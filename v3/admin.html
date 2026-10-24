@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Administración · Xiclana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Bricolage+Grotesque:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;--bg:#f5f6f2;--card:#fff;--ink:#172f42;--mut:#61727d;--bd:#dbe3e2;--nav:#123247;--acc:#17658a;--ok:#246a4a;--err:#a83343}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,sans-serif}
+header{background:var(--nav);color:white;padding:1rem max(1rem,calc((100% - 1180px)/2));display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+header a{color:white}h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.15}h1{font-size:1.5rem;margin:0}main{max-width:1180px;margin:1.5rem auto;padding:0 1rem 3rem}
+.panel{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:1.1rem;margin-bottom:1rem;box-shadow:0 5px 20px #173f4308}
+label{display:block;font-weight:700;font-size:.9rem;margin-bottom:.25rem}input,select,textarea{width:100%;font:inherit;color:var(--ink);border:1px solid var(--bd);border-radius:9px;padding:.7rem;background:white;min-width:0}textarea{resize:vertical}
+button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;background:var(--nav);color:white;padding:.7rem 1rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:.4rem}button.secondary{background:white;color:var(--ink);border:1px solid var(--bd)}button.danger{background:#fff0f1;color:var(--err);border:1px solid #f0cbd0}button:disabled{opacity:.5;cursor:wait}
+.grid{display:grid;grid-template-columns:minmax(230px,.85fr) minmax(0,1.5fr);gap:1rem;align-items:start}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}.wide{grid-column:1/-1}
+.actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem}.muted{color:var(--mut);font-size:.92rem}.status{padding:.75rem 1rem;border-radius:10px;background:#eaf0f1;margin:.8rem 0}.status.error{background:#fff0f1;color:var(--err)}.status.ok{background:#e8f5ed;color:var(--ok)}
+#list{display:flex;flex-direction:column;gap:.4rem;max-height:65vh;overflow:auto;margin-top:.7rem}.item{width:100%;text-align:left;background:white;color:var(--ink);border:1px solid var(--bd);padding:.7rem;border-radius:9px;display:block}.item.active{border-color:var(--acc);box-shadow:0 0 0 2px #17658a22}.item small{display:block;color:var(--mut);font-weight:400}.pill{font-size:.75rem;border-radius:999px;background:#e7f0f5;padding:.15rem .5rem;display:inline-block;margin-top:.3rem}
+.hidden{display:none!important}.topline{display:flex;align-items:center;justify-content:space-between;gap:.7rem;flex-wrap:wrap}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.fields{grid-template-columns:1fr}#list{max-height:32vh}.wide{grid-column:auto}}
+</style>
+</head>
+<body>
+<header><div><h1>Administración de Xiclana</h1><div class="muted" style="color:#d8e5ec">Panel privado · Ocio y de NegOcio</div></div><div class="actions" style="margin:0"><a class="button" href="./">Ver web pública</a><button id="logout" class="secondary hidden">Cerrar sesión</button></div></header>
+<main>
+<div id="status" class="status">Comprobando configuración…</div>
+<section id="login" class="panel hidden">
+<h2>Acceso de administrador</h2><p class="muted">Solo la cuenta autorizada puede guardar cambios. El registro de nuevas cuentas debe permanecer desactivado en Supabase.</p>
+<form id="login-form" class="fields">
+<div class="wide"><label for="email">Correo electrónico</label><input id="email" type="email" autocomplete="username" required></div>
+<div class="wide"><label for="password">Contraseña</label><input id="password" type="password" autocomplete="current-password" required></div>
+<div class="wide"><button id="login-button" type="submit">Iniciar sesión</button></div>
+</form></section>
+<section id="app" class="hidden">
+<div class="panel topline"><div><strong id="who"></strong><div class="muted">Las fichas verificadas se guardan en la base de datos y prevalecen sobre los datos automáticos.</div></div><button id="new-record">＋ Nueva ficha</button></div>
+<section class="panel">
+<div class="topline"><div><h2 style="margin:.2rem 0">Categorías</h2><div class="muted">Crea categorías propias para organizar fichas manuales. Solo aparecerán en la web cuando haya al menos una ficha en ellas.</div></div></div>
+<form id="category-form" class="fields" style="margin-top:.8rem">
+<div><label for="category-name">Nueva categoría</label><input id="category-name" maxlength="100" placeholder="Parking, Camping…" required></div>
+<div><label for="category-type">Tipo de directorio</label><select id="category-type"><option value="negocio">Negocio</option><option value="ocio">Ocio</option></select></div>
+<div class="wide actions"><button id="category-save" type="submit">＋ Crear categoría</button></div>
+</form>
+<div id="category-list" class="muted" style="margin-top:.7rem"></div>
+</section>
+
+<section class="panel" id="trash-panel">
+<div class="topline"><div><h2 style="margin:.2rem 0">Papelera de fichas</h2><div class="muted">Las fichas eliminadas se conservan aquí y se pueden restaurar sin reconstruirlas.</div></div><button id="trash-refresh" type="button" class="secondary">Actualizar papelera</button></div>
+<div id="trash-list" style="margin-top:.7rem"><span class="muted">Cargando papelera…</span></div>
+</section>
+
+<section class="panel" id="proposals-panel">
+ <div class="topline"><div><h2 style="margin:.2rem 0">Fichas provisionales</h2><div class="muted">Registra negocios y lugares de ocio como propuestas privadas. Solo pasan a la web pública cuando las apruebas.</div></div><button id="proposal-refresh" type="button" class="secondary">Actualizar propuestas</button></div>
+ <form id="proposal-form" class="fields" style="margin-top:.8rem">
+  <div><label for="pr-n">Nombre del establecimiento o lugar *</label><input id="pr-n" maxlength="180" required placeholder="Nombre del negocio o lugar de ocio"></div>
+  <div><label for="pr-t">Tipo de directorio *</label><select id="pr-t" required><option value="negocio">Negocio</option><option value="ocio">Ocio</option></select></div>
+  <div><label for="pr-c">Categoría *</label><input id="pr-c" list="category-options" maxlength="100" required placeholder="Restaurante, Camping, Playa…"></div>
+  <div><label for="pr-a">Dirección</label><input id="pr-a" maxlength="240"></div>
+  <div><label for="pr-p">Teléfono</label><input id="pr-p" maxlength="100"></div>
+  <div class="wide"><label for="pr-w">Web (si se conoce)</label><input id="pr-w" type="url" maxlength="500" placeholder="https://…"></div>
+  <div class="wide"><label for="pr-h">Horario (si se conoce)</label><input id="pr-h" maxlength="300"></div>
+  <div class="wide"><label for="pr-d">Descripción / datos por comprobar</label><textarea id="pr-d" rows="2" maxlength="3000"></textarea></div>
+  <div><label for="pr-source">Nombre de la fuente</label><input id="pr-source" maxlength="200" placeholder="Ayuntamiento, web oficial…"></div>
+  <div><label for="pr-url">URL de la fuente</label><input id="pr-url" type="url" maxlength="1000" placeholder="https://…"></div>
+  <div><label for="pr-date">Fecha de comprobación</label><input id="pr-date" type="date"></div>
+  <div><label for="pr-notes">Notas internas</label><input id="pr-notes" maxlength="1000" placeholder="Qué falta verificar"></div>
+  <div class="wide actions"><button id="proposal-save" type="submit">Guardar como provisional</button></div>
+ </form>
+ <div class="panel" style="margin-top:1rem;background:#f8faf9">
+  <h3>Importar lote de fichas provisionales</h3>
+  <p class="muted">Pega un array JSON de negocios o lugares de ocio. Se guardarán como propuestas privadas pendientes; nunca se publican automáticamente. Máximo 100 fichas por lote. Campos: n (nombre), c (categoría), t (negocio/ocio), a (dirección), p (teléfono), e (correo), w (web), h (horario), s (destacado), d (descripción), source_name, source_url, source_checked_at, notes.</p>
+  <label for="proposal-json">Lote JSON</label>
+  <textarea id="proposal-json" rows="7" placeholder='[{"n":"Nombre","c":"Camping","t":"ocio","a":"Dirección","w":"https://ejemplo.es","source_name":"Web oficial","source_url":"https://ejemplo.es","notes":"Pendiente de verificación"}]'></textarea>
+  <div class="actions"><button id="proposal-import" type="button">Importar como provisionales</button><button id="proposal-example" type="button" class="secondary">Cargar ejemplo</button></div>
+ </div>
+ <h3>Propuestas pendientes</h3><div id="proposal-list" class="muted">Cargando propuestas…</div>
+</section>
+
+
+<datalist id="category-options"></datalist>
+<div class="grid">
+<aside class="panel"><label for="search">Buscar ficha por nombre, categoría o dirección</label><input id="search" type="search" placeholder="Ej. restaurante, calle…"><div id="count" class="muted"></div><div id="list"></div></aside>
+<section class="panel">
+<div class="topline"><div><h2 id="form-title">Selecciona una ficha</h2><div id="record-meta" class="muted"></div></div></div>
+<form id="record-form" class="fields hidden">
+<div><label for="n">Nombre *</label><input id="n" name="n" required maxlength="180"></div>
+<div><label for="t">Tipo *</label><select id="t" name="t"><option value="negocio">Negocio</option><option value="ocio">Ocio</option></select></div>
+<div><label for="c">Categoría *</label><input id="c" name="c" list="category-options" required maxlength="100" placeholder="Restaurante, Parking, Camping…"></div>
+<div><label for="a">Dirección</label><input id="a" name="a" maxlength="240"></div>
+<div><label for="p">Teléfono</label><input id="p" name="p" maxlength="100"></div>
+<div><label for="e">Correo electrónico</label><input id="e" name="e" type="email" maxlength="180"></div>
+<div class="wide"><label for="w">Web (URL completa)</label><input id="w" name="w" type="url" placeholder="https://…" maxlength="500"></div>
+<div class="wide"><label for="h">Horario</label><input id="h" name="h" maxlength="300"></div>
+<div class="wide"><label for="s">Lo mejor del sitio / dato destacado</label><input id="s" name="s" maxlength="500"></div>
+<div class="wide"><label for="d">Descripción</label><textarea id="d" name="d" rows="4" maxlength="3000"></textarea></div>
+<div><label for="lat">Latitud (opcional)</label><input id="lat" name="lat" type="number" step="any"></div>
+<div><label for="lon">Longitud (opcional)</label><input id="lon" name="lon" type="number" step="any"></div>
+<div class="wide muted">Al guardar, la ficha quedará marcada como verificada por Xiclana con la fecha de hoy. Comprueba que los datos se han recogido correctamente antes de publicarlos.</div>
+<div class="wide actions"><button id="save-button" type="submit">Guardar ficha</button><button id="delete-button" type="button" class="danger">Eliminar ficha</button><button id="cancel" type="button" class="secondary">Cancelar</button></div>
+</form>
+<div id="empty-editor" class="muted">Elige una ficha de la lista o pulsa «Nueva ficha».</div>
+</section>
+</div>
+</section>
+<p class="muted">Consejo de seguridad: no compartas la contraseña y no introduzcas nunca una clave service_role en esta página ni en el repositorio.</p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./supabase-config.js"></script>
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s), status=$("#status"), login=$("#login"), app=$("#app"), logout=$("#logout"), form=$("#record-form"), list=$("#list");
+const config=window.XICLANA_SUPABASE||{};
+let client=null,user=null,baseItems=[],overrides=[],categories=[],proposals=[],selectedId=null,isNew=false,visibleItems=[];
+const fieldNames=["n","t","c","a","p","e","w","h","s","d","lat","lon"];
+function message(text,type=""){status.textContent=text;status.className="status"+(type?" "+type:"");status.classList.remove("hidden")}
+function showLogin(){login.classList.remove("hidden");app.classList.add("hidden");logout.classList.add("hidden")}
+function showApp(){login.classList.add("hidden");app.classList.remove("hidden");logout.classList.remove("hidden");$("#who").textContent="Sesión: "+(user?.email||"administrador")}
+function stableId(x){if(x.id)return String(x.id);return "legacy:"+[x.n,x.t,x.a].map(v=>String(v||"").trim().toLowerCase()).join("|")}
+function effectiveItems(){
+ const byId=new Map(overrides.map(o=>[o.listing_id,o]));
+ let out=baseItems.filter(x=>!byId.get(stableId(x))?.fields?._xiclana_deleted).map(x=>{const id=stableId(x),o=byId.get(id);return {...x,id,...(o?.fields||{}),id,verified_at:o?.verified_at||null,is_new:false}});
+ overrides.filter(o=>o.is_new&&!o.fields?._xiclana_deleted).forEach(o=>{if(!baseItems.some(x=>stableId(x)===o.listing_id))out.push({...o.fields,id:o.listing_id,verified_at:o.verified_at,is_new:true})});
+ // En la administración, agrupar las variantes del mismo Camping La Rana Verde sin borrar registros de la base de datos.
+ const claveRana=x=>String(x.n||x.nombre||x.name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim().includes("rana verde");
+ const rana=out.filter(claveRana);
+ if(rana.length>1){
+  const puntuacion=x=>Object.entries(x).reduce((n,[k,v])=>n+(!["id","seed","verified_at"].includes(k)&&v!=null&&String(v).trim()!==""?1:0),0)+(String(x.id||"").startsWith("manual:")?0.25:0);
+  const conservar=rana.reduce((best,x)=>puntuacion(x)>puntuacion(best)?x:best);
+  out=out.filter(x=>!claveRana(x)||x===conservar);
+ }
+ return out;
+}
+function deletedItems(){
+ const deleted=overrides.filter(o=>o.fields&&o.fields._xiclana_deleted===true);
+ return deleted.map(o=>{const base=baseItems.find(x=>stableId(x)===o.listing_id);return base?({...base,id:o.listing_id,is_new:false}):({...o.fields,id:o.listing_id,is_new:Boolean(o.is_new)});}).sort((a,b)=>String(a.n||"").localeCompare(String(b.n||""),"es"));
+}
+function renderTrash(){
+ const root=$("#trash-list");root.textContent="";const items=deletedItems();
+ if(!items.length){root.textContent="La papelera está vacía.";return}
+ items.forEach(item=>{const card=document.createElement("div");card.className="item";card.style.marginBottom=".5rem";const title=document.createElement("strong");title.textContent=item.n||"Ficha sin nombre";card.append(title);const detail=document.createElement("small");detail.textContent=[item.c||"Sin categoría",item.a||"Sin dirección",item.is_new?"Ficha creada manualmente":"Ficha original"].join(" · ");card.append(detail);const actions=document.createElement("div");actions.className="actions";const restore=document.createElement("button");restore.type="button";restore.textContent="Restaurar ficha";restore.onclick=()=>restoreItem(item.id);actions.append(restore);card.append(actions);root.append(card)});
+}
+async function restoreItem(id){
+ const item=deletedItems().find(x=>x.id===id);if(!item)return;
+ if(!confirm("¿Restaurar «"+(item.n||"esta ficha")+"»? Volverá a aparecer en la web pública."))return;
+ const btn=[...$("#trash-list").querySelectorAll("button")].find(b=>b.textContent==="Restaurar ficha");if(btn){btn.disabled=true;btn.textContent="Restaurando…"}
+ try{
+  const existing=overrides.find(o=>o.listing_id===id);if(!existing)throw new Error("No se encuentra el registro de ocultación en Supabase.");
+  const fields={...(existing.fields||{})};delete fields._xiclana_deleted;
+  const now=new Date().toISOString();
+  const {error}=await client.from("listing_overrides").upsert({listing_id:id,fields,is_new:Boolean(existing.is_new),verified_at:existing.verified_at||now,updated_at:now,updated_by:user.id},{onConflict:"listing_id"});
+  if(error)throw error;
+  await loadData();message("Ficha «"+(item.n||"") +"» restaurada. Ya puede volver a mostrarse en la web pública.","ok");
+ }catch(err){message("No se pudo restaurar la ficha: "+(err.message||"error desconocido"),"error");if(btn){btn.disabled=false;btn.textContent="Restaurar ficha"}}
+}
+function slugify(value){return value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}
+function renderCategories(){
+ const names=new Map();
+ categories.forEach(c=>names.set(c.name.toLocaleLowerCase("es"),c));
+ effectiveItems().forEach(x=>{if(x.c&&!names.has(String(x.c).toLocaleLowerCase("es")))names.set(String(x.c).toLocaleLowerCase("es"),{name:String(x.c),type:x.t||"negocio"})});
+ const all=[...names.values()].sort((a,b)=>a.name.localeCompare(b.name,"es"));
+ $("#category-options").textContent="";all.forEach(c=>{const o=document.createElement("option");o.value=c.name;$("#category-options").append(o)});
+ $("#category-list").textContent=all.length?all.map(c=>c.name+(c.type?" ("+(c.type==="ocio"?"Ocio":"Negocio")+")":"")).join(" · "):"Todavía no hay categorías.";
+}
+function refreshList(){
+ visibleItems=effectiveItems();const q=$("#search").value.trim().toLocaleLowerCase("es");
+ const matches=visibleItems.filter(x=>[x.n,x.c,x.a,x.p].join(" ").toLocaleLowerCase("es").includes(q)).sort((a,b)=>String(a.n||"").localeCompare(String(b.n||""),"es"));
+ list.textContent="";$("#count").textContent=matches.length+" fichas";
+ matches.forEach(x=>{const b=document.createElement("button");b.type="button";b.className="item"+(x.id===selectedId?" active":"");b.append(document.createTextNode(x.n||"Sin nombre"));const small=document.createElement("small");small.textContent=(x.c||"Sin categoría")+" · "+(x.a||"Sin dirección");b.append(small);if(x.verified_at){const p=document.createElement("span");p.className="pill";p.textContent="Verificada";b.append(p)}b.onclick=()=>selectItem(x.id);list.append(b)});
+}
+function selectItem(id){const x=effectiveItems().find(v=>v.id===id);if(!x)return;selectedId=id;isNew=!!x.is_new;$("#form-title").textContent=x.n;$("#record-meta").textContent=x.verified_at?"Última verificación: "+new Date(x.verified_at).toLocaleString("es-ES"):"Ficha de directorio";$("#delete-button").disabled=false;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");fieldNames.forEach(k=>{const input=form.elements[k];input.value=x[k]??""});refreshList()}
+function startNew(){selectedId="new:"+crypto.randomUUID();isNew=true;$("#form-title").textContent="Nueva ficha";$("#record-meta").textContent="Se añadirá al directorio público";$("#delete-button").disabled=true;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");form.reset();$("#t").value="negocio";refreshList()}
+function cancelEdit(){selectedId=null;isNew=false;form.classList.add("hidden");$("#empty-editor").classList.remove("hidden");$("#form-title").textContent="Selecciona una ficha";$("#record-meta").textContent="";refreshList()}
+async function loadData(){
+ const [dataRes,overrideRes]=await Promise.all([fetch("./data.json",{cache:"no-store"}),client.from("listing_overrides").select("listing_id,fields,is_new,verified_at,updated_at")]);
+ if(!dataRes.ok)throw new Error("No se pudo cargar data.json. Comprueba que GitHub Pages haya publicado el sitio.");
+ const data=await dataRes.json();if(overrideRes.error)throw overrideRes.error;
+ baseItems=(data.items||[]).map(x=>({...x}));overrides=overrideRes.data||[];
+ const categoryRes=await client.from("listing_categories").select("slug,name,type,created_at").order("name");
+ if(categoryRes.error)throw new Error("No se pudieron cargar las categorías. Comprueba que has ejecutado supabase-categories.sql en Supabase: "+categoryRes.error.message);
+ categories=categoryRes.data||[];renderCategories();refreshList();renderTrash();await loadProposals();
+}
+
+function proposalFields(p){return p.fields&&typeof p.fields==="object"?p.fields:{}}
+function renderProposals(){
+ const root=$("#proposal-list");root.textContent="";
+ const pending=proposals.filter(p=>p.status==="pending").sort((a,b)=>String(b.created_at||"").localeCompare(String(a.created_at||"")));
+ if(!pending.length){root.textContent="No hay propuestas pendientes.";return}
+ pending.forEach(p=>{
+  const card=document.createElement("div");card.className="item";card.style.marginBottom=".5rem";
+  const f=proposalFields(p),title=document.createElement("strong");title.textContent=f.n||"Propuesta sin nombre";card.append(title);
+  const detail=document.createElement("small");detail.textContent=[f.t==="ocio"?"Ocio":"Negocio",f.c||"Sin categoría",f.a||"Sin dirección",p.source_name||"Fuente no indicada",p.source_checked_at||"Sin fecha de comprobación"].join(" · ");card.append(detail);
+  if(p.source_url){const a=document.createElement("a");a.href=p.source_url;a.target="_blank";a.rel="noopener noreferrer";a.textContent="Abrir fuente";a.style.display="inline-block";a.style.marginTop=".35rem";card.append(a)}
+  if(p.notes){const n=document.createElement("small");n.textContent="Nota interna: "+p.notes;card.append(n)}
+  const actions=document.createElement("div");actions.className="actions";
+  const approve=document.createElement("button");approve.type="button";approve.textContent="Aprobar y publicar";approve.onclick=()=>reviewProposal(p,"approved");actions.append(approve);
+  const reject=document.createElement("button");reject.type="button";reject.className="danger";reject.textContent="Descartar";reject.onclick=()=>reviewProposal(p,"rejected");actions.append(reject);
+  card.append(actions);root.append(card);
+ });
+}
+async function loadProposals(){
+ const {data,error}=await client.from("listing_proposals").select("*").order("created_at",{ascending:false});
+ if(error)throw error;proposals=data||[];renderProposals();
+}
+async function reviewProposal(p,nextStatus){
+ const f={...proposalFields(p)};
+ if(nextStatus==="approved"){
+  const name=String(f.n||"").trim().toLocaleLowerCase("es"),address=String(f.a||"").trim().toLocaleLowerCase("es");
+  const duplicate=effectiveItems().find(x=>String(x.n||"").trim().toLocaleLowerCase("es")===name && (!address||String(x.a||"").trim().toLocaleLowerCase("es")===address));
+  if(duplicate){message("No se puede publicar automáticamente: ya existe una ficha con ese nombre y dirección. Revisa la ficha existente antes de continuar.","error");return}
+  if(!f.n||!f.c){message("La propuesta necesita nombre y categoría antes de publicarse.","error");return}
+  f.t=f.t||"negocio";f.f="Verificado por Xiclana";f.v=new Date().toISOString().slice(0,10);
+  const id="manual:"+crypto.randomUUID();
+  const {error:saveError}=await client.from("listing_overrides").upsert({listing_id:id,fields:f,is_new:true,verified_at:new Date().toISOString(),updated_at:new Date().toISOString(),updated_by:user.id},{onConflict:"listing_id"});
+  if(saveError){message("No se pudo publicar la ficha: "+saveError.message,"error");return}
+  const known=categories.some(c=>c.name.toLocaleLowerCase("es")===String(f.c).toLocaleLowerCase("es"));
+  if(!known){
+   const {data:cat,error:catError}=await client.from("listing_categories").upsert({slug:slugify(f.c),name:f.c,type:f.t,created_by:user.id},{onConflict:"slug"}).select("slug,name,type,created_at").single();
+   if(catError){message("La ficha se guardó, pero no se pudo registrar la categoría: "+catError.message,"error");return}
+   categories=categories.filter(c=>c.slug!==cat.slug);categories.push(cat);
+  }
+ }
+ const {error}=await client.from("listing_proposals").update({status:nextStatus,reviewed_at:new Date().toISOString(),reviewed_by:user.id,review_notes:nextStatus==="approved"?"Aprobada y enviada al directorio público":"Descartada desde Administración"}).eq("id",p.id);
+ if(error){message("La ficha se revisó parcialmente, pero no se pudo actualizar el estado de la propuesta: "+error.message,"error");return}
+ await loadData();await loadProposals();
+ message(nextStatus==="approved"?"Propuesta aprobada y ficha publicada.":"Propuesta descartada. No se ha publicado.","ok");
+}
+$("#proposal-form").addEventListener("submit",async e=>{
+ e.preventDefault();if(!user)return;
+ const btn=$("#proposal-save");btn.disabled=true;btn.textContent="Guardando…";
+ try{
+  const fields={n:$("#pr-n").value.trim(),t:$("#pr-t").value,c:$("#pr-c").value.trim(),a:$("#pr-a").value.trim(),p:$("#pr-p").value.trim(),e:"",w:$("#pr-w").value.trim(),h:$("#pr-h").value.trim(),s:"",d:$("#pr-d").value.trim(),lat:null,lon:null};
+  if(!fields.n||!fields.c)throw new Error("El nombre y la categoría son obligatorios.");
+  const row={fields,source_name:$("#pr-source").value.trim()||null,source_url:$("#pr-url").value.trim()||null,source_checked_at:$("#pr-date").value||null,notes:$("#pr-notes").value.trim()||null,status:"pending",created_by:user.id};
+  const {error}=await client.from("listing_proposals").insert(row);if(error)throw error;
+  $("#proposal-form").reset();$("#pr-t").value="negocio";await loadProposals();message("Propuesta guardada como privada. No aparece en la web hasta aprobarla.","ok");
+ }catch(err){message("No se pudo guardar la propuesta: "+(err.message||"error desconocido"),"error")}
+ finally{btn.disabled=false;btn.textContent="Guardar como provisional"}
+});
+$("#proposal-refresh").onclick=async()=>{try{await loadProposals();message("Propuestas actualizadas.","ok")}catch(err){message("No se pudieron cargar las propuestas: "+err.message,"error")}};
+
+$("#proposal-example").onclick=()=>{$("#proposal-json").value=JSON.stringify([{n:"Nombre del establecimiento",t:"negocio",c:"Restaurante",a:"Dirección por verificar",p:"",e:"",w:"https://ejemplo.es",h:"",s:"",d:"Datos públicos pendientes de verificación",source_name:"Web oficial",source_url:"https://ejemplo.es",source_checked_at:new Date().toISOString().slice(0,10),notes:"Ejemplo: sustituir por datos reales antes de importar"},{n:"Nombre del lugar de ocio",t:"ocio",c:"Camping",a:"Dirección por verificar",source_name:"Web oficial",source_url:"https://ejemplo.es",notes:"Pendiente de verificación"}],null,2)};
+$("#proposal-import").onclick=async()=>{
+ if(!user){message("Inicia sesión antes de importar.","error");return}
+ const btn=$("#proposal-import");btn.disabled=true;btn.textContent="Importando…";
+ try{
+  let batch;try{batch=JSON.parse($("#proposal-json").value)}catch(_){throw new Error("El texto no es JSON válido.")}
+  if(!Array.isArray(batch)||batch.length<1)throw new Error("El JSON debe ser una lista de objetos.")
+  if(batch.length>100)throw new Error("El lote supera el máximo de 100 fichas. Divídelo en varios lotes.")
+  const cleanUrl=(v)=>{const s=String(v||"").trim();if(!s)return null;let u;try{u=new URL(s)}catch(_){throw new Error("URL no válida: "+s)}if(!["http:","https:"].includes(u.protocol))throw new Error("Solo se admiten URLs http/https.");return u.href};
+  const seen=new Set(), rows=[];
+  const existing=new Set(proposals.filter(p=>p.status==="pending").map(p=>{const f=proposalFields(p);return [String(f.n||"").trim().toLocaleLowerCase("es"),String(f.a||"").trim().toLocaleLowerCase("es")].join("|")}));
+  for(let i=0;i<batch.length;i++){
+   const item=batch[i];if(!item||typeof item!=="object"||Array.isArray(item))throw new Error("La ficha "+(i+1)+" no es un objeto.")
+   const n=String(item.n||item.nombre||"").trim(),c=String(item.c||item.categoria||"").trim();
+   if(!n||!c)throw new Error("La ficha "+(i+1)+" necesita nombre (n) y categoría (c).")
+   if(n.length>180||c.length>100)throw new Error("Nombre o categoría demasiado largos en la ficha "+(i+1)+".")
+   const a=String(item.a||item.direccion||"").trim(),key=[n.toLocaleLowerCase("es"),a.toLocaleLowerCase("es")].join("|");
+   if(seen.has(key)||existing.has(key))continue;seen.add(key);
+   const t=String(item.t||"negocio").toLowerCase()==="ocio"?"ocio":"negocio";
+   const fields={n,t,c,a,p:String(item.p||"").trim(),e:String(item.e||"").trim(),w:cleanUrl(item.w||item.web),h:String(item.h||"").trim(),s:String(item.s||""),d:String(item.d||item.descripcion||"").trim(),lat:null,lon:null};
+   rows.push({fields,source_name:String(item.source_name||item.fuente||"").trim()||null,source_url:cleanUrl(item.source_url||item.url_fuente),source_checked_at:item.source_checked_at||null,notes:String(item.notes||item.notas||"").trim()||null,status:"pending",created_by:user.id});
+  }
+  if(!rows.length)throw new Error("No hay fichas nuevas para importar: todas parecen duplicadas entre sí o con propuestas pendientes.")
+  const {error}=await client.from("listing_proposals").insert(rows);if(error)throw error;
+  $("#proposal-json").value="";await loadProposals();message("Importadas "+rows.length+" fichas como provisionales privadas. No se ha publicado ninguna.", "ok");
+ }catch(err){message("No se pudo importar el lote: "+(err.message||"error desconocido"),"error")}
+ finally{btn.disabled=false;btn.textContent="Importar como provisionales"}
+};
+
+
+$("#category-form").addEventListener("submit",async e=>{
+ e.preventDefault();if(!user)return;
+ const btn=$("#category-save"),name=$("#category-name").value.trim(),type=$("#category-type").value,slug=slugify(name);
+ if(!name||!slug){message("Escribe un nombre de categoría válido.","error");return}
+ btn.disabled=true;btn.textContent="Creando…";
+ try{
+  const existing=categories.find(c=>c.name.toLocaleLowerCase("es")===name.toLocaleLowerCase("es"))||effectiveItems().find(x=>String(x.c||"").toLocaleLowerCase("es")===name.toLocaleLowerCase("es"));
+  if(existing)throw new Error("Esa categoría ya existe.");
+  const {data,error}=await client.from("listing_categories").insert({slug,name,type,created_by:user.id}).select("slug,name,type,created_at").single();
+  if(error)throw error;
+  categories.push(data);categories.sort((a,b)=>a.name.localeCompare(b.name,"es"));renderCategories();$("#category-name").value="";
+  $("#c").value=name;$("#t").value=type;
+  message("Categoría «"+name+"» creada. Ya puedes añadir una ficha y asignarla a esta categoría.","ok");
+ }catch(err){message("No se pudo crear la categoría: "+(err.message||"error desconocido"),"error")}
+ finally{btn.disabled=false;btn.textContent="＋ Crear categoría"}
+});
+form.addEventListener("submit",async e=>{
+ e.preventDefault();if(!user)return;
+ const btn=$("#save-button");btn.disabled=true;btn.textContent="Guardando…";
+ try{
+  const fields={};fieldNames.forEach(k=>{const raw=form.elements[k].value;fields[k]=["lat","lon"].includes(k)?(raw===""?null:Number(raw)):raw.trim()});
+  if(!fields.n||!fields.c)throw new Error("El nombre y la categoría son obligatorios.");
+  const newRecord=String(selectedId||"").startsWith("new:"), id=newRecord?"manual:"+crypto.randomUUID():selectedId;
+  fields.f="Verificado por Xiclana";fields.v=new Date().toISOString().slice(0,10);
+  const keepAsNew=newRecord||Boolean(overrides.find(o=>o.listing_id===id)?.is_new);
+  const row={listing_id:id,fields,is_new:keepAsNew,verified_at:new Date().toISOString(),updated_at:new Date().toISOString(),updated_by:user.id};
+  const {error}=await client.from("listing_overrides").upsert(row,{onConflict:"listing_id"});if(error)throw error;
+  const categorySlug=slugify(fields.c);
+  const categoryKnown=categories.some(c=>c.name.toLocaleLowerCase("es")===fields.c.toLocaleLowerCase("es"));
+  if(!categoryKnown){
+   const {data:catData,error:catError}=await client.from("listing_categories").upsert({slug:categorySlug,name:fields.c,type:fields.t||"negocio",created_by:user.id},{onConflict:"slug"}).select("slug,name,type,created_at").single();
+   if(catError)throw new Error("La ficha se guardó, pero no se pudo registrar la categoría: "+catError.message);
+   categories=categories.filter(c=>c.slug!==catData.slug);categories.push(catData);renderCategories();
+  }
+  message("Ficha guardada. Los cambios ya están almacenados y aparecerán en la web pública al recargarla.","ok");
+  await loadData();selectItem(id);
+ }catch(err){message("No se pudo guardar: "+(err.message||"error desconocido"),"error")}
+ finally{btn.disabled=false;btn.textContent="Guardar ficha"}
+});
+$("#login-form").addEventListener("submit",async e=>{e.preventDefault();const btn=$("#login-button");btn.disabled=true;try{const {data,error}=await client.auth.signInWithPassword({email:$("#email").value.trim(),password:$("#password").value});if(error)throw error;user=data.user;showApp();await loadData();message("Sesión iniciada. Solo la cuenta autorizada puede guardar cambios.","ok")}catch(err){message("No se pudo iniciar sesión: "+(err.message||"revisa el correo y la contraseña."),"error")}finally{btn.disabled=false}});
+logout.onclick=async()=>{await client.auth.signOut();user=null;showLogin();message("Sesión cerrada.")};
+$("#search").addEventListener("input",refreshList);$("#new-record").onclick=startNew;$("#cancel").onclick=cancelEdit;$("#trash-refresh").onclick=async()=>{try{await loadData();message("Papelera actualizada.","ok")}catch(err){message("No se pudo actualizar la papelera: "+err.message,"error")}};
+ $("#delete-button").onclick=async()=>{
+  if(!user||!selectedId||String(selectedId).startsWith("new:"))return;
+  const item=effectiveItems().find(x=>x.id===selectedId);if(!item)return;
+  if(!confirm(`¿Eliminar «${item.n||"esta ficha"}» del directorio público? La ficha original no se borrará de data.json; quedará marcada como oculta en Supabase.`))return;
+  const btn=$("#delete-button");btn.disabled=true;btn.textContent="Eliminando…";
+  try{
+   const existing=overrides.find(o=>o.listing_id===selectedId);
+   const fields={...(existing?.fields||{}),_xiclana_deleted:true};
+   const now=new Date().toISOString();
+   const {error}=await client.from("listing_overrides").upsert({listing_id:selectedId,fields,is_new:Boolean(item.is_new),verified_at:existing?.verified_at||item.verified_at||now,updated_at:now,updated_by:user.id},{onConflict:"listing_id"});
+   if(error)throw error;
+   selectedId=null;isNew=false;form.classList.add("hidden");$("#empty-editor").classList.remove("hidden");
+   await loadData();message("Ficha eliminada de la web pública. El registro original se conserva.","ok");
+  }catch(err){message("No se pudo eliminar la ficha: "+(err.message||"error desconocido"),"error");btn.disabled=false}
+  finally{btn.textContent="Eliminar ficha"}
+ };
+async function init(){
+ if(!config.url||!config.anonKey){message("Falta configurar Supabase. Sigue ADMIN.md en el repositorio V1 para conectar la base de datos y activar el acceso privado.","error");return}
+ if(!window.supabase?.createClient){message("No se ha podido cargar la biblioteca de acceso. Recarga la página o inténtalo más tarde.","error");return}
+ client=window.supabase.createClient(config.url,config.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ const {data,error}=await client.auth.getSession();if(error){message("Error al comprobar la sesión: "+error.message,"error");showLogin();return}
+ if(data.session){user=data.session.user;showApp();try{await loadData();message("Sesión activa. Elige una ficha para editarla.","ok")}catch(err){message("Error al cargar fichas: "+err.message,"error")}}
+ else{showLogin();message("Inicia sesión con la cuenta privada de administración.")}
+}
+init();
+})();
+</script>
+</body></html>
