@@ -1,0 +1,148 @@
+#!/usr/bin/env python3
+"""Amplía V3 con puntos de interés adicionales de OpenStreetMap.
+No elimina ni modifica las fichas existentes: solo incorpora candidatos nuevos y deduplicados.
+Los datos añadidos quedan identificados por fuente para facilitar futuras actualizaciones.
+"""
+import json, pathlib, urllib.parse, urllib.request, time, hashlib, re, unicodedata, sys
+
+ROOT = pathlib.Path(__file__).parent
+DATA = ROOT / "data.json"
+SERVERS = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+]
+QUERY = r"""[out:json][timeout:120];
+area["boundary"="administrative"]["name"="Chiclana de la Frontera"]->.z;
+(
+ nwr["amenity"~"^(parking|parking_entrance|toilets|bicycle_rental|bicycle_parking|charging_station|bus_station|ferry_terminal|community_centre|arts_centre|social_facility|place_of_worship|police|fire_station|recycling|waste_disposal|waste_transfer_station|animal_shelter|public_building|coworking_space|events_venue|music_venue|conference_centre|language_school|university|college|childcare|car_sharing|boat_rental|boat_sharing|public_bath|drinking_water|fountain|shelter|bench|bbq|picnic_table|public_bookcase)$"](area.z);
+ nwr["tourism"~"^(information|caravan_site|picnic_site|artwork|trail_riding_station|alpine_hut|wilderness_hut)$"](area.z);
+ nwr["leisure"~"^(playground|dog_park|sports_pitch|pitch|track|fitness_station|horse_riding|recreation_ground|garden|common|fishing|water_park|sauna|escape_game|adult_gaming_centre|amusement_arcade|bowling_alley|ice_rink|beach_resort)$"](area.z);
+ nwr["parking"~"^(surface|multi-storey|underground|street_side|lane|park_and_ride)$"](area.z);
+ nwr["public_transport"~"^(station|stop_position|platform)$"](area.z);
+ nwr["railway"~"^(station|halt|tram_stop)$"](area.z);
+ nwr["highway"="bus_stop"](area.z);
+ nwr["sport"](area.z);
+ nwr["emergency"~"^(ambulance_station|fire_station|water_rescue|lifeguard)$"](area.z);
+ nwr["office"~"^(lawyer|accountant|tax_advisor|insurance|architect|employment_agency|estate_agent|travel_agent|financial|therapist|consulting|educational_institution)$"](area.z);
+);
+out center tags;"""
+
+def norm(s):
+    s = unicodedata.normalize("NFD", str(s or "").casefold())
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    return " ".join(re.findall(r"[a-z0-9]+", s))
+
+def category(t):
+    a, tourism, leisure = t.get("amenity",""), t.get("tourism",""), t.get("leisure","")
+    if a in ("parking","parking_entrance") or "parking" in t: return "Parking", "negocio"
+    if a in ("toilets","drinking_water","fountain","shelter","bench","public_building"): return "Servicios públicos", "ocio"
+    if a in ("bicycle_rental","bicycle_parking"): return "Bicicletas", "negocio"
+    if a == "charging_station": return "Puntos de recarga", "negocio"
+    if a in ("bus_station","ferry_terminal") or t.get("highway") == "bus_stop" or t.get("public_transport") or t.get("railway"): return "Transporte", "negocio"
+    if a in ("community_centre","arts_centre","music_venue","conference_centre","events_venue"): return "Espacios culturales", "ocio"
+    if a in ("place_of_worship",): return "Patrimonio y culto", "ocio"
+    if a in ("police","fire_station") or t.get("emergency"): return "Emergencias", "negocio"
+    if a in ("recycling","waste_disposal","waste_transfer_station"): return "Reciclaje y residuos", "negocio"
+    if a in ("animal_shelter",): return "Protección animal", "negocio"
+    if a in ("childcare","language_school","university","college"): return "Educación", "negocio"
+    if a in ("coworking_space",): return "Coworking", "negocio"
+    if a in ("car_sharing","boat_rental","boat_sharing"): return "Alquiler y movilidad", "negocio"
+    if a in ("public_bath",): return "Baños públicos", "ocio"
+    if a in ("bbq","picnic_table") or tourism == "picnic_site": return "Merenderos y picnic", "ocio"
+    if a == "public_bookcase": return "Bibliotecas y lectura", "ocio"
+    if tourism == "caravan_site": return "Camping y autocaravanas", "negocio"
+    if tourism == "information": return "Información turística", "ocio"
+    if tourism == "artwork": return "Arte público", "ocio"
+    if leisure in ("playground","dog_park","garden","common","recreation_ground"): return ("Parques infantiles" if leisure == "playground" else "Parques y jardines"), "ocio"
+    if leisure in ("sports_pitch","pitch","track") or t.get("sport"): return "Instalaciones deportivas", "ocio"
+    if leisure in ("fitness_station","horse_riding","fishing","sauna","ice_rink","bowling_alley","amusement_arcade","escape_game","adult_gaming_centre"): return "Ocio y actividades", "ocio"
+    if t.get("office"):
+        return {"lawyer":"Abogado","accountant":"Gestoría","tax_advisor":"Asesoría fiscal","insurance":"Seguros","architect":"Arquitectura","employment_agency":"Empleo","estate_agent":"Inmobiliaria","travel_agent":"Agencia de viajes","financial":"Servicios financieros","therapist":"Terapias","consulting":"Consultoría","educational_institution":"Educación"}.get(t["office"],"Servicios profesionales"), "negocio"
+    return None
+
+def address(t):
+    street = " ".join(x for x in (t.get("addr:street"), t.get("addr:housenumber")) if x)
+    other = " ".join(x for x in (t.get("addr:postcode"), t.get("addr:city")) if x)
+    return ", ".join(x for x in (street, other) if x)
+
+def download():
+    body = urllib.parse.urlencode({"data": QUERY}).encode()
+    for attempt in range(3):
+        for server in SERVERS:
+            try:
+                req = urllib.request.Request(server, data=body, headers={"User-Agent":"Xiclana-Directorio/1.0 (open data catalog)"})
+                with urllib.request.urlopen(req, timeout=180) as response:
+                    return json.load(response).get("elements", [])
+            except Exception as exc:
+                print(f"Overpass {server}: {exc}", file=sys.stderr)
+        if attempt < 2: time.sleep(20)
+    return None
+
+def record(e):
+    t = e.get("tags", {})
+    name = (t.get("name") or t.get("name:es") or t.get("official_name") or "").strip()
+    cl = category(t)
+    if not name or not cl: return None
+    lat = e.get("lat") or e.get("center", {}).get("lat")
+    lon = e.get("lon") or e.get("center", {}).get("lon")
+    website = t.get("website") or t.get("contact:website") or ""
+    if website and not website.startswith(("http://","https://")): website = "https://" + website
+    description = (t.get("description:es") or t.get("description") or "").strip()
+    details = []
+    if description and len(description) <= 180: details.append(description)
+    if t.get("opening_hours"): details.append("Horario publicado en OpenStreetMap")
+    if t.get("wheelchair") == "yes": details.append("Accesible")
+    key = f"{e.get('type')}:{e.get('id')}"
+    return {"id":f"osm-extra:{key}", "n":name, "c":cl[0], "t":cl[1], "a":address(t),
+            "p":t.get("phone") or t.get("contact:phone") or t.get("mobile") or "",
+            "w":website, "s":"; ".join(details), "h":t.get("opening_hours",""),
+            "e":t.get("email") or t.get("contact:email") or "", "lat":lat, "lon":lon,
+            "f":"OpenStreetMap", "fuente_estado":"candidato automático; datos abiertos OSM"}
+
+def duplicate(candidate, existing):
+    cn = norm(candidate.get("n"))
+    if not cn: return True
+    cc = norm(candidate.get("c"))
+    for item in existing:
+        en = norm(item.get("n"))
+        if not en: continue
+        ec = norm(item.get("c"))
+        if cn == en and (cc == ec or not cc or not ec):
+            la, lb = candidate.get("lat"), item.get("lat")
+            loa, lob = candidate.get("lon"), item.get("lon")
+            if la is None or lb is None or loa is None or lob is None: return True
+            if abs(float(la)-float(lb)) < 0.01 and abs(float(loa)-float(lob)) < 0.01: return True
+        # Same named place and nearby position, even if the source labels the category differently.
+        if cn == en:
+            la, lb = candidate.get("lat"), item.get("lat")
+            loa, lob = candidate.get("lon"), item.get("lon")
+            if la is not None and lb is not None and loa is not None and lob is not None:
+                if abs(float(la)-float(lb)) < 0.002 and abs(float(loa)-float(lob)) < 0.003: return True
+    return False
+
+def main():
+    if not DATA.exists(): sys.exit("No existe v3/data.json; se cancela para proteger el catálogo.")
+    data = json.loads(DATA.read_text(encoding="utf-8"))
+    items = data.get("items")
+    if not isinstance(items, list): sys.exit("El catálogo no contiene una lista items; no se modifica.")
+    elements = download()
+    if elements is None:
+        print("AVISO: Overpass no respondió; se conserva intacto el catálogo actual.")
+        return
+    candidates = [x for e in elements if (x := record(e))]
+    known = {str(x.get("id","")) for x in items}
+    added = []
+    for item in candidates:
+        if item["id"] in known or duplicate(item, items) or duplicate(item, added): continue
+        added.append(item)
+        known.add(item["id"])
+    if added:
+        data["items"].extend(added)
+        data["items"].sort(key=lambda x: str(x.get("n","")).casefold())
+        DATA.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    report = {"fecha":time.strftime("%Y-%m-%d"), "fuente":"OpenStreetMap/Overpass", "candidatos_recibidos":len(candidates),
+              "fichas_nuevas":len(added), "total_catalogo":len(data["items"]),
+              "nota":"Las fichas originales se conservan. Las nuevas son candidatas automáticas basadas en datos OSM; no equivalen a verificación comercial individual."}
+    (ROOT / "informe-ampliacion.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"Ampliación automática: {len(candidates)} candidatos; {len(added)} fichas nuevas; total {len(data['items'])}.")
+if __name__ == "__main__": main()
