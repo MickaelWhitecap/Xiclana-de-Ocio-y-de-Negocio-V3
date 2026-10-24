@@ -1,0 +1,43 @@
+name: Publicar Xiclana V3
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 4 * * 1"
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Generar catálogo base
+        run: python actualizar.py
+      - name: Integrar catálogo V3 y nuevas instalaciones
+        run: python v3/actualizar.py
+      - name: Preparar sitio V3 independiente
+        run: |
+          mkdir -p _site
+          cp v3/index.html v3/data.json v3/admin.html v3/exportar-fichas.html v3/supabase-config.js v3/informe-investigacion.json _site/
+          cp v3/fondo.jpg v3/fondo.txt _site/ 2>/dev/null || true
+          cp README.md _site/README.md
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
