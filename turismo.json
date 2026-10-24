@@ -1,0 +1,109 @@
+[
+ {
+  "n": "Oficina de Turismo Centro Ciudad",
+  "t": "ocio",
+  "c": "Oficina de turismo",
+  "a": "Centro de Interpretación del Vino y la Sal, Plaza de las Bodegas s/n",
+  "p": "956 535 969",
+  "e": "turismo@chiclana.es",
+  "h": "Lunes a sábados 10:00-14:00; jueves y viernes 18:30-20:30",
+  "f": "Turismo de Chiclana, web oficial (captura del 18/10/2026)"
+ },
+ {
+  "n": "Punto de Información Turística Novo Sancti Petri",
+  "t": "ocio",
+  "c": "Oficina de turismo",
+  "a": "Urbanización Novo Sancti Petri (frente al Pinar Público), Playa de la Barrosa",
+  "p": "956 497 234",
+  "e": "turismo@chiclana.es",
+  "h": "Lunes a viernes 10:00-14:00",
+  "f": "Turismo de Chiclana, web oficial (captura del 18/10/2026)"
+ },
+ {
+  "n": "Punto de Información Turística Paseo Marítimo (1ª pista)",
+  "t": "ocio",
+  "c": "Oficina de turismo",
+  "a": "Paseo Marítimo, 1ª pista (junto a Torre Bermeja), Playa de la Barrosa",
+  "p": "956 496 082",
+  "e": "turismo@chiclana.es",
+  "s": "Cerrado hasta la temporada 2027, según la web de Turismo en octubre de 2026",
+  "f": "Turismo de Chiclana, web oficial (captura del 18/10/2026)"
+ },
+ {
+  "n": "Bodega Cooperativa - Unión de viticultores chiclaneros",
+  "t": "ocio",
+  "c": "Bodega",
+  "a": "Polígono Industrial \"El Torno\", C/ Madera, 5",
+  "f": "Turismo de Chiclana, web oficial (captura del 18/10/2026)"
+ },
+ {
+  "n": "Bodega Manuel Aragón \"El Sanatorio\"",
+  "t": "ocio",
+  "c": "Bodega",
+  "a": "C/ Olivo, 1 y Ctra. Cádiz-Málaga, km 12,200 (Campano)",
+  "f": "Turismo de Chiclana, web oficial (captura del 18/10/2026)"
+ },
+ {
+  "n": "Bodegas Primitivo Collantes",
+  "t": "ocio",
+  "c": "Bodega",
+  "a": "C/ Ancha, 51",
+  "f": "Turismo de Chiclana, web oficial (captura del 18/10/2026)"
+ },
+ {
+  "n": "Bodegas San Sebastián",
+  "t": "ocio",
+  "c": "Bodega",
+  "a": "C/ Mendaro, 15",
+  "f": "Turismo de Chiclana, web oficial (captura del 18/10/2026)"
+ },
+ {
+  "n": "Bodegas Vélez",
+  "t": "ocio",
+  "c": "Bodega",
+  "a": "C/ San Antonio, 3",
+  "f": "Turismo de Chiclana, web oficial (captura del 18/10/2026)"
+ },
+ {
+  "n": "Ruta cultural: Casas Monumentales",
+  "t": "ocio",
+  "c": "Ruta cultural",
+  "s": "Dificultad baja",
+  "f": "Turismo de Chiclana, web oficial (captura del 18/10/2026)"
+ },
+ {
+  "n": "Ruta cultural: Centro histórico",
+  "t": "ocio",
+  "c": "Ruta cultural",
+  "s": "Dificultad baja",
+  "f": "Turismo de Chiclana, web oficial (captura del 18/10/2026)"
+ },
+ {
+  "n": "Ruta cultural: Chiclana, de Origen Fenicio",
+  "t": "ocio",
+  "c": "Ruta cultural",
+  "s": "Dificultad baja",
+  "f": "Turismo de Chiclana, web oficial (captura del 18/10/2026)"
+ },
+ {
+  "n": "Ruta cultural: Chiclana, Ruta Napoleónica",
+  "t": "ocio",
+  "c": "Ruta cultural",
+  "s": "Dificultad baja",
+  "f": "Turismo de Chiclana, web oficial (captura del 18/10/2026)"
+ },
+ {
+  "n": "Ruta cultural: Río Iro",
+  "t": "ocio",
+  "c": "Ruta cultural",
+  "s": "Dificultad baja",
+  "f": "Turismo de Chiclana, web oficial (captura del 18/10/2026)"
+ },
+ {
+  "n": "Ruta cultural: Romántica",
+  "t": "ocio",
+  "c": "Ruta cultural",
+  "s": "Dificultad baja",
+  "f": "Turismo de Chiclana, web oficial (captura del 18/10/2026)"
+ }
+]
