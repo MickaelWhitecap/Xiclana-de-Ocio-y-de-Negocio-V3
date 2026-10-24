@@ -1,0 +1,27 @@
+{
+  "proyecto": "Xiclana de Ocio y de NegOcio V3",
+  "alcance": "Versión de revisión, separada del catálogo público de producción",
+  "base_catalogo": 1013,
+  "instalaciones_deportivas_municipales_confirmadas": 8,
+  "candidatas_de_primera_pasada": 214,
+  "clasificacion_candidatas": {
+    "pendiente_verificar_vigencia_y_duplicado": 105,
+    "candidata_lugar_actividad_para_confirmar": 34,
+    "revision_manual": 29,
+    "candidata_municipal_para_confirmar": 22,
+    "excluir_de_altas_de_fichas": 14,
+    "duplicado_probable_no_dar_de_alta": 9,
+    "revisar_posible_duplicado": 1
+  },
+  "regla": "Las 8 instalaciones deportivas confirmadas se incorporan a manuales.json; las 214 candidatas no se publican automáticamente como verificadas. Se conservan sus estados de revisión en este informe.",
+  "instalaciones": [
+    "Campo de Fútbol CEIP Trovador",
+    "Campo de Fútbol Fernando Quiñones",
+    "Campo de Fútbol CEIP Isabel La Católica",
+    "Centro Náutico Municipal del Lago Periurbano de Las Albinas",
+    "Pista Polideportiva La Soledad",
+    "Campo Municipal de Béisbol",
+    "Pista Polideportiva Recreo San Pedro",
+    "Parque Municipal de Skate de Las Albinas del Torno"
+  ]
+}
