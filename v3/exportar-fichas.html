@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exportar inventario · Xiclana</title>
+<style>
+:root{color-scheme:light dark}body{font:16px/1.5 system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 18px}h1{line-height:1.2}button{font:inherit;padding:12px 18px;border:0;border-radius:8px;cursor:pointer;background:#176b52;color:white}button:disabled{opacity:.5;cursor:wait}.panel{border:1px solid #8886;border-radius:12px;padding:18px;margin:18px 0}.muted{opacity:.75}#status{white-space:pre-wrap}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./supabase-config.js"></script>
+</head>
+<body>
+<h1>Inventario completo de Xiclana</h1>
+<p>Esta herramienta combina las fichas base publicadas con las correcciones y fichas nuevas guardadas en Supabase. Solo descarga un archivo; no modifica el directorio ni la base de datos.</p>
+<div class="panel">
+  <p id="status">Cargando fichas…</p>
+  <button id="download" disabled>Descargar fichas_completas.json</button>
+</div>
+<p class="muted">El inventario exportado puede contener datos de contacto de establecimientos. Úsalo para gestión interna y respeta las condiciones de uso de cada fuente.</p>
+<script>
+const statusEl=document.getElementById("status"),button=document.getElementById("download");
+let exportData=null;
+function norm(v){return String(v||"").normalize("NFD").replace(/\p{Diacritic}/gu,"").toLowerCase().trim()}
+async function build(){
+ const response=await fetch("./data.json",{cache:"no-store"});
+ if(!response.ok)throw new Error("No se pudo cargar data.json (HTTP "+response.status+").");
+ const j=await response.json();
+ let items=(j.items||[]).map(x=>({...x}));
+ const cfg=window.XICLANA_SUPABASE||{};
+ if(!cfg.url||!cfg.anonKey||!window.supabase?.createClient)throw new Error("No está disponible la conexión de lectura a Supabase.");
+ const sb=window.supabase.createClient(cfg.url,cfg.anonKey);
+ const data=[];
+ for(let from=0;;from+=1000){
+  const {data:page,error}=await sb.from("listing_overrides").select("listing_id,fields,is_new,verified_at").range(from,from+999);
+  if(error)throw new Error("Error al leer correcciones de Supabase: "+error.message);
+  data.push(...(page||[]));
+  if(!page||page.length<1000)break;
+ }
+ const byId=new Map(data.map(o=>[String(o.listing_id),o]));
+ items=items.map(x=>{const o=byId.get(String(x.id||""));return o?({...x,...(o.fields||{}),id:x.id,verified_at:o.verified_at}):x});
+ const ids=new Set(items.map(x=>String(x.id||"")));
+ for(const o of data){if(o.is_new&&!ids.has(String(o.listing_id))){items.push({...o.fields,id:o.listing_id,verified_at:o.verified_at});ids.add(String(o.listing_id))}}
+ // Keep the public site's established normalization for the known Rana Verde variants.
+ const rana=items.filter(x=>norm(x.n||x.nombre||x.name||x.title).includes("rana verde"));
+ if(rana.length){
+  const score=x=>(norm(x.t)==="ocio"?100000:0)+(String(x.id||"").startsWith("manual:")?10000:0)+Object.entries(x).reduce((n,[k,v])=>n+(!["id","seed","verified_at"].includes(k)&&v!=null&&String(v).trim()!==""?1:0),0);
+  const best=rana.reduce((a,b)=>score(b)>score(a)?b:a);
+  items=items.filter(x=>!norm(x.n||x.nombre||x.name||x.title).includes("rana verde"));
+  items.push({...best,t:"ocio",c:"Camping"});
+ }
+ items=items.map(x=>["camping","nautica"].includes(norm(x.c))?({...x,t:"ocio"}):x);
+ items.sort((a,b)=>String(a.n||"").localeCompare(String(b.n||""),"es"));
+ exportData={actualizado:j.actualizado||null,total:items.length,items};
+ statusEl.textContent="Inventario preparado: "+items.length+" fichas.\nBase publicada: "+(j.items||[]).length+" fichas.\nCorrecciones y fichas nuevas de Supabase: "+data.length+".";
+ button.disabled=false;
+}
+button.addEventListener("click",()=>{
+ if(!exportData)return;
+ const blob=new Blob([JSON.stringify(exportData,null,2)],{type:"application/json;charset=utf-8"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download="fichas_completas.json";a.click();URL.revokeObjectURL(url);
+});
+build().catch(err=>{statusEl.textContent="No se pudo generar el inventario completo.\n"+err.message+"\nNo se ha descargado ningún archivo parcial.";});
+</script>
+</body></html>
