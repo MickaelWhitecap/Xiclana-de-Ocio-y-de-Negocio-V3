@@ -386,7 +386,7 @@ body[data-m=ocio]{--acc:#a8483b}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./supabase-config.js"></script>
 <script>
-let SEED=[],LIM=120,CATEGORIAS_DB=[];
+let SEED=[],LIM=2000,CATEGORIAS_DB=[];
 const CATS=["Hoteles","Apartamentos turísticos","Supermercados","Farmacias","Talleres mecánicos","Peluquerías","Inmobiliarias","Gestorías","Abogados","Clínicas","Gimnasios","Ferreterías","Panaderías","Bodegas y vinos","Tiendas de ropa","Colegios","Clubes náuticos","Alquiler de coches"];
 let mine=[];try{mine=JSON.parse(localStorage.getItem("chic")||"[]")}catch(e){}
 const save=()=>{try{localStorage.setItem("chic",JSON.stringify(mine))}catch(e){}};
