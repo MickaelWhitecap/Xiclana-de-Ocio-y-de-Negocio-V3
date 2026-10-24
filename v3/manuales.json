@@ -1,0 +1,177 @@
+[
+  {
+    "n": "Playa de La Barrosa",
+    "t": "ocio",
+    "c": "Playa",
+    "a": "Costa de Chiclana",
+    "d": "Unos 8 km de arena fina, chiringuitos y paseo marítimo.",
+    "s": "La playa más conocida de la zona de Novo Sancti Petri; famosa por sus puestas de sol y su ambiente familiar"
+  },
+  {
+    "n": "Playa de Sancti Petri",
+    "t": "ocio",
+    "c": "Playa",
+    "a": "Sancti Petri",
+    "d": "Playa tranquila junto a la desembocadura del caño y la isla del castillo."
+  },
+  {
+    "n": "Castillo de Sancti Petri",
+    "t": "ocio",
+    "c": "Patrimonio",
+    "a": "Isla de Sancti Petri",
+    "d": "Fortaleza en un islote frente a la costa; se visita en barco."
+  },
+  {
+    "n": "Pinar de los Franceses",
+    "t": "ocio",
+    "c": "Naturaleza",
+    "a": "Chiclana",
+    "d": "Pinar para pasear, correr y hacer picnic."
+  },
+  {
+    "n": "Marismas de Sancti Petri",
+    "t": "ocio",
+    "c": "Naturaleza",
+    "a": "Parque Natural Bahía de Cádiz",
+    "d": "Salinas y marismas: rutas, aves y kayak.",
+    "s": "Espacio protegido dentro del Parque Natural Bahía de Cádiz"
+  },
+  {
+    "n": "Iglesia de San Juan Bautista",
+    "t": "ocio",
+    "c": "Patrimonio",
+    "a": "Casco histórico",
+    "d": "Templo principal del casco antiguo de Chiclana."
+  },
+  {
+    "n": "Torre del Reloj",
+    "t": "ocio",
+    "c": "Patrimonio",
+    "a": "Casco histórico",
+    "d": "Símbolo del centro histórico."
+  },
+  {
+    "n": "Teatro Moderno",
+    "t": "ocio",
+    "c": "Cultura",
+    "a": "Calle Nueva, 20",
+    "d": "Espectáculos, teatro y música.",
+    "s": "Teatro municipal con teatro, música, copla y flamenco; accesible para movilidad reducida; entradas en taquilla por la tarde y online"
+  },
+  {
+    "n": "Plaza de Andalucía",
+    "t": "ocio",
+    "c": "Plaza / paseo",
+    "a": "Centro",
+    "d": "Corazón comercial y de terraceo del centro."
+  },
+  {
+    "n": "Novo Sancti Petri Golf",
+    "t": "ocio",
+    "c": "Golf",
+    "a": "Novo Sancti Petri",
+    "d": "Campo de golf junto a la costa."
+  },
+  {
+    "n": "Mercado de Abastos",
+    "t": "negocio",
+    "c": "Mercado",
+    "a": "Centro",
+    "d": "Puestos de pescado, carne, fruta y productos locales."
+  },
+  {
+    "n": "Ayuntamiento de Chiclana",
+    "t": "negocio",
+    "c": "Administración",
+    "a": "Calle Constitución, 1",
+    "d": "Trámites y atención ciudadana.",
+    "p": "956 490 002",
+    "s": "Atención también por WhatsApp (644 639 508) y cita previa (956 241 232), según prensa local de 2022; confirmar"
+  },
+  {
+    "n": "Campo de Fútbol CEIP Trovador",
+    "t": "ocio",
+    "c": "Instalación deportiva",
+    "a": "C/ Cantabria s/n, Chiclana de la Frontera",
+    "d": "Campo de fútbol escolar recogido en el directorio municipal de instalaciones deportivas.",
+    "f": "Ayuntamiento de Chiclana · instalaciones deportivas oficiales",
+    "w": "https://deportes.chiclana.es/instalaciones/gestion-directa/campos-de-futbol/",
+    "lat": 36.42493,
+    "lon": -6.150425
+  },
+  {
+    "n": "Campo de Fútbol Fernando Quiñones",
+    "t": "ocio",
+    "c": "Instalación deportiva",
+    "a": "C/ Banderillas s/n, Chiclana de la Frontera",
+    "d": "Campo de fútbol municipal recogido en el directorio oficial de instalaciones deportivas.",
+    "f": "Ayuntamiento de Chiclana · instalaciones deportivas oficiales",
+    "w": "https://deportes.chiclana.es/instalaciones/gestion-directa/campos-de-futbol/",
+    "lat": 36.413787,
+    "lon": -6.129665
+  },
+  {
+    "n": "Campo de Fútbol CEIP Isabel La Católica",
+    "t": "ocio",
+    "c": "Instalación deportiva",
+    "a": "C/ Jardines s/n, Chiclana de la Frontera",
+    "d": "Campo de fútbol escolar recogido en el directorio municipal de instalaciones deportivas.",
+    "f": "Ayuntamiento de Chiclana · instalaciones deportivas oficiales",
+    "w": "https://deportes.chiclana.es/instalaciones/gestion-directa/campos-de-futbol/"
+  },
+  {
+    "n": "Centro Náutico Municipal del Lago Periurbano de Las Albinas",
+    "t": "ocio",
+    "c": "Instalación deportiva",
+    "a": "Lago periurbano de Las Albinas, zona de Urbisur y recinto ferial, Chiclana de la Frontera",
+    "d": "Instalación náutica municipal incluida en el directorio oficial de instalaciones al aire libre.",
+    "f": "Ayuntamiento de Chiclana · instalaciones deportivas oficiales",
+    "w": "https://deportes.chiclana.es/instalaciones/gestion-directa/instalaciones-al-aire-libre/",
+    "lat": 36.4289,
+    "lon": -6.157329
+  },
+  {
+    "n": "Pista Polideportiva La Soledad",
+    "t": "ocio",
+    "c": "Instalación deportiva",
+    "a": "C/ Mistral s/n, La Soledad, Chiclana de la Frontera",
+    "d": "Pista polideportiva municipal recogida en el directorio oficial de instalaciones al aire libre.",
+    "f": "Ayuntamiento de Chiclana · instalaciones deportivas oficiales",
+    "w": "https://deportes.chiclana.es/instalaciones/gestion-directa/instalaciones-al-aire-libre/",
+    "lat": 36.417216,
+    "lon": -6.161368
+  },
+  {
+    "n": "Campo Municipal de Béisbol",
+    "t": "ocio",
+    "c": "Instalación deportiva",
+    "a": "Ciudad Deportiva Huerta Mata, Av. Reyes Católicos, Chiclana de la Frontera",
+    "d": "Campo municipal de béisbol recogido en el directorio oficial de instalaciones al aire libre.",
+    "f": "Ayuntamiento de Chiclana · instalaciones deportivas oficiales",
+    "w": "https://deportes.chiclana.es/instalaciones/gestion-directa/instalaciones-al-aire-libre/",
+    "lat": 36.413776,
+    "lon": -6.140063
+  },
+  {
+    "n": "Pista Polideportiva Recreo San Pedro",
+    "t": "ocio",
+    "c": "Instalación deportiva",
+    "a": "Residencia Recreo San Pedro, Chiclana de la Frontera",
+    "d": "Pista polideportiva recogida en el directorio oficial municipal de instalaciones al aire libre.",
+    "f": "Ayuntamiento de Chiclana · instalaciones deportivas oficiales",
+    "w": "https://deportes.chiclana.es/instalaciones/gestion-directa/instalaciones-al-aire-libre/",
+    "lat": 36.410712,
+    "lon": -6.144425
+  },
+  {
+    "n": "Parque Municipal de Skate de Las Albinas del Torno",
+    "t": "ocio",
+    "c": "Instalación deportiva",
+    "a": "Parque periurbano Las Albinas del Torno, Chiclana de la Frontera",
+    "d": "Parque municipal de skate recogido en el directorio oficial de instalaciones al aire libre.",
+    "f": "Ayuntamiento de Chiclana · instalaciones deportivas oficiales",
+    "w": "https://deportes.chiclana.es/instalaciones/gestion-directa/instalaciones-al-aire-libre/",
+    "lat": 36.426589,
+    "lon": -6.155683
+  }
+]
