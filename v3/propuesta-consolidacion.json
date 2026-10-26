@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "catalogo_base": "v3/data.json",
+  "fecha_catalogo": "2026-10-26",
+  "total_fichas_catalogo_base": 1290,
+  "estado": "propuesta_no_aplicada",
+  "reglas": [
+    "No eliminar ni modificar fichas del catálogo principal hasta aprobar y ejecutar la consolidación.",
+    "Conservar la ficha con más información de contacto como principal.",
+    "Copiar únicamente campos complementarios no vacíos; no sobrescribir datos útiles con valores vacíos.",
+    "Mantener separadas sedes, servicios y actividades distintas.",
+    "Registrar los identificadores de origen para permitir auditoría y reversión."
+  ],
+  "fusiones_propuestas": [
+    {
+      "confianza": "alta",
+      "nombre": "Ayuntamiento de Chiclana",
+      "ficha_principal": "manual:998f9f54693eb265ccde",
+      "fichas_candidatas_a_integrar": [
+        "osm:way:1319818132"
+      ],
+      "datos_complementarios": {
+        "lat": 36.4196005,
+        "lon": -6.1493583
+      },
+      "justificacion": "Misma denominación institucional, misma dirección (Calle Constitución 1) y misma web oficial.",
+      "fuente_externa": "https://www.chiclana.es",
+      "requiere_revision_humana": false
+    },
+    {
+      "confianza": "alta",
+      "nombre": "Biblioteca Municipal García Gutiérrez",
+      "ficha_principal": "oficial:69f7f1d16dae49f4c916",
+      "fichas_candidatas_a_integrar": [
+        "osm:node:1550693931"
+      ],
+      "datos_complementarios": {
+        "lat": 36.4209773,
+        "lon": -6.1477096
+      },
+      "justificacion": "Misma biblioteca y dirección C/ Vega; la ficha principal conserva teléfono y correo.",
+      "fuente_externa": "https://www.chiclana.es/delegaciones/cultura/biblioteca-publica-municipal-garcia-gutierrez",
+      "requiere_revision_humana": false
+    },
+    {
+      "confianza": "alta",
+      "nombre": "Centro Deportivo Urbano Costa Sancti Petri",
+      "ficha_principal": "oficial:cce276865e66d9d2358b",
+      "fichas_candidatas_a_integrar": [
+        "osm:way:421653962"
+      ],
+      "datos_complementarios": {
+        "lat": 36.3804004,
+        "lon": -6.1959679
+      },
+      "justificacion": "Mismo nombre y ubicación en calle Arrecife; la ficha principal incluye teléfono, correo, web y enlace de mapa.",
+      "fuente_externa": "https://deportes.chiclana.es/instalaciones/gestion-directa/complejos-deportivos/",
+      "requiere_revision_humana": false
+    },
+    {
+      "confianza": "alta",
+      "nombre": "Hotel Escuela Fuentemar",
+      "ficha_principal": "oficial:c662c7fd00b566500259",
+      "fichas_candidatas_a_integrar": [
+        "osm:way:428044495"
+      ],
+      "datos_complementarios": {
+        "lat": 36.4028651,
+        "lon": -6.1464986
+      },
+      "justificacion": "Mismo nombre y carretera de Fuente Amarga; conservar teléfono, correo y enlace de mapa de la ficha principal.",
+      "requiere_revision_humana": true,
+      "nota": "Confirmar la correspondencia exacta de la ubicación antes de retirar el registro OSM."
+    },
+    {
+      "confianza": "alta",
+      "nombre": "Hotel Mariantonia",
+      "ficha_principal": "oficial:2ebf001f269b909d84b5",
+      "fichas_candidatas_a_integrar": [
+        "osm:way:417007003"
+      ],
+      "datos_complementarios": {
+        "lat": 36.3704616,
+        "lon": -6.1796992
+      },
+      "justificacion": "Mismo nombre y calle del Cangrejo; la ficha principal contiene teléfono, correo, web y enlace de mapa.",
+      "requiere_revision_humana": true,
+      "nota": "Confirmar la dirección exacta antes de retirar el registro OSM."
+    },
+    {
+      "confianza": "media",
+      "nombre": "Cortijo Los Gallos",
+      "ficha_principal": "oficial:140aa95fd366376e93ae",
+      "fichas_candidatas_a_integrar": [
+        "osm:node:4230812194"
+      ],
+      "datos_complementarios": {
+        "lat": 36.3962516,
+        "lon": -6.1730027
+      },
+      "justificacion": "Mismo establecimiento hotelero y carretera de la Barrosa.",
+      "requiere_revision_humana": true
+    },
+    {
+      "confianza": "media",
+      "nombre": "Hotel Marisma Sancti Petri",
+      "ficha_principal": "osm:node:13456507101",
+      "fichas_candidatas_a_integrar": [
+        "osm:node:13505039301"
+      ],
+      "datos_complementarios": {},
+      "justificacion": "Mismo nombre y coordenadas separadas aproximadamente un metro.",
+      "requiere_revision_humana": true,
+      "nota": "Verificar que el segundo punto no representa una entrada o instalación independiente."
+    }
+  ],
+  "mantener_separadas": [
+    {
+      "nombre": "Hipotels Playa la Barrosa y SPASANAR",
+      "motivo": "Hotel y spa son servicios diferenciados; no fusionar entre sí."
+    },
+    {
+      "nombre": "Correos",
+      "motivo": "Las fichas de Jesús Nazareno y Alameda de Solano corresponden a oficinas distintas."
+    },
+    {
+      "nombre": "Cruz Roja",
+      "motivo": "Las fichas con ubicaciones distintas pueden representar sedes o servicios diferenciados."
+    },
+    {
+      "nombre": "Centro de Especialidades La Longuera",
+      "motivo": "Los registros incluyen el centro, una referencia a urgencias y otro teléfono; falta determinar si son fichas independientes."
+    },
+    {
+      "nombre": "Club de Golf Novo Sancti Petri",
+      "motivo": "Las geometrías de OpenStreetMap podrían representar partes distintas del complejo."
+    },
+    {
+      "nombre": "Club Náutico Sancti Petri / Club Nautico",
+      "motivo": "La ficha genérica de OpenStreetMap está categorizada como restaurante; no fusionar sin verificar el negocio."
+    }
+  ],
+  "pendientes": [
+    "Revisar la tercera ficha de Cortijo Los Gallos: osm-extra:node:3234860387, categorizada como Transporte.",
+    "Confirmar duplicados restantes del catálogo mediante teléfono, web, dirección y distancia geográfica.",
+    "No ejecutar eliminaciones en Supabase ni en el catálogo público como parte de esta propuesta."
+  ]
+}
