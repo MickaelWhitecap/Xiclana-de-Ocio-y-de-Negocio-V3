@@ -207,6 +207,48 @@ def principal():
             base_ids.add(str(propuesta.get("id", "")))
             añadidas += 1
 
+    # Resoluciones manuales aprobadas: unificar las variantes y geometrías del Club de Golf Novo Sancti Petri.
+    def _norm_nombre(valor):
+        t = unicodedata.normalize("NFD", str(valor or "").casefold())
+        t = "".join(c for c in t if unicodedata.category(c) != "Mn")
+        return " ".join(re.findall(r"[a-z0-9]+", t))
+
+    golf = [x for x in todo if "golf" in _norm_nombre(x.get("n", "")) and "novo sancti petri" in _norm_nombre(x.get("n", ""))]
+    if len(golf) > 1:
+        # Preferir la ficha oficial, que contiene teléfono, correo y web.
+        keeper = next((x for x in golf if str(x.get("id", "")).startswith("oficial:")), golf[0])
+        ubicaciones = list(keeper.get("ubicaciones_alternativas", []))
+        ids = list(keeper.get("ids_alternativos", []))
+        nombres = list(keeper.get("nombres_alternativos", []))
+        fuentes = [str(keeper.get("f", "") or "")]
+        for x in golf:
+            if x is keeper:
+                continue
+            if x.get("id") and x["id"] not in ids:
+                ids.append(x["id"])
+            if x.get("n") and x["n"] != keeper.get("n") and x["n"] not in nombres:
+                nombres.append(x["n"])
+            if x.get("f") and x["f"] not in fuentes:
+                fuentes.append(x["f"])
+            if x.get("lat") is not None and x.get("lon") is not None:
+                punto = {"lat": x["lat"], "lon": x["lon"], "id": x.get("id", ""), "fuente": x.get("f", "")}
+                if punto not in ubicaciones:
+                    ubicaciones.append(punto)
+            for campo in CAMPOS:
+                if not keeper.get(campo) and x.get(campo):
+                    keeper[campo] = x[campo]
+            todo.remove(x)
+        keeper["n"] = "Club de Golf Novo Sancti Petri"
+        if keeper.get("lat") is not None and keeper.get("lon") is not None:
+            punto = {"lat": keeper["lat"], "lon": keeper["lon"], "id": keeper.get("id", ""), "fuente": keeper.get("f", "")}
+            if punto not in ubicaciones:
+                ubicaciones.insert(0, punto)
+        keeper["ubicaciones_alternativas"] = ubicaciones
+        keeper["ids_alternativos"] = ids
+        keeper["nombres_alternativos"] = nombres
+        keeper["f"] = " + ".join(f for f in fuentes if f)
+        keeper["s"] = (str(keeper.get("s", "") or "").strip() + " Ficha unificada: agrupa las variantes y geometrías del Club de Golf Novo Sancti Petri; se conservan sus identificadores y ubicaciones de origen.").strip()
+
     todo.sort(key=lambda x: x.get("n", "").lower())
     fecha = base.get("actualizado") or datetime.date.today().isoformat()
     destacados = base.get("destacados", _leer("destacados.json", {}))
