@@ -181,8 +181,8 @@ function selectItem(id){const x=effectiveItems().find(v=>v.id===id);if(!x)return
 function startNew(){selectedId="new:"+crypto.randomUUID();isNew=true;$("#form-title").textContent="Nueva ficha";$("#record-meta").textContent="Se añadirá al directorio público";$("#delete-button").disabled=true;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");form.reset();$("#t").value="negocio";refreshList()}
 function cancelEdit(){selectedId=null;isNew=false;form.classList.add("hidden");$("#empty-editor").classList.remove("hidden");$("#form-title").textContent="Selecciona una ficha";$("#record-meta").textContent="";refreshList()}
 async function loadData(){
- const [dataRes,overrideRes]=await Promise.all([fetch("./data.json",{cache:"no-store"}),client.from("listing_overrides").select("listing_id,fields,is_new,verified_at,updated_at")]);
- if(!dataRes.ok)throw new Error("No se pudo cargar data.json. Comprueba que GitHub Pages haya publicado el sitio.");
+ const [dataRes,overrideRes]=await Promise.all([fetch("./fichas_completas.json",{cache:"no-store"}),client.from("listing_overrides").select("listing_id,fields,is_new,verified_at,updated_at")]);
+ if(!dataRes.ok)throw new Error("No se pudo cargar fichas_completas.json. Comprueba que GitHub Pages haya publicado el sitio.");
  const data=await dataRes.json();if(overrideRes.error)throw overrideRes.error;
  baseItems=(data.items||[]).map(x=>({...x}));overrides=overrideRes.data||[];
  const categoryRes=await client.from("listing_categories").select("slug,name,type,created_at").order("name");
