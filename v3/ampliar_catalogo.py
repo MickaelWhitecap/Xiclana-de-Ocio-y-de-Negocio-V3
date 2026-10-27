@@ -6,7 +6,7 @@ Los datos añadidos quedan identificados por fuente para facilitar futuras actua
 import json, pathlib, urllib.parse, urllib.request, time, hashlib, re, unicodedata, sys
 
 ROOT = pathlib.Path(__file__).parent
-DATA = ROOT / "data.json"
+DATA = ROOT / "fichas_completas.json"
 SERVERS = [
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
@@ -121,7 +121,7 @@ def duplicate(candidate, existing):
     return False
 
 def main():
-    if not DATA.exists(): sys.exit("No existe v3/data.json; se cancela para proteger el catálogo.")
+    if not DATA.exists(): sys.exit("No existe v3/fichas_completas.json; se cancela para proteger el catálogo.")
     data = json.loads(DATA.read_text(encoding="utf-8"))
     items = data.get("items")
     if not isinstance(items, list): sys.exit("El catálogo no contiene una lista items; no se modifica.")
