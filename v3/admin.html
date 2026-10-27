@@ -165,10 +165,17 @@ function renderCategories(){
  $("#category-list").textContent=all.length?all.map(c=>c.name+(c.type?" ("+(c.type==="ocio"?"Ocio":"Negocio")+")":"")).join(" · "):"Todavía no hay categorías.";
 }
 function refreshList(){
- visibleItems=effectiveItems();const q=$("#search").value.trim().toLocaleLowerCase("es");
- const matches=visibleItems.filter(x=>[x.n,x.c,x.a,x.p].join(" ").toLocaleLowerCase("es").includes(q)).sort((a,b)=>String(a.n||"").localeCompare(String(b.n||""),"es"));
+ visibleItems=effectiveItems();
+ const normalize=v=>String(v??"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLocaleLowerCase("es").trim();
+ const q=normalize($("#search").value);
+ const matches=visibleItems.filter(x=>{
+  if(!q)return true;
+  // Buscar también por identificador, fuente y cualquier campo importado,
+  // no solo por nombre/categoría/dirección/teléfono.
+  return Object.entries(x).some(([k,v])=>k!=="fields"&&normalize(typeof v==="object"?JSON.stringify(v):v).includes(q));
+ }).sort((a,b)=>String(a.n||a.nombre||a.name||"").localeCompare(String(b.n||b.nombre||b.name||""),"es"));
  list.textContent="";$("#count").textContent=matches.length+" fichas";
- matches.forEach(x=>{const b=document.createElement("button");b.type="button";b.className="item"+(x.id===selectedId?" active":"");b.append(document.createTextNode(x.n||"Sin nombre"));const small=document.createElement("small");small.textContent=(x.c||"Sin categoría")+" · "+(x.a||"Sin dirección");b.append(small);if(x.verified_at){const p=document.createElement("span");p.className="pill";p.textContent="Verificada";b.append(p)}b.onclick=()=>selectItem(x.id);list.append(b)});
+ matches.forEach(x=>{const b=document.createElement("button");b.type="button";b.className="item"+(x.id===selectedId?" active":"");b.append(document.createTextNode(x.n||x.nombre||x.name||"Sin nombre"));const small=document.createElement("small");small.textContent=(x.c||"Sin categoría")+" · "+(x.a||"Sin dirección");b.append(small);if(x.verified_at){const p=document.createElement("span");p.className="pill";p.textContent="Verificada";b.append(p)}b.onclick=()=>selectItem(x.id);list.append(b)});
 }
 function selectItem(id){const x=effectiveItems().find(v=>v.id===id);if(!x)return;selectedId=id;isNew=!!x.is_new;$("#form-title").textContent=x.n;$("#record-meta").textContent=x.verified_at?"Última verificación: "+new Date(x.verified_at).toLocaleString("es-ES"):"Ficha de directorio";$("#delete-button").disabled=false;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");fieldNames.forEach(k=>{const input=form.elements[k];input.value=x[k]??""});refreshList()}
 function startNew(){selectedId="new:"+crypto.randomUUID();isNew=true;$("#form-title").textContent="Nueva ficha";$("#record-meta").textContent="Se añadirá al directorio público";$("#delete-button").disabled=true;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");form.reset();$("#t").value="negocio";refreshList()}
