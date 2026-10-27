@@ -177,7 +177,8 @@ def principal():
     if not base or not isinstance(base.get("items"), list):
         sys.exit("No existe el catálogo base ../data.json; se cancela V3 para no publicar un catálogo incompleto.")
     manuales = _asegurar_ids(_leer("manuales.json", []), "manual")
-    todo = [dict(x) for x in base["items"]]
+    # Exclusión solicitada: puntos genéricos de agua con coordenadas no fiables y sin información útil.
+    todo = [dict(x) for x in base["items"] if str(x.get("n", "")).strip().casefold() not in {"agua", "agua potable"}]
     base_ids = {str(x.get("id", "")) for x in todo if x.get("id")}
 
     def similitud(a, b):
