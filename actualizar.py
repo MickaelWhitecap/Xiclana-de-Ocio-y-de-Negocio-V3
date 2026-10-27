@@ -188,8 +188,24 @@ def principal():
             osm, fecha = previa["items"], previa["fecha"]
             print(f"::warning::OpenStreetMap no respondió; se usa la copia del {fecha}")
         else:
-            # No publicar un directorio parcial: conservar la versión anterior si OSM falla.
-            sys.exit("OpenStreetMap no respondió y no existe una copia local; se cancela la publicación para no perder categorías ni fichas.")
+            # Recuperación de emergencia: usar como caché los registros OSM que ya figuran
+            # en el catálogo V3 publicado, sin descartar las fichas manuales ni inventar datos.
+            v3_path = RAIZ / "v3" / "data.json"
+            v3_data = json.loads(v3_path.read_text(encoding="utf-8")) if v3_path.exists() else {}
+            prev_items = v3_data.get("items", [])
+            osm_prev = [dict(x) for x in prev_items
+                        if str(x.get("id", "")).startswith("osm:")
+                        or "openstreetmap" in str(x.get("f", "")).casefold()
+                        or "osm-extra:" in str(x.get("id", ""))]
+            if len(osm_prev) >= 30:
+                osm = osm_prev
+                fecha = v3_data.get("actualizado", datetime.date.today().isoformat())
+                print(f"::warning::Overpass no respondió; se recuperan {len(osm)} registros OSM del catálogo V3 anterior ({fecha}).")
+                copia = RAIZ / "datos" / "osm.json"
+                copia.parent.mkdir(exist_ok=True)
+                copia.write_text(json.dumps({"fecha": fecha, "items": osm}, ensure_ascii=False), encoding="utf-8")
+            else:
+                sys.exit("OpenStreetMap no respondió y no hay copia local ni registros OSM recuperables en V3; se cancela la publicación para proteger el catálogo.")
     todo = fusionar(manuales, oficiales, turismo, osm)
     todo.sort(key=lambda x: x["n"].lower())
     (RAIZ / "data.json").write_text(json.dumps({"actualizado": fecha, "items": todo, "destacados": destacados},
