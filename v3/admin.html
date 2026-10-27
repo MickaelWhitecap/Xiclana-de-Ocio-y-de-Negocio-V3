@@ -46,6 +46,37 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
 <div id="category-list" class="muted" style="margin-top:.7rem"></div>
 </section>
 
+
+<section class="panel" id="advertising-panel">
+ <div class="topline"><div><h2 style="margin:.2rem 0">Gestión de los dos espacios publicitarios</h2><div class="muted">Cada espacio se administra por separado. Solo las campañas activas y dentro de sus fechas se mostrarán en la web pública.</div></div><button type="button" id="ads-refresh" class="secondary">Actualizar espacios</button></div>
+ <div class="grid" style="margin-top:1rem">
+  <section class="panel" style="margin:0;background:#f8faf9"><h3>Espacio 1 · Patrocinador principal</h3><form class="fields ad-form" data-slot="1">
+  <div class="wide"><label for="ad1-source">Establecimiento del directorio (opcional)</label><select id="ad1-source" data-key="source"><option value="">Nuevo anunciante / introducir datos manualmente</option></select><small class="muted">Si eliges una ficha, se recuperarán sus datos disponibles y podrás editarlos para el anuncio.</small></div>
+  <div class="wide"><label for="ad1-name">Nombre de la ficha / anunciante *</label><input id="ad1-name" data-key="listing_name" required maxlength="180"></div>
+  <div><label for="ad1-phone">Teléfono</label><input id="ad1-phone" data-key="phone" maxlength="100"></div><div><label for="ad1-location">Ubicación</label><input id="ad1-location" data-key="location" maxlength="240"></div>
+  <div class="wide"><label for="ad1-promotion">Promoción especial</label><textarea id="ad1-promotion" data-key="promotion" rows="2" maxlength="500" placeholder="Ej. 20 % de descuento en excursiones"></textarea></div>
+  <div class="wide"><label for="ad1-hook">Texto gancho para los usuarios *</label><input id="ad1-hook" data-key="hook_text" required maxlength="180" placeholder="Una frase breve que invite a descubrir la oferta"></div>
+  <div class="wide"><label for="ad1-image">Imagen o logotipo (URL)</label><input id="ad1-image" data-key="image_url" type="url" maxlength="1000" placeholder="https://…"></div>
+  <div class="wide"><label for="ad1-target">Enlace de destino (web, reserva o contacto)</label><input id="ad1-target" data-key="target_url" type="url" maxlength="1000" placeholder="https://…"></div>
+  <div><label for="ad1-status">Estado</label><select id="ad1-status" data-key="status"><option value="available">Disponible</option><option value="draft">En preparación</option><option value="active">Activo / publicado</option><option value="expired">Caducado</option></select></div>
+  <div><label for="ad1-start">Inicio de publicación</label><input id="ad1-start" data-key="starts_at" type="date"></div><div><label for="ad1-end">Fin de publicación</label><input id="ad1-end" data-key="ends_at" type="date"></div>
+  <div class="wide"><label style="display:flex;gap:.5rem;align-items:center"><input type="checkbox" data-key="create_listing" style="width:auto"> Crear también una ficha en el directorio público</label><small class="muted">Desactivado por defecto. Si se marca, se solicitará confirmación al guardar.</small></div>
+  <div class="wide actions"><button type="submit">Guardar espacio 1</button></div></form></section><section class="panel" style="margin:0;background:#f8faf9"><h3>Espacio 2 · Oferta destacada</h3><form class="fields ad-form" data-slot="2">
+  <div class="wide"><label for="ad2-source">Establecimiento del directorio (opcional)</label><select id="ad2-source" data-key="source"><option value="">Nuevo anunciante / introducir datos manualmente</option></select><small class="muted">Si eliges una ficha, se recuperarán sus datos disponibles y podrás editarlos para el anuncio.</small></div>
+  <div class="wide"><label for="ad2-name">Nombre de la ficha / anunciante *</label><input id="ad2-name" data-key="listing_name" required maxlength="180"></div>
+  <div><label for="ad2-phone">Teléfono</label><input id="ad2-phone" data-key="phone" maxlength="100"></div><div><label for="ad2-location">Ubicación</label><input id="ad2-location" data-key="location" maxlength="240"></div>
+  <div class="wide"><label for="ad2-promotion">Promoción especial</label><textarea id="ad2-promotion" data-key="promotion" rows="2" maxlength="500" placeholder="Ej. 20 % de descuento en excursiones"></textarea></div>
+  <div class="wide"><label for="ad2-hook">Texto gancho para los usuarios *</label><input id="ad2-hook" data-key="hook_text" required maxlength="180" placeholder="Una frase breve que invite a descubrir la oferta"></div>
+  <div class="wide"><label for="ad2-image">Imagen o logotipo (URL)</label><input id="ad2-image" data-key="image_url" type="url" maxlength="1000" placeholder="https://…"></div>
+  <div class="wide"><label for="ad2-target">Enlace de destino (web, reserva o contacto)</label><input id="ad2-target" data-key="target_url" type="url" maxlength="1000" placeholder="https://…"></div>
+  <div><label for="ad2-status">Estado</label><select id="ad2-status" data-key="status"><option value="available">Disponible</option><option value="draft">En preparación</option><option value="active">Activo / publicado</option><option value="expired">Caducado</option></select></div>
+  <div><label for="ad2-start">Inicio de publicación</label><input id="ad2-start" data-key="starts_at" type="date"></div><div><label for="ad2-end">Fin de publicación</label><input id="ad2-end" data-key="ends_at" type="date"></div>
+  <div class="wide"><label style="display:flex;gap:.5rem;align-items:center"><input type="checkbox" data-key="create_listing" style="width:auto"> Crear también una ficha en el directorio público</label><small class="muted">Desactivado por defecto. Si se marca, se solicitará confirmación al guardar.</small></div>
+  <div class="wide actions"><button type="submit">Guardar espacio 2</button></div></form></section>
+ </div>
+ <p class="muted">El texto gancho debe ser corto; la promoción describe el beneficio concreto. El estado «Activo» no publica la campaña fuera de las fechas indicadas.</p>
+</section>
+
 <section class="panel" id="trash-panel">
 <div class="topline"><div><h2 style="margin:.2rem 0">Papelera de fichas</h2><div class="muted">Las fichas eliminadas se conservan aquí y se pueden restaurar sin reconstruirlas.</div></div><button id="trash-refresh" type="button" class="secondary">Actualizar papelera</button></div>
 <div id="trash-list" style="margin-top:.7rem"><span class="muted">Cargando papelera…</span></div>
@@ -113,7 +144,7 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
 "use strict";
 const $=s=>document.querySelector(s), status=$("#status"), login=$("#login"), app=$("#app"), logout=$("#logout"), form=$("#record-form"), list=$("#list");
 const config=window.XICLANA_SUPABASE||{};
-let client=null,user=null,baseItems=[],overrides=[],categories=[],proposals=[],selectedId=null,isNew=false,visibleItems=[];
+let client=null,user=null,baseItems=[],overrides=[],categories=[],proposals=[],selectedId=null,isNew=false,visibleItems=[],adSlots=[];
 const fieldNames=["n","t","c","a","p","e","w","h","s","d","lat","lon"];
 function message(text,type=""){status.textContent=text;status.className="status"+(type?" "+type:"");status.classList.remove("hidden")}
 function showLogin(){login.classList.remove("hidden");app.classList.add("hidden");logout.classList.add("hidden")}
@@ -187,8 +218,23 @@ async function loadData(){
  baseItems=(data.items||[]).map(x=>({...x}));overrides=overrideRes.data||[];
  const categoryRes=await client.from("listing_categories").select("slug,name,type,created_at").order("name");
  if(categoryRes.error)throw new Error("No se pudieron cargar las categorías. Comprueba que has ejecutado supabase-categories.sql en Supabase: "+categoryRes.error.message);
- categories=categoryRes.data||[];renderCategories();refreshList();renderTrash();await loadProposals();
+ categories=categoryRes.data||[];renderCategories();refreshList();renderTrash();await loadProposals();await loadAdvertisingSlots();
 }
+
+
+function adForm(slot){return document.querySelector('.ad-form[data-slot="'+slot+'"]')}
+function adFields(form){const out={};form.querySelectorAll('[data-key]').forEach(el=>{const k=el.dataset.key;out[k]=el.type==="checkbox"?el.checked:el.value.trim()});return out}
+function fillAdForm(slot,row={}){const f=adForm(slot);if(!f)return;f.querySelectorAll('[data-key]').forEach(el=>{const k=el.dataset.key;if(k==="source"){el.value=row.listing_id||"";return}if(el.type==="checkbox")el.checked=Boolean(row[k]);else el.value=row[k]??""})}
+function populateAdSources(){const items=effectiveItems().sort((a,b)=>String(a.n||"").localeCompare(String(b.n||""),"es",{sensitivity:"base"}));[1,2].forEach(slot=>{const sel=adForm(slot).querySelector('[data-key="source"]'),prev=sel.value;sel.textContent="";const blank=document.createElement("option");blank.value="";blank.textContent="Nuevo anunciante / introducir datos manualmente";sel.append(blank);items.forEach(x=>{const o=document.createElement("option");o.value=x.id;o.textContent=(x.n||"Ficha sin nombre")+" · "+(x.c||"Sin categoría");sel.append(o)});sel.value=prev})}
+async function loadAdvertisingSlots(){const {data,error}=await client.from("advertising_slots").select("*").order("slot_id");if(error)throw new Error("No se pudieron cargar los espacios publicitarios: "+error.message);adSlots=data||[];populateAdSources();[1,2].forEach(slot=>fillAdForm(slot,adSlots.find(x=>x.slot_id===slot)||{slot_id:slot,status:"available"}))}
+function wireAdForms(){populateAdSources();[1,2].forEach(slot=>{const f=adForm(slot),sel=f.querySelector('[data-key="source"]');sel.addEventListener("change",()=>{const id=sel.value;if(!id)return;const x=effectiveItems().find(v=>v.id===id);if(!x)return;f.querySelector('[data-key="listing_name"]').value=x.n||"";f.querySelector('[data-key="phone"]').value=x.p||"";f.querySelector('[data-key="location"]').value=x.a||""});
+f.addEventListener("submit",async e=>{e.preventDefault();if(!user)return;const btn=f.querySelector('button[type="submit"]');btn.disabled=true;btn.textContent="Guardando…";try{const v=adFields(f),listingId=f.querySelector('[data-key="source"]').value||null;if(v.status==="active"&&(!v.listing_name||!v.hook_text))throw new Error("Para activar el anuncio, indica el nombre y el texto gancho.");if(v.starts_at&&v.ends_at&&v.ends_at<v.starts_at)throw new Error("La fecha final no puede ser anterior a la fecha de inicio.");if(v.create_listing&&!confirm("Se creará también una ficha pública en el directorio con los datos básicos de este anunciante. ¿Continuar?"))return;
+const now=new Date().toISOString(),row={slot_id:slot,listing_id:listingId,listing_name:v.listing_name,phone:v.phone,location:v.location,promotion:v.promotion,hook_text:v.hook_text,image_url:v.image_url,target_url:v.target_url,status:v.status,starts_at:v.starts_at||null,ends_at:v.ends_at||null,create_listing:Boolean(v.create_listing),updated_at:now,updated_by:user.id};const {error}=await client.from("advertising_slots").upsert(row,{onConflict:"slot_id"});if(error)throw error;
+if(v.create_listing&&!listingId){const newId="advertiser:"+crypto.randomUUID(),fields={n:v.listing_name,t:"negocio",c:"Publicidad y promociones",a:v.location,p:v.phone,e:"",w:v.target_url,h:"",s:v.hook_text,d:v.promotion,f:"Ficha creada desde la gestión publicitaria",v:new Date().toISOString().slice(0,10)};const {error:listingError}=await client.from("listing_overrides").upsert({listing_id:newId,fields,is_new:true,verified_at:now,updated_at:now,updated_by:user.id},{onConflict:"listing_id"});if(listingError)throw new Error("El espacio se guardó, pero no se pudo crear la ficha: "+listingError.message)}
+if(v.create_listing){const {error:clearErr}=await client.from("advertising_slots").update({create_listing:false,updated_at:new Date().toISOString(),updated_by:user.id}).eq("slot_id",slot);if(clearErr)throw clearErr}
+await loadAdvertisingSlots();message("Espacio "+slot+" guardado en Supabase. La web pública mostrará la campaña cuando esté activa y dentro de fechas.","ok");
+}catch(err){message("No se pudo guardar el espacio "+slot+": "+(err.message||"error desconocido"),"error")}finally{btn.disabled=false;btn.textContent="Guardar espacio "+slot}})})}
+$("#ads-refresh").addEventListener("click",async()=>{try{await loadAdvertisingSlots();message("Espacios publicitarios actualizados.","ok")}catch(err){message(err.message,"error")}});
 
 function proposalFields(p){return p.fields&&typeof p.fields==="object"?p.fields:{}}
 function renderProposals(){
@@ -317,7 +363,7 @@ form.addEventListener("submit",async e=>{
  }catch(err){message("No se pudo guardar: "+(err.message||"error desconocido"),"error")}
  finally{btn.disabled=false;btn.textContent="Guardar ficha"}
 });
-$("#login-form").addEventListener("submit",async e=>{e.preventDefault();const btn=$("#login-button");btn.disabled=true;try{const {data,error}=await client.auth.signInWithPassword({email:$("#email").value.trim(),password:$("#password").value});if(error)throw error;user=data.user;showApp();await loadData();message("Sesión iniciada. Solo la cuenta autorizada puede guardar cambios.","ok")}catch(err){message("No se pudo iniciar sesión: "+(err.message||"revisa el correo y la contraseña."),"error")}finally{btn.disabled=false}});
+$("#login-form").addEventListener("submit",async e=>{e.preventDefault();const btn=$("#login-button");btn.disabled=true;try{const {data,error}=await client.auth.signInWithPassword({email:$("#email").value.trim(),password:$("#password").value});if(error)throw error;user=data.user;showApp();wireAdForms();await loadData();message("Sesión iniciada. Solo la cuenta autorizada puede guardar cambios.","ok")}catch(err){message("No se pudo iniciar sesión: "+(err.message||"revisa el correo y la contraseña."),"error")}finally{btn.disabled=false}});
 logout.onclick=async()=>{await client.auth.signOut();user=null;showLogin();message("Sesión cerrada.")};
 $("#search").addEventListener("input",refreshList);$("#new-record").onclick=startNew;$("#cancel").onclick=cancelEdit;$("#trash-refresh").onclick=async()=>{try{await loadData();message("Papelera actualizada.","ok")}catch(err){message("No se pudo actualizar la papelera: "+err.message,"error")}};
  $("#delete-button").onclick=async()=>{
@@ -341,7 +387,7 @@ async function init(){
  if(!window.supabase?.createClient){message("No se ha podido cargar la biblioteca de acceso. Recarga la página o inténtalo más tarde.","error");return}
  client=window.supabase.createClient(config.url,config.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
  const {data,error}=await client.auth.getSession();if(error){message("Error al comprobar la sesión: "+error.message,"error");showLogin();return}
- if(data.session){user=data.session.user;showApp();try{await loadData();message("Sesión activa. Elige una ficha para editarla.","ok")}catch(err){message("Error al cargar fichas: "+err.message,"error")}}
+ if(data.session){user=data.session.user;showApp();wireAdForms();try{await loadData();message("Sesión activa. Elige una ficha para editarla.","ok")}catch(err){message("Error al cargar fichas: "+err.message,"error")}}
  else{showLogin();message("Inicia sesión con la cuenta privada de administración.")}
 }
 init();
