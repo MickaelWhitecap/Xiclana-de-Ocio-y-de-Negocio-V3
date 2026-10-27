@@ -140,6 +140,36 @@ def main():
         data["items"].extend(added)
         data["items"].sort(key=lambda x: str(x.get("n","")).casefold())
         DATA.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    # Resolución manual aprobada: los elementos OSM con el nombre exacto
+    # "Nuestra Señora de los Remedios" son componentes de una misma parada,
+    # no deben generar varias fichas. El colegio con nombre más largo se conserva aparte.
+    remedios = [x for x in items if norm(x.get("n")) == norm("Nuestra Señora de los Remedios")]
+    if len(remedios) > 1:
+        keeper = next((x for x in remedios if x.get("id") == "osm-extra:node:10137800750"), remedios[0])
+        ids = list(keeper.get("ids_alternativos", []))
+        ubicaciones = list(keeper.get("ubicaciones_alternativas", []))
+        fuentes = [str(keeper.get("f", "") or "")]
+        for x in remedios:
+            if x is keeper:
+                continue
+            if x.get("id") and x["id"] not in ids:
+                ids.append(x["id"])
+            if x.get("lat") is not None and x.get("lon") is not None:
+                point = {"lat": x["lat"], "lon": x["lon"], "id": x.get("id", ""), "fuente": x.get("f", "")}
+                if point not in ubicaciones:
+                    ubicaciones.append(point)
+            if x.get("f") and x.get("f") not in fuentes:
+                fuentes.append(x["f"])
+            items.remove(x)
+        keeper["ids_alternativos"] = ids
+        keeper["ubicaciones_alternativas"] = ubicaciones
+        keeper["f"] = " + ".join(v for v in fuentes if v)
+        keeper["s"] = (str(keeper.get("s", "") or "").strip() + " Ficha unificada de los componentes OSM de la parada; no corresponde al Colegio Nuestra Señora de los Remedios, que es una entidad distinta.").strip()
+    # Escribir siempre: las reglas de unificación también deben persistir cuando no haya altas nuevas.
+    items.sort(key=lambda x: str(x.get("n","")).casefold())
+    data["items"] = items
+    DATA.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+
     report = {"fecha":time.strftime("%Y-%m-%d"), "fuente":"OpenStreetMap/Overpass", "candidatos_recibidos":len(candidates),
               "fichas_nuevas":len(added), "total_catalogo":len(data["items"]),
               "nota":"Las fichas originales se conservan. Las nuevas son candidatas automáticas basadas en datos OSM; no equivalen a verificación comercial individual."}
