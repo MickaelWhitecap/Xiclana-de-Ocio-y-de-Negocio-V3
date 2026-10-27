@@ -33,7 +33,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v3/data.json
+          git add v3/fichas_completas.json
           if ! git diff --cached --quiet; then
             git commit -m "Actualizar catálogo global V3"
             git push
@@ -43,7 +43,7 @@ jobs:
       - name: Preparar sitio V3 independiente
         run: |
           mkdir -p _site
-          cp v3/index.html v3/data.json v3/admin.html v3/exportar-fichas.html v3/supabase-config.js v3/informe-investigacion.json _site/
+          cp v3/index.html v3/fichas_completas.json v3/admin.html v3/exportar-fichas.html v3/supabase-config.js v3/informe-investigacion.json _site/
           cp v3/informe-ampliacion.json _site/ 2>/dev/null || true
           cp v3/fondo.jpg v3/fondo.txt _site/ 2>/dev/null || true
           cp README.md _site/README.md
