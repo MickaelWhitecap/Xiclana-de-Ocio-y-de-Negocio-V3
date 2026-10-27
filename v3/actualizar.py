@@ -250,11 +250,33 @@ def principal():
         keeper["f"] = " + ".join(f for f in fuentes if f)
         keeper["s"] = (str(keeper.get("s", "") or "").strip() + " Ficha unificada: agrupa las variantes y geometrías del Club de Golf Novo Sancti Petri; se conservan sus identificadores y ubicaciones de origen.").strip()
 
+    # Preservar en el catálogo canónico las fichas incorporadas desde Supabase
+    # y los campos verificados que no están en el catálogo base.
+    anterior = _leer("fichas_completas.json", {})
+    prev_items = anterior.get("items", []) if isinstance(anterior, dict) else []
+    por_id = {str(x.get("id", "")): x for x in todo if x.get("id")}
+    for previo in prev_items:
+        pid = str(previo.get("id", ""))
+        if not pid:
+            continue
+        if pid in por_id:
+            actual = por_id[pid]
+            for campo, valor in previo.items():
+                if campo != "id" and valor not in (None, ""):
+                    actual[campo] = valor
+        elif pid not in base_ids:
+            todo.append(dict(previo))
+            por_id[pid] = todo[-1]
+
     todo.sort(key=lambda x: x.get("n", "").lower())
     fecha = base.get("actualizado") or datetime.date.today().isoformat()
     destacados = base.get("destacados", _leer("destacados.json", {}))
-    candidatas_revision = _leer("candidatas-globales.json", [])
-    salida = {"actualizado": fecha, "items": todo, "destacados": destacados, "candidatas_revision": candidatas_revision}
+    fichero_candidatas = _leer("candidatas-globales.json", {})
+    candidatas_revision = fichero_candidatas.get("candidatas", []) if isinstance(fichero_candidatas, dict) else fichero_candidatas
+    salida = {"actualizado": fecha, "items": todo, "destacados": destacados,
+              "candidatas_revision": candidatas_revision,
+              "total_fichas": len(todo), "total_candidatas_revision": len(candidatas_revision),
+              "fuente_unica": "fichas_completas.json"}
     (RAIZ / "fichas_completas.json").write_text(json.dumps(salida, ensure_ascii=False), encoding="utf-8")
     print(f"V3: {len(todo)} fichas; catálogo base {len(base['items'])}; "
           f"{añadidas} nuevas, {integradas} integradas y {len(ambiguas)} ambiguas sin alta automática.")
