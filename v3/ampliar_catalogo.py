@@ -144,9 +144,12 @@ def main():
     # "Nuestra Señora de los Remedios" son componentes de una misma parada,
     # no deben generar varias fichas. El colegio con nombre más largo se conserva aparte.
     remedios = [x for x in items if norm(x.get("n")) == norm("Nuestra Señora de los Remedios")]
-    if len(remedios) > 1:
+    if remedios:
         keeper = next((x for x in remedios if x.get("id") == "osm-extra:node:10137800750"), remedios[0])
         ids = list(keeper.get("ids_alternativos", []))
+        for source_id in ("osm-extra:node:10137800750", "osm-extra:node:12946613737", "osm-extra:relation:17627589"):
+            if source_id != keeper.get("id") and source_id not in ids:
+                ids.append(source_id)
         ubicaciones = list(keeper.get("ubicaciones_alternativas", []))
         fuentes = [str(keeper.get("f", "") or "")]
         for x in remedios:
