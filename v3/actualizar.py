@@ -252,7 +252,8 @@ def principal():
     todo.sort(key=lambda x: x.get("n", "").lower())
     fecha = base.get("actualizado") or datetime.date.today().isoformat()
     destacados = base.get("destacados", _leer("destacados.json", {}))
-    salida = {"actualizado": fecha, "items": todo, "destacados": destacados}
+    candidatas_revision = _leer("candidatas-globales.json", [])
+    salida = {"actualizado": fecha, "items": todo, "destacados": destacados, "candidatas_revision": candidatas_revision}
     (RAIZ / "data.json").write_text(json.dumps(salida, ensure_ascii=False), encoding="utf-8")
     print(f"V3: {len(todo)} fichas; catálogo base {len(base['items'])}; "
           f"{añadidas} nuevas, {integradas} integradas y {len(ambiguas)} ambiguas sin alta automática.")
