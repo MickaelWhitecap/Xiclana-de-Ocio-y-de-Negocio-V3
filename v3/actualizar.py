@@ -255,7 +255,7 @@ def principal():
     destacados = base.get("destacados", _leer("destacados.json", {}))
     candidatas_revision = _leer("candidatas-globales.json", [])
     salida = {"actualizado": fecha, "items": todo, "destacados": destacados, "candidatas_revision": candidatas_revision}
-    (RAIZ / "data.json").write_text(json.dumps(salida, ensure_ascii=False), encoding="utf-8")
+    (RAIZ / "fichas_completas.json").write_text(json.dumps(salida, ensure_ascii=False), encoding="utf-8")
     print(f"V3: {len(todo)} fichas; catálogo base {len(base['items'])}; "
           f"{añadidas} nuevas, {integradas} integradas y {len(ambiguas)} ambiguas sin alta automática.")
     if ambiguas:
