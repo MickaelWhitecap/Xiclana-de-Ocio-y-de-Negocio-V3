@@ -130,6 +130,8 @@ def main():
         print("AVISO: Overpass no respondió; se conserva intacto el catálogo actual.")
         return
     candidates = [x for e in elements if (x := record(e))]
+    # Exclusión permanente de puntos de agua genéricos: ubicación no fiable y sin información útil.
+    candidates = [x for x in candidates if norm(x.get("n")) not in {norm("Agua"), norm("Agua potable")}]
     known = {str(x.get("id","")) for x in items}
     added = []
     for item in candidates:
