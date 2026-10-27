@@ -531,6 +531,6 @@ async function aplicarCambios(j){
   $("#fecha").textContent="Datos actualizados: "+j.actualizado+" · "+items.length+" fichas";
   render();
  }
- fetch("data.json").then(r=>{if(!r.ok)throw new Error("No se pudo cargar data.json");return r.json()}).then(aplicarCambios).catch(err=>{console.error(err);render()});
+ fetch("fichas_completas.json").then(r=>{if(!r.ok)throw new Error("No se pudo cargar fichas_completas.json");return r.json()}).then(aplicarCambios).catch(err=>{console.error(err);render()});
  const im=new Image();im.onload=()=>{document.querySelector(".hero").classList.add("foto");fetch("fondo.txt").then(r=>r.ok?r.text():"").then(t=>{$("#cr").textContent=t.trim()}).catch(()=>{})};im.src="fondo.jpg";
 </script></body></html>
