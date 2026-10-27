@@ -359,6 +359,39 @@ body[data-m=ocio]{--acc:#a8483b}
 @media(max-width:560px){.hero h1{font-size:clamp(1.05rem,5.8vw,2.15rem)}}
 /* Icono de actividad más visible sin cambiar el tamaño del recuadro */
 .card .ic{font-size:1.65rem}
+
+
+/* Recuadro del nombre de cada ficha: ola dorada suave, como en la referencia */
+.card-summary h3{
+ position:relative;
+ isolation:isolate;
+ overflow:hidden;
+ box-sizing:border-box;
+ padding:.62rem .85rem;
+ border:2px solid #dca044;
+ border-radius:15px;
+ background:linear-gradient(105deg,#fff8eb 0%,#fffdf8 68%,#fff5df 100%);
+ color:#102f55;
+ font-size:clamp(1.05rem,2.2vw,1.35rem);
+ line-height:1.25;
+}
+.card-summary h3:after{
+ content:"";
+ position:absolute;
+ z-index:-1;
+ pointer-events:none;
+ right:0;
+ bottom:0;
+ width:34%;
+ height:72%;
+ opacity:.9;
+ background-repeat:no-repeat;
+ background-position:right bottom;
+ background-size:100% 100%;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 90' preserveAspectRatio='none'%3E%3Cpath d='M0 90 C65 84 91 53 146 49 C194 45 208 14 260 7 L260 90 Z' fill='%23efc77f' fill-opacity='.42'/%3E%3Cpath d='M0 90 C72 87 105 67 151 65 C196 63 218 35 260 31 L260 90 Z' fill='%23dca044' fill-opacity='.42'/%3E%3Cpath d='M0 90 C73 87 109 75 157 73 C202 71 225 48 260 45' fill='none' stroke='%23dca044' stroke-width='2' stroke-opacity='.7'/%3E%3C/svg%3E");
+}
+.card-summary h3{padding-right:1rem}
+
 </style>
 </head><body>
 <header class="hero foto"><svg viewBox="0 0 1200 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect class="salt" width="1200" height="340"/><rect class="p" style="--d:0" x="0" y="0" width="300" height="150" fill="#f08fa8"/><rect class="p" style="--d:1" x="308" y="0" width="220" height="100" fill="#f7c1cd"/><rect class="p" style="--d:2" x="536" y="0" width="330" height="170" fill="#e56b8d"/><rect class="p" style="--d:3" x="874" y="0" width="326" height="120" fill="#f3a3b6"/><rect class="p" style="--d:4" x="0" y="158" width="180" height="182" fill="#8cc9cf"/><rect class="p" style="--d:5" x="188" y="158" width="330" height="90" fill="#5fb0ba"/><rect class="p" style="--d:6" x="526" y="178" width="180" height="162" fill="#f7c1cd"/><rect class="p" style="--d:7" x="714" y="178" width="200" height="100" fill="#f08fa8"/><rect class="p" style="--d:8" x="922" y="128" width="278" height="212" fill="#8cc9cf"/><rect class="p" style="--d:9" x="188" y="256" width="330" height="84" fill="#f3a3b6"/><rect class="p" style="--d:10" x="714" y="286" width="200" height="54" fill="#5fb0ba"/><circle cx="1080" cy="62" r="34" fill="#f6b93b"/></svg><small class="cr" id="cr"></small><div class="t"><h1>Xiclana de Ocio y de <span class="brand-negocio">Negocio</span></h1><p>Playas, marismas, bares y comercios de Chiclana de la Frontera (11130, Cádiz) en un solo sitio.</p></div></header>
