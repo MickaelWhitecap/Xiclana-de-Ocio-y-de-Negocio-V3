@@ -520,6 +520,9 @@ async function aplicarCambios(j){
     items=items.filter(x=>!claveRana(x));
     items.push(conservar);
   }
+  // Excluir fuentes de agua genéricas: fichas sin información útil y con geolocalización no fiable.
+  const nombreAgua=x=>String(x.n||x.nombre||x.name||x.title||"").normalize("NFD").replace(/\\p{Diacritic}/gu,"").toLowerCase().trim();
+  items=items.filter(x=>!["agua","agua potable"].includes(nombreAgua(x)));
   // Camping y Nautica pertenecen a Ocio: evitar que aparezcan en Negocio.
   const normalizarCategoria=v=>String(v||"").normalize("NFD").replace(/\p{Diacritic}/gu,"").toLowerCase().trim();
   items=items.map(x=>["camping","nautica"].includes(normalizarCategoria(x.c))?({...x,t:"ocio"}):x);
