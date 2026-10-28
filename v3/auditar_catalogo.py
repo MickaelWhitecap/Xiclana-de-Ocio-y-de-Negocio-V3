@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Auditoría no destructiva del catálogo maestro de Xiclana V3."""
+"""Auditoría no destructiva del catálogo maestro de Xiclana V3.
+
+La detección de duplicados genera propuestas; nunca borra fichas por sí sola.
+"""
 import json, pathlib, re, sys, unicodedata, datetime
 ROOT = pathlib.Path(__file__).parent
 DATA = ROOT / "fichas_completas.json"
