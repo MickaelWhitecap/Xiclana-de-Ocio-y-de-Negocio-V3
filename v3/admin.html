@@ -157,8 +157,8 @@ function effectiveItems(){
  const byId=new Map(overrides.map(o=>[o.listing_id,o]));
  let out=baseItems.filter(x=>!byId.get(stableId(x))?.fields?._xiclana_deleted).map(x=>{const id=stableId(x),o=byId.get(id);return {...x,id,...(o?.fields||{}),id,verified_at:o?.verified_at||null,is_new:false}});
  overrides.filter(o=>o.is_new&&!o.fields?._xiclana_deleted).forEach(o=>{if(!baseItems.some(x=>stableId(x)===o.listing_id))out.push({...o.fields,id:o.listing_id,verified_at:o.verified_at,is_new:true})});
- // En la administración, agrupar las variantes del mismo Camping La Rana Verde sin borrar registros de la base de datos.
- const claveRana=x=>String(x.n||x.nombre||x.name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim().includes("rana verde");
+ // La Rana Verde es una zona geográfica; agrupar solo variantes exactas del mismo camping.
+ const claveRana=x=>String(x.n||x.nombre||x.name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()==="camping la rana verde";
  const rana=out.filter(claveRana);
  if(rana.length>1){
   const puntuacion=x=>Object.entries(x).reduce((n,[k,v])=>n+(!["id","seed","verified_at"].includes(k)&&v!=null&&String(v).trim()!==""?1:0),0)+(String(x.id||"").startsWith("manual:")?0.25:0);
