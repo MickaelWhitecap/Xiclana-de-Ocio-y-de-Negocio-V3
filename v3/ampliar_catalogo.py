@@ -241,5 +241,5 @@ def main():
     data["actualizado"] = time.strftime("%Y-%m-%d")
     DATA.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
 
-    print(f"Ampliación automática: {len(candidates)} candidatos; {len(added)} fichas nuevas; total {len(data['items'])}.")
+    print(f"Ampliación automática: {len(candidates)} candidatos detectados; {queued} enviados a revisión; total público {len(data['items'])}, pendientes {len(data['candidatas_revision'])}.")
 if __name__ == "__main__": main()
