@@ -211,6 +211,5 @@ def main():
     data["items"] = items
     DATA.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
 
-    (ROOT / "informe-ampliacion.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Ampliación automática: {len(candidates)} candidatos; {len(added)} fichas nuevas; total {len(data['items'])}.")
 if __name__ == "__main__": main()
