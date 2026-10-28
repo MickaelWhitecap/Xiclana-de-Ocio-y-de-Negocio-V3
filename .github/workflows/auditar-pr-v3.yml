@@ -18,7 +18,21 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
       - name: Comprobar sintaxis Python
         run: python -m py_compile v3/auditar_catalogo.py v3/ampliar_catalogo.py v3/actualizar.py
+      - name: Comprobar sintaxis JavaScript de las páginas
+        run: |
+          python - <<'PY'
+          import re, pathlib
+          for page in ("v3/index.html", "v3/admin.html"):
+              html = pathlib.Path(page).read_text(encoding="utf-8")
+              scripts = re.findall(r'<script(?![^>]*\\bsrc=)[^>]*>([\\s\\S]*?)</script>', html, re.I)
+              pathlib.Path("/tmp/" + pathlib.Path(page).stem + ".js").write_text("\\n".join(scripts), encoding="utf-8")
+          PY
+          node --check /tmp/index.js
+          node --check /tmp/admin.js
       - name: Validar estructura e informar duplicados
         run: python v3/auditar_catalogo.py
