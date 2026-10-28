@@ -135,6 +135,17 @@ def main():
     known = {str(x.get("id","")) for x in items}
     added = []
     for item in candidates:
+        # Charter Alcántara y Alcántara Charter son la misma ficha; conservar los datos
+        # de contacto oficiales y añadir las coordenadas OSM sin crear otra entrada.
+        if norm(item.get("n")) in {norm("Charter Alcántara"), norm("Alcántara Charter")}:
+            target = next((x for x in items if norm(x.get("n")) == norm("Charter Alcántara")), None)
+            if target:
+                if target.get("lat") is None and item.get("lat") is not None: target["lat"] = item["lat"]
+                if target.get("lon") is None and item.get("lon") is not None: target["lon"] = item["lon"]
+                target["nombres_alternativos"] = list(dict.fromkeys(list(target.get("nombres_alternativos", [])) + [item.get("n", "")]))
+                target["ids_alternativos"] = list(dict.fromkeys(list(target.get("ids_alternativos", [])) + [item.get("id", "")]))
+                target["fuentes_integradas"] = list(dict.fromkeys(list(target.get("fuentes_integradas", [])) + [item.get("f", "OpenStreetMap")]))
+                continue
         if item["id"] in known or duplicate(item, items) or duplicate(item, added): continue
         added.append(item)
         known.add(item["id"])
