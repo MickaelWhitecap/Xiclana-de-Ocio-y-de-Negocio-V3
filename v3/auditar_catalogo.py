@@ -7,7 +7,7 @@ import json, pathlib, re, sys, unicodedata, datetime
 ROOT = pathlib.Path(__file__).parent
 DATA = ROOT / "fichas_completas.json"
 REPORT = ROOT / "auditoria_integridad.json"
-LEGACY_AUTO_ITEM_LIMIT = 266  # registros automáticos heredados, detectados en la auditoría inicial
+BASELINE = ROOT / "catalogo_auto_baseline.json"
 
 def norm(value):
     value = unicodedata.normalize("NFD", str(value or "").casefold())
@@ -25,6 +25,13 @@ def main():
         sys.exit("ERROR: el catálogo maestro debe contener items como lista.")
 
     items = data["items"]
+    if not BASELINE.exists():
+        sys.exit("ERROR: falta catalogo_auto_baseline.json; no se puede distinguir el legado de nuevas altas automáticas.")
+    try:
+        baseline_data = json.loads(BASELINE.read_text(encoding="utf-8"))
+        baseline_ids = set(map(str, baseline_data.get("ids", [])))
+    except Exception as exc:
+        sys.exit(f"ERROR: línea base de candidatos automáticos inválida: {exc}")
     ids, invalid, missing = set(), [], []
     automatic = []
     exact = {}
@@ -64,12 +71,14 @@ def main():
         review = []
         data["candidatas_revision"] = review
 
+    unexpected_auto = sorted(set(automatic) - baseline_ids)
     report = {
         "fecha": datetime.date.today().isoformat(),
         "total_items_publicables": len(items),
         "total_candidatas_revision": len(review),
         "candidatos_automaticos_heredados_en_items": len(automatic),
         "ids_automaticos_heredados": automatic,
+        "ids_automaticos_nuevos_no_aprobados": unexpected_auto,
         "registros_invalidos_o_ids_repetidos": invalid,
         "fichas_sin_nombre_categoria_o_tipo_valido": missing,
         "grupos_duplicados_exactos_nombre_categoria_direccion": len(duplicate_groups),
@@ -78,13 +87,13 @@ def main():
     }
     REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Auditoría catálogo: {len(items)} fichas; {len(review)} candidatas pendientes.")
-    print(f"Candidatos automáticos heredados en fichas públicas: {len(automatic)} (límite heredado: {LEGACY_AUTO_ITEM_LIMIT}).")
+    print(f"Candidatos automáticos en fichas públicas: {len(automatic)}; altas fuera de la línea base: {len(unexpected_auto)}.")
     print(f"Grupos exactos que requieren consolidación: {len(duplicate_groups)}.")
     print(f"Registros inválidos/IDs repetidos: {len(invalid)}; fichas incompletas: {len(missing)}.")
     print(f"Informe detallado: {REPORT}")
     if invalid or missing:
         sys.exit("ERROR: el catálogo incumple validaciones estructurales; se detiene la publicación.")
-    if len(automatic) > LEGACY_AUTO_ITEM_LIMIT:
-        sys.exit("ERROR: aumentaron los candidatos automáticos publicados. Se detiene la publicación.")
+    if unexpected_auto:
+        sys.exit("ERROR: hay candidatos automáticos nuevos en el catálogo público sin aprobación. Se detiene la publicación.")
 if __name__ == "__main__":
     main()
