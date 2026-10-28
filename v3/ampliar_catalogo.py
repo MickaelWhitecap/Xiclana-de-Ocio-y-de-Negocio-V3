@@ -211,9 +211,6 @@ def main():
     data["items"] = items
     DATA.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
 
-    report = {"fecha":time.strftime("%Y-%m-%d"), "fuente":"OpenStreetMap/Overpass", "candidatos_recibidos":len(candidates),
-              "fichas_nuevas":len(added), "total_catalogo":len(data["items"]),
-              "nota":"Las fichas originales se conservan. Las nuevas son candidatas automáticas basadas en datos OSM; no equivalen a verificación comercial individual."}
     (ROOT / "informe-ampliacion.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Ampliación automática: {len(candidates)} candidatos; {len(added)} fichas nuevas; total {len(data['items'])}.")
 if __name__ == "__main__": main()
