@@ -10,7 +10,7 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: pages
+  group: pages-v3-master
   cancel-in-progress: true
 jobs:
   publicar:
