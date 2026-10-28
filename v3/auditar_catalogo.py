@@ -71,7 +71,16 @@ def main():
         review = []
         data["candidatas_revision"] = review
 
-    unexpected_auto = sorted(set(automatic) - baseline_ids)
+    unexpected_auto = sorted(
+        (set(automatic) - baseline_ids)
+        | {
+            str(item.get("id") or "")
+            for item in items
+            if isinstance(item, dict)
+            and str(item.get("id") or "").startswith("osm-extra:")
+            and str(item.get("id") or "") not in baseline_ids
+        }
+    )
     report = {
         "fecha": datetime.date.today().isoformat(),
         "total_items_publicables": len(items),
