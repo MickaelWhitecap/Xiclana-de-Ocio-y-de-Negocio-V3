@@ -226,8 +226,9 @@ function candidateAlreadyExists(candidate){
   if(candidateKey(x.n)!==name)return false;
   const otherAddress=candidateKey(x.a);
   if(address&&otherAddress&&address===otherAddress)return true;
+  const hasCoords=candidate.lat!=null&&candidate.lon!=null&&x.lat!=null&&x.lon!=null;
   const a=Number(candidate.lat),b=Number(candidate.lon),la=Number(x.lat),lo=Number(x.lon);
-  if(Number.isFinite(a)&&Number.isFinite(b)&&Number.isFinite(la)&&Number.isFinite(lo))return Math.abs(a-la)<0.002&&Math.abs(b-lo)<0.003;
+  if(hasCoords&&Number.isFinite(a)&&Number.isFinite(b)&&Number.isFinite(la)&&Number.isFinite(lo))return Math.abs(a-la)<0.002&&Math.abs(b-lo)<0.003;
   return !address&&!otherAddress&&candidateKey(x.c)===candidateKey(candidate.c);
  });
 }
