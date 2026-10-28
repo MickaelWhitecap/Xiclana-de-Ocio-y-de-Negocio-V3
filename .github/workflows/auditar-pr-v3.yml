@@ -7,6 +7,9 @@ on:
       - "v3/auditar_catalogo.py"
       - "v3/ampliar_catalogo.py"
       - "v3/actualizar.py"
+      - "v3/index.html"
+      - "v3/admin.html"
+      - ".github/workflows/auditar-pr-v3.yml"
       - ".github/workflows/publicar-v3.yml"
 permissions:
   contents: read
