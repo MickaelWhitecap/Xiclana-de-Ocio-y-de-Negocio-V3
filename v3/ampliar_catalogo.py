@@ -149,10 +149,21 @@ def main():
         if item["id"] in known or duplicate(item, items) or duplicate(item, added): continue
         added.append(item)
         known.add(item["id"])
-    if added:
-        data["items"].extend(added)
-        data["items"].sort(key=lambda x: str(x.get("n","")).casefold())
-        DATA.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    # Los hallazgos de OpenStreetMap son propuestas, nunca fichas públicas automáticas.
+    # Conservamos identificadores y datos completos en candidatas_revision para revisión.
+    review = data.get("candidatas_revision")
+    if not isinstance(review, list):
+        review = []
+        data["candidatas_revision"] = review
+    review_ids = {str(x.get("id", "")) for x in review if isinstance(x, dict)}
+    queued = 0
+    for item in added:
+        if str(item.get("id", "")) not in review_ids:
+            item["estado_revision"] = "pendiente"
+            item["fuente_estado"] = "candidato automático; datos abiertos OSM; pendiente de aprobación"
+            review.append(item)
+            review_ids.add(str(item.get("id", "")))
+            queued += 1
     # Resolución manual aprobada: los elementos OSM con el nombre exacto
     # "Nuestra Señora de los Remedios" son componentes de una misma parada,
     # no deben generar varias fichas. El colegio con nombre más largo se conserva aparte.
