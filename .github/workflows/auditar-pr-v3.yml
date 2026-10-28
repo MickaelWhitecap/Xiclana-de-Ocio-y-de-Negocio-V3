@@ -1,0 +1,24 @@
+name: Auditoría de integridad V3 (PR)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "v3/fichas_completas.json"
+      - "v3/auditar_catalogo.py"
+      - "v3/ampliar_catalogo.py"
+      - "v3/actualizar.py"
+      - ".github/workflows/publicar-v3.yml"
+permissions:
+  contents: read
+jobs:
+  auditar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Comprobar sintaxis Python
+        run: python -m py_compile v3/auditar_catalogo.py v3/ampliar_catalogo.py v3/actualizar.py
+      - name: Validar estructura e informar duplicados
+        run: python v3/auditar_catalogo.py
