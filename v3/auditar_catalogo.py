@@ -7,6 +7,7 @@ import json, pathlib, re, sys, unicodedata, datetime
 ROOT = pathlib.Path(__file__).parent
 DATA = ROOT / "fichas_completas.json"
 REPORT = ROOT / "auditoria_integridad.json"
+MERGE_PLAN = ROOT / "plan_consolidacion.json"
 BASELINE = ROOT / "catalogo_auto_baseline.json"
 
 def norm(value):
@@ -56,15 +57,54 @@ def main():
             exact.setdefault(key, []).append(item)
 
     duplicate_groups = []
+    merge_plan = []
+    field_keys = sorted({field for group in exact.values() for item in group for field in item.keys()})
+    priority = lambda item: (0 if str(item.get("id", "")).startswith("manual:") else
+                              1 if str(item.get("id", "")).startswith("oficial:") else
+                              2 if str(item.get("id", "")).startswith("consolidado:") else
+                              3 if str(item.get("id", "")).startswith("proposal:") else 4)
     for key, group in exact.items():
         if len(group) > 1:
+            keeper = sorted(group, key=priority)[0]
+            merged = dict(keeper)
+            conflicts = {}
+            for field in field_keys:
+                values = []
+                for item in group:
+                    value = item.get(field)
+                    if value is not None and str(value).strip() and value not in values:
+                        values.append(value)
+                if len(values) > 1:
+                    conflicts[field] = values
+                if merged.get(field) is None or not str(merged.get(field) or "").strip():
+                    if values:
+                        merged[field] = values[0]
+            ids_group = [str(item.get("id") or "") for item in group]
             duplicate_groups.append({
                 "nombre_normalizado": key[0],
                 "categoria_normalizada": key[1],
                 "direccion_normalizada": key[2],
-                "ids": [str(x.get("id") or "") for x in group],
-                "nombres": [str(x.get("n") or "") for x in group],
-                "accion": "propuesta de consolidación; no se elimina ni fusiona automáticamente"
+                "ids": ids_group,
+                "nombres": [str(item.get("n") or "") for item in group],
+                "campos_por_id": {
+                    str(item.get("id") or ""): sorted(
+                        field for field, value in item.items()
+                        if value is not None and str(value).strip()
+                    ) for item in group
+                },
+                "id_recomendado_conservar": str(keeper.get("id") or ""),
+                "accion": "consolidación propuesta; no se elimina ni fusiona automáticamente"
+            })
+            merge_plan.append({
+                "id_recomendado_conservar": str(keeper.get("id") or ""),
+                "ids_candidatos_a_consolidar": [ident for ident in ids_group if ident != str(keeper.get("id") or "")],
+                "nombre": str(keeper.get("n") or ""),
+                "categoria": str(keeper.get("c") or ""),
+                "direccion": str(keeper.get("a") or ""),
+                "campos_completos_propuestos": merged,
+                "conflictos_de_datos_que_requieren_decision": conflicts,
+                "requiere_migracion_de_overrides_supabase": True,
+                "aplicado": False
             })
     review = data.get("candidatas_revision")
     if not isinstance(review, list):
@@ -96,11 +136,18 @@ def main():
         "regla": "Los nuevos hallazgos automáticos deben permanecer en candidatas_revision hasta aprobación."
     }
     REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    MERGE_PLAN.write_text(json.dumps({
+        "fecha": datetime.date.today().isoformat(),
+        "total_grupos": len(merge_plan),
+        "regla": "Plan no destructivo: elegir ficha maestra, completar campos vacíos, conservar conflictos para decisión y migrar referencias de Supabase antes de retirar IDs.",
+        "grupos": merge_plan
+    }, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Auditoría catálogo: {len(items)} fichas; {len(review)} candidatas pendientes.")
     print(f"Candidatos automáticos en fichas públicas: {len(automatic)}; altas fuera de la línea base: {len(unexpected_auto)}.")
     print(f"Grupos exactos que requieren consolidación: {len(duplicate_groups)}.")
     print(f"Registros inválidos/IDs repetidos: {len(invalid)}; fichas incompletas: {len(missing)}.")
     print(f"Informe detallado: {REPORT}")
+    print(f"Plan de consolidación no destructivo: {MERGE_PLAN}")
     if invalid or missing:
         sys.exit("ERROR: el catálogo incumple validaciones estructurales; se detiene la publicación.")
     if unexpected_auto:
