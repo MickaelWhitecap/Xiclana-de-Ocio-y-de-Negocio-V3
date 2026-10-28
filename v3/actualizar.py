@@ -24,8 +24,8 @@ def main():
         seen.add(ident); items.append(item)
     # Sincronizar las ediciones administrativas vigentes sin crear otro fichero de datos.
     config_text = (ROOT / "supabase-config.js").read_text(encoding="utf-8")
-    url_match = re.search(r'url:\\s*"([^"]+)"', config_text)
-    key_match = re.search(r'anonKey:\\s*"([^"]+)"', config_text)
+    url_match = re.search(r'url:\s*"([^"]+)"', config_text)
+    key_match = re.search(r'anonKey:\s*"([^"]+)"', config_text)
     if not url_match or not key_match:
         sys.exit("No se pudo leer la configuración pública de Supabase; no se publica un catálogo posiblemente incompleto.")
     api_url, api_key = url_match.group(1).rstrip("/"), key_match.group(1)
