@@ -132,7 +132,12 @@ def main():
     candidates = [x for e in elements if (x := record(e))]
     # Exclusión permanente de puntos de agua genéricos: ubicación no fiable y sin información útil.
     candidates = [x for x in candidates if norm(x.get("n")) not in {norm("Agua"), norm("Agua potable")}]
+    existing_review = data.get("candidatas_revision")
+    if not isinstance(existing_review, list):
+        existing_review = []
+        data["candidatas_revision"] = existing_review
     known = {str(x.get("id","")) for x in items}
+    known.update(str(x.get("id","")) for x in existing_review if isinstance(x, dict))
     added = []
     for item in candidates:
         # Charter Alcántara y Alcántara Charter son la misma ficha; conservar los datos
@@ -146,7 +151,7 @@ def main():
                 target["ids_alternativos"] = list(dict.fromkeys(list(target.get("ids_alternativos", [])) + [item.get("id", "")]))
                 target["fuentes_integradas"] = list(dict.fromkeys(list(target.get("fuentes_integradas", [])) + [item.get("f", "OpenStreetMap")]))
                 continue
-        if item["id"] in known or duplicate(item, items) or duplicate(item, added): continue
+        if item["id"] in known or duplicate(item, items) or duplicate(item, existing_review) or duplicate(item, added): continue
         added.append(item)
         known.add(item["id"])
     # Los hallazgos de OpenStreetMap son propuestas, nunca fichas públicas automáticas.
