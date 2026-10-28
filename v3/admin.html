@@ -369,7 +369,7 @@ $("#search").addEventListener("input",refreshList);$("#new-record").onclick=star
  $("#delete-button").onclick=async()=>{
   if(!user||!selectedId||String(selectedId).startsWith("new:"))return;
   const item=effectiveItems().find(x=>x.id===selectedId);if(!item)return;
-  if(!confirm(`¿Eliminar «${item.n||"esta ficha"}» del directorio público? La ficha original no se borrará de data.json; quedará marcada como oculta en Supabase.`))return;
+  if(!confirm(`¿Eliminar «${item.n||"esta ficha"}» del directorio público? La ficha original no se borrará de fichas_completas.json; quedará marcada como oculta en Supabase.`))return;
   const btn=$("#delete-button");btn.disabled=true;btn.textContent="Eliminando…";
   try{
    const existing=overrides.find(o=>o.listing_id===selectedId);

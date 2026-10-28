@@ -1,10 +1,8 @@
 # Xiclana de Ocio y de NegOcio — V3
 
-Versión independiente del directorio de Chiclana. Mantiene el catálogo base, las incorporaciones verificadas, la web pública y el panel de Administración conectado a Supabase.
+V3 utiliza un único fichero JSON maestro: `v3/fichas_completas.json`. Contiene las fichas del directorio, las candidatas pendientes de revisión, la configuración publicitaria y los informes de consolidación. El proceso de publicación no lee ni genera catálogos JSON auxiliares.
 
-- Web pública: https://mickaelwhitecap.github.io/Xiclana-de-Ocio-y-de-Negocio-V3/
-- Administración: https://mickaelwhitecap.github.io/Xiclana-de-Ocio-y-de-Negocio-V3/admin.html
-- Catálogo generado automáticamente con GitHub Actions.
-- Actualización programada semanalmente y ejecución manual desde Actions.
+- Web pública: https://mickaelwhitecap.github.io/Xiclana-de-Ocio-y-de-NegOcio-V3/
+- Administración: https://mickaelwhitecap.github.io/Xiclana-de-Ocio-y-de-NegOcio-V3/admin.html
 
-La clave pública anon de Supabase se utiliza en el navegador; no incluir nunca claves service_role ni contraseñas en el repositorio.
+Las candidatas de revisión no se publican automáticamente como fichas verificadas. La ampliación desde OpenStreetMap escribe las nuevas fichas en el catálogo maestro.

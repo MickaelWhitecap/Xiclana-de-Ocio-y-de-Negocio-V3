@@ -23,28 +23,25 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Generar catálogo base
-        run: python actualizar.py
-      - name: Integrar catálogo V3 y nuevas instalaciones
+      - name: Validar el fichero maestro único
         run: python v3/actualizar.py
-      - name: Ampliar catálogo automáticamente con nuevas categorías OSM
+      - name: Ampliar catálogo en el fichero maestro
         run: python v3/ampliar_catalogo.py
-      - name: Guardar catálogo global permanente
+      - name: Guardar el catálogo maestro
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add v3/fichas_completas.json
           if ! git diff --cached --quiet; then
-            git commit -m "Actualizar catálogo global V3"
+            git commit -m "Actualizar catálogo maestro V3"
             git push
           else
-            echo "El catálogo global no ha cambiado; no se necesita un commit."
+            echo "El catálogo maestro no ha cambiado."
           fi
       - name: Preparar sitio V3 independiente
         run: |
           mkdir -p _site
-          cp v3/index.html v3/fichas_completas.json v3/admin.html v3/exportar-fichas.html v3/supabase-config.js v3/informe-investigacion.json _site/
-          cp v3/informe-ampliacion.json _site/ 2>/dev/null || true
+          cp v3/index.html v3/fichas_completas.json v3/admin.html v3/exportar-fichas.html v3/supabase-config.js _site/
           cp v3/fondo.jpg v3/fondo.txt _site/ 2>/dev/null || true
           cp README.md _site/README.md
       - uses: actions/configure-pages@v5
