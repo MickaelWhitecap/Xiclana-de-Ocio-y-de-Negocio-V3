@@ -29,8 +29,8 @@ jobs:
           import re, pathlib
           for page in ("v3/index.html", "v3/admin.html"):
               html = pathlib.Path(page).read_text(encoding="utf-8")
-              scripts = re.findall(r'<script(?![^>]*\\bsrc=)[^>]*>([\\s\\S]*?)</script>', html, re.I)
-              pathlib.Path("/tmp/" + pathlib.Path(page).stem + ".js").write_text("\\n".join(scripts), encoding="utf-8")
+              scripts = re.findall(r'<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>', html, re.I)
+              pathlib.Path("/tmp/" + pathlib.Path(page).stem + ".js").write_text("\n".join(scripts), encoding="utf-8")
           PY
           node --check /tmp/index.js
           node --check /tmp/admin.js
