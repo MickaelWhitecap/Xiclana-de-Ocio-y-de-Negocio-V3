@@ -14,6 +14,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   publicar:
+    if: github.actor != 'github-actions[bot]' || github.event_name != 'push'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -28,11 +29,13 @@ jobs:
       - name: Ampliar catálogo en el fichero maestro
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: python v3/ampliar_catalogo.py
+      - name: Auditar integridad del catálogo
+        run: python v3/auditar_catalogo.py
       - name: Guardar el catálogo maestro
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v3/fichas_completas.json
+          git add v3/fichas_completas.json v3/auditoria_integridad.json
           if ! git diff --cached --quiet; then
             git commit -m "Actualizar catálogo maestro V3"
             git push
