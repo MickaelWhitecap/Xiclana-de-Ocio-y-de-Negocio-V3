@@ -16,11 +16,14 @@ header a{color:white}h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-s
 label{display:block;font-weight:700;font-size:.9rem;margin-bottom:.25rem}input,select,textarea{width:100%;font:inherit;color:var(--ink);border:1px solid var(--bd);border-radius:9px;padding:.7rem;background:white;min-width:0}textarea{resize:vertical}
 button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;background:var(--nav);color:white;padding:.7rem 1rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:.4rem}button.secondary{background:white;color:var(--ink);border:1px solid var(--bd)}button.danger{background:#fff0f1;color:var(--err);border:1px solid #f0cbd0}button:disabled{opacity:.5;cursor:wait}
 .grid{display:grid;grid-template-columns:minmax(230px,.85fr) minmax(0,1.5fr);gap:1rem;align-items:start}
+/* Los dos espacios publicitarios tienen la misma anchura y superficie. */
+#advertising-panel > .grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+#advertising-panel > .grid > .panel{height:100%;min-width:0}
 .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}.wide{grid-column:1/-1}
 .actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem}.muted{color:var(--mut);font-size:.92rem}.status{padding:.75rem 1rem;border-radius:10px;background:#eaf0f1;margin:.8rem 0}.status.error{background:#fff0f1;color:var(--err)}.status.ok{background:#e8f5ed;color:var(--ok)}
 #list{display:flex;flex-direction:column;gap:.4rem;max-height:65vh;overflow:auto;margin-top:.7rem}.item{width:100%;text-align:left;background:white;color:var(--ink);border:1px solid var(--bd);padding:.7rem;border-radius:9px;display:block}.item.active{border-color:var(--acc);box-shadow:0 0 0 2px #17658a22}.item small{display:block;color:var(--mut);font-weight:400}.pill{font-size:.75rem;border-radius:999px;background:#e7f0f5;padding:.15rem .5rem;display:inline-block;margin-top:.3rem}
 .hidden{display:none!important}.topline{display:flex;align-items:center;justify-content:space-between;gap:.7rem;flex-wrap:wrap}
-@media(max-width:760px){.grid{grid-template-columns:1fr}.fields{grid-template-columns:1fr}#list{max-height:32vh}.wide{grid-column:auto}}
+@media(max-width:760px){.grid{grid-template-columns:1fr}#advertising-panel > .grid{grid-template-columns:1fr}.fields{grid-template-columns:1fr}#list{max-height:32vh}.wide{grid-column:auto}}
 </style>
 </head>
 <body>
