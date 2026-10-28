@@ -155,7 +155,8 @@ footer{background:var(--nav);color:#e0eae5}
  .op,.chip,.card,.btn{transition:none}
  .op:hover,.chip:hover,.card:hover,.btn:hover{transform:none}
 }
-.sp-ad-image{display:block;width:100%;max-height:140px;object-fit:cover;border-radius:10px;margin:.35rem 0 .65rem}\n.espacio1-foto{display:block;width:100%;height:auto;max-height:560px;object-fit:contain;margin:.65rem auto 0;border-radius:8px;box-shadow:0 2px 10px rgba(25,60,60,.12)}
+.sp-ad-image{display:block;width:100%;max-height:140px;object-fit:cover;border-radius:10px;margin:.35rem 0 .65rem}
+.espacio1-foto{display:block;width:100%;height:auto;max-height:560px;object-fit:contain;margin:.65rem auto 0;border-radius:8px;box-shadow:0 2px 10px rgba(25,60,60,.12)}
 </style>
 <style id="refresh-visual-v1">
 :root{
@@ -536,7 +537,7 @@ if(d.w&&/^https?:\/\//.test(d.w)){const l=el("a","","Ver oferta");l.href=d.w;l.t
 c.append(a);return c}
 function hueco(){const k=(DEST&&DEST.contacto)||"";const c=el("div","sp libre");const tp=el("div","sp-top");tp.append(el("span","sp-tag","Espacio disponible"),logo("Espacio para promociones especiales"));c.append(tp,el("h4","","Tu negocio aquí"),el("p","sp-l","Anuncia tu negocio en este espacio durante un mes."));if(k){const l=el("a","","Reservar este espacio");l.href=/^(https?:|mailto:)/.test(k)?k:"mailto:"+k;c.append(l)}return c}
 function pintarDest(){const a=activos().map((d,i)=>({d,l:d.lado?String(d.lado).toLowerCase()[0]:(i%2?"d":"i")}));
-["i","d"].forEach(k=>{const box=$("#lado-"+k);box.textContent="";const m=a.filter(x=>x.l===k);m.slice(0,1).forEach(x=>box.append(tarjetaSp(x.d)));if(k==="i"){const img=el("img","espacio1-foto");img.src="espacio-1-flamenca.jpg";img.alt="Figura flamenca del Centro de Interpretación del Vino y la Sal de Chiclana";img.loading="lazy";box.append(img)}if(!m.length){const q=hueco();if(q)box.append(q)}});
+["i","d"].forEach(k=>{const box=$("#lado-"+k);box.textContent="";const m=a.filter(x=>x.l===k);m.slice(0,1).forEach(x=>box.append(tarjetaSp(x.d)));if(k==="i"){const img=el("img","espacio1-foto");img.src="espacio-1-flamenca.jpg?v=20261028";img.alt="Figura flamenca del Centro de Interpretación del Vino y la Sal de Chiclana";img.loading="lazy";box.append(img)}if(!m.length){const q=hueco();if(q)box.append(q)}});
 const s=$("#dest-strip");s.textContent="";a.forEach(x=>s.append(tarjetaSp(x.d)));s.hidden=!a.length}
 
 async function loadAdvertisingSlotsPublic(){
