@@ -220,6 +220,9 @@ def main():
     # Escribir siempre: las reglas de unificación también deben persistir cuando no haya altas nuevas.
     items.sort(key=lambda x: str(x.get("n","")).casefold())
     data["items"] = items
+    data["total_fichas"] = len(items)
+    data["total_candidatas_revision"] = len(data.get("candidatas_revision", []))
+    data["actualizado"] = time.strftime("%Y-%m-%d")
     DATA.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
 
     print(f"Ampliación automática: {len(candidates)} candidatos; {len(added)} fichas nuevas; total {len(data['items'])}.")
