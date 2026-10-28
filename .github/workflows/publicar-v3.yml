@@ -26,6 +26,7 @@ jobs:
       - name: Validar el fichero maestro único
         run: python v3/actualizar.py
       - name: Ampliar catálogo en el fichero maestro
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: python v3/ampliar_catalogo.py
       - name: Guardar el catálogo maestro
         run: |
