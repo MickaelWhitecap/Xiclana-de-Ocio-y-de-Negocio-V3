@@ -235,17 +235,22 @@ function candidateAlreadyExists(candidate){
 function renderAutomaticCandidates(){
  const root=$("#automatic-candidates-list");if(!root)return;root.textContent="";
  const approved=new Set(overrides.filter(o=>o.is_new&&!o.fields?._xiclana_deleted).map(o=>String(o.listing_id)));
+ const rejected=new Set(proposals.filter(p=>p.status==="rejected"&&p.source_name==="OpenStreetMap").map(p=>String(proposalFields(p).id||"")));
  const baseIds=new Set(baseItems.map(stableId));
- const pending=reviewCandidates.filter(x=>x&&x.id&&!approved.has(String(x.id))&&!baseIds.has(String(x.id))&&x.estado_revision!=="descartada");
+ const pending=reviewCandidates.filter(x=>x&&x.id&&!approved.has(String(x.id))&&!rejected.has(String(x.id))&&!baseIds.has(String(x.id))&&x.estado_revision!=="descartada");
  if(!pending.length){root.textContent="No hay candidatas automáticas pendientes de revisión.";return}
  pending.forEach(candidate=>{
   const card=document.createElement("div");card.className="item";card.style.marginBottom=".65rem";
   const title=document.createElement("strong");title.textContent=candidate.n||"Candidata sin nombre";card.append(title);
   const detail=document.createElement("small");detail.textContent=[candidate.c||"Sin categoría",candidate.t||"Sin tipo",candidate.a||"Sin dirección",candidate.p||"",candidate.e||"",candidate.w||"",candidate.lat!=null&&candidate.lon!=null?("Coordenadas "+candidate.lat+", "+candidate.lon):"",candidate.f||"OpenStreetMap"].filter(Boolean).join(" · ");card.append(detail);
+  const osm=String(candidate.id).match(/^osm-extra:(node|way|relation):(\d+)$/);
+  if(osm){const source=document.createElement("a");source.href="https://www.openstreetmap.org/"+osm[1]+"/"+osm[2];source.target="_blank";source.rel="noopener noreferrer";source.textContent="Ver en OpenStreetMap";source.style.display="inline-block";source.style.marginTop=".25rem";card.append(source)}
   const duplicate=candidateAlreadyExists(candidate);
   if(duplicate){const note=document.createElement("small");note.textContent="Posible duplicado de «"+(duplicate.n||"ficha existente")+"». No se publica desde aquí; revisa la ficha existente.";note.style.color="#8a4b12";card.append(note)}
   const actions=document.createElement("div");actions.className="actions";
-  const approve=document.createElement("button");approve.type="button";approve.textContent="Aprobar y publicar";approve.disabled=Boolean(duplicate);approve.onclick=()=>approveAutomaticCandidate(candidate);actions.append(approve);card.append(actions);root.append(card);
+  const approve=document.createElement("button");approve.type="button";approve.textContent="Aprobar y publicar";approve.disabled=Boolean(duplicate);approve.onclick=()=>approveAutomaticCandidate(candidate);actions.append(approve);
+  const reject=document.createElement("button");reject.type="button";reject.className="danger";reject.textContent="Descartar";reject.onclick=()=>rejectAutomaticCandidate(candidate);actions.append(reject);
+  card.append(actions);root.append(card);
  });
 }
 async function approveAutomaticCandidate(candidate){
@@ -255,16 +260,27 @@ async function approveAutomaticCandidate(candidate){
  if(!window.confirm("¿Aprobar y publicar «"+candidate.n+"»? La ficha será visible en la web pública."))return;
  const fields={...candidate,f:String(candidate.f||"OpenStreetMap"),fuente_estado:"Candidata automática revisada y aprobada por Administración",v:new Date().toISOString().slice(0,10)};
  delete fields.estado_revision;
+ const known=categories.some(x=>candidateKey(x.name)===candidateKey(fields.c)&&x.type===fields.t);
+ if(!known){
+  const baseSlug=slugify(fields.c),conflict=categories.some(x=>x.slug===baseSlug&&x.type!==fields.t);
+  let slug=conflict?baseSlug+"-"+fields.t:baseSlug;
+  if(categories.some(x=>x.slug===slug&&candidateKey(x.name)!==candidateKey(fields.c)))slug=slug+"-"+Date.now().toString(36);
+  const {data:cat,error:catError}=await client.from("listing_categories").insert({slug,name:fields.c,type:fields.t,created_by:user.id}).select("slug,name,type,created_at").single();
+  if(catError){message("No se pudo registrar la categoría; la ficha no se ha publicado: "+catError.message,"error");return}
+  categories=categories.filter(x=>x.slug!==cat.slug);categories.push(cat);renderCategories();
+ }
  const now=new Date().toISOString();
  const {error}=await client.from("listing_overrides").upsert({listing_id:String(candidate.id),fields,is_new:true,verified_at:now,updated_at:now,updated_by:user.id},{onConflict:"listing_id"});
  if(error){message("No se pudo publicar la candidata: "+error.message,"error");return}
- const known=categories.some(x=>candidateKey(x.name)===candidateKey(fields.c)&&x.type===fields.t);
- if(!known){
-  const {data:cat,error:catError}=await client.from("listing_categories").upsert({slug:slugify(fields.c),name:fields.c,type:fields.t,created_by:user.id},{onConflict:"slug"}).select("slug,name,type,created_at").single();
-  if(catError){message("La ficha se publicó, pero no se pudo registrar su categoría: "+catError.message,"error");return}
-  categories=categories.filter(x=>x.slug!==cat.slug);categories.push(cat);renderCategories();
- }
  await loadData();message("Candidata aprobada y publicada: "+candidate.n,"ok");
+}
+async function rejectAutomaticCandidate(candidate){
+ if(!window.confirm("¿Descartar «"+candidate.n+"»? Quedará registrada como rechazada y no volverá a aparecer en esta revisión."))return;
+ const match=String(candidate.id||"").match(/^osm-extra:(node|way|relation):(\d+)$/);
+ const sourceUrl=match?"https://www.openstreetmap.org/"+match[1]+"/"+match[2]:null;
+ const {error}=await client.from("listing_proposals").insert({fields:{...candidate},source_name:"OpenStreetMap",source_url:sourceUrl,source_checked_at:new Date().toISOString().slice(0,10),notes:"Candidata automática descartada desde Administración; no publicada.",status:"rejected",created_by:user.id});
+ if(error){message("No se pudo registrar el descarte: "+error.message,"error");return}
+ await loadProposals();renderAutomaticCandidates();message("Candidata descartada; no se ha publicado.","ok");
 }
 async function loadData(){
  const [dataRes,overrideRes]=await Promise.all([fetch("./fichas_completas.json",{cache:"no-store"}),client.from("listing_overrides").select("listing_id,fields,is_new,verified_at,updated_at")]);
@@ -310,7 +326,7 @@ function renderProposals(){
 }
 async function loadProposals(){
  const {data,error}=await client.from("listing_proposals").select("*").order("created_at",{ascending:false});
- if(error)throw error;proposals=data||[];renderProposals();
+ if(error)throw error;proposals=data||[];renderProposals();renderAutomaticCandidates();
 }
 async function reviewProposal(p,nextStatus){
  const f={...proposalFields(p)};
