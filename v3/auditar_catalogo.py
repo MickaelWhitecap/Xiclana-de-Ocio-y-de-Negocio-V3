@@ -79,6 +79,7 @@ def main():
             if isinstance(item, dict)
             and str(item.get("id") or "").startswith("osm-extra:")
             and str(item.get("id") or "") not in baseline_ids
+            and "ficha administrativa sincronizada desde supabase" not in str(item.get("fuente_estado") or "").casefold()
         }
     )
     report = {
