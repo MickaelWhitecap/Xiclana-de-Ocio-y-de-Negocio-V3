@@ -613,11 +613,11 @@ async function aplicarCambios(j){
     (data||[]).filter(o=>o.is_new&&!o.fields?._xiclana_deleted&&!ids.has(o.listing_id)).forEach(o=>items.push({...o.fields,id:o.listing_id,seed:1,verified_at:o.verified_at}));
    }catch(err){console.warn("No se pudieron cargar las fichas verificadas de Supabase:",err)}
   }
-  // Unificar todas las variantes de La Rana Verde y priorizar la ficha de Ocio.
+  // La Rana Verde es una zona geográfica; solo se agrupan variantes del mismo camping.
   const nombreClave=v=>String(v||"").normalize("NFD").replace(/\p{Diacritic}/gu,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
   const claveRana=x=>{
     const nombre=nombreClave(x.n||x.nombre||x.name||x.title);
-    return nombre.includes("rana verde");
+    return nombre === "camping la rana verde";
   };
   const candidatasRana=items.filter(claveRana);
   if(candidatasRana.length){
