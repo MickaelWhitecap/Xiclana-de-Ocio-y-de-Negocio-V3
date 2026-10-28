@@ -5,6 +5,7 @@ on:
     paths:
       - "v3/fichas_completas.json"
       - "v3/catalogo_auto_baseline.json"
+      - "v3/plan_consolidacion.json"
       - "v3/auditar_catalogo.py"
       - "v3/ampliar_catalogo.py"
       - "v3/actualizar.py"
