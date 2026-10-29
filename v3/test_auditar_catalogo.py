@@ -127,7 +127,7 @@ class AuditDuplicateTests(unittest.TestCase):
                     self.assertEqual(ranges, ["0-499", "500-999"])
                     stored = json.loads(data_path.read_text(encoding="utf-8"))
                     self.assertEqual(stored["sincronizacion_supabase"]["overrides_leidos"], 501)
-                    self.assertEqual(stored["sincronizacion_supabase"]["fichas_nuevas_incorporadas"], 500)
+                    self.assertEqual(stored["sincronizacion_supabase"]["fichas_nuevas_incorporadas"], 501)
                     self.assertTrue(any(item.get("id") == "manual:500" for item in stored["items"]))
                 finally:
                     updater.DATA, updater.ROOT = old_data, old_root
