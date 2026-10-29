@@ -172,7 +172,7 @@ function effectiveItems(){
  }
  // Evitar que la lista de Administración muestre dos fichas con nombre, categoría, tipo y dirección idénticos.
  // No se borra ningún registro de baseItems ni de Supabase; solo se presenta una ficha preferente.
- const normExact=v=>String(v??"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim().replace(/\\s+/g," ");
+ const normExact=v=>String(v??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");
  const exactKey=x=>{const n=normExact(x.n||x.nombre||x.name),c=normExact(x.c||x.categoria||x.category),t=normExact(x.t||x.tipo),a=normExact(x.a||x.direccion||x.address);return n&&c&&t&&a?[n,c,t,a].join("|"):""};
  const priority=x=>String(x.id||"").startsWith("manual:")?0:String(x.id||"").startsWith("oficial:")?1:String(x.id||"").startsWith("consolidado:")?2:String(x.id||"").startsWith("proposal:")?3:4;
  const exactGroups=new Map();
@@ -214,7 +214,7 @@ function renderCategories(){
 }
 function refreshList(){
  visibleItems=effectiveItems();
- const normalize=v=>String(v??"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLocaleLowerCase("es").trim();
+ const normalize=v=>String(v??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("es").trim();
  const q=normalize($("#search").value);
  const matches=visibleItems.filter(x=>{
   if(!q)return true;
