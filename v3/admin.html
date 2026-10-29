@@ -331,8 +331,11 @@ async function loadProposals(){
 async function reviewProposal(p,nextStatus){
  const f={...proposalFields(p)};
  if(nextStatus==="approved"){
+  const publicationId="proposal:"+p.id;
   const name=String(f.n||"").trim().toLocaleLowerCase("es"),address=String(f.a||"").trim().toLocaleLowerCase("es");
-  const duplicate=effectiveItems().find(x=>String(x.n||"").trim().toLocaleLowerCase("es")===name && (!address||String(x.a||"").trim().toLocaleLowerCase("es")===address));
+  // Una aprobación puede quedar parcialmente aplicada si Supabase falla al actualizar el estado de la propuesta.
+  // Reutilizar un ID estable permite reintentar sin crear otra ficha ni bloquear la propia ficha ya publicada.
+  const duplicate=effectiveItems().find(x=>x.id!==publicationId && String(x.n||"").trim().toLocaleLowerCase("es")===name && (!address||String(x.a||"").trim().toLocaleLowerCase("es")===address));
   if(duplicate){message("No se puede publicar automáticamente: ya existe una ficha con ese nombre y dirección. Revisa la ficha existente antes de continuar.","error");return}
   if(!f.n||!f.c){message("La propuesta necesita nombre y categoría antes de publicarse.","error");return}
   f.t=f.t||"negocio";f.f="Verificado por Xiclana";f.v=new Date().toISOString().slice(0,10);
@@ -345,7 +348,7 @@ async function reviewProposal(p,nextStatus){
    if(catError){message("No se pudo registrar la categoría; la ficha no se ha publicado: "+catError.message,"error");return}
    categories=categories.filter(c=>c.slug!==cat.slug);categories.push(cat);
   }
-  const id="manual:"+crypto.randomUUID();
+  const id=publicationId;
   const {error:saveError}=await client.from("listing_overrides").upsert({listing_id:id,fields:f,is_new:true,verified_at:new Date().toISOString(),updated_at:new Date().toISOString(),updated_by:user.id},{onConflict:"listing_id"});
   if(saveError){message("No se pudo publicar la ficha: "+saveError.message,"error");return}
  }
