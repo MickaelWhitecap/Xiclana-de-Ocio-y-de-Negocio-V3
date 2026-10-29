@@ -42,14 +42,19 @@ jobs:
           node --check /tmp/admin.js
       - name: Probar que ocio y negocio no se confundan como duplicados
         run: python -m unittest v3/test_auditar_catalogo.py
+      - name: Sincronizar en entorno temporal las ediciones administrativas
+        run: python v3/actualizar.py
+      - name: Buscar nuevas fichas y enviarlas a revisión provisional
+        run: python v3/ampliar_catalogo.py
       - name: Validar estructura e informar duplicados
         run: python v3/auditar_catalogo.py
-      - name: Guardar informes de auditoría para revisión
+      - name: Guardar catálogo e informes generados para revisión
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: auditoria-catalogo-v3
           path: |
+            v3/fichas_completas.json
             v3/auditoria_integridad.json
             v3/plan_consolidacion.json
           if-no-files-found: ignore
