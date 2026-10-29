@@ -170,7 +170,16 @@ function effectiveItems(){
   const conservar=rana.reduce((best,x)=>puntuacion(x)>puntuacion(best)?x:best);
   out=out.filter(x=>!claveRana(x)||x===conservar);
  }
- return out;
+ // Evitar que la lista de Administración muestre dos fichas con nombre, categoría, tipo y dirección idénticos.
+ // No se borra ningún registro de baseItems ni de Supabase; solo se presenta una ficha preferente.
+ const normExact=v=>String(v??"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim().replace(/\\s+/g," ");
+ const exactKey=x=>{const n=normExact(x.n||x.nombre||x.name),c=normExact(x.c||x.categoria||x.category),t=normExact(x.t||x.tipo),a=normExact(x.a||x.direccion||x.address);return n&&c&&t&&a?[n,c,t,a].join("|"):""};
+ const priority=x=>String(x.id||"").startsWith("manual:")?0:String(x.id||"").startsWith("oficial:")?1:String(x.id||"").startsWith("consolidado:")?2:String(x.id||"").startsWith("proposal:")?3:4;
+ const exactGroups=new Map();
+ out.forEach(x=>{const k=exactKey(x);if(k){if(!exactGroups.has(k))exactGroups.set(k,[]);exactGroups.get(k).push(x)}});
+ const suppressed=new Set();
+ exactGroups.forEach(group=>{if(group.length<2)return;group.sort((a,b)=>priority(a)-priority(b));const keeper=group[0];group.slice(1).forEach(other=>{Object.entries(other).forEach(([k,v])=>{if((keeper[k]===undefined||keeper[k]===null||String(keeper[k]).trim()==="")&&v!==undefined&&v!==null&&String(v).trim()!=="")keeper[k]=v});suppressed.add(other)})});
+ return out.filter(x=>!suppressed.has(x));
 }
 function deletedItems(){
  const deleted=overrides.filter(o=>o.fields&&o.fields._xiclana_deleted===true);
