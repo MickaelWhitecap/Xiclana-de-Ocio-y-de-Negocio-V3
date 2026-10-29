@@ -132,6 +132,25 @@ class AuditDuplicateTests(unittest.TestCase):
                 finally:
                     updater.DATA, updater.ROOT = old_data, old_root
 
+    def test_malformed_catalog_item_aborts_without_rewriting_file(self):
+        import importlib.util
+        updater_path = Path(__file__).with_name("actualizar.py")
+        spec = importlib.util.spec_from_file_location("actualizar_malformado_test", updater_path)
+        updater = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(updater)
+        with tempfile.TemporaryDirectory() as tmp:
+            data_path = Path(tmp) / "catalog.json"
+            original = json.dumps({"items": [{"id": "manual:1", "n": "Ficha"}, None]})
+            data_path.write_text(original, encoding="utf-8")
+            old_data = updater.DATA
+            updater.DATA = data_path
+            try:
+                with self.assertRaises(SystemExit):
+                    updater.main()
+                self.assertEqual(data_path.read_text(encoding="utf-8"), original)
+            finally:
+                updater.DATA = old_data
+
 
 if __name__ == "__main__":
     unittest.main()
