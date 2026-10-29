@@ -7,6 +7,7 @@ on:
       - "v3/catalogo_auto_baseline.json"
       - "v3/plan_consolidacion.json"
       - "v3/auditar_catalogo.py"
+      - "v3/test_auditar_catalogo.py"
       - "v3/ampliar_catalogo.py"
       - "v3/actualizar.py"
       - "v3/index.html"
@@ -39,6 +40,8 @@ jobs:
           PY
           node --check /tmp/index.js
           node --check /tmp/admin.js
+      - name: Probar que ocio y negocio no se confundan como duplicados
+        run: python -m unittest v3/test_auditar_catalogo.py
       - name: Validar estructura e informar duplicados
         run: python v3/auditar_catalogo.py
       - name: Guardar informes de auditoría para revisión
