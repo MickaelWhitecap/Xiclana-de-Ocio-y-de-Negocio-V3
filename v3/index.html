@@ -590,7 +590,7 @@ $("#f").onsubmit=e=>{e.preventDefault();const d=new FormData(e.target);mine.push
 $("#exp").onclick=()=>{const s=JSON.stringify(mine,null,1);navigator.clipboard?.writeText(s).then(()=>alert("JSON copiado al portapapeles"),()=>prompt("Copia el JSON:",s))||prompt("Copia el JSON:",s)};
 $("#imp").onclick=()=>{const s=prompt("Pega aquí el JSON exportado:");if(!s)return;try{const a=JSON.parse(s);if(Array.isArray(a)){mine=mine.concat(a.filter(x=>x&&x.n&&x.c&&(x.t==="ocio"||x.t==="negocio")).map(x=>({n:String(x.n),t:x.t,c:String(x.c),a:x.a?String(x.a):"",p:x.p?String(x.p):"",w:x.w?String(x.w):"",s:x.s?String(x.s):"",d:x.d?String(x.d):""})));save();render()}}catch(e){alert("JSON no válido")}};
 async function aplicarCambios(j){
-  const esAguaGenerica=v=>["agua","agua potable"].includes(String(v||"").toLowerCase().trim().split(/\\s+/).filter(Boolean).join(" "));
+  const esAguaGenerica=v=>["agua","agua potable"].includes(String(v||"").toLowerCase().trim().split(" ").filter(Boolean).join(" "));
   let items=(j.items||[]).filter(x=>x&&x._xiclana_deleted!==true&&!esAguaGenerica(x.n||x.nombre||x.name||x.title)).map(x=>({...x,seed:1}));
   const cfg=window.XICLANA_SUPABASE||{};
   if(cfg.url&&cfg.anonKey&&window.supabase?.createClient){
