@@ -616,7 +616,7 @@ async function aplicarCambios(j){
   // Oculta duplicados exactos solo en la vista pública; conserva todos los IDs en el catálogo maestro y en Supabase.
   // Prioridad: ficha manual verificada > oficial > consolidado > propuesta. Solo agrupa si coinciden nombre, categoría, tipo y dirección.
   const claveExacta=x=>{
-    const norm=v=>String(v||"").normalize("NFD").replace(/\\p{Diacritic}/gu,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim().replace(/\\s+/g," ");
+    const norm=v=>String(v||"").normalize("NFD").replace(/\p{Diacritic}/gu,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");
     const n=norm(x.n||x.nombre||x.name||x.title), c=norm(x.c||x.categoria||x.category), t=norm(x.t||x.tipo), a=norm(x.a||x.direccion||x.address);
     return n&&c&&t&&a?[n,c,t,a].join("|"):"";
   };
