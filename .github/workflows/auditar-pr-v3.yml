@@ -41,3 +41,13 @@ jobs:
           node --check /tmp/admin.js
       - name: Validar estructura e informar duplicados
         run: python v3/auditar_catalogo.py
+      - name: Guardar informes de auditoría para revisión
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auditoria-catalogo-v3
+          path: |
+            v3/auditoria_integridad.json
+            v3/plan_consolidacion.json
+          if-no-files-found: ignore
+          retention-days: 14
