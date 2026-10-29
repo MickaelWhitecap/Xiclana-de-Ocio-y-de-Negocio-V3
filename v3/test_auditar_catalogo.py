@@ -75,6 +75,63 @@ class AuditDuplicateTests(unittest.TestCase):
             finally:
                 audit.DATA, audit.BASELINE, audit.REPORT, audit.MERGE_PLAN = old
 
+    def test_updater_reads_all_override_pages_before_writing_catalog(self):
+        import importlib.util
+        from unittest import mock
+        import urllib.request
+
+        updater_path = Path(__file__).with_name("actualizar.py")
+        spec = importlib.util.spec_from_file_location("actualizar_paginacion_test", updater_path)
+        updater = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(updater)
+
+        class FakeResponse(io.StringIO):
+            def __init__(self, payload):
+                super().__init__(json.dumps(payload))
+                self.headers = {"Content-Range": "*/*"}
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                self.close()
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            data_path = root / "catalog.json"
+            config_path = root / "supabase-config.js"
+            data_path.write_text(json.dumps({"items": [
+                {"id": "manual:existing", "n": "Ficha existente", "t": "ocio", "c": "Deportes", "a": "Calle 1"}
+            ]}), encoding="utf-8")
+            config_path.write_text(
+                'window.XICLANA_SUPABASE = { url: "https://example.supabase.co", anonKey: "public-test-key" };',
+                encoding="utf-8"
+            )
+            first_page = [
+                {"listing_id": f"manual:{i}", "fields": {"n": f"Ficha {i}", "t": "ocio", "c": "Deportes", "a": f"Calle {i}"},
+                 "is_new": True, "verified_at": None, "updated_at": "2026-01-01T00:00:00Z"}
+                for i in range(500)
+            ]
+            second_page = [
+                {"listing_id": "manual:500", "fields": {"n": "Ficha 500", "t": "ocio", "c": "Deportes", "a": "Calle 500"},
+                 "is_new": True, "verified_at": None, "updated_at": "2026-01-01T00:00:00Z"}
+            ]
+            old_data, old_root = updater.DATA, updater.ROOT
+            updater.DATA, updater.ROOT = data_path, root
+            with mock.patch.object(urllib.request, "urlopen", side_effect=[FakeResponse(first_page), FakeResponse(second_page)]) as mocked_urlopen:
+                try:
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        updater.main()
+                    self.assertEqual(mocked_urlopen.call_count, 2)
+                    ranges = [call.args[0].get_header("Range") for call in mocked_urlopen.call_args_list]
+                    self.assertEqual(ranges, ["0-499", "500-999"])
+                    stored = json.loads(data_path.read_text(encoding="utf-8"))
+                    self.assertEqual(stored["sincronizacion_supabase"]["overrides_leidos"], 501)
+                    self.assertEqual(stored["sincronizacion_supabase"]["fichas_nuevas_incorporadas"], 500)
+                    self.assertTrue(any(item.get("id") == "manual:500" for item in stored["items"]))
+                finally:
+                    updater.DATA, updater.ROOT = old_data, old_root
+
 
 if __name__ == "__main__":
     unittest.main()
