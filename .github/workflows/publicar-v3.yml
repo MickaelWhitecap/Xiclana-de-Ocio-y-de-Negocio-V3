@@ -24,6 +24,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Ejecutar pruebas de regresión antes de sincronizar
+        run: python -m unittest v3/test_auditar_catalogo.py
       - name: Validar el fichero maestro único
         run: python v3/actualizar.py
       - name: Ampliar catálogo en el fichero maestro
