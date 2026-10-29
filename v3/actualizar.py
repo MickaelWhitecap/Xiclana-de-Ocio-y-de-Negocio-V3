@@ -9,8 +9,9 @@ def main():
     except Exception as exc: sys.exit(f"El fichero maestro no es JSON válido: {exc}")
     if not isinstance(data, dict) or not isinstance(data.get("items"), list): sys.exit("El fichero maestro no contiene una lista items; no se modifica.")
     items, seen = [], set()
-    for raw in data["items"]:
-        if not isinstance(raw, dict): continue
+    for index, raw in enumerate(data["items"]):
+        if not isinstance(raw, dict):
+            sys.exit(f"Elemento inválido en items[{index}]; se cancela la sincronización para no perder datos.")
         item = dict(raw); name = str(item.get("n", "")).strip()
         if " ".join(name.casefold().split()) in {"agua", "agua potable"}: continue
         if not item.get("id"):
