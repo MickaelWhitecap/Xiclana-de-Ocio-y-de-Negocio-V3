@@ -1,0 +1,39 @@
+{
+  "fecha": "2026-10-29",
+  "fuente": "v3/fichas_completas.json en rama audit/integridad-catalogo-publicacion",
+  "total_registros_historicos": 1322,
+  "total_items_activos": 1314,
+  "total_borrados": 8,
+  "total_candidatas_revision": 2,
+  "estadistica_parametros": {
+    "campos_contados": [
+      "n",
+      "t",
+      "c",
+      "a",
+      "d",
+      "p",
+      "e",
+      "w",
+      "m",
+      "lat",
+      "lon",
+      "f"
+    ],
+    "distribucion_por_numero_de_campos": {
+      "4": 6,
+      "5": 9,
+      "6": 811,
+      "7": 268,
+      "8": 81,
+      "9": 96,
+      "10": 25,
+      "11": 16,
+      "12": 2
+    },
+    "fichas_con_algun_medio_de_contacto": 275,
+    "fichas_con_email": 133
+  },
+  "ids_duplicados_o_faltantes_detectados_por_comprobacion_rapida": 0,
+  "nota": "La cifra de activos corresponde a registros no marcados como borrados, no certifica que el negocio siga abierto. El informe detallado de auditoría se genera mediante GitHub Actions."
+}
