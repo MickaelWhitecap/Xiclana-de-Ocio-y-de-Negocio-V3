@@ -54,7 +54,7 @@ def main():
             automatic.append(ident)
         address = norm(item.get("a"))
         if item.get("_xiclana_deleted") is not True and name and category and address:
-            key = (norm(name), norm(category), address)
+            key = (norm(name), norm(category), norm(kind), address)
             exact.setdefault(key, []).append(item)
 
     duplicate_groups = []
@@ -84,7 +84,8 @@ def main():
             duplicate_groups.append({
                 "nombre_normalizado": key[0],
                 "categoria_normalizada": key[1],
-                "direccion_normalizada": key[2],
+                "tipo_normalizado": key[2],
+                "direccion_normalizada": key[3],
                 "ids": ids_group,
                 "nombres": [str(item.get("n") or "") for item in group],
                 "campos_por_id": {
