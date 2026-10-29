@@ -61,6 +61,10 @@ def main():
                 item["_xiclana_deleted"] = True
                 hidden += 1
             continue
+        # No reintroducir puntos genéricos de agua desde overrides nuevos de Supabase.
+        override_name = " ".join(str(fields.get("n", "")).casefold().split())
+        if override_name in {"agua", "agua potable"}:
+            continue
         if item is None and row.get("is_new"):
             item = dict(fields)
             item["id"] = ident
