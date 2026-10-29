@@ -590,7 +590,8 @@ $("#f").onsubmit=e=>{e.preventDefault();const d=new FormData(e.target);mine.push
 $("#exp").onclick=()=>{const s=JSON.stringify(mine,null,1);navigator.clipboard?.writeText(s).then(()=>alert("JSON copiado al portapapeles"),()=>prompt("Copia el JSON:",s))||prompt("Copia el JSON:",s)};
 $("#imp").onclick=()=>{const s=prompt("Pega aquí el JSON exportado:");if(!s)return;try{const a=JSON.parse(s);if(Array.isArray(a)){mine=mine.concat(a.filter(x=>x&&x.n&&x.c&&(x.t==="ocio"||x.t==="negocio")).map(x=>({n:String(x.n),t:x.t,c:String(x.c),a:x.a?String(x.a):"",p:x.p?String(x.p):"",w:x.w?String(x.w):"",s:x.s?String(x.s):"",d:x.d?String(x.d):""})));save();render()}}catch(e){alert("JSON no válido")}};
 async function aplicarCambios(j){
-  let items=(j.items||[]).filter(x=>x&&x._xiclana_deleted!==true).map(x=>({...x,seed:1}));
+  const esAguaGenerica=v=>["agua","agua potable"].includes(String(v||"").toLowerCase().trim().split(/\\s+/).filter(Boolean).join(" "));
+  let items=(j.items||[]).filter(x=>x&&x._xiclana_deleted!==true&&!esAguaGenerica(x.n||x.nombre||x.name||x.title)).map(x=>({...x,seed:1}));
   const cfg=window.XICLANA_SUPABASE||{};
   if(cfg.url&&cfg.anonKey&&window.supabase?.createClient){
    try{
@@ -610,7 +611,7 @@ async function aplicarCambios(j){
     items=items.filter(x=>!deletedIds.has(String(x.id||"legacy:"+[x.n,x.t,x.a].map(v=>String(v||"").trim().toLowerCase()).join("|"))));
     items=items.map(x=>{const o=byId.get(String(x.id||""));return o?({...x,...(o.fields||{}),id:x.id,seed:1,verified_at:o.verified_at}):x});
     const ids=new Set(items.map(x=>String(x.id||"")));
-    (data||[]).filter(o=>o.is_new&&!o.fields?._xiclana_deleted&&!ids.has(o.listing_id)).forEach(o=>items.push({...o.fields,id:o.listing_id,seed:1,verified_at:o.verified_at}));
+    (data||[]).filter(o=>o.is_new&&!o.fields?._xiclana_deleted&&!esAguaGenerica(o.fields?.n||o.fields?.nombre||o.fields?.name||o.fields?.title)&&!ids.has(o.listing_id)).forEach(o=>items.push({...o.fields,id:o.listing_id,seed:1,verified_at:o.verified_at}));
    }catch(err){console.warn("No se pudieron cargar las fichas verificadas de Supabase:",err)}
   }
   // Oculta duplicados exactos solo en la vista pública; conserva todos los IDs en el catálogo maestro y en Supabase.
