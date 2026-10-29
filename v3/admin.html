@@ -336,15 +336,18 @@ async function reviewProposal(p,nextStatus){
   if(duplicate){message("No se puede publicar automáticamente: ya existe una ficha con ese nombre y dirección. Revisa la ficha existente antes de continuar.","error");return}
   if(!f.n||!f.c){message("La propuesta necesita nombre y categoría antes de publicarse.","error");return}
   f.t=f.t||"negocio";f.f="Verificado por Xiclana";f.v=new Date().toISOString().slice(0,10);
+  const known=categories.some(c=>c.name.toLocaleLowerCase("es")===String(f.c).toLocaleLowerCase("es")&&c.type===f.t);
+  if(!known){
+   const baseSlug=slugify(f.c),conflict=categories.some(c=>c.slug===baseSlug&&c.type!==f.t);
+   let slug=conflict?baseSlug+"-"+f.t:baseSlug;
+   if(categories.some(c=>c.slug===slug&&c.name.toLocaleLowerCase("es")!==String(f.c).toLocaleLowerCase("es")))slug=slug+"-"+Date.now().toString(36);
+   const {data:cat,error:catError}=await client.from("listing_categories").insert({slug,name:f.c,type:f.t,created_by:user.id}).select("slug,name,type,created_at").single();
+   if(catError){message("No se pudo registrar la categoría; la ficha no se ha publicado: "+catError.message,"error");return}
+   categories=categories.filter(c=>c.slug!==cat.slug);categories.push(cat);
+  }
   const id="manual:"+crypto.randomUUID();
   const {error:saveError}=await client.from("listing_overrides").upsert({listing_id:id,fields:f,is_new:true,verified_at:new Date().toISOString(),updated_at:new Date().toISOString(),updated_by:user.id},{onConflict:"listing_id"});
   if(saveError){message("No se pudo publicar la ficha: "+saveError.message,"error");return}
-  const known=categories.some(c=>c.name.toLocaleLowerCase("es")===String(f.c).toLocaleLowerCase("es"));
-  if(!known){
-   const {data:cat,error:catError}=await client.from("listing_categories").upsert({slug:slugify(f.c),name:f.c,type:f.t,created_by:user.id},{onConflict:"slug"}).select("slug,name,type,created_at").single();
-   if(catError){message("La ficha se guardó, pero no se pudo registrar la categoría: "+catError.message,"error");return}
-   categories=categories.filter(c=>c.slug!==cat.slug);categories.push(cat);
-  }
  }
  const {error}=await client.from("listing_proposals").update({status:nextStatus,reviewed_at:new Date().toISOString(),reviewed_by:user.id,review_notes:nextStatus==="approved"?"Aprobada y enviada al directorio público":"Descartada desde Administración"}).eq("id",p.id);
  if(error){message("La ficha se revisó parcialmente, pero no se pudo actualizar el estado de la propuesta: "+error.message,"error");return}
