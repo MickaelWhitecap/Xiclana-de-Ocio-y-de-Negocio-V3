@@ -152,5 +152,60 @@ class AuditDuplicateTests(unittest.TestCase):
                 updater.DATA = old_data
 
 
+    def test_tombstones_are_not_revived_or_reintroduced_by_sync(self):
+        import importlib.util
+        from unittest import mock
+        import urllib.request
+
+        updater_path = Path(__file__).with_name("actualizar.py")
+        spec = importlib.util.spec_from_file_location("actualizar_tombstones_test", updater_path)
+        updater = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(updater)
+
+        class FakeResponse(io.StringIO):
+            def __init__(self, payload):
+                super().__init__(json.dumps(payload))
+                self.headers = {"Content-Range": "0-1/2"}
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                self.close()
+
+        rows = [
+            {"listing_id": "manual:deleted-existing", "fields": {"n": "Ficha retirada", "t": "ocio", "c": "Deportes"}, "is_new": False, "updated_at": "2026-01-01T00:00:00Z"},
+            {"listing_id": "manual:deleted-missing", "fields": {"n": "No reintroducir", "_xiclana_deleted": True}, "is_new": True, "updated_at": "2026-01-01T00:00:00Z"},
+            {"listing_id": "manual:active-existing", "fields": {"n": "Ficha activa actualizada"}, "is_new": False, "updated_at": "2026-01-01T00:00:00Z"},
+        ]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            data_path = root / "catalog.json"
+            config_path = root / "supabase-config.js"
+            data_path.write_text(json.dumps({"items": [
+                {"id": "manual:deleted-existing", "n": "Ficha retirada", "_xiclana_deleted": True},
+                {"id": "manual:active-existing", "n": "Ficha activa"},
+            ]}), encoding="utf-8")
+            config_path.write_text(
+                'window.XICLANA_SUPABASE = { url: "https://example.supabase.co", anonKey: "public-test-key" };',
+                encoding="utf-8"
+            )
+            old_data, old_root = updater.DATA, updater.ROOT
+            updater.DATA, updater.ROOT = data_path, root
+            with mock.patch.object(urllib.request, "urlopen", return_value=FakeResponse(rows)):
+                try:
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        updater.main()
+                    stored = json.loads(data_path.read_text(encoding="utf-8"))
+                    by_id = {item["id"]: item for item in stored["items"]}
+                    self.assertTrue(by_id["manual:deleted-existing"]["_xiclana_deleted"])
+                    self.assertNotIn("manual:deleted-missing", by_id)
+                    self.assertEqual(by_id["manual:active-existing"]["n"], "Ficha activa actualizada")
+                    self.assertNotIn("_xiclana_deleted", by_id["manual:active-existing"])
+                finally:
+                    updater.DATA, updater.ROOT = old_data, old_root
+
+
 if __name__ == "__main__":
     unittest.main()
