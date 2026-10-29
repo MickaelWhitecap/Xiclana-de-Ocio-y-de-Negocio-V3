@@ -610,6 +610,7 @@ async function aplicarCambios(j){
     const deletedIds=new Set((data||[]).filter(o=>o.fields?._xiclana_deleted===true).map(o=>String(o.listing_id)));
     items=items.filter(x=>!deletedIds.has(String(x.id||"legacy:"+[x.n,x.t,x.a].map(v=>String(v||"").trim().toLowerCase()).join("|"))));
     items=items.map(x=>{const o=byId.get(String(x.id||""));return o?({...x,...(o.fields||{}),id:x.id,seed:1,verified_at:o.verified_at}):x});
+    items=items.filter(x=>!esAguaGenerica(x.n||x.nombre||x.name||x.title));
     const ids=new Set(items.map(x=>String(x.id||"")));
     (data||[]).filter(o=>o.is_new&&!o.fields?._xiclana_deleted&&!esAguaGenerica(o.fields?.n||o.fields?.nombre||o.fields?.name||o.fields?.title)&&!ids.has(o.listing_id)).forEach(o=>items.push({...o.fields,id:o.listing_id,seed:1,verified_at:o.verified_at}));
    }catch(err){console.warn("No se pudieron cargar las fichas verificadas de Supabase:",err)}
