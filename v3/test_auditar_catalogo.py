@@ -15,6 +15,10 @@ SPEC.loader.exec_module(audit)
 
 
 class AuditDuplicateTests(unittest.TestCase):
+    def test_automatic_expansion_does_not_remove_existing_catalog_records(self):
+        source = Path(__file__).with_name("ampliar_catalogo.py").read_text(encoding="utf-8")
+        self.assertNotIn("items.remove(", source)
+
     def test_different_types_are_not_duplicates_but_same_type_is(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
