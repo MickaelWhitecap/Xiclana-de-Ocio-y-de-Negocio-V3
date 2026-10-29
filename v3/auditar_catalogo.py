@@ -124,8 +124,26 @@ def main():
             and "ficha administrativa sincronizada desde supabase" not in str(item.get("fuente_estado") or "").casefold()
         }
     )
+    # Estadísticas reproducibles para priorizar mejoras de fichas sin revisar una a una.
+    documented_fields = ("n", "t", "c", "a", "d", "p", "e", "w", "m", "lat", "lon", "f")
+    distribution = {}
+    contact_count = email_count = 0
+    for item in active_items:
+        count = sum(1 for field in documented_fields if item.get(field) is not None and str(item.get(field)).strip())
+        distribution[str(count)] = distribution.get(str(count), 0) + 1
+        if any(item.get(field) is not None and str(item.get(field)).strip() for field in ("p", "e", "w", "m")):
+            contact_count += 1
+        if item.get("e") is not None and str(item.get("e")).strip():
+            email_count += 1
+
     report = {
         "fecha": datetime.date.today().isoformat(),
+        "parametros_documentados_por_ficha": {
+            "campos_contados": list(documented_fields),
+            "distribucion": dict(sorted(distribution.items(), key=lambda pair: int(pair[0]))),
+            "fichas_con_algun_medio_de_contacto": contact_count,
+            "fichas_con_email": email_count
+        },
         "total_registros_historicos": len(items),
         "total_items_publicables": len(active_items),
         "total_items_marcados_borrados": len(items) - len(active_items),
