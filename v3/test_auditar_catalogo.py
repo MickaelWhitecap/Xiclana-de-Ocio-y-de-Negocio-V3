@@ -15,6 +15,34 @@ SPEC.loader.exec_module(audit)
 
 
 class AuditDuplicateTests(unittest.TestCase):
+    def test_duplicate_catalog_ids_abort_instead_of_rewriting_ids(self):
+        import importlib.util
+        updater_path = Path(__file__).with_name("actualizar.py")
+        spec = importlib.util.spec_from_file_location("actualizar_catalogo_test", updater_path)
+        updater = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(updater)
+        with tempfile.TemporaryDirectory() as tmp:
+            data_path = Path(tmp) / "catalog.json"
+            data_path.write_text(json.dumps({"items": [
+                {"id": "manual:same", "n": "Ficha A", "t": "ocio", "c": "Deportes", "a": "Calle 1"},
+                {"id": "manual:same", "n": "Ficha B", "t": "ocio", "c": "Deportes", "a": "Calle 2"}
+            ]}), encoding="utf-8")
+            old_data = updater.DATA
+            updater.DATA = data_path
+            try:
+                with self.assertRaises(SystemExit):
+                    updater.main()
+                stored = json.loads(data_path.read_text(encoding="utf-8"))
+                self.assertEqual([x["id"] for x in stored["items"]], ["manual:same", "manual:same"])
+            finally:
+                updater.DATA = old_data
+
+    def test_supabase_override_sync_uses_pagination(self):
+        source = Path(__file__).with_name("actualizar.py").read_text(encoding="utf-8")
+        self.assertIn('"Range":f"{offset}-{offset + page_size - 1}"', source)
+        self.assertIn('while True:', source)
+        self.assertIn('page_size = 500', source)
+
     def test_automatic_expansion_does_not_remove_existing_catalog_records(self):
         source = Path(__file__).with_name("ampliar_catalogo.py").read_text(encoding="utf-8")
         self.assertNotIn("items.remove(", source)
