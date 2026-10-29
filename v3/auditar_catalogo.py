@@ -34,6 +34,7 @@ def main():
     except Exception as exc:
         sys.exit(f"ERROR: línea base de candidatos automáticos inválida: {exc}")
     ids, invalid, missing = set(), [], []
+    active_items = [item for item in items if isinstance(item, dict) and item.get("_xiclana_deleted") is not True]
     automatic = []
     exact = {}
     for i, item in enumerate(items):
@@ -49,10 +50,10 @@ def main():
         ids.add(ident)
         if not name or not category or kind not in {"ocio", "negocio"}:
             missing.append({"id": ident, "nombre": name, "categoria": category, "tipo": kind})
-        if "candidato automático" in str(item.get("fuente_estado") or "").casefold():
+        if item.get("_xiclana_deleted") is not True and "candidato automático" in str(item.get("fuente_estado") or "").casefold():
             automatic.append(ident)
         address = norm(item.get("a"))
-        if name and category and address:
+        if item.get("_xiclana_deleted") is not True and name and category and address:
             key = (norm(name), norm(category), address)
             exact.setdefault(key, []).append(item)
 
@@ -115,7 +116,7 @@ def main():
         (set(automatic) - baseline_ids)
         | {
             str(item.get("id") or "")
-            for item in items
+            for item in active_items
             if isinstance(item, dict)
             and str(item.get("id") or "").startswith("osm-extra:")
             and str(item.get("id") or "") not in baseline_ids
@@ -124,7 +125,9 @@ def main():
     )
     report = {
         "fecha": datetime.date.today().isoformat(),
-        "total_items_publicables": len(items),
+        "total_registros_historicos": len(items),
+        "total_items_publicables": len(active_items),
+        "total_items_marcados_borrados": len(items) - len(active_items),
         "total_candidatas_revision": len(review),
         "candidatos_automaticos_heredados_en_items": len(automatic),
         "ids_automaticos_heredados": automatic,
