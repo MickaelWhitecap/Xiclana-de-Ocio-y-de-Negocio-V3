@@ -160,7 +160,7 @@ function showApp(){login.classList.add("hidden");app.classList.remove("hidden");
 function stableId(x){if(x.id)return String(x.id);return "legacy:"+[x.n,x.t,x.a].map(v=>String(v||"").trim().toLowerCase()).join("|")}
 function effectiveItems(){
  const byId=new Map(overrides.map(o=>[o.listing_id,o]));
- let out=baseItems.filter(x=>!byId.get(stableId(x))?.fields?._xiclana_deleted).map(x=>{const id=stableId(x),o=byId.get(id);return {...x,id,...(o?.fields||{}),id,verified_at:o?.verified_at||null,is_new:false}});
+ let out=baseItems.filter(x=>x._xiclana_deleted!==true&&!byId.get(stableId(x))?.fields?._xiclana_deleted).map(x=>{const id=stableId(x),o=byId.get(id);return {...x,id,...(o?.fields||{}),id,verified_at:o?.verified_at||null,is_new:false}});
  overrides.filter(o=>o.is_new&&!o.fields?._xiclana_deleted).forEach(o=>{if(!baseItems.some(x=>stableId(x)===o.listing_id))out.push({...o.fields,id:o.listing_id,verified_at:o.verified_at,is_new:true})});
  // La Rana Verde es una zona geográfica; agrupar solo variantes exactas del mismo camping.
  const claveRana=x=>String(x.n||x.nombre||x.name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()==="camping la rana verde";
