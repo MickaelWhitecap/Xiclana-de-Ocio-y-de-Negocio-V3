@@ -177,6 +177,7 @@ class AuditDuplicateTests(unittest.TestCase):
             {"listing_id": "manual:deleted-existing", "fields": {"n": "Ficha retirada", "t": "ocio", "c": "Deportes"}, "is_new": False, "updated_at": "2026-01-01T00:00:00Z"},
             {"listing_id": "manual:deleted-missing", "fields": {"n": "No reintroducir", "_xiclana_deleted": True}, "is_new": True, "updated_at": "2026-01-01T00:00:00Z"},
             {"listing_id": "manual:active-existing", "fields": {"n": "Ficha activa actualizada"}, "is_new": False, "updated_at": "2026-01-01T00:00:00Z"},
+            {"listing_id": "manual:agua-generica", "fields": {"n": "Agua potable", "t": "ocio", "c": "Servicios públicos"}, "is_new": True, "updated_at": "2026-01-01T00:00:00Z"},
         ]
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -201,10 +202,17 @@ class AuditDuplicateTests(unittest.TestCase):
                     by_id = {item["id"]: item for item in stored["items"]}
                     self.assertTrue(by_id["manual:deleted-existing"]["_xiclana_deleted"])
                     self.assertNotIn("manual:deleted-missing", by_id)
+                    self.assertNotIn("manual:agua-generica", by_id)
                     self.assertEqual(by_id["manual:active-existing"]["n"], "Ficha activa actualizada")
                     self.assertNotIn("_xiclana_deleted", by_id["manual:active-existing"])
                 finally:
                     updater.DATA, updater.ROOT = old_data, old_root
+
+
+    def test_public_page_excludes_generic_water_overrides(self):
+        page = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
+        self.assertIn("const esAguaGenerica=", page)
+        self.assertIn("!esAguaGenerica(o.fields?.n", page)
 
 
 if __name__ == "__main__":
