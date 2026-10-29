@@ -169,70 +169,9 @@ def main():
             review.append(item)
             review_ids.add(str(item.get("id", "")))
             queued += 1
-    # Resolución manual aprobada: los elementos OSM con el nombre exacto
-    # "Nuestra Señora de los Remedios" son componentes de una misma parada,
-    # no deben generar varias fichas. El colegio con nombre más largo se conserva aparte.
-    remedios = [x for x in items if norm(x.get("n")) == norm("Nuestra Señora de los Remedios")]
-    if remedios:
-        keeper = next((x for x in remedios if x.get("id") == "osm-extra:node:10137800750"), remedios[0])
-        ids = list(keeper.get("ids_alternativos", []))
-        for source_id in ("osm-extra:node:10137800750", "osm-extra:node:12946613737", "osm-extra:relation:17627589"):
-            if source_id != keeper.get("id") and source_id not in ids:
-                ids.append(source_id)
-        ubicaciones = list(keeper.get("ubicaciones_alternativas", []))
-        fuentes = [str(keeper.get("f", "") or "")]
-        for x in remedios:
-            if x is keeper:
-                continue
-            if x.get("id") and x["id"] not in ids:
-                ids.append(x["id"])
-            if x.get("lat") is not None and x.get("lon") is not None:
-                point = {"lat": x["lat"], "lon": x["lon"], "id": x.get("id", ""), "fuente": x.get("f", "")}
-                if point not in ubicaciones:
-                    ubicaciones.append(point)
-            if x.get("f") and x.get("f") not in fuentes:
-                fuentes.append(x["f"])
-            items.remove(x)
-        keeper["ids_alternativos"] = ids
-        keeper["ubicaciones_alternativas"] = ubicaciones
-        keeper["f"] = " + ".join(v for v in fuentes if v)
-        keeper["s"] = (str(keeper.get("s", "") or "").strip() + " Ficha unificada de los componentes OSM de la parada; no corresponde al Colegio Nuestra Señora de los Remedios, que es una entidad distinta.").strip()
-    # Unificar geometrías OSM del Club de Golf después de añadir candidatas nuevas.
-    golf = [x for x in items if "golf" in str(x.get("n", "")).casefold() and "novo sancti petri" in str(x.get("n", "")).casefold()]
-    if len(golf) > 1:
-        keeper = next((x for x in golf if "oficial:" in str(x.get("id", "")).casefold() or "iberostar" in str(x.get("n", "")).casefold() or (x.get("e") or x.get("w") or x.get("p"))), golf[0])
-        ids = list(keeper.get("ids_alternativos", []))
-        nombres = list(keeper.get("nombres_alternativos", []))
-        ubicaciones = list(keeper.get("ubicaciones_alternativas", []))
-        fuentes = [str(keeper.get("f", "") or "")]
-        for x in golf:
-            if x is keeper:
-                continue
-            if x.get("id") and x["id"] not in ids:
-                ids.append(x["id"])
-            if x.get("n") and x["n"] != keeper.get("n") and x["n"] not in nombres:
-                nombres.append(x["n"])
-            if x.get("lat") is not None and x.get("lon") is not None:
-                point = {"lat": x["lat"], "lon": x["lon"], "id": x.get("id", ""), "fuente": x.get("f", "")}
-                if point not in ubicaciones:
-                    ubicaciones.append(point)
-            for campo in ("a", "p", "e", "w", "d", "m"):
-                if not keeper.get(campo) and x.get(campo):
-                    keeper[campo] = x[campo]
-            if x.get("f") and x.get("f") not in fuentes:
-                fuentes.append(x["f"])
-            items.remove(x)
-        keeper["n"] = "Club de Golf Novo Sancti Petri"
-        keeper["ids_alternativos"] = ids
-        keeper["nombres_alternativos"] = nombres
-        if keeper.get("lat") is not None and keeper.get("lon") is not None:
-            point = {"lat": keeper["lat"], "lon": keeper["lon"], "id": keeper.get("id", ""), "fuente": keeper.get("f", "")}
-            if point not in ubicaciones:
-                ubicaciones.insert(0, point)
-        keeper["ubicaciones_alternativas"] = ubicaciones
-        keeper["f"] = " + ".join(v for v in fuentes if v)
-        keeper["s"] = (str(keeper.get("s", "") or "").strip() + " Ficha unificada: agrupa las variantes y geometrías del Club de Golf Novo Sancti Petri; se conservan sus identificadores y ubicaciones de origen.").strip()
-
+    # No consolidar ni retirar fichas existentes durante la ampliación automática.
+    # Las coincidencias se conservan para auditoría y deduplicación solo visual.
+    # Las fusiones reales requieren un plan explícito y migración de referencias.
     # Escribir siempre: las reglas de unificación también deben persistir cuando no haya altas nuevas.
     items.sort(key=lambda x: str(x.get("n","")).casefold())
     data["items"] = items
