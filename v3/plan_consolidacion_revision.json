@@ -70,7 +70,10 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
+      "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual."
     },
     {
       "numero": 2,
@@ -134,7 +137,10 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
+      "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual."
     },
     {
       "numero": 3,
@@ -188,7 +194,10 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
+      "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual."
     },
     {
       "numero": 4,
@@ -252,7 +261,10 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
+      "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual."
     },
     {
       "numero": 5,
@@ -304,7 +316,10 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
+      "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual."
     },
     {
       "numero": 6,
@@ -364,7 +379,8 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
     },
     {
       "numero": 7,
@@ -425,7 +441,8 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
     },
     {
       "numero": 8,
@@ -485,7 +502,8 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
     },
     {
       "numero": 9,
@@ -545,7 +563,8 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
     },
     {
       "numero": 10,
@@ -605,7 +624,8 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
     },
     {
       "numero": 11,
@@ -671,7 +691,8 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
     },
     {
       "numero": 12,
@@ -733,7 +754,8 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
     },
     {
       "numero": 13,
@@ -795,7 +817,8 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
     },
     {
       "numero": 14,
@@ -858,7 +881,8 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
     },
     {
       "numero": 15,
@@ -910,7 +934,10 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
+      "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual."
     },
     {
       "numero": 16,
@@ -962,7 +989,10 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
+      "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual."
     },
     {
       "numero": 17,
@@ -1028,7 +1058,8 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
     },
     {
       "numero": 18,
@@ -1092,7 +1123,8 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
     },
     {
       "numero": 19,
@@ -1158,7 +1190,8 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
     },
     {
       "numero": 20,
@@ -1214,7 +1247,35 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false
+      "aplicado": false,
+      "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
+      "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual."
     }
-  ]
+  ],
+  "verificacion_supabase": {
+    "consulta": "Solo lectura, proyecto pewfqucupmbkgamwvaic, 29-10-2026",
+    "resultados": {
+      "propuestas_de_los_ocho_pares_manual_propuesta": "8 de 8 existen en listing_proposals y están en estado approved",
+      "overrides_de_las_ocho_fichas_manuales": "8 de 8 existen en listing_overrides con is_new=true",
+      "modificaciones_realizadas": false,
+      "recomendaciones": [
+        "No borrar filas de listing_proposals: son el historial de aprobación.",
+        "No borrar overrides manuales: son la fuente de las fichas verificadas.",
+        "La consolidación prevista afecta al catálogo JSON y a la representación pública de propuestas duplicadas; antes de aplicar, revisar cómo se reconstruye el catálogo desde Supabase para evitar que vuelvan a aparecer.",
+        "Los pares oficial/consolidado son duplicaciones del catálogo estático y no se han encontrado referencias Supabase comprobadas todavía."
+      ]
+    },
+    "propuestas_aprobadas": [
+      "32c3142a-1318-401e-a957-01c5d576f92a",
+      "f9bb7e0e-dc87-48bd-83a7-534a2ea663f5",
+      "64e6ab5a-7fa4-4b91-853d-51258e6ee6fd",
+      "37286994-c534-43dd-911b-2863c4bb1439",
+      "b3e7c772-2995-4703-9066-3b30dffe07d0",
+      "a26439de-62d5-4d4b-9685-e3e69340811e",
+      "5c4994a2-a582-4431-977c-af3183744f1b",
+      "3f5acadc-bbd6-41dd-a306-664550e38fd0"
+    ],
+    "limitacion": "La consulta confirmó existencia y estado de propuestas y overrides, pero no rastreó todas las referencias de IDs en el código ni todas las tablas posibles."
+  }
 }
