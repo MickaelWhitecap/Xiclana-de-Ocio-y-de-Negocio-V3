@@ -613,6 +613,30 @@ async function aplicarCambios(j){
     (data||[]).filter(o=>o.is_new&&!o.fields?._xiclana_deleted&&!ids.has(o.listing_id)).forEach(o=>items.push({...o.fields,id:o.listing_id,seed:1,verified_at:o.verified_at}));
    }catch(err){console.warn("No se pudieron cargar las fichas verificadas de Supabase:",err)}
   }
+  // Oculta duplicados exactos solo en la vista pública; conserva todos los IDs en el catálogo maestro y en Supabase.
+  // Prioridad: ficha manual verificada > oficial > consolidado > propuesta. Solo agrupa si coinciden nombre, categoría, tipo y dirección.
+  const claveExacta=x=>{
+    const norm=v=>String(v||"").normalize("NFD").replace(/\\p{Diacritic}/gu,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim().replace(/\\s+/g," ");
+    const n=norm(x.n||x.nombre||x.name||x.title), c=norm(x.c||x.categoria||x.category), t=norm(x.t||x.tipo), a=norm(x.a||x.direccion||x.address);
+    return n&&c&&t&&a?[n,c,t,a].join("|"):"";
+  };
+  const prioridadExacta=x=>String(x.id||"").startsWith("manual:")?0:String(x.id||"").startsWith("oficial:")?1:String(x.id||"").startsWith("consolidado:")?2:String(x.id||"").startsWith("proposal:")?3:4;
+  const gruposExactos=new Map();
+  for(const x of items){const k=claveExacta(x);if(!k)continue;if(!gruposExactos.has(k))gruposExactos.set(k,[]);gruposExactos.get(k).push(x)}
+  const suprimidos=new Set();
+  for(const grupo of gruposExactos.values()){
+    if(grupo.length<2)continue;
+    grupo.sort((a,b)=>prioridadExacta(a)-prioridadExacta(b));
+    const maestra=grupo[0];
+    for(const otra of grupo.slice(1)){
+      for(const [k,v] of Object.entries(otra)){
+        if((maestra[k]===undefined||maestra[k]===null||String(maestra[k]).trim()==="")&&v!==undefined&&v!==null&&String(v).trim()!=="")maestra[k]=v;
+      }
+      suprimidos.add(otra);
+    }
+  }
+  if(suprimidos.size)console.info("Xiclana: duplicados exactos ocultos en la vista pública:",suprimidos.size);
+  items=items.filter(x=>!suprimidos.has(x));
   // La Rana Verde es una zona geográfica; solo se agrupan variantes del mismo camping.
   const nombreClave=v=>String(v||"").normalize("NFD").replace(/\p{Diacritic}/gu,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
   const claveRana=x=>{
