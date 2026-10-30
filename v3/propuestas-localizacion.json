@@ -4,11 +4,14 @@
   "estado": "propuestas pendientes de aprobación; no aplicado al catálogo maestro",
   "archivo_base": "v3/fichas_completas.json",
   "sha_catalogo": "1e5004609cfb8853353698151ad09671efef0a97",
-  "criterio": "Solo se proponen coordenadas con una referencia pública identificable. Los pines de puerto o edificios con varias entidades se marcan como aproximados y requieren revisión de precisión.",
+  "criterio": "Se separan coordenadas, direcciones postales y entidades que no deben tener un pin único. Las coordenadas antiguas de folletos se marcan como medias y pueden ser puntos de actividad/embarque, no necesariamente sedes.",
   "resumen": {
     "correcciones_de_coordenadas": 2,
-    "nuevas_coordenadas": 11,
-    "total_propuestas": 13
+    "nuevas_coordenadas": 17,
+    "total_propuestas": 19,
+    "nuevas_direcciones": 29,
+    "entidades_sin_pin": 7,
+    "pendientes_de_localizacion": 0
   },
   "propuestas": [
     {
@@ -199,6 +202,486 @@
         "https://www.puertosdeandalucia.es/puertos/puertos/cadiz/puerto-de-sancti-petri",
         "https://argosailing.es/"
       ]
+    },
+    {
+      "id_ficha": "oficial:423096c983aa24881a41",
+      "nombre": "Why-not-fly Escuela de Kitesurf",
+      "propuesta": {
+        "lat": 36.3945,
+        "lon": -6.2086389
+      },
+      "confianza": "media",
+      "nota": "GPS publicado para la escuela en el Puerto Deportivo de Sancti Petri. Dato procedente de folleto turístico náutico; conviene considerar que puede representar el punto de embarque y no una oficina independiente.",
+      "fuentes": [
+        "https://www.guiadecadiz.com/sites/default/files/localidad/Bahia_de_Cadiz/Chiclana_de_la_Frontera/FOLLETO_NAUTICA.pdf"
+      ]
+    },
+    {
+      "id_ficha": "oficial:8987479920db6cd0b7fa",
+      "nombre": "Escuela de Surf Chiclana-kitesurf Chiclana",
+      "propuesta": {
+        "lat": 36.3700389,
+        "lon": -6.1796111
+      },
+      "confianza": "media",
+      "nota": "GPS publicado para Escuela de Surf Chiclana en Centro Comercial Hércules / La Barrosa. La ficha actualizada de Turismo de Chiclana sitúa la escuela en C.C. El Pino; confirmar si se trata del mismo local antes de aplicar el pin.",
+      "fuentes": [
+        "https://www.guiadecadiz.com/sites/default/files/localidad/Bahia_de_Cadiz/Chiclana_de_la_Frontera/FOLLETO_NAUTICA.pdf",
+        "https://turismo.chiclana.es/deportes/surf-y-windsurf/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:e4f5be40d91c5cd46119",
+      "nombre": "Oasis Escuela de Surf",
+      "propuesta": {
+        "lat": 36.3788056,
+        "lon": -6.1743611
+      },
+      "confianza": "media",
+      "nota": "GPS publicado para Escuela de Surf Oasis en C.C. Aldea del Coto; el punto de actividad puede haber cambiado, ya que la ficha de contacto propone Tartessus. Mantener como alternativa, no como coordenada definitiva.",
+      "fuentes": [
+        "https://www.guiadecadiz.com/sites/default/files/localidad/Bahia_de_Cadiz/Chiclana_de_la_Frontera/FOLLETO_NAUTICA.pdf",
+        "https://turismo.chiclana.es/deportes/surf-y-windsurf/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:53416e1a05d8daa84548",
+      "nombre": "Zaida Actividades Naúticas",
+      "propuesta": {
+        "lat": 36.3943333,
+        "lon": -6.2086944
+      },
+      "confianza": "media",
+      "nota": "GPS publicado para Escuela de Vela Zaida en Puerto Deportivo de Sancti Petri.",
+      "fuentes": [
+        "https://www.guiadecadiz.com/sites/default/files/localidad/Bahia_de_Cadiz/Chiclana_de_la_Frontera/FOLLETO_NAUTICA.pdf",
+        "https://aiunta.com/es/chiclana-de-la-frontera/planes"
+      ]
+    },
+    {
+      "id_ficha": "oficial:813f69ef14d32f498327",
+      "nombre": "Novo Jet",
+      "propuesta": {
+        "lat": 36.3945,
+        "lon": -6.2085833
+      },
+      "confianza": "media",
+      "nota": "GPS publicado para Novojet en Puerto Deportivo de Sancti Petri.",
+      "fuentes": [
+        "https://www.guiadecadiz.com/sites/default/files/localidad/Bahia_de_Cadiz/Chiclana_de_la_Frontera/FOLLETO_NAUTICA.pdf"
+      ]
+    },
+    {
+      "id_ficha": "oficial:fca22ec0ae5aef3e4e69",
+      "nombre": "Sancti Petri Kayak",
+      "propuesta": {
+        "lat": 36.3943611,
+        "lon": -6.2086667
+      },
+      "confianza": "media",
+      "nota": "GPS publicado para Sancti Petri Kayak en Puerto Deportivo de Sancti Petri.",
+      "fuentes": [
+        "https://www.guiadecadiz.com/sites/default/files/localidad/Bahia_de_Cadiz/Chiclana_de_la_Frontera/FOLLETO_NAUTICA.pdf"
+      ]
     }
+  ],
+  "propuestas_direccion": [
+    {
+      "id_ficha": "oficial:00840abca4a438b77e75",
+      "nombre": "Albarco.com",
+      "categoria": "Náutica",
+      "direccion_propuesta": "Puerto Deportivo de Sancti Petri, Poblado de Sancti Petri, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://www.albarco.com/puertos/puertos.php?id=2",
+        "https://www.albarco.com/contacto/formulario.php"
+      ]
+    },
+    {
+      "id_ficha": "oficial:2481fb74ae3c713ec4e0",
+      "nombre": "Arsosailing",
+      "categoria": "Náutica",
+      "direccion_propuesta": "Puerto Deportivo de Sancti Petri, Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://argosailing.es/contacto/",
+        "https://www.juntadeandalucia.es/organismos/culturapatrimoniohistoricoydeporte/areas/deporte/formacion-investigacion-innovacion/titulaciones-nauticas/paginas/escuelas-cadiz.html"
+      ]
+    },
+    {
+      "id_ficha": "oficial:2f3b30558cf222424cc3",
+      "nombre": "Ayuntamiento (edificio histórico)",
+      "categoria": "Patrimonio",
+      "direccion_propuesta": "Calle Constitución, 1, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://www.chiclana.es/el-ayuntamiento/contacto/directorio-de-contacto",
+        "https://turismo.chiclana.es/oficina-virtual-de-turismo/telefonos-de-interes/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:f4f25ea982d7b4cfbe9d",
+      "nombre": "Balneario de Chiclana",
+      "categoria": "Balneario y spa",
+      "direccion_propuesta": "Calle de Fuente Amarga, s/n, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "media",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://www.chiclana.es/el-ayuntamiento/contacto/directorio-de-contacto/telefonos-de-interes",
+        "https://www.andalucia.org/listing/hotel-balneario-de-chiclana/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:bc553825c15286021ef4",
+      "nombre": "Centro de Interpretación del Vino y la Sal",
+      "categoria": "Museo",
+      "direccion_propuesta": "Plaza de las Bodegas, s/n, frente al Mercado de Abastos, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/centro-de-interpretacion-del-vino-y-la-sal/",
+        "https://www.chiclana.es/el-ayuntamiento/contacto/directorio-de-contacto"
+      ]
+    },
+    {
+      "id_ficha": "oficial:f82c75c0157a2e929e73",
+      "nombre": "Club Náutico \"Sancti Petri\"",
+      "categoria": "Instalación deportiva",
+      "direccion_propuesta": "Poblado de Sancti Petri, Puerto Deportivo, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://www.juntadeandalucia.es/organismos/appa.html"
+      ]
+    },
+    {
+      "id_ficha": "oficial:773830be81c0560ebbbb",
+      "nombre": "Ermita del Santo Cristo",
+      "categoria": "Patrimonio",
+      "direccion_propuesta": "Plaza del Santo Cristo, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "coordenadas_propuestas": {
+        "lat": 36.416459,
+        "lon": -6.146183
+      },
+      "nota": "Dirección y coordenadas contrastadas con recursos turísticos/locales.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/ermita-de-santo-cristo/",
+        "https://www.dechiclana.com/item/ermita-de-la-vera-cruz-o-del-santo-cristo/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:8987479920db6cd0b7fa",
+      "nombre": "Escuela de Surf Chiclana-kitesurf Chiclana",
+      "categoria": "Náutica",
+      "direccion_propuesta": "Avenida del Atlántico, Centro Comercial El Pino, local 4, 11139 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://www.escueladesurfchiclana.com/contact/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:8a98a252720b98b1e3f2",
+      "nombre": "Escuela Municipal de Artes. Casa de las Artes",
+      "categoria": "Cultura",
+      "direccion_propuesta": "Casa de las Artes – Edificio Brake, Calle Santa Ana, 9, Chiclana de la Frontera, Cádiz",
+      "confianza": "media",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://cuadernoamarillo.com/localizacion/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:54b3c7e7468fcb0858e3",
+      "nombre": "Esencia Surf School",
+      "categoria": "Náutica",
+      "direccion_propuesta": "Calle Hércules, local 18, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://esenciasurfschool.com/aviso-legal/",
+        "https://esenciasurfschool.com/politica-privacidad/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:49d9bb308d38e11fef84",
+      "nombre": "Espacio Arqueológico Nueva Gadeira",
+      "categoria": "Museo",
+      "direccion_propuesta": "Calle Rosa, 13, esquina con Calle Castillo, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://nuevagadeira.chiclana.es/contacto/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:f69a4fab835340c8f10e",
+      "nombre": "Iglesia de San Sebastián",
+      "categoria": "Patrimonio",
+      "direccion_propuesta": "Calle Ancha, 10, Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/iglesia-de-san-sebastian/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:921768b625ad4a907a2f",
+      "nombre": "Iglesia de San Telmo",
+      "categoria": "Patrimonio",
+      "direccion_propuesta": "Calle La Plaza, 6, Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/iglesia-de-san-telmo/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:664890c143779609baa0",
+      "nombre": "Iglesia Jesús Nazareno",
+      "categoria": "Patrimonio",
+      "direccion_propuesta": "Calle Jesús Nazareno, s/n, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "coordenadas_propuestas": {
+        "lat": 36.41881,
+        "lon": -6.14939
+      },
+      "nota": "Dirección y coordenadas contrastadas con recursos turísticos/locales.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/iglesia-jesus-nazareno/",
+        "https://aiunta.com/es/chiclana-de-la-frontera/ficha/iglesia-y-convento-de-jesus-nazareno"
+      ]
+    },
+    {
+      "id_ficha": "oficial:62cdcd5ff7955e0bad87",
+      "nombre": "Medina Mudéjar",
+      "categoria": "Balneario y spa",
+      "direccion_propuesta": "Carretera de La Loma, s/n, Centro de Ocio Tartessus, Sancti Petri, 11139 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://medinamudejar.com/contacto/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:55578a43f4616996e415",
+      "nombre": "NAMMU SPA Hotel Vincci Costa Golf",
+      "categoria": "Balneario y spa",
+      "direccion_propuesta": "Urbanización Novo Sancti Petri, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "media",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://www.vinccicostagolf.com/es/spa/",
+        "https://www.vinccicostagolf.com/es/contacto/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:813f69ef14d32f498327",
+      "nombre": "Novo Jet",
+      "categoria": "Náutica",
+      "direccion_propuesta": "Puerto Deportivo de Sancti Petri, buzón 6, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://www.juntadeandalucia.es/organismos/culturapatrimoniohistoricoydeporte/areas/deporte/formacion-investigacion-innovacion/titulaciones-nauticas/paginas/escuelas-cadiz.html",
+        "https://aetcadiz.com/turismo-nautico/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:e4f5be40d91c5cd46119",
+      "nombre": "Oasis Escuela de Surf",
+      "categoria": "Náutica",
+      "direccion_propuesta": "Centro Comercial Tartessus, locales 14–17, 11139 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://oasissurfinglife.com/contacto/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:fca22ec0ae5aef3e4e69",
+      "nombre": "Sancti Petri Kayak",
+      "categoria": "Náutica",
+      "direccion_propuesta": "Puerto Deportivo de Sancti Petri, s/n, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://www.sanctipetrikayak.com/web/",
+        "https://turismo.chiclana.es/detalle-de-recurso/sancti-petri-kayak/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:032eb937385d34062eec",
+      "nombre": "Spa Barrosa Palace",
+      "categoria": "Balneario y spa",
+      "direccion_propuesta": "Hotel Barrosa Palace, Urbanización Novo Sancti Petri, s/n, 11139 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/spa-barrosa-palace/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:0ac09fc904b624f470ee",
+      "nombre": "SPA by Clarins Hotel Gran Meliá Sancti Petri",
+      "categoria": "Balneario y spa",
+      "direccion_propuesta": "Hotel Gran Meliá Sancti Petri, Urbanización Novo Sancti Petri, s/n, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://turismo.chiclana.es/en/detail/spa-by-clarins-hotel-gran-melia-sancti-petri/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:8e629fe7d4b2c2ddef4c",
+      "nombre": "Spa Iberostar Selection Andalucía Playa",
+      "categoria": "Balneario y spa",
+      "direccion_propuesta": "Hotel Iberostar Selection Andalucía Playa, Calle Amílcar Barca, s/n, Urbanización Novo Sancti Petri, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://www.iberostar.com/es/hoteles/cadiz/iberostar-selection-andalucia-playa/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:c3a8573884056bacd538",
+      "nombre": "SPA SENSATION Hotel Iberostar Royal Andalus",
+      "categoria": "Balneario y spa",
+      "direccion_propuesta": "Hotel Iberostar Waves Royal Andalus, Calle Amílcar Barca, s/n, Urbanización Novo Sancti Petri, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://www.iberostar.com/hoteles/cadiz/iberostar-waves-royal-andalus/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:8907793cf5722f7fe608",
+      "nombre": "SPASANAR Club Hotel Riu Chiclana",
+      "categoria": "Balneario y spa",
+      "direccion_propuesta": "Club Hotel Riu Chiclana, Urbanización Loma de Sancti Petri, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/spasanar-hotel-riu-chiclana/",
+        "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/alojamiento/club-riu-chiclana/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:ae5492fc1e8fb8da071f",
+      "nombre": "SPASANAR Hotel Hipotels Playa la Barrosa",
+      "categoria": "Balneario y spa",
+      "direccion_propuesta": "Hotel Hipotels Playa la Barrosa, Avenida Amílcar Barca, 8, 11139 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://www.hipotels.com/hoteles/playalabarrosa/ubicacion/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:2304ecbba8c6dc28a141",
+      "nombre": "Surf Kite House",
+      "categoria": "Náutica",
+      "direccion_propuesta": "Calle Pato Silvestre, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://surfkitehouse.es/",
+        "https://surfkitehouse.es/cursos-paddel-surf/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:5536e72b95603ac2fd0e",
+      "nombre": "U-spa Royal Hideaway",
+      "categoria": "Balneario y spa",
+      "direccion_propuesta": "Hotel Royal Hideaway Sancti Petri, Urbanización Loma de Sancti Petri, s/n, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/u-spa-royal-hideaway/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:423096c983aa24881a41",
+      "nombre": "Why-not-fly Escuela de Kitesurf",
+      "categoria": "Náutica",
+      "direccion_propuesta": "Puerto Deportivo de Sancti Petri, oficina Novojet, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/why-not-fly-escuela-de-kitesurf/",
+        "https://www.why-not-fly.com/contacto.html"
+      ]
+    },
+    {
+      "id_ficha": "oficial:53416e1a05d8daa84548",
+      "nombre": "Zaida Actividades Naúticas",
+      "categoria": "Náutica",
+      "direccion_propuesta": "Puerto Deportivo de Sancti Petri, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
+      "fuentes": [
+        "https://turismo.chiclana.es/en/detail/zaida-actividades-nauticas/",
+        "https://www.escueladevelazaida.es/"
+      ]
+    }
+  ],
+  "entidades_sin_pin": [
+    {
+      "id_ficha": "turismo:1bcc1232f85408378a15",
+      "nombre": "Ruta cultural: Casas Monumentales",
+      "categoria": "Ruta cultural",
+      "tratamiento": "No asignar un único pin de establecimiento. Representar como ruta con trazado y/o paradas cuando se disponga del itinerario oficial.",
+      "fuente": "https://turismo.chiclana.es/"
+    },
+    {
+      "id_ficha": "turismo:b78e3e749fb643f1e02b",
+      "nombre": "Ruta cultural: Centro histórico",
+      "categoria": "Ruta cultural",
+      "tratamiento": "No asignar un único pin de establecimiento. Representar como ruta con trazado y/o paradas cuando se disponga del itinerario oficial.",
+      "fuente": "https://turismo.chiclana.es/"
+    },
+    {
+      "id_ficha": "turismo:05650520a7f6fdab4319",
+      "nombre": "Ruta cultural: Chiclana, de Origen Fenicio",
+      "categoria": "Ruta cultural",
+      "tratamiento": "No asignar un único pin de establecimiento. Representar como ruta con trazado y/o paradas cuando se disponga del itinerario oficial.",
+      "fuente": "https://turismo.chiclana.es/"
+    },
+    {
+      "id_ficha": "turismo:79c460daf4896253a637",
+      "nombre": "Ruta cultural: Chiclana, Ruta Napoleónica",
+      "categoria": "Ruta cultural",
+      "tratamiento": "No asignar un único pin de establecimiento. Representar como ruta con trazado y/o paradas cuando se disponga del itinerario oficial.",
+      "fuente": "https://turismo.chiclana.es/"
+    },
+    {
+      "id_ficha": "turismo:e1c15f3d5dd4aad64f61",
+      "nombre": "Ruta cultural: Romántica",
+      "categoria": "Ruta cultural",
+      "tratamiento": "No asignar un único pin de establecimiento. Representar como ruta con trazado y/o paradas cuando se disponga del itinerario oficial.",
+      "fuente": "https://turismo.chiclana.es/"
+    },
+    {
+      "id_ficha": "turismo:dbe4dd9256466355b24c",
+      "nombre": "Ruta cultural: Río Iro",
+      "categoria": "Ruta cultural",
+      "tratamiento": "No asignar un único pin de establecimiento. Representar como ruta con trazado y/o paradas cuando se disponga del itinerario oficial.",
+      "fuente": "https://turismo.chiclana.es/"
+    },
+    {
+      "id_ficha": "oficial:9427c992514c37fb8222",
+      "nombre": "Urgencias",
+      "categoria": "Servicio público",
+      "tratamiento": "No asignar pin geográfico a la ficha genérica. Debe mantenerse como servicio de emergencia con teléfonos de contacto; si se quiere representar centros físicos, crear fichas individuales de cada centro sanitario."
+    }
+  ],
+  "pendientes_de_localizacion": [
+    "Ermita del Santo Cristo",
+    "Iglesia Jesús Nazareno",
+    "NAMMU SPA Hotel Vincci Costa Golf"
   ]
 }
