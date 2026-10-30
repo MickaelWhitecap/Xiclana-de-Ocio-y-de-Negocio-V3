@@ -1,4 +1,4 @@
--- Preparado para revisión; NO se ha ejecutado en Supabase.
+-- Ejecutada en Supabase el 2026-10-30 (migración registrada: 20261030061922).
 -- Optimiza las cinco claves foráneas sin alterar datos ni permisos funcionales.
 create index if not exists advertising_slots_updated_by_idx
   on public.advertising_slots (updated_by);
