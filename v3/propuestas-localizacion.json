@@ -1,15 +1,16 @@
 {
   "proyecto": "Xiclana de Ocio y de NegOcio",
   "fecha": "2026-10-30",
-  "estado": "propuestas pendientes de aprobación; no aplicado al catálogo maestro",
+  "estado": "aplicado al catálogo maestro; dos coordenadas antiguas aplazadas por conflicto con la dirección actual",
   "archivo_base": "v3/fichas_completas.json",
   "sha_catalogo": "1e5004609cfb8853353698151ad09671efef0a97",
   "criterio": "Se separan coordenadas, direcciones postales y entidades que no deben tener un pin único. Las coordenadas antiguas de folletos se marcan como medias y pueden ser puntos de actividad/embarque, no necesariamente sedes.",
   "resumen": {
-    "correcciones_de_coordenadas": 2,
-    "nuevas_coordenadas": 17,
-    "total_propuestas": 19,
-    "nuevas_direcciones": 29,
+    "correcciones_de_coordenadas_aplicadas": 2,
+    "nuevas_coordenadas_aplicadas": 17,
+    "total_coordenadas_aplicadas": 19,
+    "direcciones_aplicadas": 29,
+    "coordenadas_aplazadas": 2,
     "entidades_sin_pin": 7,
     "pendientes_de_localizacion": 0
   },
@@ -30,7 +31,8 @@
       "fuentes": [
         "https://callejear.com/cadiz/chiclana-de-la-frontera/calle-de-las-albinas/",
         "https://www.google.com/maps/search/?api=1&query=Parking+Las+Albinas+1-2+Chiclana"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "manual:a5cbbf9d-7560-45fd-8a85-70dc921c43e8",
@@ -48,7 +50,8 @@
       "fuentes": [
         "https://www.puertosdeandalucia.es/puertos/puertos/cadiz/puerto-de-sancti-petri",
         "https://www.guiadecadiz.com/sites/default/files/localidad/Bahia_de_Cadiz/Chiclana_de_la_Frontera/FOLLETO_NAUTICA.pdf"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:1cbe8f5267fd661a2a4e",
@@ -62,7 +65,8 @@
       "fuentes": [
         "https://mapcarta.com/N13463941501",
         "https://outsail.es/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:69f7f1d16dae49f4c916",
@@ -76,7 +80,8 @@
       "fuentes": [
         "https://www.juntadeandalucia.es/cultura/agendaculturaldeandalucia/espacios/biblioteca-municipal-de-chiclana-de-la-frontera",
         "https://www.chiclana.es/delegaciones/cultura/biblioteca-publica-municipal-garcia-gutierrez"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "consolidado:ayuntamiento|negocio|servicio publico|c constitucion 1",
@@ -90,7 +95,8 @@
       "fuentes": [
         "https://www.dechiclana.com/item/ayuntamiento/",
         "https://www.coe.int/es/web/cultural-routes/-/municipality-of-chiclana"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:2f3b30558cf222424cc3",
@@ -104,7 +110,8 @@
       "fuentes": [
         "https://www.dechiclana.com/item/ayuntamiento/",
         "https://www.coe.int/es/web/cultural-routes/-/municipality-of-chiclana"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "manual:998f9f54693eb265ccde",
@@ -118,7 +125,8 @@
       "fuentes": [
         "https://www.dechiclana.com/item/ayuntamiento/",
         "https://www.coe.int/es/web/cultural-routes/-/municipality-of-chiclana"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:bc553825c15286021ef4",
@@ -132,7 +140,8 @@
       "fuentes": [
         "https://www.vinoysal.es/visita",
         "https://ahib.es/centro-de-interpretacion-del-vino-y-la-sal-chiclana-de-la-frontera-cadiz/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "turismo:6f9ad82d5cbc85d1e3b8",
@@ -146,7 +155,8 @@
       "fuentes": [
         "https://www.bodegasblancareyes.com/bodegas/bodega-cooperativa-de-vinos-de-chiclana-union-de-viticultores-chiclaneros-chiclana-de-la-frontera/",
         "https://cadizturismo.com/storage/app/media/actividadeschiclana.pdf"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "turismo:08037347299879c9047c",
@@ -160,7 +170,8 @@
       "fuentes": [
         "https://www.bodegasblancareyes.com/bodegas/bodegas-primitivo-collantes-chiclana-de-la-frontera/",
         "https://turismo.chiclana.es/detalle-de-recurso/bodegas-primitivo-collantes/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:0af83add7c18d49512a1",
@@ -173,7 +184,8 @@
       "nota": "Coordenadas de la Junta de Andalucía para el Jardín del Museo Francisco Montes Paquiro, en C/ San Agustín, 3.",
       "fuentes": [
         "https://www.juntadeandalucia.es/cultura/agendaculturaldeandalucia/espacios/jardin-del-museo-municipal-francisco-montes-paquiro"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:00840abca4a438b77e75",
@@ -187,7 +199,8 @@
       "fuentes": [
         "https://www.puertosdeandalucia.es/puertos/puertos/cadiz/puerto-de-sancti-petri",
         "https://www.albarco.com/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:2481fb74ae3c713ec4e0",
@@ -201,7 +214,8 @@
       "fuentes": [
         "https://www.puertosdeandalucia.es/puertos/puertos/cadiz/puerto-de-sancti-petri",
         "https://argosailing.es/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:423096c983aa24881a41",
@@ -214,7 +228,8 @@
       "nota": "GPS publicado para la escuela en el Puerto Deportivo de Sancti Petri. Dato procedente de folleto turístico náutico; conviene considerar que puede representar el punto de embarque y no una oficina independiente.",
       "fuentes": [
         "https://www.guiadecadiz.com/sites/default/files/localidad/Bahia_de_Cadiz/Chiclana_de_la_Frontera/FOLLETO_NAUTICA.pdf"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:8987479920db6cd0b7fa",
@@ -228,7 +243,9 @@
       "fuentes": [
         "https://www.guiadecadiz.com/sites/default/files/localidad/Bahia_de_Cadiz/Chiclana_de_la_Frontera/FOLLETO_NAUTICA.pdf",
         "https://turismo.chiclana.es/deportes/surf-y-windsurf/"
-      ]
+      ],
+      "estado_aplicacion": "aplazada",
+      "nota_aplicacion": "No se aplicó esta coordenada histórica: las fuentes actuales sitúan la actividad en otra dirección. Se conserva la dirección actualizada y queda pendiente geocodificar el local vigente."
     },
     {
       "id_ficha": "oficial:e4f5be40d91c5cd46119",
@@ -242,7 +259,9 @@
       "fuentes": [
         "https://www.guiadecadiz.com/sites/default/files/localidad/Bahia_de_Cadiz/Chiclana_de_la_Frontera/FOLLETO_NAUTICA.pdf",
         "https://turismo.chiclana.es/deportes/surf-y-windsurf/"
-      ]
+      ],
+      "estado_aplicacion": "aplazada",
+      "nota_aplicacion": "No se aplicó esta coordenada histórica: las fuentes actuales sitúan la actividad en otra dirección. Se conserva la dirección actualizada y queda pendiente geocodificar el local vigente."
     },
     {
       "id_ficha": "oficial:53416e1a05d8daa84548",
@@ -256,7 +275,8 @@
       "fuentes": [
         "https://www.guiadecadiz.com/sites/default/files/localidad/Bahia_de_Cadiz/Chiclana_de_la_Frontera/FOLLETO_NAUTICA.pdf",
         "https://aiunta.com/es/chiclana-de-la-frontera/planes"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:813f69ef14d32f498327",
@@ -269,7 +289,8 @@
       "nota": "GPS publicado para Novojet en Puerto Deportivo de Sancti Petri.",
       "fuentes": [
         "https://www.guiadecadiz.com/sites/default/files/localidad/Bahia_de_Cadiz/Chiclana_de_la_Frontera/FOLLETO_NAUTICA.pdf"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:fca22ec0ae5aef3e4e69",
@@ -282,7 +303,8 @@
       "nota": "GPS publicado para Sancti Petri Kayak en Puerto Deportivo de Sancti Petri.",
       "fuentes": [
         "https://www.guiadecadiz.com/sites/default/files/localidad/Bahia_de_Cadiz/Chiclana_de_la_Frontera/FOLLETO_NAUTICA.pdf"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     }
   ],
   "propuestas_direccion": [
@@ -296,7 +318,8 @@
       "fuentes": [
         "https://www.albarco.com/puertos/puertos.php?id=2",
         "https://www.albarco.com/contacto/formulario.php"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:2481fb74ae3c713ec4e0",
@@ -308,7 +331,8 @@
       "fuentes": [
         "https://argosailing.es/contacto/",
         "https://www.juntadeandalucia.es/organismos/culturapatrimoniohistoricoydeporte/areas/deporte/formacion-investigacion-innovacion/titulaciones-nauticas/paginas/escuelas-cadiz.html"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:2f3b30558cf222424cc3",
@@ -320,7 +344,8 @@
       "fuentes": [
         "https://www.chiclana.es/el-ayuntamiento/contacto/directorio-de-contacto",
         "https://turismo.chiclana.es/oficina-virtual-de-turismo/telefonos-de-interes/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:f4f25ea982d7b4cfbe9d",
@@ -332,7 +357,8 @@
       "fuentes": [
         "https://www.chiclana.es/el-ayuntamiento/contacto/directorio-de-contacto/telefonos-de-interes",
         "https://www.andalucia.org/listing/hotel-balneario-de-chiclana/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:bc553825c15286021ef4",
@@ -344,7 +370,8 @@
       "fuentes": [
         "https://turismo.chiclana.es/detalle-de-recurso/centro-de-interpretacion-del-vino-y-la-sal/",
         "https://www.chiclana.es/el-ayuntamiento/contacto/directorio-de-contacto"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:f82c75c0157a2e929e73",
@@ -355,7 +382,8 @@
       "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
       "fuentes": [
         "https://www.juntadeandalucia.es/organismos/appa.html"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:773830be81c0560ebbbb",
@@ -371,7 +399,8 @@
       "fuentes": [
         "https://turismo.chiclana.es/detalle-de-recurso/ermita-de-santo-cristo/",
         "https://www.dechiclana.com/item/ermita-de-la-vera-cruz-o-del-santo-cristo/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:8987479920db6cd0b7fa",
@@ -382,7 +411,8 @@
       "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
       "fuentes": [
         "https://www.escueladesurfchiclana.com/contact/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:8a98a252720b98b1e3f2",
@@ -393,7 +423,8 @@
       "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
       "fuentes": [
         "https://cuadernoamarillo.com/localizacion/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:54b3c7e7468fcb0858e3",
@@ -405,7 +436,8 @@
       "fuentes": [
         "https://esenciasurfschool.com/aviso-legal/",
         "https://esenciasurfschool.com/politica-privacidad/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:49d9bb308d38e11fef84",
@@ -416,7 +448,8 @@
       "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
       "fuentes": [
         "https://nuevagadeira.chiclana.es/contacto/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:f69a4fab835340c8f10e",
@@ -427,7 +460,8 @@
       "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
       "fuentes": [
         "https://turismo.chiclana.es/detalle-de-recurso/iglesia-de-san-sebastian/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:921768b625ad4a907a2f",
@@ -438,7 +472,8 @@
       "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
       "fuentes": [
         "https://turismo.chiclana.es/detalle-de-recurso/iglesia-de-san-telmo/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:664890c143779609baa0",
@@ -454,7 +489,8 @@
       "fuentes": [
         "https://turismo.chiclana.es/detalle-de-recurso/iglesia-jesus-nazareno/",
         "https://aiunta.com/es/chiclana-de-la-frontera/ficha/iglesia-y-convento-de-jesus-nazareno"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:62cdcd5ff7955e0bad87",
@@ -465,7 +501,8 @@
       "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
       "fuentes": [
         "https://medinamudejar.com/contacto/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:55578a43f4616996e415",
@@ -477,7 +514,8 @@
       "fuentes": [
         "https://www.vinccicostagolf.com/es/spa/",
         "https://www.vinccicostagolf.com/es/contacto/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:813f69ef14d32f498327",
@@ -489,7 +527,8 @@
       "fuentes": [
         "https://www.juntadeandalucia.es/organismos/culturapatrimoniohistoricoydeporte/areas/deporte/formacion-investigacion-innovacion/titulaciones-nauticas/paginas/escuelas-cadiz.html",
         "https://aetcadiz.com/turismo-nautico/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:e4f5be40d91c5cd46119",
@@ -500,7 +539,8 @@
       "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
       "fuentes": [
         "https://oasissurfinglife.com/contacto/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:fca22ec0ae5aef3e4e69",
@@ -512,7 +552,8 @@
       "fuentes": [
         "https://www.sanctipetrikayak.com/web/",
         "https://turismo.chiclana.es/detalle-de-recurso/sancti-petri-kayak/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:032eb937385d34062eec",
@@ -523,7 +564,8 @@
       "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
       "fuentes": [
         "https://turismo.chiclana.es/detalle-de-recurso/spa-barrosa-palace/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:0ac09fc904b624f470ee",
@@ -534,7 +576,8 @@
       "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
       "fuentes": [
         "https://turismo.chiclana.es/en/detail/spa-by-clarins-hotel-gran-melia-sancti-petri/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:8e629fe7d4b2c2ddef4c",
@@ -545,7 +588,8 @@
       "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
       "fuentes": [
         "https://www.iberostar.com/es/hoteles/cadiz/iberostar-selection-andalucia-playa/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:c3a8573884056bacd538",
@@ -556,7 +600,8 @@
       "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
       "fuentes": [
         "https://www.iberostar.com/hoteles/cadiz/iberostar-waves-royal-andalus/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:8907793cf5722f7fe608",
@@ -568,7 +613,8 @@
       "fuentes": [
         "https://turismo.chiclana.es/detalle-de-recurso/spasanar-hotel-riu-chiclana/",
         "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/alojamiento/club-riu-chiclana/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:ae5492fc1e8fb8da071f",
@@ -579,7 +625,8 @@
       "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
       "fuentes": [
         "https://www.hipotels.com/hoteles/playalabarrosa/ubicacion/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:2304ecbba8c6dc28a141",
@@ -591,7 +638,8 @@
       "fuentes": [
         "https://surfkitehouse.es/",
         "https://surfkitehouse.es/cursos-paddel-surf/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:5536e72b95603ac2fd0e",
@@ -602,7 +650,8 @@
       "nota": "Dirección propuesta a partir de información pública de la ficha de contacto y/o fuente oficial; revisar si se aprueba su incorporación.",
       "fuentes": [
         "https://turismo.chiclana.es/detalle-de-recurso/u-spa-royal-hideaway/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:423096c983aa24881a41",
@@ -614,7 +663,8 @@
       "fuentes": [
         "https://turismo.chiclana.es/detalle-de-recurso/why-not-fly-escuela-de-kitesurf/",
         "https://www.why-not-fly.com/contacto.html"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     },
     {
       "id_ficha": "oficial:53416e1a05d8daa84548",
@@ -626,7 +676,8 @@
       "fuentes": [
         "https://turismo.chiclana.es/en/detail/zaida-actividades-nauticas/",
         "https://www.escueladevelazaida.es/"
-      ]
+      ],
+      "estado_aplicacion": "aplicada"
     }
   ],
   "entidades_sin_pin": [
@@ -683,5 +734,20 @@
     "Ermita del Santo Cristo",
     "Iglesia Jesús Nazareno",
     "NAMMU SPA Hotel Vincci Costa Golf"
-  ]
+  ],
+  "aplicacion": {
+    "fecha": "2026-10-30",
+    "catalogo": "v3/fichas_completas.json",
+    "sha_catalogo": "6d850277344f7870c5c4027bdf4cabe098eaaffc",
+    "direcciones_aplicadas": 29,
+    "coordenadas_aplicadas": 19,
+    "coordenadas_aplazadas": 2,
+    "coordenadas_aplazadas_ids": [
+      "oficial:8987479920db6cd0b7fa",
+      "oficial:e4f5be40d91c5cd46119"
+    ],
+    "rutas_sin_pin": 6,
+    "servicios_genericos_sin_pin": 1,
+    "nota": "Se aplicaron 29 direcciones y 19 pares de coordenadas (incluidas las dos correcciones de signo y dos coordenadas de monumentos incorporadas desde propuestas de dirección). Las dos coordenadas históricas de escuelas de surf no se aplicaron porque sus ubicaciones actuales difieren."
+  }
 }
