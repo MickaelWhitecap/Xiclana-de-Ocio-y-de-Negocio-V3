@@ -3,8 +3,10 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "30 3 * * *"
+
 permissions:
   contents: read
+
 jobs:
   backup:
     runs-on: ubuntu-latest
@@ -18,16 +20,24 @@ jobs:
             echo "::error::Configura SUPABASE_DB_URL y BACKUP_PASSPHRASE en Settings > Secrets and variables > Actions."
             exit 1
           fi
+
+      - name: Descargar el repositorio para incluir el catálogo
+        uses: actions/checkout@v4
+
       - uses: supabase/setup-cli@v1
         with:
           version: latest
-      - name: Exportar esquema, roles y datos
+
+      - name: Exportar esquema, roles, datos y comprobar catálogo
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
+          set -euo pipefail
+          test -s v3/fichas_completas.json || { echo "::error::No se encuentra v3/fichas_completas.json o está vacío."; exit 1; }
           supabase db dump --db-url "$SUPABASE_DB_URL" -f schema.sql
           supabase db dump --db-url "$SUPABASE_DB_URL" -f roles.sql --role-only
           supabase db dump --db-url "$SUPABASE_DB_URL" -f data.sql --use-copy --data-only
+
       - name: Cifrar las copias y eliminar los ficheros sin cifrar
         env:
           BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
@@ -37,7 +47,15 @@ jobs:
             openssl enc -aes-256-cbc -salt -pbkdf2 -iter 600000 \
               -in "$file" -out "$file.enc" -pass env:BACKUP_PASSPHRASE
           done
-          rm -f schema.sql roles.sql data.sql
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 600000 \
+            -in v3/fichas_completas.json -out fichas_completas.json.enc \
+            -pass env:BACKUP_PASSPHRASE
+          rm -f schema.sql roles.sql data.sql v3/fichas_completas.json
+          test -s schema.sql.enc
+          test -s roles.sql.enc
+          test -s data.sql.enc
+          test -s fichas_completas.json.enc
+
       - name: Guardar copia cifrada durante 30 días
         uses: actions/upload-artifact@v4
         with:
@@ -46,5 +64,6 @@ jobs:
             schema.sql.enc
             roles.sql.enc
             data.sql.enc
+            fichas_completas.json.enc
           if-no-files-found: error
           retention-days: 30
