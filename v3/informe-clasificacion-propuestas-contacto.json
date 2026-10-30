@@ -7,28 +7,29 @@
     "catalogo": "v3/fichas_completas.json",
     "sha_catalogo": "1e5004609cfb8853353698151ad09671efef0a97",
     "propuestas": "v3/propuestas-enriquecimiento-contacto.json",
-    "sha_propuestas": "8f4afb755e621d4f061f272aafce4bd09700d67e"
+    "sha_propuestas": "8e924b0408d03b61b748a25fba20e5a6ed9df9f2"
   },
   "criterio": "Campo vacío = dato_nuevo; valor distinto en campo ocupado = correccion_o_complemento; campo alternativo = alternativa que no sustituye al actual.",
   "resumen": {
-    "fichas_con_propuestas": 104,
-    "campos_propuestos": 157,
+    "fichas_con_propuestas": 107,
+    "campos_propuestos": 165,
     "por_tipo": {
-      "dato_nuevo": 91,
-      "alternativa": 7,
-      "correccion_o_complemento": 59
+      "dato_nuevo": 92,
+      "alternativa": 8,
+      "correccion_o_complemento": 65
     },
     "por_campo": {
-      "w": 23,
-      "h": 31,
+      "w": 24,
+      "h": 33,
       "email_alternativo": 3,
-      "a": 38,
+      "a": 39,
       "p": 3,
       "w_alternativa": 3,
-      "s": 55,
-      "p_alternativo": 1
+      "s": 58,
+      "p_alternativo": 1,
+      "n_alternativo": 1
     },
-    "fichas_con_al_menos_un_dato_nuevo": 80
+    "fichas_con_al_menos_un_dato_nuevo": 81
   },
   "detalle": [
     {
@@ -2160,6 +2161,116 @@
         "https://www.booking.com/hotel/es/sol-sancti-petri.es.html"
       ],
       "nota": "Turismo de Chiclana confirma la categoría, dirección y teléfono. La descripción de servicios se apoya en información de alojamiento publicada para el establecimiento; conviene verificar la denominación y la URL comercial exacta con Meliá antes de sustituir el enlace."
+    },
+    {
+      "id_ficha": "oficial:1154bfee050329b7afe8",
+      "nombre": "Hipotels Playa la Barrosa",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hotel 4 estrellas",
+      "valor_propuesto": "Hotel de cuatro estrellas de Hipotels en la avenida Amílcar Barca, junto a la Playa de La Barrosa. Dispone de restaurante buffet, restaurante a la carta Culinarium, snack-pool bar, lobby bar, piscina exterior, gimnasio, spa, sauna, hidromasaje y aparcamiento privado.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.hipotels.com/hoteles/playalabarrosa/servicios/"
+      ],
+      "nota": "Servicios, dirección, teléfono, correo y horarios de restauración publicados en la web oficial de Hipotels. La ficha OSM correspondiente es el mismo hotel; no deben contarse como dos establecimientos."
+    },
+    {
+      "id_ficha": "oficial:1154bfee050329b7afe8",
+      "nombre": "Hipotels Playa la Barrosa",
+      "campo": "h",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Desayuno frío: 06:00–08:00; desayuno: 08:00–10:30; desayuno tardío: 10:30–11:00; cena buffet: 19:00–21:00. Culinarium: almuerzo 13:00–15:30 y cena 20:00–22:00. Snack-pool bar: 10:00–18:00; lobby bar: 18:00–01:00. Horarios sujetos a temporada.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.hipotels.com/hoteles/playalabarrosa/servicios/"
+      ],
+      "nota": "Servicios, dirección, teléfono, correo y horarios de restauración publicados en la web oficial de Hipotels. La ficha OSM correspondiente es el mismo hotel; no deben contarse como dos establecimientos."
+    },
+    {
+      "id_ficha": "osm:way:52495339",
+      "nombre": "Valentin Sancti Petri",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "4 estrellas; accesible",
+      "valor_propuesto": "Hotel de cuatro estrellas en Novo Sancti Petri, con 549 habitaciones, jardines tropicales, piscinas, gimnasio, restaurantes y bares, animación infantil y para adultos, spa, centro de convenciones y puntos de carga para vehículos eléctricos.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.valentinsanctipetri.com/es/servicios/",
+        "https://www.valentinsanctipetri.com/es/habitaciones/"
+      ],
+      "nota": "Servicios, número de habitaciones, recepción y horarios de entrada y salida publicados en la web oficial del hotel."
+    },
+    {
+      "id_ficha": "osm:way:52495339",
+      "nombre": "Valentin Sancti Petri",
+      "campo": "h",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "24/7",
+      "valor_propuesto": "Recepción 24 horas. Check-in desde las 15:00; check-out antes de las 12:00.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.valentinsanctipetri.com/es/servicios/",
+        "https://www.valentinsanctipetri.com/es/habitaciones/"
+      ],
+      "nota": "Servicios, número de habitaciones, recepción y horarios de entrada y salida publicados en la web oficial del hotel."
+    },
+    {
+      "id_ficha": "oficial:c1bc4f9177af16b7651f",
+      "nombre": "Matchpoint / HEIT Racket Center",
+      "campo": "n_alternativo",
+      "tipo": "alternativa",
+      "valor_actual": "",
+      "valor_propuesto": "HEIT Racket Center",
+      "confianza": "alta",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/heit-racket-center/",
+        "https://heitacademy.com/centros-deportivos/"
+      ],
+      "nota": "Turismo municipal publica exactamente el teléfono de la ficha (639 237 649), la dirección y las instalaciones bajo el nombre HEIT Racket Center. Se propone actualizar la denominación, no crear otra ficha."
+    },
+    {
+      "id_ficha": "oficial:c1bc4f9177af16b7651f",
+      "nombre": "Matchpoint / HEIT Racket Center",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "11 pistas de tenis (7 de tierra batida y 4 de pistas dura de green set), 2 pistas de padel de cristal y 4 pistas de padel de muro.",
+      "valor_propuesto": "Centro de tenis y pádel de Novo Sancti Petri con once pistas de tenis (siete de tierra batida y cuatro de pista rápida) y seis pistas de pádel de cristal. La ficha turística municipal identifica el recinto como HEIT Racket Center y conserva Matchpoint como nombre anterior o rótulo asociado.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/heit-racket-center/",
+        "https://heitacademy.com/centros-deportivos/"
+      ],
+      "nota": "Turismo municipal publica exactamente el teléfono de la ficha (639 237 649), la dirección y las instalaciones bajo el nombre HEIT Racket Center. Se propone actualizar la denominación, no crear otra ficha."
+    },
+    {
+      "id_ficha": "oficial:c1bc4f9177af16b7651f",
+      "nombre": "Matchpoint / HEIT Racket Center",
+      "campo": "a",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Centro Deportivo Iberostar Royal Andalus .  Urb. Novo Sancti Petri",
+      "valor_propuesto": "Urbanización Novo Sancti Petri, calle Asdrúbal, 22, Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/heit-racket-center/",
+        "https://heitacademy.com/centros-deportivos/"
+      ],
+      "nota": "Turismo municipal publica exactamente el teléfono de la ficha (639 237 649), la dirección y las instalaciones bajo el nombre HEIT Racket Center. Se propone actualizar la denominación, no crear otra ficha."
+    },
+    {
+      "id_ficha": "oficial:c1bc4f9177af16b7651f",
+      "nombre": "Matchpoint / HEIT Racket Center",
+      "campo": "w",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "https://www.matchpoint-world.com",
+      "valor_propuesto": "https://heitacademy.com/",
+      "confianza": "alta",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/heit-racket-center/",
+        "https://heitacademy.com/centros-deportivos/"
+      ],
+      "nota": "Turismo municipal publica exactamente el teléfono de la ficha (639 237 649), la dirección y las instalaciones bajo el nombre HEIT Racket Center. Se propone actualizar la denominación, no crear otra ficha."
     }
   ]
 }
