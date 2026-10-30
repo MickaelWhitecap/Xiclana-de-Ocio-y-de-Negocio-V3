@@ -565,12 +565,42 @@
         "https://turismo.chiclana.es/en/detail/zaida-actividades-nauticas/",
         "https://www.escueladevelazaida.es/"
       ]
+    },
+    {
+      "id_ficha": "oficial:ae5492fc1e8fb8da071f",
+      "nombre": "SPASANAR Hotel Hipotels Playa la Barrosa",
+      "cambios_propuestos": {
+        "a": "Hotel Hipotels Playa la Barrosa, Avenida Amílcar Barca, 8, 11139 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "La web oficial de Hipotels confirma dirección y que el hotel dispone de spa. El teléfono actual de la ficha coincide con el del hotel; conservar el correo genérico de SPASANAR como contacto específico del spa.",
+      "fuentes": [
+        "https://www.hipotels.com/hoteles/playalabarrosa/ubicacion/"
+      ]
+    },
+    {
+      "id_ficha": "osm:node:12798420501",
+      "nombre": "MPE Servicio de Prevención",
+      "cambios_propuestos": {
+        "a": "Parque Empresarial Las Redes, portal 2, oficinas H-K, 11130 Chiclana de la Frontera, Cádiz",
+        "w": "https://prevencionmpe.com/"
+      },
+      "confianza": "alta",
+      "nota": "Documento corporativo de Grupo MPE identifica expresamente su delegación de Chiclana, dirección y teléfono. La web corporativa vigente es prevencionmpe.com. El correo chiclana@grupompe.es coincide con el documento corporativo.",
+      "fuentes": [
+        "https://prevencionmpe.com/",
+        "https://prevencionmpe.com/web/content/2909?unique=7290c7f3916ea2423474547cbcfde08469f79671"
+      ]
     }
   ],
-  "resumen": "43 propuestas preparadas para revisión. Ninguna modifica el catálogo maestro ni la web pública.",
+  "resumen": "45 propuestas preparadas para revisión. Ninguna modifica el catálogo maestro ni la web pública.",
   "fecha_actualizacion": "2026-10-30",
   "siguiente_lote": {
-    "revisadas_en_esta_ampliacion": 4,
-    "criterio": "Se priorizan fuentes oficiales y datos de ubicación verificables; no se rellenan páginas web ausentes con dominios históricos sin comprobar ni se inventan direcciones."
+    "revisadas_en_esta_ampliacion": 2,
+    "pendientes_de_verificacion": [
+      "Hostal Ntra. Sra. del Rosario: no se ha localizado web propia verificable; no se inventa una URL.",
+      "Zen-saciones: el dominio antiguo aparece en directorios históricos, pero no se ha confirmado que siga operativo."
+    ],
+    "criterio": "No rellenar páginas web ausentes con dominios antiguos sin comprobar su vigencia."
   }
 }
