@@ -1158,9 +1158,91 @@
       "fuentes": [
         "https://www.booking.com/hotel/es/hostal-casa-la-laja.es.html"
       ]
+    },
+    {
+      "id_ficha": "osm:node:4252456030",
+      "nombre": "Farmacia La Barrosa",
+      "cambios_propuestos": {
+        "a": "Urbanización Pinar de Don Jesús, s/n, 11139 Chiclana de la Frontera, Cádiz",
+        "w": "https://farmacialabarrosa.es/",
+        "s": "Farmacia comunitaria con atención farmacéutica, servicio dermocosmético, control de presión arterial y glucosa, formulación magistral y tienda online de productos de higiene y cuidado personal."
+      },
+      "confianza": "alta",
+      "nota": "La web propia vigente utiliza el dominio .es y confirma la dirección general, el teléfono, el correo y los servicios. El dominio .com de la ficha parece antiguo.",
+      "fuentes": [
+        "https://farmacialabarrosa.es/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:00bd2e6630d8360ef2a6",
+      "nombre": "Hotel Alborán",
+      "cambios_propuestos": {
+        "s": "Hotel urbano de 3 estrellas en el centro de Chiclana, con 70 habitaciones equipadas con baño, aire acondicionado, televisión y wifi. Dispone de garaje privado, salones para reuniones y celebraciones, cafetería, zona de estar y patio andaluz."
+      },
+      "confianza": "alta",
+      "nota": "Descripción, capacidad y servicios publicados por Turismo de Andalucía y la web oficial del hotel.",
+      "fuentes": [
+        "https://www.andalucia.org/listing/hotel-albor%C3%A1n-chiclana/323102/",
+        "https://www.hotelalboranchiclana.com/contacto-y-mapa.html"
+      ]
+    },
+    {
+      "id_ficha": "oficial:bbea5e561959b5b811ae",
+      "nombre": "Hotel Coral Playa",
+      "cambios_propuestos": {
+        "s": "Hotel frente a la Playa de La Barrosa, con piscina exterior de temporada, terraza, bar, aparcamiento, wifi y habitaciones climatizadas; algunas disponen de balcón o terraza. Cuenta con recepción 24 horas."
+      },
+      "confianza": "alta",
+      "nota": "Servicios y ubicación publicados por Turismo de Chiclana, Turismo de Andalucía y la plataforma de alojamiento.",
+      "fuentes": [
+        "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/alojamiento/coral-playa/",
+        "https://www.andalucia.org/listing/hotel-coral-playa/12207102/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:eef249fb4b4a3027d258",
+      "nombre": "Museo de Chiclana",
+      "cambios_propuestos": {
+        "s": "Museo municipal ubicado en la Casa Briones, edificio histórico de la Plaza Mayor. Recorre la historia de Chiclana y organiza visitas guiadas y actividades para grupos y centros educativos.",
+        "h": "Verano (1 abril–31 octubre): martes a domingo 10:00–14:00; jueves y viernes 18:30–21:30. Invierno (1 noviembre–31 marzo): martes a domingo 10:00–14:00; miércoles, jueves y viernes 17:30–20:30. Lunes cerrado."
+      },
+      "confianza": "alta",
+      "nota": "Horario, dirección y servicios de visita publicados en la web oficial del Museo. La ficha actual contiene solo un horario parcial de invierno.",
+      "fuentes": [
+        "https://www.museodechiclana.es/es/visita/horario"
+      ]
+    },
+    {
+      "id_ficha": "oficial:d31b7b92b88f71ed1613",
+      "nombre": "Padel Center Europa 2015",
+      "cambios_propuestos": {
+        "s": "Complejo deportivo municipal en Huerta Mata, con nueve pistas de pádel semicubiertas homologadas para competición, cuatro pistas de tenis homologadas y una pista polideportiva. Dispone de recepción, oficinas, cafetería y vestuarios.",
+        "a": "Complejo Deportivo Municipal Huerta Mata, Chiclana de la Frontera, Cádiz",
+        "w": "https://deportes.chiclana.es/instalaciones/gestion-directa/complejos-deportivos/"
+      },
+      "confianza": "alta",
+      "nota": "Descripción, dirección, teléfono y equipamientos publicados por la Delegación Municipal de Deportes. Se propone una URL municipal específica en lugar de la página genérica.",
+      "fuentes": [
+        "https://deportes.chiclana.es/instalaciones/gestion-directa/complejos-deportivos/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:6bf2713f5b0860398dd8",
+      "nombre": "Sancti Petri Hill Golf",
+      "cambios_propuestos": {
+        "s": "Campo de golf de 18 hoyos diseñado por Manuel Piñero, con tienda Pro Shop, vestuarios y duchas, restaurante especializado en arroces y reserva online de green fees. Está situado en la zona de Loma de Sancti Petri.",
+        "p": "856 924 668 / 605 651 950",
+        "w": "https://sanctipetrihillsgolf.com/es/"
+      },
+      "confianza": "alta",
+      "nota": "La web oficial confirma 18 hoyos, servicios, dirección, teléfonos y correo. Se añade un segundo teléfono de contacto publicado por el propio club.",
+      "fuentes": [
+        "https://sanctipetrihillsgolf.com/es/",
+        "https://sanctipetrihillsgolf.com/es/contacto/"
+      ]
     }
   ],
-  "resumen": "88 propuestas preparadas para revisión. Esta ampliación añade información de hoteles, aparthoteles y hostales, priorizando webs oficiales. Ninguna modifica el catálogo maestro ni la web pública.",
+  "resumen": "94 propuestas preparadas para revisión. Esta ampliación añade información contrastada de servicios turísticos, culturales, deportivos y comerciales. No se modifica el catálogo maestro ni la web pública.",
   "fecha_actualizacion": "2026-10-30",
   "siguiente_lote": {
     "revisadas_en_esta_ampliacion": 8,
