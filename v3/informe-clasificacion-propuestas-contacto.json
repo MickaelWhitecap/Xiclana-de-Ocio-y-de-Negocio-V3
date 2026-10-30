@@ -7,27 +7,27 @@
     "catalogo": "v3/fichas_completas.json",
     "sha_catalogo": "1e5004609cfb8853353698151ad09671efef0a97",
     "propuestas": "v3/propuestas-enriquecimiento-contacto.json",
-    "sha_propuestas": "99a19f0ad3e13b784f075e9bc0e074a06bc69a84"
+    "sha_propuestas": "2ca463b3b5e73406f7df79d7f79e3cced86234b1"
   },
   "criterio": "Campo vacío = dato_nuevo; valor distinto en campo ocupado = correccion_o_complemento; campo alternativo = alternativa que no sustituye al actual.",
   "resumen": {
-    "fichas_con_propuestas": 88,
-    "campos_propuestos": 125,
+    "fichas_con_propuestas": 100,
+    "campos_propuestos": 148,
     "por_tipo": {
-      "dato_nuevo": 85,
+      "dato_nuevo": 89,
       "alternativa": 6,
-      "correccion_o_complemento": 34
+      "correccion_o_complemento": 53
     },
     "por_campo": {
-      "w": 16,
-      "h": 27,
+      "w": 20,
+      "h": 31,
       "email_alternativo": 3,
-      "a": 34,
-      "p": 2,
+      "a": 37,
+      "p": 3,
       "w_alternativa": 3,
-      "s": 40
+      "s": 51
     },
-    "fichas_con_al_menos_un_dato_nuevo": 74
+    "fichas_con_al_menos_un_dato_nuevo": 78
   },
   "detalle": [
     {
@@ -1728,6 +1728,315 @@
         "https://www.booking.com/hotel/es/hostal-casa-la-laja.es.html"
       ],
       "nota": "Descripción y servicios publicados por plataforma de reservas. La web propia no se ha podido contrastar en el mismo nivel de detalle; no se propone horario de entrada/salida."
+    },
+    {
+      "id_ficha": "osm:node:4252456030",
+      "nombre": "Farmacia La Barrosa",
+      "campo": "a",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Carretera de la Barrosa",
+      "valor_propuesto": "Urbanización Pinar de Don Jesús, s/n, 11139 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "fuentes": [
+        "https://farmacialabarrosa.es/"
+      ],
+      "nota": "La web propia vigente utiliza el dominio .es y confirma la dirección general, el teléfono, el correo y los servicios. El dominio .com de la ficha parece antiguo."
+    },
+    {
+      "id_ficha": "osm:node:4252456030",
+      "nombre": "Farmacia La Barrosa",
+      "campo": "w",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "https://farmacialabarrosa.com/",
+      "valor_propuesto": "https://farmacialabarrosa.es/",
+      "confianza": "alta",
+      "fuentes": [
+        "https://farmacialabarrosa.es/"
+      ],
+      "nota": "La web propia vigente utiliza el dominio .es y confirma la dirección general, el teléfono, el correo y los servicios. El dominio .com de la ficha parece antiguo."
+    },
+    {
+      "id_ficha": "osm:node:4252456030",
+      "nombre": "Farmacia La Barrosa",
+      "campo": "s",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Farmacia comunitaria con atención farmacéutica, servicio dermocosmético, control de presión arterial y glucosa, formulación magistral y tienda online de productos de higiene y cuidado personal.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://farmacialabarrosa.es/"
+      ],
+      "nota": "La web propia vigente utiliza el dominio .es y confirma la dirección general, el teléfono, el correo y los servicios. El dominio .com de la ficha parece antiguo."
+    },
+    {
+      "id_ficha": "oficial:00bd2e6630d8360ef2a6",
+      "nombre": "Hotel Alborán",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hotel 3 estrellas",
+      "valor_propuesto": "Hotel urbano de 3 estrellas en el centro de Chiclana, con 70 habitaciones equipadas con baño, aire acondicionado, televisión y wifi. Dispone de garaje privado, salones para reuniones y celebraciones, cafetería, zona de estar y patio andaluz.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.andalucia.org/listing/hotel-albor%C3%A1n-chiclana/323102/",
+        "https://www.hotelalboranchiclana.com/contacto-y-mapa.html"
+      ],
+      "nota": "Descripción, capacidad y servicios publicados por Turismo de Andalucía y la web oficial del hotel."
+    },
+    {
+      "id_ficha": "oficial:bbea5e561959b5b811ae",
+      "nombre": "Hotel Coral Playa",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hotel  3 estrellas",
+      "valor_propuesto": "Hotel frente a la Playa de La Barrosa, con piscina exterior de temporada, terraza, bar, aparcamiento, wifi y habitaciones climatizadas; algunas disponen de balcón o terraza. Cuenta con recepción 24 horas.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/alojamiento/coral-playa/",
+        "https://www.andalucia.org/listing/hotel-coral-playa/12207102/"
+      ],
+      "nota": "Servicios y ubicación publicados por Turismo de Chiclana, Turismo de Andalucía y la plataforma de alojamiento."
+    },
+    {
+      "id_ficha": "oficial:eef249fb4b4a3027d258",
+      "nombre": "Museo de Chiclana",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "accesible",
+      "valor_propuesto": "Museo municipal ubicado en la Casa Briones, edificio histórico de la Plaza Mayor. Recorre la historia de Chiclana y organiza visitas guiadas y actividades para grupos y centros educativos.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.museodechiclana.es/es/visita/horario"
+      ],
+      "nota": "Horario, dirección y servicios de visita publicados en la web oficial del Museo. La ficha actual contiene solo un horario parcial de invierno."
+    },
+    {
+      "id_ficha": "oficial:eef249fb4b4a3027d258",
+      "nombre": "Museo de Chiclana",
+      "campo": "h",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Casa de Briones. Plaza Mayor, nº 7 Invierno : Lunes cerrado Martes a viernes de 10:00 a 14:00 y de 18:00 a 20:00 horas.",
+      "valor_propuesto": "Verano (1 abril–31 octubre): martes a domingo 10:00–14:00; jueves y viernes 18:30–21:30. Invierno (1 noviembre–31 marzo): martes a domingo 10:00–14:00; miércoles, jueves y viernes 17:30–20:30. Lunes cerrado.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.museodechiclana.es/es/visita/horario"
+      ],
+      "nota": "Horario, dirección y servicios de visita publicados en la web oficial del Museo. La ficha actual contiene solo un horario parcial de invierno."
+    },
+    {
+      "id_ficha": "oficial:d31b7b92b88f71ed1613",
+      "nombre": "Padel Center Europa 2015",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "9 pistas padel semicubiertas, 4 pistas de tenis rápida (en superficie courtsoul standing) y 1 de multideporte",
+      "valor_propuesto": "Complejo deportivo municipal en Huerta Mata, con nueve pistas de pádel semicubiertas homologadas para competición, cuatro pistas de tenis homologadas y una pista polideportiva. Dispone de recepción, oficinas, cafetería y vestuarios.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://deportes.chiclana.es/instalaciones/gestion-directa/complejos-deportivos/"
+      ],
+      "nota": "Descripción, dirección, teléfono y equipamientos publicados por la Delegación Municipal de Deportes. Se propone una URL municipal específica en lugar de la página genérica."
+    },
+    {
+      "id_ficha": "oficial:d31b7b92b88f71ed1613",
+      "nombre": "Padel Center Europa 2015",
+      "campo": "a",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Complejo deportivo municipal Huerta Mata, s/n",
+      "valor_propuesto": "Complejo Deportivo Municipal Huerta Mata, Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "fuentes": [
+        "https://deportes.chiclana.es/instalaciones/gestion-directa/complejos-deportivos/"
+      ],
+      "nota": "Descripción, dirección, teléfono y equipamientos publicados por la Delegación Municipal de Deportes. Se propone una URL municipal específica en lugar de la página genérica."
+    },
+    {
+      "id_ficha": "oficial:d31b7b92b88f71ed1613",
+      "nombre": "Padel Center Europa 2015",
+      "campo": "w",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "https://www.deporteschiclana.es",
+      "valor_propuesto": "https://deportes.chiclana.es/instalaciones/gestion-directa/complejos-deportivos/",
+      "confianza": "alta",
+      "fuentes": [
+        "https://deportes.chiclana.es/instalaciones/gestion-directa/complejos-deportivos/"
+      ],
+      "nota": "Descripción, dirección, teléfono y equipamientos publicados por la Delegación Municipal de Deportes. Se propone una URL municipal específica en lugar de la página genérica."
+    },
+    {
+      "id_ficha": "oficial:6bf2713f5b0860398dd8",
+      "nombre": "Sancti Petri Hill Golf",
+      "campo": "s",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Campo de golf de 18 hoyos diseñado por Manuel Piñero, con tienda Pro Shop, vestuarios y duchas, restaurante especializado en arroces y reserva online de green fees. Está situado en la zona de Loma de Sancti Petri.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://sanctipetrihillsgolf.com/es/",
+        "https://sanctipetrihillsgolf.com/es/contacto/"
+      ],
+      "nota": "La web oficial confirma 18 hoyos, servicios, dirección, teléfonos y correo. Se añade un segundo teléfono de contacto publicado por el propio club."
+    },
+    {
+      "id_ficha": "oficial:6bf2713f5b0860398dd8",
+      "nombre": "Sancti Petri Hill Golf",
+      "campo": "p",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "856 924 668",
+      "valor_propuesto": "856 924 668 / 605 651 950",
+      "confianza": "alta",
+      "fuentes": [
+        "https://sanctipetrihillsgolf.com/es/",
+        "https://sanctipetrihillsgolf.com/es/contacto/"
+      ],
+      "nota": "La web oficial confirma 18 hoyos, servicios, dirección, teléfonos y correo. Se añade un segundo teléfono de contacto publicado por el propio club."
+    },
+    {
+      "id_ficha": "oficial:6bf2713f5b0860398dd8",
+      "nombre": "Sancti Petri Hill Golf",
+      "campo": "w",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "https://www.sanctipetrihillsgolf.com",
+      "valor_propuesto": "https://sanctipetrihillsgolf.com/es/",
+      "confianza": "alta",
+      "fuentes": [
+        "https://sanctipetrihillsgolf.com/es/",
+        "https://sanctipetrihillsgolf.com/es/contacto/"
+      ],
+      "nota": "La web oficial confirma 18 hoyos, servicios, dirección, teléfonos y correo. Se añade un segundo teléfono de contacto publicado por el propio club."
+    },
+    {
+      "id_ficha": "oficial:140aa95fd366376e93ae",
+      "nombre": "Cortijo los Gallos",
+      "campo": "a",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Ctra. de la Barrosa, Urb. Los Gallos, 461",
+      "valor_propuesto": "Carretera de La Barrosa, 116, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.google.com/maps/search/?api=1&query=Hotel+Cortijo+Los+Gallos+Chiclana",
+        "https://www.hotelcortijolosgallos.com/"
+      ],
+      "nota": "Dirección normalizada y servicios contrastados con la ficha empresarial y la web del establecimiento."
+    },
+    {
+      "id_ficha": "oficial:140aa95fd366376e93ae",
+      "nombre": "Cortijo los Gallos",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hotel 2 estrellas",
+      "valor_propuesto": "Hotel familiar de estilo andaluz con patio interior ajardinado, piscina exterior de temporada, terraza, cafetería y aparcamiento gratuito. Ofrece alojamiento próximo a las playas de La Barrosa y Sancti Petri.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.google.com/maps/search/?api=1&query=Hotel+Cortijo+Los+Gallos+Chiclana",
+        "https://www.hotelcortijolosgallos.com/"
+      ],
+      "nota": "Dirección normalizada y servicios contrastados con la ficha empresarial y la web del establecimiento."
+    },
+    {
+      "id_ficha": "oficial:3f234cf0036aec3f1cb0",
+      "nombre": "Hotel Aldiana Andalusien",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hotel 4 estrellas",
+      "valor_propuesto": "Club vacacional tipo resort en Novo Sancti Petri, con vacaciones todo incluido y actividades deportivas y de ocio para familias. La web oficial publica temporadas de apertura diferenciadas.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.aldiana.com/clubs/andalusien"
+      ],
+      "nota": "La web oficial confirma dirección, teléfono, correo y fechas de apertura de las temporadas 2026 y 2027."
+    },
+    {
+      "id_ficha": "oficial:3f234cf0036aec3f1cb0",
+      "nombre": "Hotel Aldiana Andalusien",
+      "campo": "h",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Temporada 2026: 15 de marzo–9 de noviembre. Temporada 2027 anunciada: 14 de marzo–8 de noviembre. Son fechas de temporada del club, no horario diario de recepción.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.aldiana.com/clubs/andalusien"
+      ],
+      "nota": "La web oficial confirma dirección, teléfono, correo y fechas de apertura de las temporadas 2026 y 2027."
+    },
+    {
+      "id_ficha": "oficial:a018965dd7dc247afbb6",
+      "nombre": "Ilunion Sancti Petri",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hotel-Apartamento 5 estrellas",
+      "valor_propuesto": "Aparthotel de 4 estrellas con apartamentos de uno y dos dormitorios y villas, piscinas exteriores para adultos y niños, restaurante, gastrobar, gimnasio, pistas de pádel, animación y miniclub. Admite mascotas y dispone de apartamentos accesibles.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.ilunionhotels.com/hoteles/ilunion-sancti-petri",
+        "https://www.ilunionhotels.com/hoteles/ilunion-sancti-petri/Servicios/Instalaciones1"
+      ],
+      "nota": "Servicios, tipologías de alojamiento y horario del gimnasio publicados en la web oficial de ILUNION."
+    },
+    {
+      "id_ficha": "oficial:a018965dd7dc247afbb6",
+      "nombre": "Ilunion Sancti Petri",
+      "campo": "h",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "24/7",
+      "valor_propuesto": "Gimnasio: todos los días de 08:00 a 21:00. Horario del gimnasio, no del establecimiento.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.ilunionhotels.com/hoteles/ilunion-sancti-petri",
+        "https://www.ilunionhotels.com/hoteles/ilunion-sancti-petri/Servicios/Instalaciones1"
+      ],
+      "nota": "Servicios, tipologías de alojamiento y horario del gimnasio publicados en la web oficial de ILUNION."
+    },
+    {
+      "id_ficha": "oficial:0af83add7c18d49512a1",
+      "nombre": "Museo Municipal: Francisco Montes Paquiro",
+      "campo": "s",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Museo taurino municipal dedicado a Francisco Montes Reina, Paquiro (1805–1851), figura del toreo romántico. Reúne objetos, recuerdos y útiles taurinos, piezas históricas y materiales sobre la trayectoria del torero chiclanero.",
+      "confianza": "media",
+      "fuentes": [
+        "https://www.chiclana.es/areas-municipales/sociedad-y-cultura/delegacion-de-cultura/espacios-culturales",
+        "https://www.guiadecadiz.com/es/museo-francisco-montes-paquiro"
+      ],
+      "nota": "La Delegación Municipal de Cultura confirma denominación, dirección y teléfono; la descripción histórica procede de una ficha cultural pública. No se añade horario porque las fuentes disponibles discrepan y no se ha localizado un calendario oficial actualizado."
+    },
+    {
+      "id_ficha": "oficial:2bfb1cc6c3afbf393e99",
+      "nombre": "Polideportivo Municipal Santa Ana",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "3 pistas de padel y 3 de tenis",
+      "valor_propuesto": "Complejo deportivo municipal de 12.697 m² con pabellón cubierto, pista de fútbol sala, pabellón multiusos, pistas de baloncesto y voleibol, mini-basket, cuatro pistas de tenis, tres pistas de pádel, sala de ciclo indoor, sala de artes marciales y vestuarios.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://deportes.chiclana.es/instalaciones/gestion-directa/complejos-deportivos/"
+      ],
+      "nota": "Equipamiento, dirección y teléfono publicados por la Delegación Municipal de Deportes. Se propone una URL municipal específica."
+    },
+    {
+      "id_ficha": "oficial:2bfb1cc6c3afbf393e99",
+      "nombre": "Polideportivo Municipal Santa Ana",
+      "campo": "w",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "https://www.deporteschiclana.es",
+      "valor_propuesto": "https://deportes.chiclana.es/instalaciones/gestion-directa/complejos-deportivos/",
+      "confianza": "alta",
+      "fuentes": [
+        "https://deportes.chiclana.es/instalaciones/gestion-directa/complejos-deportivos/"
+      ],
+      "nota": "Equipamiento, dirección y teléfono publicados por la Delegación Municipal de Deportes. Se propone una URL municipal específica."
+    },
+    {
+      "id_ficha": "manual:10a8f9cf90ea221069aa",
+      "nombre": "Teatro Moderno",
+      "campo": "h",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Horario de Teatro Moderno: de 16:30 – 21:00 horas. Horario de taquilla - De lunes a viernes no festivos: de 17:00 – 21:00 horas y DOS HORAS…",
+      "valor_propuesto": "Taquilla: invierno, primavera y otoño, lunes a viernes no festivos 17:00–21:00 y dos horas antes de cada espectáculo. Julio y agosto: lunes a viernes no festivos 09:00–13:00, excepto días de función, cuando abre dos horas antes del espectáculo.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.chiclana.es/delegaciones/cultura"
+      ],
+      "nota": "Horario de taquilla publicado por la Delegación Municipal de Cultura. No debe confundirse con el horario de apertura del edificio ni con el horario de cada espectáculo."
     }
   ]
 }
