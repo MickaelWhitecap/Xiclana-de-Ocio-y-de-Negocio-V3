@@ -7838,5 +7838,26 @@
       "lon": -6.1485185,
       "nota": "Aparece en el mapa, pero falta una dirección o referencia comprensible para el usuario."
     }
-  ]
+  ],
+  "propuestas_pendientes": {
+    "archivo": "v3/propuestas-localizacion.json",
+    "propuestas": 14,
+    "correcciones_de_coordenadas": 2,
+    "nuevas_coordenadas": 12
+  },
+  "cobertura_proyectada": {
+    "coordenadas_validas_si_se_aprueban": 1178,
+    "pendientes_sin_coordenadas": 116,
+    "sin_direccion_ni_coordenadas_pendientes": 32,
+    "pendientes_por_categoria": {
+      "Balneario y spa": 10,
+      "Instalación deportiva": 1,
+      "Patrimonio": 4,
+      "Náutica": 8,
+      "Cultura": 1,
+      "Museo": 1,
+      "Ruta cultural": 6,
+      "Servicio público": 1
+    }
+  }
 }
