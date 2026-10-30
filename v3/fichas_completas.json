@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-10-29",
+  "actualizado": "2026-10-30",
   "items": [
     {
       "id": "osm-extra:node:2245173830",
@@ -716,18 +716,10 @@
       "lat": 36.42,
       "lon": -6.145,
       "id": "manual:e95c07cf-41c6-4d0b-b9bb-ece0bf871770",
-      "fuente_estado": "Ficha administrativa sincronizada desde Supabase"
-    },
-    {
-      "a": "C. San Mateo, 9, 11130 Chiclana de la Frontera, Cádiz",
-      "c": "Parking",
-      "d": "Aparcamiento público próximo al centro. Confirmar condiciones y horario.",
-      "n": "Aparcamiento El Manchón",
-      "t": "negocio",
-      "lat": 36.42,
-      "lon": -6.145,
-      "id": "proposal:32c3142a-1318-401e-a957-01c5d576f92a",
-      "f": "Ficha de negocio / mapas"
+      "fuente_estado": "Ficha administrativa sincronizada desde Supabase",
+      "fuentes_integradas": [
+        "Ficha de negocio / mapas"
+      ]
     },
     {
       "a": "C. Concepción, 12, 11130 Chiclana de la Frontera, Cádiz",
@@ -745,23 +737,10 @@
       "lat": null,
       "lon": null,
       "id": "manual:d28fa8a8-608b-49d0-a5da-7c8bce6aacc5",
-      "fuente_estado": "Ficha administrativa sincronizada desde Supabase"
-    },
-    {
-      "a": "C. Concepción, 12, 11130 Chiclana de la Frontera, Cádiz",
-      "c": "Parking",
-      "d": "",
-      "e": "",
-      "h": "24 horas",
-      "n": "Aparcamiento público Centro Plaza",
-      "p": "956534789",
-      "s": "",
-      "t": "negocio",
-      "w": "https://parclick.com/parking-chiclana_de_la_frontera/ic_plaza_de_abastos",
-      "lat": null,
-      "lon": null,
-      "id": "proposal:f9bb7e0e-dc87-48bd-83a7-534a2ea663f5",
-      "f": "el propio establecimiento"
+      "fuente_estado": "Ficha administrativa sincronizada desde Supabase",
+      "fuentes_integradas": [
+        "el propio establecimiento"
+      ]
     },
     {
       "id": "osm-extra:node:13483910001",
@@ -2628,18 +2607,10 @@
       "v": "2026-10-24",
       "w": "https://www.bubbleaventuras.com/",
       "id": "manual:86dc79fb-99c4-4f51-ac73-a516b3e35fcc",
-      "fuente_estado": "Ficha administrativa sincronizada desde Supabase"
-    },
-    {
-      "a": "Av. del Mueble, 46B, 11130 Chiclana de la Frontera, Cádiz",
-      "c": "Ocio infantil",
-      "d": "Centro de ocio infantil y parque de bolas; celebraciones y cumpleaños.",
-      "n": "Bubble Aventuras",
-      "p": "657 47 96 21",
-      "t": "ocio",
-      "w": "https://www.bubbleaventuras.com/",
-      "id": "proposal:64e6ab5a-7fa4-4b91-853d-51258e6ee6fd",
-      "f": "Web del establecimiento / directorio local"
+      "fuente_estado": "Ficha administrativa sincronizada desde Supabase",
+      "fuentes_integradas": [
+        "Web del establecimiento / directorio local"
+      ]
     },
     {
       "id": "osm:way:699223280",
@@ -3788,23 +3759,10 @@
       "lat": null,
       "lon": null,
       "id": "manual:ff80d59d-caab-4e1a-b1d1-1a3b74b46af7",
-      "fuente_estado": "Ficha administrativa sincronizada desde Supabase"
-    },
-    {
-      "a": "Carretera de las Lagunas, s/n, Pago de la Rana, 11130 Chiclana de la Frontera, Cádiz",
-      "c": "Camping",
-      "d": "Establecimiento turístico con parcelas para tiendas, caravanas y autocaravanas. También ofrece bungalows, cabañas y apartamentos. Confirmar la próxima temporada antes de planificar una estancia.",
-      "e": "recepcion@campinglaranaverde.com",
-      "h": "Temporada 2026 finalizada el 3 de octubre. Próxima apertura por confirmar.",
-      "n": "Camping La Rana Verde",
-      "p": "956 494 348",
-      "s": "Camping con parcelas, bungalows, cabañas y apartamentos",
-      "t": "ocio",
-      "w": "https://www.campinglaranaverde.com/",
-      "lat": null,
-      "lon": null,
-      "id": "proposal:37286994-c534-43dd-911b-2863c4bb1439",
-      "f": "Web oficial de Camping La Rana Verde"
+      "fuente_estado": "Ficha administrativa sincronizada desde Supabase",
+      "fuentes_integradas": [
+        "Web oficial de Camping La Rana Verde"
+      ]
     },
     {
       "n": "Campo de Fútbol CEIP Isabel La Católica",
@@ -4780,17 +4738,10 @@
       "t": "ocio",
       "v": "2026-10-24",
       "id": "manual:3da1e819-76c4-4558-aeae-683988b300b0",
-      "fuente_estado": "Ficha administrativa sincronizada desde Supabase"
-    },
-    {
-      "a": "C. San Alejandro, 24, 11130 Chiclana de la Frontera, Cádiz",
-      "c": "Buceo",
-      "d": "Club y centro de buceo; cursos, experiencias de iniciación e inmersiones.",
-      "n": "Centollo Dive",
-      "p": "633 41 18 04",
-      "t": "ocio",
-      "id": "proposal:b3e7c772-2995-4703-9066-3b30dffe07d0",
-      "f": "Ficha de negocio / mapas"
+      "fuente_estado": "Ficha administrativa sincronizada desde Supabase",
+      "fuentes_integradas": [
+        "Ficha de negocio / mapas"
+      ]
     },
     {
       "id": "osm:node:4261106889",
@@ -4928,7 +4879,9 @@
       "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
       "id": "oficial:e26d071430774934a25a",
       "fuentes_integradas": [
-        "v3/data.json"
+        "v3/data.json",
+        "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+        "v3/oficiales.json"
       ]
     },
     {
@@ -4941,7 +4894,9 @@
       "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
       "id": "oficial:dbb5a9e2078f3254a638",
       "fuentes_integradas": [
-        "v3/data.json"
+        "v3/data.json",
+        "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+        "v3/oficiales.json"
       ]
     },
     {
@@ -4954,45 +4909,8 @@
       "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
       "id": "oficial:a8106036befa2e2799e5",
       "fuentes_integradas": [
-        "v3/data.json"
-      ]
-    },
-    {
-      "n": "Centro de Especialidades la Longuera",
-      "t": "negocio",
-      "c": "Servicio público",
-      "a": "La Longuera, s/n",
-      "p": "956 006 111 / 12",
-      "s": "Centros médicos privados",
-      "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
-      "id": "consolidado:centro de especialidades la longuera|negocio|servicio publico|la longuera s n",
-      "fuentes_integradas": [
-        "v3/oficiales.json"
-      ]
-    },
-    {
-      "n": "Centro de Especialidades la Longuera",
-      "t": "negocio",
-      "c": "Servicio público",
-      "a": "Urgencias (20:00 a 08:00/Festivos)",
-      "p": "662 976 719",
-      "s": "Centros médicos privados",
-      "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
-      "id": "consolidado:centro de especialidades la longuera|negocio|servicio publico|urgencias 20 00 a 08 00 festivos",
-      "fuentes_integradas": [
-        "v3/oficiales.json"
-      ]
-    },
-    {
-      "n": "Centro de Especialidades la Longuera",
-      "t": "negocio",
-      "c": "Servicio público",
-      "a": "Ctra. N-IV",
-      "p": "956 005 000",
-      "s": "Centros médicos privados",
-      "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
-      "id": "consolidado:centro de especialidades la longuera|negocio|servicio publico|ctra n iv",
-      "fuentes_integradas": [
+        "v3/data.json",
+        "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
         "v3/oficiales.json"
       ]
     },
@@ -6622,7 +6540,9 @@
       "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
       "id": "oficial:85cb11586e2a761f145c",
       "fuentes_integradas": [
-        "v3/data.json"
+        "v3/data.json",
+        "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+        "v3/oficiales.json"
       ]
     },
     {
@@ -6635,7 +6555,9 @@
       "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
       "id": "oficial:2a2cd1c94cb144a7e1d6",
       "fuentes_integradas": [
-        "v3/data.json"
+        "v3/data.json",
+        "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+        "v3/oficiales.json"
       ]
     },
     {
@@ -6654,32 +6576,6 @@
       "f": "OpenStreetMap",
       "fuentes_integradas": [
         "v3/data.json"
-      ]
-    },
-    {
-      "n": "Correos",
-      "t": "negocio",
-      "c": "Servicio público",
-      "a": "Jesús Nazareno, 4",
-      "p": "956 402 535",
-      "w": "https://www.correos.es",
-      "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
-      "id": "consolidado:correos|negocio|servicio publico|jesus nazareno 4",
-      "fuentes_integradas": [
-        "v3/oficiales.json"
-      ]
-    },
-    {
-      "n": "Correos",
-      "t": "negocio",
-      "c": "Servicio público",
-      "a": "Alameda de Solano, 2",
-      "p": "956 497 794",
-      "w": "https://www.correos.es",
-      "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
-      "id": "consolidado:correos|negocio|servicio publico|alameda de solano 2",
-      "fuentes_integradas": [
-        "v3/oficiales.json"
       ]
     },
     {
@@ -6713,7 +6609,9 @@
       "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
       "id": "oficial:140aa95fd366376e93ae",
       "fuentes_integradas": [
-        "v3/data.json"
+        "v3/data.json",
+        "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+        "v3/oficiales.json"
       ]
     },
     {
@@ -6732,22 +6630,6 @@
       "f": "OpenStreetMap",
       "fuentes_integradas": [
         "v3/data.json"
-      ]
-    },
-    {
-      "n": "Cortijo los Gallos",
-      "t": "negocio",
-      "c": "Hotel",
-      "a": "Ctra. de la Barrosa, Urb. Los Gallos, 461",
-      "p": "956 490 950",
-      "e": "info@hotelcortijolosgallos.com",
-      "w": "https://www.hotelcortijolosgallos.com",
-      "s": "Hotel 2 estrellas",
-      "m": "https://goo.gl/maps/SDwjGf6FNaXuhxsL7",
-      "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
-      "id": "consolidado:cortijo los gallos|negocio|hotel|ctra de la barrosa urb los gallos 461",
-      "fuentes_integradas": [
-        "v3/oficiales.json"
       ]
     },
     {
@@ -7221,7 +7103,9 @@
       "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
       "id": "oficial:211265c9f18077efde7b",
       "fuentes_integradas": [
-        "v3/data.json"
+        "v3/data.json",
+        "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+        "v3/oficiales.json"
       ]
     },
     {
@@ -7235,7 +7119,9 @@
       "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
       "id": "oficial:3ffbfb0d2d603e319e2d",
       "fuentes_integradas": [
-        "v3/data.json"
+        "v3/data.json",
+        "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+        "v3/oficiales.json"
       ]
     },
     {
@@ -7249,7 +7135,9 @@
       "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
       "id": "oficial:7030c46174ade7a07af3",
       "fuentes_integradas": [
-        "v3/data.json"
+        "v3/data.json",
+        "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+        "v3/oficiales.json"
       ]
     },
     {
@@ -7268,48 +7156,6 @@
       "f": "OpenStreetMap",
       "fuentes_integradas": [
         "v3/data.json"
-      ]
-    },
-    {
-      "n": "Cruz Roja",
-      "t": "negocio",
-      "c": "Servicio público",
-      "a": "Jesús Nazareno, 11",
-      "p": "956 400 467",
-      "e": "chiclana@cruzroja.es",
-      "w": "https://Web: Abre un enlace externo en una nueva ventana www.cruzroja.es",
-      "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
-      "id": "consolidado:cruz roja|negocio|servicio publico|jesus nazareno 11",
-      "fuentes_integradas": [
-        "v3/oficiales.json"
-      ]
-    },
-    {
-      "n": "Cruz Roja",
-      "t": "negocio",
-      "c": "Servicio público",
-      "a": "Playa la Barrosa 2ª Pista",
-      "p": "956 240 949",
-      "e": "chiclana@cruzroja.es",
-      "w": "https://Web: Abre un enlace externo en una nueva ventana www.cruzroja.es",
-      "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
-      "id": "consolidado:cruz roja|negocio|servicio publico|playa la barrosa 2 pista",
-      "fuentes_integradas": [
-        "v3/oficiales.json"
-      ]
-    },
-    {
-      "n": "Cruz Roja",
-      "t": "negocio",
-      "c": "Servicio público",
-      "a": "Urgencias Cruz Roja",
-      "p": "956 240 949",
-      "e": "chiclana@cruzroja.es",
-      "w": "https://Web: Abre un enlace externo en una nueva ventana www.cruzroja.es",
-      "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
-      "id": "consolidado:cruz roja|negocio|servicio publico|urgencias cruz roja",
-      "fuentes_integradas": [
-        "v3/oficiales.json"
       ]
     },
     {
@@ -8580,17 +8426,10 @@
       "t": "ocio",
       "v": "2026-10-23",
       "id": "manual:70302956-dd7d-420a-bce0-643bbbbdae61",
-      "fuente_estado": "Ficha administrativa sincronizada desde Supabase"
-    },
-    {
-      "a": "Cjón. de la Peligra, 11130 Chiclana de la Frontera, Cádiz",
-      "c": "Aventura",
-      "d": "Escuela y experiencias de paramotor/paratrike; confirmar punto de despegue y condiciones.",
-      "n": "Eolo School",
-      "p": "616 39 90 81",
-      "t": "ocio",
-      "id": "proposal:a26439de-62d5-4d4b-9685-e3e69340811e",
-      "f": "Ficha de negocio / mapas"
+      "fuente_estado": "Ficha administrativa sincronizada desde Supabase",
+      "fuentes_integradas": [
+        "Ficha de negocio / mapas"
+      ]
     },
     {
       "id": "osm:node:13482914401",
@@ -9946,17 +9785,10 @@
       "v": "2026-10-24",
       "w": "https://galaxypark.es/chiclana-las-salinas/",
       "id": "manual:eeaf2f01-3f40-46a1-8dcf-87a86937dcb0",
-      "fuente_estado": "Ficha administrativa sincronizada desde Supabase"
-    },
-    {
-      "a": "Parque Comercial Las Salinas, Av. de los Descubrimientos, 11130 Chiclana de la Frontera, Cádiz",
-      "c": "Ocio familiar",
-      "d": "Centro de ocio con bolera, arcade, realidad virtual, karaoke y celebraciones.",
-      "n": "Galaxy Park Bowling Chiclana",
-      "t": "ocio",
-      "w": "https://galaxypark.es/chiclana-las-salinas/",
-      "id": "proposal:5c4994a2-a582-4431-977c-af3183744f1b",
-      "f": "Web oficial del establecimiento"
+      "fuente_estado": "Ficha administrativa sincronizada desde Supabase",
+      "fuentes_integradas": [
+        "Web oficial del establecimiento"
+      ]
     },
     {
       "id": "osm:node:13463577801",
@@ -10657,7 +10489,9 @@
       "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
       "id": "oficial:1154bfee050329b7afe8",
       "fuentes_integradas": [
-        "v3/data.json"
+        "v3/data.json",
+        "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+        "v3/oficiales.json"
       ]
     },
     {
@@ -10676,22 +10510,6 @@
       "f": "OpenStreetMap",
       "fuentes_integradas": [
         "v3/data.json"
-      ]
-    },
-    {
-      "n": "Hipotels Playa la Barrosa",
-      "t": "negocio",
-      "c": "Hotel",
-      "a": "Urb. Novo Sancti Petri . Playa de la Barrosa",
-      "p": "956 494 824",
-      "e": "playalabarrosa@hipotels.com",
-      "w": "https://www.hipotels.com",
-      "s": "Hotel 4 estrellas",
-      "m": "https://goo.gl/maps/gErJC9cmZLH6SW6s9",
-      "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
-      "id": "consolidado:hipotels playa la barrosa|negocio|hotel|urb novo sancti petri playa de la barrosa",
-      "fuentes_integradas": [
-        "v3/oficiales.json"
       ]
     },
     {
@@ -11184,7 +11002,9 @@
       "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
       "id": "oficial:c662c7fd00b566500259",
       "fuentes_integradas": [
-        "v3/data.json"
+        "v3/data.json",
+        "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+        "v3/oficiales.json"
       ]
     },
     {
@@ -11203,21 +11023,6 @@
       "f": "OpenStreetMap",
       "fuentes_integradas": [
         "v3/data.json"
-      ]
-    },
-    {
-      "n": "Hotel Escuela Fuentemar",
-      "t": "negocio",
-      "c": "Hotel",
-      "a": "Ctra. Fuente Amarga, s/n",
-      "p": "956 400 111",
-      "e": "recepcion@balneariodechiclana.es",
-      "s": "Hotel 3 estrellas",
-      "m": "https://goo.gl/maps/KUUbVx6y1aPB7g1Q8",
-      "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
-      "id": "consolidado:hotel escuela fuentemar|negocio|hotel|ctra fuente amarga s n",
-      "fuentes_integradas": [
-        "v3/oficiales.json"
       ]
     },
     {
@@ -11284,7 +11089,9 @@
       "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
       "id": "oficial:2ebf001f269b909d84b5",
       "fuentes_integradas": [
-        "v3/data.json"
+        "v3/data.json",
+        "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+        "v3/oficiales.json"
       ]
     },
     {
@@ -11303,22 +11110,6 @@
       "f": "OpenStreetMap",
       "fuentes_integradas": [
         "v3/data.json"
-      ]
-    },
-    {
-      "n": "Hotel Mariantonia",
-      "t": "negocio",
-      "c": "Hotel",
-      "a": "Avda. del Cangrejo, 5. Playa de la Barrosa",
-      "p": "956 496 022",
-      "e": "info@alojamientosoasis.com",
-      "w": "https://www.mariantoniahotel.com",
-      "s": "Hotel 2 estrellas",
-      "m": "https://goo.gl/maps/EWF4rE9vfym",
-      "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
-      "id": "consolidado:hotel mariantonia|negocio|hotel|avda del cangrejo 5 playa de la barrosa",
-      "fuentes_integradas": [
-        "v3/oficiales.json"
       ]
     },
     {
@@ -16943,19 +16734,10 @@
       "lat": 36.419,
       "lon": -6.146,
       "id": "manual:6e14031d-e690-4271-9bfb-784ceaa326cf",
-      "fuente_estado": "Ficha administrativa sincronizada desde Supabase"
-    },
-    {
-      "a": "C. Alameda del Río, 11130 Chiclana de la Frontera, Cádiz",
-      "c": "Parking",
-      "d": "Aparcamiento cubierto en el centro; el directorio consultado indica servicio 24 horas.",
-      "n": "Parking INDIGO Alameda del Río",
-      "p": "956 53 13 26",
-      "t": "negocio",
-      "lat": 36.419,
-      "lon": -6.146,
-      "id": "proposal:3f5acadc-bbd6-41dd-a306-664550e38fd0",
-      "f": "Ficha de negocio / mapas"
+      "fuente_estado": "Ficha administrativa sincronizada desde Supabase",
+      "fuentes_integradas": [
+        "Ficha de negocio / mapas"
+      ]
     },
     {
       "a": "C. Caraza, 35, 11130 Chiclana de la Frontera, Cádiz",
@@ -22939,7 +22721,7 @@
       "estado_revision": "pendiente"
     }
   ],
-  "total_fichas": 1322,
+  "total_fichas": 1302,
   "total_candidatas_revision": 2,
   "fuente_unica": "fichas_completas.json",
   "propuesta_consolidacion": {
