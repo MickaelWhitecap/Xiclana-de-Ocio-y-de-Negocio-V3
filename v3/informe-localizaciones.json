@@ -7859,5 +7859,16 @@
       "Ruta cultural": 6,
       "Servicio público": 1
     }
+  },
+  "revision_pendientes": {
+    "fecha": "2026-10-30",
+    "total_revisadas": 36,
+    "direcciones_propuestas": 29,
+    "coordenadas_nuevas_propuestas": 6,
+    "rutas_que_requieren_trazado": 6,
+    "servicios_genericos_que_no_deben_tener_pin": 1,
+    "fichas_con_direccion_o_coordenada_propuesta": 29,
+    "pendientes_de_direccion": 0,
+    "nota": "El resumen principal sigue describiendo el catálogo maestro sin modificar. Esta revisión añade propuestas externas y no altera las cifras de cobertura del maestro. Las 36 fichas ya tienen un tratamiento asignado: 29 con dirección/coordenada propuesta, seis rutas sin pin y un servicio genérico sin pin."
   }
 }
