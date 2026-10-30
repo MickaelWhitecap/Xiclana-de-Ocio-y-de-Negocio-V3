@@ -514,17 +514,63 @@
       "fuentes": [
         "https://www.iberostar.com/es/hoteles/cadiz/iberostar-selection-andalucia-playa/"
       ]
+    },
+    {
+      "id_ficha": "oficial:0ac09fc904b624f470ee",
+      "nombre": "SPA by Clarins Hotel Gran Meliá Sancti Petri",
+      "cambios_propuestos": {
+        "a": "Hotel Gran Meliá Sancti Petri, Urbanización Novo Sancti Petri, s/n, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "La ficha oficial de Turismo de Chiclana identifica el spa dentro del hotel y publica la ubicación. El teléfono de la ficha coincide con el del hotel.",
+      "fuentes": [
+        "https://turismo.chiclana.es/en/detail/spa-by-clarins-hotel-gran-melia-sancti-petri/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:c3a8573884056bacd538",
+      "nombre": "SPA SENSATION Hotel Iberostar Royal Andalus",
+      "cambios_propuestos": {
+        "a": "Hotel Iberostar Waves Royal Andalus, Calle Amílcar Barca, s/n, Urbanización Novo Sancti Petri, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "La web oficial de Iberostar confirma la dirección del hotel y la existencia de SPA Sensations en sus instalaciones. El spa comparte la ubicación del hotel, no tiene una dirección independiente.",
+      "fuentes": [
+        "https://www.iberostar.com/hoteles/cadiz/iberostar-waves-royal-andalus/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:2304ecbba8c6dc28a141",
+      "nombre": "Surf Kite House",
+      "cambios_propuestos": {
+        "a": "Calle Pato Silvestre, 11130 Chiclana de la Frontera, Cádiz",
+        "w": "https://surfkitehouse.es/"
+      },
+      "confianza": "alta",
+      "nota": "La web actual de la escuela confirma el dominio surfkitehouse.es y publica Calle Pato Silvestre como dirección de referencia. La ficha conserva además dos dominios antiguos; mantenerlos como alias solo si siguen redirigiendo.",
+      "fuentes": [
+        "https://surfkitehouse.es/",
+        "https://surfkitehouse.es/cursos-paddel-surf/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:53416e1a05d8daa84548",
+      "nombre": "Zaida Actividades Náuticas",
+      "cambios_propuestos": {
+        "a": "Puerto Deportivo de Sancti Petri, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "Turismo de Chiclana y la web de la escuela sitúan la actividad en el Puerto Deportivo de Sancti Petri. La empresa también opera en Playa de Sancti Petri y La Barrosa; la ficha puede describir el puerto como sede principal.",
+      "fuentes": [
+        "https://turismo.chiclana.es/en/detail/zaida-actividades-nauticas/",
+        "https://www.escueladevelazaida.es/"
+      ]
     }
   ],
-  "resumen": "39 propuestas preparadas para revisión. Ninguna modifica el catálogo maestro ni la web pública.",
+  "resumen": "43 propuestas preparadas para revisión. Ninguna modifica el catálogo maestro ni la web pública.",
   "fecha_actualizacion": "2026-10-30",
   "siguiente_lote": {
-    "revisadas_en_esta_ampliacion": 8,
-    "fuentes_prioritarias": [
-      "webs oficiales de establecimientos",
-      "Ayuntamiento de Chiclana y Turismo municipal",
-      "Junta de Andalucía y organismos públicos"
-    ],
-    "criterio": "Solo añadir campos vacíos o corregir errores evidentes de dominio; discrepancias de teléfono se conservan como alternativas para aprobación."
+    "revisadas_en_esta_ampliacion": 4,
+    "criterio": "Se priorizan fuentes oficiales y datos de ubicación verificables; no se rellenan páginas web ausentes con dominios históricos sin comprobar ni se inventan direcciones."
   }
 }
