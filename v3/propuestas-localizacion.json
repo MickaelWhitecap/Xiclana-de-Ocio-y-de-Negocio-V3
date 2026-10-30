@@ -1,0 +1,218 @@
+{
+  "proyecto": "Xiclana de Ocio y de NegOcio",
+  "fecha": "2026-10-30",
+  "estado": "propuestas pendientes de aprobación; no aplicado al catálogo maestro",
+  "archivo_base": "v3/fichas_completas.json",
+  "sha_catalogo": "1e5004609cfb8853353698151ad09671efef0a97",
+  "criterio": "Solo se proponen coordenadas con una referencia pública identificable. Los pines de puerto o edificios con varias entidades se marcan como aproximados y requieren revisión de precisión.",
+  "resumen": {
+    "correcciones_de_coordenadas": 2,
+    "nuevas_coordenadas": 11,
+    "total_propuestas": 14
+  },
+  "propuestas": [
+    {
+      "id_ficha": "manual:30ca79ce-ecfd-4a70-9f02-c1df5b91a05d",
+      "nombre": "Parking Las Albinas 1-2",
+      "actual": {
+        "lat": 36.420876,
+        "lon": 6.152069
+      },
+      "propuesta": {
+        "lat": 36.420876,
+        "lon": -6.152069
+      },
+      "confianza": "alta",
+      "nota": "Corrección del signo de longitud: el parking está en Chiclana, al oeste de Greenwich. La dirección C. Caraza, 35 coincide con el aparcamiento localizado en el centro.",
+      "fuentes": [
+        "https://callejear.com/cadiz/chiclana-de-la-frontera/calle-de-las-albinas/",
+        "https://www.google.com/maps/search/?api=1&query=Parking+Las+Albinas+1-2+Chiclana"
+      ]
+    },
+    {
+      "id_ficha": "manual:a5cbbf9d-7560-45fd-8a85-70dc921c43e8",
+      "nombre": "Windsurf Club Sancti Petri",
+      "actual": {
+        "lat": 36.393339,
+        "lon": 6.208825
+      },
+      "propuesta": {
+        "lat": 36.393339,
+        "lon": -6.208825
+      },
+      "confianza": "media",
+      "nota": "Corrección del signo de longitud. El establecimiento se sitúa en el Puerto Deportivo de Sancti Petri; las coordenadas oficiales de la oficina portuaria confirman longitud oeste próxima a -6.209.",
+      "fuentes": [
+        "https://www.puertosdeandalucia.es/puertos/puertos/cadiz/puerto-de-sancti-petri",
+        "https://www.guiadecadiz.com/sites/default/files/localidad/Bahia_de_Cadiz/Chiclana_de_la_Frontera/FOLLETO_NAUTICA.pdf"
+      ]
+    },
+    {
+      "id_ficha": "oficial:1cbe8f5267fd661a2a4e",
+      "nombre": "Academia Outsail",
+      "propuesta": {
+        "lat": 36.42964,
+        "lon": -6.14504
+      },
+      "confianza": "alta",
+      "nota": "Coordenadas publicadas en cartografía abierta para el punto Outsail; coinciden con su dirección en Centro Comercial Las Redes, Av. de los Descubrimientos, 2, local 49D.",
+      "fuentes": [
+        "https://mapcarta.com/N13463941501",
+        "https://outsail.es/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:69f7f1d16dae49f4c916",
+      "nombre": "Biblioteca Municipal García Gutiérrez",
+      "propuesta": {
+        "lat": 36.420722,
+        "lon": -6.148437
+      },
+      "confianza": "alta",
+      "nota": "Coordenadas publicadas por la Agenda Cultural de Andalucía para la biblioteca de C/ Vega, 6.",
+      "fuentes": [
+        "https://www.juntadeandalucia.es/cultura/agendaculturaldeandalucia/espacios/biblioteca-municipal-de-chiclana-de-la-frontera",
+        "https://www.chiclana.es/delegaciones/cultura/biblioteca-publica-municipal-garcia-gutierrez"
+      ]
+    },
+    {
+      "id_ficha": "consolidado:ayuntamiento|negocio|servicio publico|c constitucion 1",
+      "nombre": "Ayuntamiento",
+      "propuesta": {
+        "lat": 36.41970665,
+        "lon": -6.14958016
+      },
+      "confianza": "alta",
+      "nota": "Coordenadas de la sede municipal en C/ Constitución, 1.",
+      "fuentes": [
+        "https://www.dechiclana.com/item/ayuntamiento/",
+        "https://www.coe.int/es/web/cultural-routes/-/municipality-of-chiclana"
+      ]
+    },
+    {
+      "id_ficha": "oficial:2f3b30558cf222424cc3",
+      "nombre": "Ayuntamiento (edificio histórico)",
+      "propuesta": {
+        "lat": 36.41970665,
+        "lon": -6.14958016
+      },
+      "confianza": "alta",
+      "nota": "Mismo edificio municipal que la ficha Ayuntamiento; duplicidad de entidad, no dos sedes distintas.",
+      "fuentes": [
+        "https://www.dechiclana.com/item/ayuntamiento/",
+        "https://www.coe.int/es/web/cultural-routes/-/municipality-of-chiclana"
+      ]
+    },
+    {
+      "id_ficha": "manual:998f9f54693eb265ccde",
+      "nombre": "Ayuntamiento de Chiclana",
+      "propuesta": {
+        "lat": 36.41970665,
+        "lon": -6.14958016
+      },
+      "confianza": "alta",
+      "nota": "Mismo edificio municipal que las otras dos fichas Ayuntamiento; duplicidad de entidad.",
+      "fuentes": [
+        "https://www.dechiclana.com/item/ayuntamiento/",
+        "https://www.coe.int/es/web/cultural-routes/-/municipality-of-chiclana"
+      ]
+    },
+    {
+      "id_ficha": "oficial:bc553825c15286021ef4",
+      "nombre": "Centro de Interpretación del Vino y la Sal",
+      "propuesta": {
+        "lat": 36.4211155,
+        "lon": -6.1510886
+      },
+      "confianza": "media",
+      "nota": "Coordenadas de la ubicación en Plaza de las Bodegas, s/n, contrastadas con la localización cartográfica del centro. Es una referencia de edificio, no de una entrada concreta.",
+      "fuentes": [
+        "https://www.vinoysal.es/visita",
+        "https://ahib.es/centro-de-interpretacion-del-vino-y-la-sal-chiclana-de-la-frontera-cadiz/"
+      ]
+    },
+    {
+      "id_ficha": "turismo:6f9ad82d5cbc85d1e3b8",
+      "nombre": "Bodega Cooperativa – Unión de Viticultores Chiclaneros",
+      "propuesta": {
+        "lat": 36.425839,
+        "lon": -6.148617
+      },
+      "confianza": "media",
+      "nota": "Coordenadas publicadas para C/ Madera, 5, Polígono Industrial El Torno; la dirección también figura en la guía turística provincial.",
+      "fuentes": [
+        "https://www.bodegasblancareyes.com/bodegas/bodega-cooperativa-de-vinos-de-chiclana-union-de-viticultores-chiclaneros-chiclana-de-la-frontera/",
+        "https://cadizturismo.com/storage/app/media/actividadeschiclana.pdf"
+      ]
+    },
+    {
+      "id_ficha": "turismo:08037347299879c9047c",
+      "nombre": "Bodegas Primitivo Collantes",
+      "propuesta": {
+        "lat": 36.419342,
+        "lon": -6.140835
+      },
+      "confianza": "media",
+      "nota": "Coordenadas publicadas para C/ Ancha, 51, dirección confirmada por Turismo de Chiclana.",
+      "fuentes": [
+        "https://www.bodegasblancareyes.com/bodegas/bodegas-primitivo-collantes-chiclana-de-la-frontera/",
+        "https://turismo.chiclana.es/detalle-de-recurso/bodegas-primitivo-collantes/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:0af83add7c18d49512a1",
+      "nombre": "Museo Municipal Francisco Montes Paquiro",
+      "propuesta": {
+        "lat": 36.4165052,
+        "lon": -6.1461102
+      },
+      "confianza": "alta",
+      "nota": "Coordenadas de la Junta de Andalucía para el Jardín del Museo Francisco Montes Paquiro, en C/ San Agustín, 3.",
+      "fuentes": [
+        "https://www.juntadeandalucia.es/cultura/agendaculturaldeandalucia/espacios/jardin-del-museo-municipal-francisco-montes-paquiro"
+      ]
+    },
+    {
+      "id_ficha": "oficial:00840abca4a438b77e75",
+      "nombre": "Albarco.com",
+      "propuesta": {
+        "lat": 36.3950417,
+        "lon": -6.2090778
+      },
+      "confianza": "media",
+      "nota": "Coordenadas de la oficina del Puerto Deportivo de Sancti Petri, donde opera la salida estacional de Albarco. Pin aproximado de la zona de embarque, no de un local individual.",
+      "fuentes": [
+        "https://www.puertosdeandalucia.es/puertos/puertos/cadiz/puerto-de-sancti-petri",
+        "https://www.albarco.com/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:2481fb74ae3c713ec4e0",
+      "nombre": "Argosailing",
+      "propuesta": {
+        "lat": 36.3950417,
+        "lon": -6.2090778
+      },
+      "confianza": "media",
+      "nota": "Coordenadas del Puerto Deportivo de Sancti Petri, dirección confirmada por el registro empresarial. Pin aproximado de la zona de actividad.",
+      "fuentes": [
+        "https://www.puertosdeandalucia.es/puertos/puertos/cadiz/puerto-de-sancti-petri",
+        "https://argosailing.es/"
+      ]
+    },
+    {
+      "id_ficha": "osm:node:2343120422",
+      "nombre": "A.P. Caño Chanarro",
+      "propuesta": {
+        "lat": 36.3950417,
+        "lon": -6.2090778
+      },
+      "confianza": "media",
+      "nota": "Ubicación aproximada en el Puerto Deportivo de Sancti Petri, en la zona portuaria de C. de la Rivera. Se debe afinar el punto exacto dentro del muelle antes de publicar.",
+      "fuentes": [
+        "https://www.puertosdeandalucia.es/puertos/puertos/cadiz/puerto-de-sancti-petri",
+        "https://www.google.com/maps/search/?api=1&query=Asociacion+de+Pescadores+Ca%C3%B1o+Chanarro+Sancti+Petri"
+      ]
+    }
+  ]
+}
