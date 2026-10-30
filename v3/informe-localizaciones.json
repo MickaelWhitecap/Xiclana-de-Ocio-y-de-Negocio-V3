@@ -1,7 +1,7 @@
 {
   "proyecto": "Xiclana de Ocio y de NegOcio",
   "fecha": "2026-10-30",
-  "estado": "diagnostico y propuestas; no aplicado al catalogo maestro",
+  "estado": "diagnóstico actualizado después de aplicar las propuestas al catálogo maestro",
   "fuente": {
     "archivo": "v3/fichas_completas.json",
     "sha": "1e5004609cfb8853353698151ad09671efef0a97"
@@ -12,15 +12,15 @@
   },
   "resumen": {
     "fichas_activas": 1294,
-    "coordenadas_validas": 1165,
-    "coordenadas_invalidas": 2,
-    "sin_coordenadas_validas": 129,
-    "direccion_textual": 425,
-    "sin_direccion_textual": 869,
-    "direccion_y_coordenadas_validas": 332,
+    "coordenadas_validas": 1184,
+    "coordenadas_invalidas": 0,
+    "sin_coordenadas_validas": 110,
+    "direccion_textual": 454,
+    "sin_direccion_textual": 840,
+    "direccion_y_coordenadas_validas": 351,
     "coordenadas_sin_direccion": 833,
-    "sin_direccion_ni_coordenadas": 36,
-    "direccion_sin_coordenadas": 93
+    "sin_direccion_ni_coordenadas": 7,
+    "direccion_sin_coordenadas": 103
   },
   "errores_coordenadas": [
     {
@@ -46,241 +46,7 @@
       "nota": "La longitud está almacenada como positiva aunque la ubicación está al oeste de Greenwich. Confirmar y corregir el signo."
     }
   ],
-  "pendientes_sin_direccion_ni_coordenadas": [
-    {
-      "id": "oficial:00840abca4a438b77e75",
-      "n": "Albarco.com",
-      "c": "Náutica",
-      "p": "617 378 894/ 856 91 00 15",
-      "w": "https://www.albarco.com"
-    },
-    {
-      "id": "oficial:2481fb74ae3c713ec4e0",
-      "n": "Arsosailing",
-      "c": "Náutica",
-      "p": "626 193 960",
-      "w": "https://www.argosailling.es"
-    },
-    {
-      "id": "oficial:2f3b30558cf222424cc3",
-      "n": "Ayuntamiento (edificio histórico)",
-      "c": "Patrimonio",
-      "p": "956 490 002",
-      "w": "https://www.chiclana.es"
-    },
-    {
-      "id": "oficial:f4f25ea982d7b4cfbe9d",
-      "n": "Balneario de Chiclana",
-      "c": "Balneario y spa",
-      "p": "956 400520",
-      "w": "https://www.balneariodechiclana.net"
-    },
-    {
-      "id": "oficial:bc553825c15286021ef4",
-      "n": "Centro de Interpretación del Vino y la Sal",
-      "c": "Museo",
-      "p": "956 241 229",
-      "w": "https://www.vinoysal.es"
-    },
-    {
-      "id": "oficial:f82c75c0157a2e929e73",
-      "n": "Club Náutico \"Sancti Petri\"",
-      "c": "Instalación deportiva",
-      "p": "956 495 434",
-      "w": "https://www.cnsanctipetri.es"
-    },
-    {
-      "id": "oficial:773830be81c0560ebbbb",
-      "n": "Ermita del Santo Cristo",
-      "c": "Patrimonio"
-    },
-    {
-      "id": "oficial:8987479920db6cd0b7fa",
-      "n": "Escuela de Surf Chiclana-kitesurf Chiclana",
-      "c": "Náutica",
-      "p": "956 49 81 94/ 696 047 997",
-      "w": "https://www.kitesurfchiclana.com"
-    },
-    {
-      "id": "oficial:8a98a252720b98b1e3f2",
-      "n": "Escuela Municipal de Artes. Casa de las Artes",
-      "c": "Cultura",
-      "p": "620 785 599"
-    },
-    {
-      "id": "oficial:54b3c7e7468fcb0858e3",
-      "n": "Esencia Surf School",
-      "c": "Náutica",
-      "p": "606 984 621",
-      "w": "https://www.esenciasurfschool.com"
-    },
-    {
-      "id": "oficial:49d9bb308d38e11fef84",
-      "n": "Espacio Arqueológico Nueva Gadeira",
-      "c": "Museo",
-      "p": "672336800",
-      "w": "https://www.nuevagadeira.es"
-    },
-    {
-      "id": "oficial:f69a4fab835340c8f10e",
-      "n": "Iglesia de San Sebastián",
-      "c": "Patrimonio",
-      "p": "956 401 757"
-    },
-    {
-      "id": "oficial:921768b625ad4a907a2f",
-      "n": "Iglesia de San Telmo",
-      "c": "Patrimonio",
-      "p": "956 400 556"
-    },
-    {
-      "id": "oficial:664890c143779609baa0",
-      "n": "Iglesia Jesús Nazareno",
-      "c": "Patrimonio",
-      "p": "956 400 409"
-    },
-    {
-      "id": "oficial:62cdcd5ff7955e0bad87",
-      "n": "Medina Mudéjar",
-      "c": "Balneario y spa",
-      "p": "956 496 047",
-      "w": "https://medinamudejar.com/"
-    },
-    {
-      "id": "oficial:55578a43f4616996e415",
-      "n": "NAMMU SPA Hotel Vincci Costa Golf",
-      "c": "Balneario y spa",
-      "p": "956 494 535",
-      "w": "https://www.vinccihoteles.com"
-    },
-    {
-      "id": "oficial:813f69ef14d32f498327",
-      "n": "Novo Jet",
-      "c": "Náutica",
-      "p": "956 494 932",
-      "w": "https://www.novojet.net"
-    },
-    {
-      "id": "oficial:e4f5be40d91c5cd46119",
-      "n": "Oasis Escuela de Surf",
-      "c": "Náutica",
-      "p": "679 659 991",
-      "w": "https://www.oasissurfinglife.com"
-    },
-    {
-      "id": "turismo:1bcc1232f85408378a15",
-      "n": "Ruta cultural: Casas Monumentales",
-      "c": "Ruta cultural"
-    },
-    {
-      "id": "turismo:b78e3e749fb643f1e02b",
-      "n": "Ruta cultural: Centro histórico",
-      "c": "Ruta cultural"
-    },
-    {
-      "id": "turismo:05650520a7f6fdab4319",
-      "n": "Ruta cultural: Chiclana, de Origen Fenicio",
-      "c": "Ruta cultural"
-    },
-    {
-      "id": "turismo:79c460daf4896253a637",
-      "n": "Ruta cultural: Chiclana, Ruta Napoleónica",
-      "c": "Ruta cultural"
-    },
-    {
-      "id": "turismo:e1c15f3d5dd4aad64f61",
-      "n": "Ruta cultural: Romántica",
-      "c": "Ruta cultural"
-    },
-    {
-      "id": "turismo:dbe4dd9256466355b24c",
-      "n": "Ruta cultural: Río Iro",
-      "c": "Ruta cultural"
-    },
-    {
-      "id": "oficial:fca22ec0ae5aef3e4e69",
-      "n": "Sancti Petri Kayak",
-      "c": "Náutica",
-      "p": "676 363 718 (piraguas)/ 633 283 546 (veleros)",
-      "w": "https://www.santipetrikayak.com"
-    },
-    {
-      "id": "oficial:032eb937385d34062eec",
-      "n": "Spa Barrosa Palace",
-      "c": "Balneario y spa",
-      "p": "956 492 200",
-      "w": "https://www.hipotels.com"
-    },
-    {
-      "id": "oficial:0ac09fc904b624f470ee",
-      "n": "SPA by Clarins Hotel Gran Meliá Sancti Petri",
-      "c": "Balneario y spa",
-      "p": "956 491 200 ext. 708",
-      "w": "https://www.melia-sanctipetri.com/es/beauty-farm.html"
-    },
-    {
-      "id": "oficial:8e629fe7d4b2c2ddef4c",
-      "n": "Spa Iberostar Selection Andalucía Playa",
-      "c": "Balneario y spa",
-      "p": "956 497 060 Ext. 5060",
-      "w": "https://www.iberostar.com"
-    },
-    {
-      "id": "oficial:c3a8573884056bacd538",
-      "n": "SPA SENSATION Hotel Iberostar Royal Andalus",
-      "c": "Balneario y spa",
-      "p": "956 494 109",
-      "w": "https://www.iberostar.com"
-    },
-    {
-      "id": "oficial:8907793cf5722f7fe608",
-      "n": "SPASANAR Club Hotel Riu Chiclana",
-      "c": "Balneario y spa",
-      "p": "956 242 100",
-      "w": "https://www.riu.com"
-    },
-    {
-      "id": "oficial:ae5492fc1e8fb8da071f",
-      "n": "SPASANAR Hotel Hipotels Playa la Barrosa",
-      "c": "Balneario y spa",
-      "p": "956 494 824",
-      "w": "https://www.hipotels.com"
-    },
-    {
-      "id": "oficial:2304ecbba8c6dc28a141",
-      "n": "Surf Kite House",
-      "c": "Náutica",
-      "p": "636 752 623",
-      "w": "https://www.surfkitehouse.com / www.surfkitehouse.es"
-    },
-    {
-      "id": "oficial:5536e72b95603ac2fd0e",
-      "n": "U-spa Royal Hideaway",
-      "c": "Balneario y spa",
-      "p": "956 242 795",
-      "w": "https://www.barcelo.com"
-    },
-    {
-      "id": "oficial:9427c992514c37fb8222",
-      "n": "Urgencias",
-      "c": "Servicio público",
-      "p": "061 / 902 505 061"
-    },
-    {
-      "id": "oficial:423096c983aa24881a41",
-      "n": "Why-not-fly Escuela de Kitesurf",
-      "c": "Náutica",
-      "p": "619 804 339",
-      "w": "https://www.why-not-fly.com"
-    },
-    {
-      "id": "oficial:53416e1a05d8daa84548",
-      "n": "Zaida Actividades Naúticas",
-      "c": "Náutica",
-      "p": "610 086 535",
-      "w": "https://www.escueladevelazaida.es"
-    }
-  ],
+  "pendientes_sin_direccion_ni_coordenadas": [],
   "pendientes_con_direccion_sin_coordenadas": [
     {
       "id": "oficial:1cbe8f5267fd661a2a4e",
@@ -7863,12 +7629,291 @@
   "revision_pendientes": {
     "fecha": "2026-10-30",
     "total_revisadas": 36,
-    "direcciones_propuestas": 29,
-    "coordenadas_nuevas_propuestas": 6,
+    "direcciones_aplicadas": 29,
+    "coordenadas_aplicadas": 19,
+    "coordenadas_aplazadas": 2,
     "rutas_que_requieren_trazado": 6,
     "servicios_genericos_que_no_deben_tener_pin": 1,
-    "fichas_con_direccion_o_coordenada_propuesta": 29,
-    "pendientes_de_direccion": 0,
-    "nota": "El resumen principal sigue describiendo el catálogo maestro sin modificar. Esta revisión añade propuestas externas y no altera las cifras de cobertura del maestro. Las 36 fichas ya tienen un tratamiento asignado: 29 con dirección/coordenada propuesta, seis rutas sin pin y un servicio genérico sin pin."
-  }
+    "pendientes_de_localizacion": 0,
+    "registros_originales": [
+      {
+        "id": "oficial:00840abca4a438b77e75",
+        "n": "Albarco.com",
+        "c": "Náutica",
+        "p": "617 378 894/ 856 91 00 15",
+        "w": "https://www.albarco.com"
+      },
+      {
+        "id": "oficial:2481fb74ae3c713ec4e0",
+        "n": "Arsosailing",
+        "c": "Náutica",
+        "p": "626 193 960",
+        "w": "https://www.argosailling.es"
+      },
+      {
+        "id": "oficial:2f3b30558cf222424cc3",
+        "n": "Ayuntamiento (edificio histórico)",
+        "c": "Patrimonio",
+        "p": "956 490 002",
+        "w": "https://www.chiclana.es"
+      },
+      {
+        "id": "oficial:f4f25ea982d7b4cfbe9d",
+        "n": "Balneario de Chiclana",
+        "c": "Balneario y spa",
+        "p": "956 400520",
+        "w": "https://www.balneariodechiclana.net"
+      },
+      {
+        "id": "oficial:bc553825c15286021ef4",
+        "n": "Centro de Interpretación del Vino y la Sal",
+        "c": "Museo",
+        "p": "956 241 229",
+        "w": "https://www.vinoysal.es"
+      },
+      {
+        "id": "oficial:f82c75c0157a2e929e73",
+        "n": "Club Náutico \"Sancti Petri\"",
+        "c": "Instalación deportiva",
+        "p": "956 495 434",
+        "w": "https://www.cnsanctipetri.es"
+      },
+      {
+        "id": "oficial:773830be81c0560ebbbb",
+        "n": "Ermita del Santo Cristo",
+        "c": "Patrimonio"
+      },
+      {
+        "id": "oficial:8987479920db6cd0b7fa",
+        "n": "Escuela de Surf Chiclana-kitesurf Chiclana",
+        "c": "Náutica",
+        "p": "956 49 81 94/ 696 047 997",
+        "w": "https://www.kitesurfchiclana.com"
+      },
+      {
+        "id": "oficial:8a98a252720b98b1e3f2",
+        "n": "Escuela Municipal de Artes. Casa de las Artes",
+        "c": "Cultura",
+        "p": "620 785 599"
+      },
+      {
+        "id": "oficial:54b3c7e7468fcb0858e3",
+        "n": "Esencia Surf School",
+        "c": "Náutica",
+        "p": "606 984 621",
+        "w": "https://www.esenciasurfschool.com"
+      },
+      {
+        "id": "oficial:49d9bb308d38e11fef84",
+        "n": "Espacio Arqueológico Nueva Gadeira",
+        "c": "Museo",
+        "p": "672336800",
+        "w": "https://www.nuevagadeira.es"
+      },
+      {
+        "id": "oficial:f69a4fab835340c8f10e",
+        "n": "Iglesia de San Sebastián",
+        "c": "Patrimonio",
+        "p": "956 401 757"
+      },
+      {
+        "id": "oficial:921768b625ad4a907a2f",
+        "n": "Iglesia de San Telmo",
+        "c": "Patrimonio",
+        "p": "956 400 556"
+      },
+      {
+        "id": "oficial:664890c143779609baa0",
+        "n": "Iglesia Jesús Nazareno",
+        "c": "Patrimonio",
+        "p": "956 400 409"
+      },
+      {
+        "id": "oficial:62cdcd5ff7955e0bad87",
+        "n": "Medina Mudéjar",
+        "c": "Balneario y spa",
+        "p": "956 496 047",
+        "w": "https://medinamudejar.com/"
+      },
+      {
+        "id": "oficial:55578a43f4616996e415",
+        "n": "NAMMU SPA Hotel Vincci Costa Golf",
+        "c": "Balneario y spa",
+        "p": "956 494 535",
+        "w": "https://www.vinccihoteles.com"
+      },
+      {
+        "id": "oficial:813f69ef14d32f498327",
+        "n": "Novo Jet",
+        "c": "Náutica",
+        "p": "956 494 932",
+        "w": "https://www.novojet.net"
+      },
+      {
+        "id": "oficial:e4f5be40d91c5cd46119",
+        "n": "Oasis Escuela de Surf",
+        "c": "Náutica",
+        "p": "679 659 991",
+        "w": "https://www.oasissurfinglife.com"
+      },
+      {
+        "id": "turismo:1bcc1232f85408378a15",
+        "n": "Ruta cultural: Casas Monumentales",
+        "c": "Ruta cultural"
+      },
+      {
+        "id": "turismo:b78e3e749fb643f1e02b",
+        "n": "Ruta cultural: Centro histórico",
+        "c": "Ruta cultural"
+      },
+      {
+        "id": "turismo:05650520a7f6fdab4319",
+        "n": "Ruta cultural: Chiclana, de Origen Fenicio",
+        "c": "Ruta cultural"
+      },
+      {
+        "id": "turismo:79c460daf4896253a637",
+        "n": "Ruta cultural: Chiclana, Ruta Napoleónica",
+        "c": "Ruta cultural"
+      },
+      {
+        "id": "turismo:e1c15f3d5dd4aad64f61",
+        "n": "Ruta cultural: Romántica",
+        "c": "Ruta cultural"
+      },
+      {
+        "id": "turismo:dbe4dd9256466355b24c",
+        "n": "Ruta cultural: Río Iro",
+        "c": "Ruta cultural"
+      },
+      {
+        "id": "oficial:fca22ec0ae5aef3e4e69",
+        "n": "Sancti Petri Kayak",
+        "c": "Náutica",
+        "p": "676 363 718 (piraguas)/ 633 283 546 (veleros)",
+        "w": "https://www.santipetrikayak.com"
+      },
+      {
+        "id": "oficial:032eb937385d34062eec",
+        "n": "Spa Barrosa Palace",
+        "c": "Balneario y spa",
+        "p": "956 492 200",
+        "w": "https://www.hipotels.com"
+      },
+      {
+        "id": "oficial:0ac09fc904b624f470ee",
+        "n": "SPA by Clarins Hotel Gran Meliá Sancti Petri",
+        "c": "Balneario y spa",
+        "p": "956 491 200 ext. 708",
+        "w": "https://www.melia-sanctipetri.com/es/beauty-farm.html"
+      },
+      {
+        "id": "oficial:8e629fe7d4b2c2ddef4c",
+        "n": "Spa Iberostar Selection Andalucía Playa",
+        "c": "Balneario y spa",
+        "p": "956 497 060 Ext. 5060",
+        "w": "https://www.iberostar.com"
+      },
+      {
+        "id": "oficial:c3a8573884056bacd538",
+        "n": "SPA SENSATION Hotel Iberostar Royal Andalus",
+        "c": "Balneario y spa",
+        "p": "956 494 109",
+        "w": "https://www.iberostar.com"
+      },
+      {
+        "id": "oficial:8907793cf5722f7fe608",
+        "n": "SPASANAR Club Hotel Riu Chiclana",
+        "c": "Balneario y spa",
+        "p": "956 242 100",
+        "w": "https://www.riu.com"
+      },
+      {
+        "id": "oficial:ae5492fc1e8fb8da071f",
+        "n": "SPASANAR Hotel Hipotels Playa la Barrosa",
+        "c": "Balneario y spa",
+        "p": "956 494 824",
+        "w": "https://www.hipotels.com"
+      },
+      {
+        "id": "oficial:2304ecbba8c6dc28a141",
+        "n": "Surf Kite House",
+        "c": "Náutica",
+        "p": "636 752 623",
+        "w": "https://www.surfkitehouse.com / www.surfkitehouse.es"
+      },
+      {
+        "id": "oficial:5536e72b95603ac2fd0e",
+        "n": "U-spa Royal Hideaway",
+        "c": "Balneario y spa",
+        "p": "956 242 795",
+        "w": "https://www.barcelo.com"
+      },
+      {
+        "id": "oficial:9427c992514c37fb8222",
+        "n": "Urgencias",
+        "c": "Servicio público",
+        "p": "061 / 902 505 061"
+      },
+      {
+        "id": "oficial:423096c983aa24881a41",
+        "n": "Why-not-fly Escuela de Kitesurf",
+        "c": "Náutica",
+        "p": "619 804 339",
+        "w": "https://www.why-not-fly.com"
+      },
+      {
+        "id": "oficial:53416e1a05d8daa84548",
+        "n": "Zaida Actividades Naúticas",
+        "c": "Náutica",
+        "p": "610 086 535",
+        "w": "https://www.escueladevelazaida.es"
+      }
+    ],
+    "nota": "Se han aplicado 29 direcciones y 19 pares de coordenadas al catálogo. Las dos coordenadas históricas de Escuela de Surf Chiclana y Oasis Escuela de Surf se aplazaron porque los puntos publicados en un folleto antiguo no coinciden con las ubicaciones actuales recogidas por Turismo de Chiclana y/o las webs oficiales. Las seis rutas se mantienen sin pin individual y requieren trazado; Urgencias permanece como servicio genérico sin pin. No quedan fichas accionables pendientes dentro de este lote."
+  },
+  "entidades_sin_pin": [
+    {
+      "id": "turismo:1bcc1232f85408378a15",
+      "n": "Ruta cultural: Casas Monumentales",
+      "c": "Ruta cultural",
+      "tratamiento": "No asignar un único pin de establecimiento. Representar como ruta con trazado y/o paradas cuando se disponga del itinerario oficial."
+    },
+    {
+      "id": "turismo:b78e3e749fb643f1e02b",
+      "n": "Ruta cultural: Centro histórico",
+      "c": "Ruta cultural",
+      "tratamiento": "No asignar un único pin de establecimiento. Representar como ruta con trazado y/o paradas cuando se disponga del itinerario oficial."
+    },
+    {
+      "id": "turismo:05650520a7f6fdab4319",
+      "n": "Ruta cultural: Chiclana, de Origen Fenicio",
+      "c": "Ruta cultural",
+      "tratamiento": "No asignar un único pin de establecimiento. Representar como ruta con trazado y/o paradas cuando se disponga del itinerario oficial."
+    },
+    {
+      "id": "turismo:79c460daf4896253a637",
+      "n": "Ruta cultural: Chiclana, Ruta Napoleónica",
+      "c": "Ruta cultural",
+      "tratamiento": "No asignar un único pin de establecimiento. Representar como ruta con trazado y/o paradas cuando se disponga del itinerario oficial."
+    },
+    {
+      "id": "turismo:e1c15f3d5dd4aad64f61",
+      "n": "Ruta cultural: Romántica",
+      "c": "Ruta cultural",
+      "tratamiento": "No asignar un único pin de establecimiento. Representar como ruta con trazado y/o paradas cuando se disponga del itinerario oficial."
+    },
+    {
+      "id": "turismo:dbe4dd9256466355b24c",
+      "n": "Ruta cultural: Río Iro",
+      "c": "Ruta cultural",
+      "tratamiento": "No asignar un único pin de establecimiento. Representar como ruta con trazado y/o paradas cuando se disponga del itinerario oficial."
+    },
+    {
+      "id": "oficial:9427c992514c37fb8222",
+      "n": "Urgencias",
+      "c": "Servicio público",
+      "tratamiento": "No asignar pin geográfico a la ficha genérica. Debe mantenerse como servicio de emergencia con teléfonos de contacto; si se quiere representar centros físicos, crear fichas individuales de cada centro sanitario."
+    }
+  ]
 }
