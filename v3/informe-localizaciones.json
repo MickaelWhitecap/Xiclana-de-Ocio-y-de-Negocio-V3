@@ -7841,9 +7841,9 @@
   ],
   "propuestas_pendientes": {
     "archivo": "v3/propuestas-localizacion.json",
-    "propuestas": 14,
+    "propuestas": 13,
     "correcciones_de_coordenadas": 2,
-    "nuevas_coordenadas": 12
+    "nuevas_coordenadas": 11
   },
   "cobertura_proyectada": {
     "coordenadas_validas_si_se_aprueban": 1178,
