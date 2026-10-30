@@ -1,0 +1,162 @@
+{
+  "proyecto": "Xiclana de Ocio y de NegOcio V3",
+  "operacion": "Enriquecimiento de fichas activas que ya tienen correo electrónico",
+  "fecha": "2026-10-30",
+  "estado": "propuestas pendientes de aprobación; no aplicadas al catálogo público",
+  "reglas": [
+    "No modificar ni sustituir los datos actuales sin aprobación.",
+    "Solo proponer datos respaldados por fuentes públicas identificables.",
+    "Cuando una fuente contradiga el dato existente, conservar ambos como alternativas y marcar conflicto.",
+    "No publicar automáticamente estas propuestas."
+  ],
+  "universo": {
+    "fichas_activas_con_email": 125,
+    "campos_sin_dato": {
+      "direccion": 33,
+      "telefono": 2,
+      "web": 16
+    }
+  },
+  "propuestas": [
+    {
+      "id_ficha": "osm:node:9550529384",
+      "nombre": "A Pedales",
+      "cambios_propuestos": {
+        "w": "https://www.bicicletasapedales.com",
+        "h": "Lunes a viernes 09:30–20:30; sábado 09:30–13:30; domingo cerrado"
+      },
+      "confianza": "media",
+      "nota": "La web y el horario aparecen en directorios comerciales; el teléfono y correo actuales coinciden con otras fichas públicas. Conviene comprobar que el dominio sigue activo antes de aprobar.",
+      "fuentes": [
+        "https://www.todosbiz.es/bicicletas-a-pedales-956-53-49-42",
+        "https://www.cylex.es/chiclana-de-la-frontera/bicicletas-a-pedales-12940797.html"
+      ]
+    },
+    {
+      "id_ficha": "oficial:69f7f1d16dae49f4c916",
+      "nombre": "Biblioteca Municipal",
+      "cambios_propuestos": {
+        "w": "https://www.chiclana.es/delegaciones/cultura/biblioteca-publica-municipal-garcia-gutierrez"
+      },
+      "confianza": "alta",
+      "nota": "Página oficial municipal. La fuente también publica Facebook e Instagram, pero el esquema actual de ficha no tiene campos específicos para redes sociales.",
+      "fuentes": [
+        "https://www.chiclana.es/delegaciones/cultura/biblioteca-publica-municipal-garcia-gutierrez"
+      ]
+    },
+    {
+      "id_ficha": "oficial:51b25bb54f3afb8bd3f5",
+      "nombre": "Hostal El Campanario",
+      "cambios_propuestos": {
+        "w": "https://www.hostalelcampanario.com"
+      },
+      "confianza": "alta",
+      "nota": "Web propia del establecimiento. La web publica dos móviles y un email distintos de los actuales; no se sustituyen aquí. Revisar como alternativas: +34 623 311 568, +34 675 621 392 y hostal.elcampanario@gmail.com.",
+      "fuentes": [
+        "https://www.hostalelcampanario.com/",
+        "https://www.chiclanaguiadempresas.com/telefonos-de-interes/alojamientos/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:81732d4119b7c3d5a10c",
+      "nombre": "Hotel Novomar",
+      "cambios_propuestos": {
+        "w": "https://novomarhotel.es/"
+      },
+      "confianza": "media",
+      "nota": "La página de contacto del establecimiento contiene datos para Chiclana y Conil. No modificar el teléfono ni el correo actuales porque la ficha de Turismo de Chiclana los sigue mostrando; confirmar qué contacto corresponde al establecimiento chiclanero.",
+      "fuentes": [
+        "https://novomarhotel.es/contacto/",
+        "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/alojamiento/novomar/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:c662c7fd00b566500259",
+      "nombre": "Hotel Escuela Fuentemar",
+      "cambios_propuestos": {
+        "email_alternativo": "reservasfuentemar@emsisa.net"
+      },
+      "confianza": "media",
+      "nota": "Andalucía Turismo publica este correo de reservas, distinto del correo actual. Mantener ambos hasta confirmar cuál está vigente. El teléfono y dirección coinciden con la ficha.",
+      "fuentes": [
+        "https://www.andalucia.org/listing/hotel-escuela-fuentemar/4688102/",
+        "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/alojamiento/escuela-fuentemar/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:f69a4fab835340c8f10e",
+      "nombre": "Iglesia de San Sebastián",
+      "cambios_propuestos": {
+        "a": "Calle Ancha, 10, Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "Dirección publicada por la web oficial de Turismo de Chiclana.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/iglesia-de-san-sebastian/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:921768b625ad4a907a2f",
+      "nombre": "Iglesia de San Telmo",
+      "cambios_propuestos": {
+        "a": "Calle La Plaza, 6, Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "Dirección publicada por la web oficial de Turismo de Chiclana.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/iglesia-de-san-telmo/"
+      ]
+    },
+    {
+      "id_ficha": "manual:a5cbbf9d-7560-45fd-8a85-70dc921c43e8",
+      "nombre": "Windsurf Club Sancti Petri",
+      "cambios_propuestos": {
+        "p": "600 066 536"
+      },
+      "confianza": "alta",
+      "nota": "Teléfono publicado por la Federación Andaluza de Vela para Club Windsurf Sancti Petri en Chiclana; coincide el correo electrónico de contacto.",
+      "fuentes": [
+        "https://www.fav.es/clubes-de-andalucia/"
+      ]
+    },
+    {
+      "id_ficha": "osm:way:320773593",
+      "nombre": "Oficinas Hipotels Cádiz",
+      "cambios_propuestos": {
+        "p": "956 495 835"
+      },
+      "confianza": "media",
+      "nota": "Teléfono de contacto/reservas de Hipotels para Cádiz, publicado en la web corporativa. Es un contacto regional, no se ha podido confirmar como teléfono directo de una oficina física.",
+      "fuentes": [
+        "https://www.hipotels.com/contacto/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:94abed2977cbdf584917",
+      "nombre": "Multicines Las Salinas",
+      "cambios_propuestos": {
+        "w": "https://www.cineciudad.com/",
+        "a": "Polígono Industrial El Torno, Avenida de los Descubrimientos, 107D, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "La web de Turismo municipal confirma la dirección; varias fuentes de cartelera/directorio enlazan Cineciudad. El campo de email actual contiene «www.cineciudad.com», que parece ser una web mal colocada, no un correo: no borrarlo hasta aprobación.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/multicines-las-salinas/",
+        "https://www.guiadecadiz.com/es/cines-detalle?id=9227"
+      ]
+    },
+    {
+      "id_ficha": "oficial:8a98a252720b98b1e3f2",
+      "nombre": "Escuela Municipal de Artes. Casa de las Artes",
+      "cambios_propuestos": {
+        "a": "Casa de las Artes – Edificio Brake, Calle Santa Ana, 9, Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "media",
+      "nota": "La escuela reparte talleres entre Casa de las Artes–Edificio Brake y Casa de Cultura–Teatro Moderno. La dirección propuesta corresponde a una de sus sedes, no necesariamente a todos los servicios.",
+      "fuentes": [
+        "https://cuadernoamarillo.com/localizacion/"
+      ]
+    }
+  ],
+  "resumen": "10 propuestas preparadas para revisión. Ninguna modifica el catálogo maestro ni la web pública."
+}
