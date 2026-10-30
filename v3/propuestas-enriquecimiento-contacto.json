@@ -591,16 +591,177 @@
         "https://prevencionmpe.com/",
         "https://prevencionmpe.com/web/content/2909?unique=7290c7f3916ea2423474547cbcfde08469f79671"
       ]
+    },
+    {
+      "id_ficha": "oficial:1cbe8f5267fd661a2a4e",
+      "nombre": "Academia Outsail",
+      "cambios_propuestos": {
+        "s": "Escuela náutica homologada para formación marítima profesional y de recreo. Imparte cursos STCW y titulaciones de recreo: Certificado de Navegación, PNB, PER, Patrón de Yate y Capitán de Yate."
+      },
+      "confianza": "alta",
+      "nota": "Descripción y oferta formativa publicadas en la web propia. No se añade horario porque la página consultada no publica uno.",
+      "fuentes": [
+        "https://outsail.es/academia-nautica/"
+      ]
+    },
+    {
+      "id_ficha": "manual:68d63688-e0cc-4ce8-8d72-87935a367e03",
+      "nombre": "Actividades Náuticas Gurri",
+      "cambios_propuestos": {
+        "s": "Actividades náuticas desde el Puerto Deportivo de Sancti Petri: alquiler de kayaks, paddle surf y windsurf; excursiones en barco, rutas guiadas al Castillo de Sancti Petri y paseos en lancha."
+      },
+      "confianza": "media",
+      "nota": "Descripción de servicios publicada y revisada en octubre de 2026 por un directorio local. La fuente indica expresamente que no dispone de horario verificable.",
+      "fuentes": [
+        "https://aiunta.com/es/chiclana-de-la-frontera/ficha/actividades-nauticas-gurri"
+      ]
+    },
+    {
+      "id_ficha": "osm:way:277962040",
+      "nombre": "Amaré Hotel",
+      "cambios_propuestos": {
+        "s": "Hotel recomendado para adultos (edad mínima 16 años), con tres piscinas principales, rooftop, jacuzzi, espacio Wellness by Germaine de Capuccini, gimnasio, yoga, espectáculos y música en directo. Instalaciones comunes accesibles.",
+        "h": "Gimnasio: 06:00–00:00. Wellness: 11:00–19:00. Estos son horarios de servicios concretos, no horario general de recepción."
+      },
+      "confianza": "alta",
+      "nota": "Información de servicios y horarios publicada en la web oficial. Se especifica que los horarios corresponden al gimnasio y al Wellness, no a la apertura general del hotel.",
+      "fuentes": [
+        "https://www.amarehotels.com/es/amare-sancti-petri/preguntas-frecuentes/",
+        "https://www.amarehotels.com/es/amare-sancti-petri/servicios/"
+      ]
+    },
+    {
+      "id_ficha": "osm:node:9550520625",
+      "nombre": "Benibikes",
+      "cambios_propuestos": {
+        "h": "Lunes a viernes: 09:45–13:30 y 17:30–21:00; sábados: 10:00–13:30; domingos: cerrado."
+      },
+      "confianza": "media",
+      "nota": "Horario publicado por directorio comercial, actualizado el 19/06/2026. La web propia confirma dirección, teléfono y correo, pero no muestra horario; conviene confirmar antes de publicar.",
+      "fuentes": [
+        "https://www.cylex.es/chiclana-de-la-frontera/beni-bikes-13201355.html",
+        "https://benibikes.com/contactenos"
+      ]
+    },
+    {
+      "id_ficha": "oficial:d70c71fdc839e8e507a5",
+      "nombre": "Centro Deportivo Supera. Piscina Municipal Cubierta",
+      "cambios_propuestos": {
+        "h": "Lunes a viernes: 08:00–23:00; sábados: 08:00–22:00; domingos y festivos: 09:00–14:00.",
+        "s": "Complejo deportivo con piscinas climatizadas, zona spa, salas de actividades dirigidas, sala de bicicleta indoor, sala de fitness y musculación, sauna, cursos, campus y entrenamiento personal. Accesible para personas con movilidad reducida."
+      },
+      "confianza": "alta",
+      "nota": "Horario, instalaciones y servicios publicados en la web oficial de Centro Supera. La página municipal confirma equipamientos adicionales.",
+      "fuentes": [
+        "https://www.centrosupera.com/chiclana/",
+        "https://deportes.chiclana.es/instalaciones/gestion-indirecta/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:cce276865e66d9d2358b",
+      "nombre": "Centro Deportivo Urbano Costa Sancti Petri",
+      "cambios_propuestos": {
+        "s": "Instalación deportiva municipal próxima a la Playa de La Barrosa, con campo de fútbol 7, pistas de pádel, pista polideportiva, salas deportivas auxiliares, sala de musculación, zona wellness y cafetería.",
+        "h": "Horario de la instalación: lunes a viernes 08:00–14:30 y 15:30–23:30; sábados 08:00–14:30 y 16:00–21:00; domingos 08:30–14:00 y 16:00–19:00. Horario publicado para el servicio de cafetería en licitación municipal; confirmar si coincide con el horario general del centro."
+      },
+      "confianza": "alta",
+      "nota": "La descripción procede de Deportes y Turismo municipales. El horario disponible corresponde al pliego de la cafetería y no debe presentarse como horario general confirmado del centro.",
+      "fuentes": [
+        "https://deportes.chiclana.es/instalaciones/gestion-directa/complejos-deportivos/",
+        "https://turismo.chiclana.es/detalle-de-recurso/centro-deportivo-costa-sancti-petri/",
+        "https://www.chiclana.es/areas-municipales/seguridad-ciudadana-y-transporte/policia-local/noticias/detalle-noticia/sale-a-licitacion-la-explotacion-de-la-cafeteria-del-centro-deportivo-urbano-costa-sancti-petri-1"
+      ]
+    },
+    {
+      "id_ficha": "oficial:f1bd32945f20ef0c567d",
+      "nombre": "Chiclana Family Golf",
+      "cambios_propuestos": {
+        "h": "Horario de otoño publicado en la web oficial: todos los días de 09:00 a 18:00. El campo de prácticas cierra a las 17:00."
+      },
+      "confianza": "alta",
+      "nota": "Horario estacional publicado en la web oficial. La misma web publica otros horarios en páginas de tarifas; mantener la referencia a otoño y revisar al cambiar la temporada.",
+      "fuentes": [
+        "https://www.familygolfpark.es/",
+        "https://www.familygolfpark.es/tarifas"
+      ]
+    },
+    {
+      "id_ficha": "oficial:455b2d15a3c4506172ea",
+      "nombre": "Club de Golf Campano",
+      "cambios_propuestos": {
+        "s": "Campo de golf de 18 hoyos con casa club, terraza y restaurante de cocina tradicional. Dispone de campo de prácticas.",
+        "h": "Horario de invierno (25/10/2026–27/03/2027): recepción 08:00–19:00; campo de prácticas 08:00–17:00."
+      },
+      "confianza": "alta",
+      "nota": "Descripción y horario estacional publicados en la web oficial; el horario de invierno se anunció el 23/10/2026.",
+      "fuentes": [
+        "https://golfcampano.es/",
+        "https://golfcampano.es/actualidad-2/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:2516b08b42d46103e7b6",
+      "nombre": "Club de Tenis \"La Barrosa\"",
+      "cambios_propuestos": {
+        "s": "Club deportivo y social con pistas de tenis, pádel y pickleball, pista multideporte, piscina, parque infantil, bar-restaurante y actividades sociales. Ofrece clases individuales y grupales.",
+        "h": "Horario de pistas indicado por plataforma de reservas: todos los días 09:00–23:30. La plataforma también publica horarios estacionales distintos; confirmar con el club antes de publicar."
+      },
+      "confianza": "media",
+      "nota": "Las instalaciones se describen en la web propia del club. El horario procede de una plataforma de reservas y no de la página oficial; se deja marcado para confirmación.",
+      "fuentes": [
+        "https://clublabarrosa.com/",
+        "https://playtomic.com/es/clubs/club-la-barrosa"
+      ]
+    },
+    {
+      "id_ficha": "oficial:7d4d7787738ac04e3903",
+      "nombre": "Escuela Internacional de Tenis y Padel-\"HEIT\"",
+      "cambios_propuestos": {
+        "s": "Academia de tenis y pádel para niños y adultos, con clases individuales y grupales, entrenamientos de equipo y actividades de perfeccionamiento técnico y táctico.",
+        "h": "Escuela: de lunes a viernes 16:00–22:00; fines de semana 09:00–14:00. Clases privadas por la mañana según disponibilidad."
+      },
+      "confianza": "alta",
+      "nota": "Información de la escuela y horarios publicada en la web oficial de HEIT Academy.",
+      "fuentes": [
+        "https://heitacademy.com/escuela-padel-tenis/"
+      ]
+    },
+    {
+      "id_ficha": "osm:way:1328129080",
+      "nombre": "Crisol Chiclana",
+      "cambios_propuestos": {
+        "s": "Hotel urbano de 67 habitaciones, con salones para eventos y reuniones y patio andaluz. No admite mascotas y dispone de aparcamiento interior de pago.",
+        "h": "Entrada a partir de las 15:00 y salida hasta las 12:00. Desayuno: lunes a viernes 07:30–10:30; sábados, domingos y festivos 08:00–11:00."
+      },
+      "confianza": "alta",
+      "nota": "Datos de capacidad, servicios y horarios publicados en la web oficial de Eurostars Hotels.",
+      "fuentes": [
+        "https://www.eurostarshotels.com/crisol-chiclana.html"
+      ]
+    },
+    {
+      "id_ficha": "oficial:3dbc8886da51db7a30ca",
+      "nombre": "Estadio Municipal de Atletismo",
+      "cambios_propuestos": {
+        "s": "Instalación de atletismo homologada por la IAAF en clase 1, con pista sintética de 400 metros y 8 calles, campo interior de césped natural, anillo exterior de rodaje, jaula de lanzamientos y zonas para salto de longitud, altura, jabalina y peso."
+      },
+      "confianza": "alta",
+      "nota": "Equipamiento descrito en la página oficial de la Delegación Municipal de Deportes. La fuente consultada no publica horario de apertura.",
+      "fuentes": [
+        "https://deportes.chiclana.es/instalaciones/gestion-directa/instalaciones-al-aire-libre/"
+      ]
     }
   ],
-  "resumen": "45 propuestas preparadas para revisión. Ninguna modifica el catálogo maestro ni la web pública.",
+  "resumen": "57 propuestas preparadas para revisión. En esta ampliación se incorporan 12 fichas con información descriptiva y/o horarios contrastados. Ninguna modifica el catálogo maestro ni la web pública.",
   "fecha_actualizacion": "2026-10-30",
   "siguiente_lote": {
-    "revisadas_en_esta_ampliacion": 2,
+    "revisadas_en_esta_ampliacion": 12,
     "pendientes_de_verificacion": [
       "Hostal Ntra. Sra. del Rosario: no se ha localizado web propia verificable; no se inventa una URL.",
-      "Zen-saciones: el dominio antiguo aparece en directorios históricos, pero no se ha confirmado que siga operativo."
+      "Zen-saciones: el dominio antiguo aparece en directorios históricos, pero no se ha confirmado que siga operativo.",
+      "Camping La Rana Verde: existen dos fichas activas con el mismo establecimiento, una en Ocio y otra en Negocio; conviene resolver la duplicidad antes de replicar datos.",
+      "Farmacia La Barrosa: horario hallado en directorio externo, pendiente de confirmación directa."
     ],
-    "criterio": "No rellenar páginas web ausentes con dominios antiguos sin comprobar su vigencia."
+    "criterio": "Añadir solo información pública respaldada; distinguir horarios generales de horarios de servicios concretos y mantener la estacionalidad explícita."
   }
 }
