@@ -1240,9 +1240,88 @@
         "https://sanctipetrihillsgolf.com/es/",
         "https://sanctipetrihillsgolf.com/es/contacto/"
       ]
+    },
+    {
+      "id_ficha": "oficial:140aa95fd366376e93ae",
+      "nombre": "Cortijo los Gallos",
+      "cambios_propuestos": {
+        "a": "Carretera de La Barrosa, 116, 11130 Chiclana de la Frontera, Cádiz",
+        "s": "Hotel familiar de estilo andaluz con patio interior ajardinado, piscina exterior de temporada, terraza, cafetería y aparcamiento gratuito. Ofrece alojamiento próximo a las playas de La Barrosa y Sancti Petri."
+      },
+      "confianza": "alta",
+      "nota": "Dirección normalizada y servicios contrastados con la ficha empresarial y la web del establecimiento.",
+      "fuentes": [
+        "https://www.google.com/maps/search/?api=1&query=Hotel+Cortijo+Los+Gallos+Chiclana",
+        "https://www.hotelcortijolosgallos.com/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:3f234cf0036aec3f1cb0",
+      "nombre": "Hotel Aldiana Andalusien",
+      "cambios_propuestos": {
+        "s": "Club vacacional tipo resort en Novo Sancti Petri, con vacaciones todo incluido y actividades deportivas y de ocio para familias. La web oficial publica temporadas de apertura diferenciadas.",
+        "h": "Temporada 2026: 15 de marzo–9 de noviembre. Temporada 2027 anunciada: 14 de marzo–8 de noviembre. Son fechas de temporada del club, no horario diario de recepción."
+      },
+      "confianza": "alta",
+      "nota": "La web oficial confirma dirección, teléfono, correo y fechas de apertura de las temporadas 2026 y 2027.",
+      "fuentes": [
+        "https://www.aldiana.com/clubs/andalusien"
+      ]
+    },
+    {
+      "id_ficha": "oficial:a018965dd7dc247afbb6",
+      "nombre": "Ilunion Sancti Petri",
+      "cambios_propuestos": {
+        "s": "Aparthotel de 4 estrellas con apartamentos de uno y dos dormitorios y villas, piscinas exteriores para adultos y niños, restaurante, gastrobar, gimnasio, pistas de pádel, animación y miniclub. Admite mascotas y dispone de apartamentos accesibles.",
+        "h": "Gimnasio: todos los días de 08:00 a 21:00. Horario del gimnasio, no del establecimiento."
+      },
+      "confianza": "alta",
+      "nota": "Servicios, tipologías de alojamiento y horario del gimnasio publicados en la web oficial de ILUNION.",
+      "fuentes": [
+        "https://www.ilunionhotels.com/hoteles/ilunion-sancti-petri",
+        "https://www.ilunionhotels.com/hoteles/ilunion-sancti-petri/Servicios/Instalaciones1"
+      ]
+    },
+    {
+      "id_ficha": "oficial:0af83add7c18d49512a1",
+      "nombre": "Museo Municipal: Francisco Montes Paquiro",
+      "cambios_propuestos": {
+        "s": "Museo taurino municipal dedicado a Francisco Montes Reina, Paquiro (1805–1851), figura del toreo romántico. Reúne objetos, recuerdos y útiles taurinos, piezas históricas y materiales sobre la trayectoria del torero chiclanero."
+      },
+      "confianza": "media",
+      "nota": "La Delegación Municipal de Cultura confirma denominación, dirección y teléfono; la descripción histórica procede de una ficha cultural pública. No se añade horario porque las fuentes disponibles discrepan y no se ha localizado un calendario oficial actualizado.",
+      "fuentes": [
+        "https://www.chiclana.es/areas-municipales/sociedad-y-cultura/delegacion-de-cultura/espacios-culturales",
+        "https://www.guiadecadiz.com/es/museo-francisco-montes-paquiro"
+      ]
+    },
+    {
+      "id_ficha": "oficial:2bfb1cc6c3afbf393e99",
+      "nombre": "Polideportivo Municipal Santa Ana",
+      "cambios_propuestos": {
+        "s": "Complejo deportivo municipal de 12.697 m² con pabellón cubierto, pista de fútbol sala, pabellón multiusos, pistas de baloncesto y voleibol, mini-basket, cuatro pistas de tenis, tres pistas de pádel, sala de ciclo indoor, sala de artes marciales y vestuarios.",
+        "w": "https://deportes.chiclana.es/instalaciones/gestion-directa/complejos-deportivos/"
+      },
+      "confianza": "alta",
+      "nota": "Equipamiento, dirección y teléfono publicados por la Delegación Municipal de Deportes. Se propone una URL municipal específica.",
+      "fuentes": [
+        "https://deportes.chiclana.es/instalaciones/gestion-directa/complejos-deportivos/"
+      ]
+    },
+    {
+      "id_ficha": "manual:10a8f9cf90ea221069aa",
+      "nombre": "Teatro Moderno",
+      "cambios_propuestos": {
+        "h": "Taquilla: invierno, primavera y otoño, lunes a viernes no festivos 17:00–21:00 y dos horas antes de cada espectáculo. Julio y agosto: lunes a viernes no festivos 09:00–13:00, excepto días de función, cuando abre dos horas antes del espectáculo."
+      },
+      "confianza": "alta",
+      "nota": "Horario de taquilla publicado por la Delegación Municipal de Cultura. No debe confundirse con el horario de apertura del edificio ni con el horario de cada espectáculo.",
+      "fuentes": [
+        "https://www.chiclana.es/delegaciones/cultura"
+      ]
     }
   ],
-  "resumen": "94 propuestas preparadas para revisión. Esta ampliación añade información contrastada de servicios turísticos, culturales, deportivos y comerciales. No se modifica el catálogo maestro ni la web pública.",
+  "resumen": "100 propuestas preparadas para revisión. Se amplía la información sobre alojamientos, cultura y deporte con fuentes oficiales. No se modifica el catálogo maestro ni la web pública.",
   "fecha_actualizacion": "2026-10-30",
   "siguiente_lote": {
     "revisadas_en_esta_ampliacion": 8,
