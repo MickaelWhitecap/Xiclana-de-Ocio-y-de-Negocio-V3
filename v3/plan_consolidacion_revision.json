@@ -4,8 +4,8 @@
   "rama": "audit/integridad-catalogo-publicacion",
   "proposito": "Plan de consolidación no destructivo; no modifica el catálogo público ni Supabase.",
   "resumen": {
-    "registros_historicos": 1322,
-    "activos": 1314,
+    "registros_historicos": 1302,
+    "activos": 1294,
     "grupos_exactos": 20,
     "registros_en_grupos": 40,
     "excedentes_teoricos": 20,
@@ -1346,7 +1346,13 @@
       "3f5acadc-bbd6-41dd-a306-664550e38fd0"
     ],
     "limitacion": "La consulta confirmó existencia y estado de propuestas y overrides, pero no rastreó todas las referencias de IDs en el código ni todas las tablas posibles.",
-    "modificaciones_realizadas": false
+    "modificaciones_realizadas": false,
+    "recomendaciones": [
+      "Las 8 filas de listing_proposals aprobadas se conservan como historial; no se han borrado.",
+      "Los 8 overrides manuales siguen siendo la fuente de las fichas maestras; no se han modificado.",
+      "La consulta de referencias en listing_overrides, listing_proposals y advertising_slots no encontró referencias de Supabase para los 12 pares oficial/consolidado ni slots publicitarios vinculados a los 40 IDs.",
+      "La consolidación se aplicó únicamente al JSON maestro; no se ejecutaron escrituras ni migraciones en Supabase."
+    ]
   },
   "estado_final": "20 duplicados consolidados en el catálogo JSON; IDs maestros conservados; historial y overrides de Supabase preservados. La publicación queda pendiente de validación final del workflow."
 }
