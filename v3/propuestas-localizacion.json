@@ -7,7 +7,7 @@
   "criterio": "Solo se proponen coordenadas con una referencia pública identificable. Los pines de puerto o edificios con varias entidades se marcan como aproximados y requieren revisión de precisión.",
   "resumen": {
     "correcciones_de_coordenadas": 2,
-    "nuevas_coordenadas": 11,
+    "nuevas_coordenadas": 12,
     "total_propuestas": 14
   },
   "propuestas": [
