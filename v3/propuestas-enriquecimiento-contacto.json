@@ -868,19 +868,114 @@
         "https://www.hipotels.com/hoteles/barrosapalace/servicios/",
         "https://www.hipotels.com/hoteles/barrosapalace/spa/"
       ]
+    },
+    {
+      "id_ficha": "oficial:06519928bdaee17a93a0",
+      "nombre": "Hotel Valentín Sancti Petri",
+      "cambios_propuestos": {
+        "s": "Hotel de 4 estrellas con piscinas exteriores e interior climatizada, jardines, gimnasio, spa y wellness, restaurantes y bares, animación infantil y para adultos, centro de convenciones, aparcamiento y puntos de carga para vehículos eléctricos.",
+        "h": "Recepción 24 horas. Check-in desde las 15:00; check-out antes de las 12:00."
+      },
+      "confianza": "alta",
+      "nota": "Servicios, recepción y horarios de entrada y salida publicados en la web oficial del hotel.",
+      "fuentes": [
+        "https://www.valentinsanctipetri.com/es/servicios/",
+        "https://www.valentinsanctipetri.com/es/contacto/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:ff45bbb9eedfe0830a70",
+      "nombre": "Indoor Torno Padel",
+      "cambios_propuestos": {
+        "s": "Club de pádel con dos pistas indoor climatizadas y tres pistas exteriores (una cubierta y dos descubiertas). Ofrece alquiler y reserva de pistas, clases individuales y grupales, entrenador personal y cafetería.",
+        "h": "Horario publicado por directorio comercial: lunes a viernes 09:00–23:30; sábados y domingos cerrado. Confirmar con el club, ya que la web oficial no publica horario general."
+      },
+      "confianza": "media",
+      "nota": "Instalaciones y servicios publicados por el propio club; horario de apertura procede de directorio externo actualizado en junio de 2026.",
+      "fuentes": [
+        "https://padeltornochiclana.com/instalaciones/",
+        "https://www.cylex.es/chiclana-de-la-frontera/torno-padel-indoor-12940796.html"
+      ]
+    },
+    {
+      "id_ficha": "oficial:ee84b4cf747cd42b9449",
+      "nombre": "Hotel Azalea Playa",
+      "cambios_propuestos": {
+        "s": "Hotel boutique solo para adultos, con piscina exterior, jardín privado, terraza-solárium, habitaciones climatizadas con baño privado, wifi gratuito y televisión de pantalla plana.",
+        "h": "Recepción: todos los días de 09:00 a 20:00. Atención después de las 20:00 con suplemento de 5 € por hora."
+      },
+      "confianza": "alta",
+      "nota": "Servicios y horario de recepción publicados en la web oficial del establecimiento.",
+      "fuentes": [
+        "https://www.hotelazaleaplaya.com/es/servicios",
+        "https://www.hotelazaleaplaya.com/es"
+      ]
+    },
+    {
+      "id_ficha": "oficial:10ebce6a4de7b477302e",
+      "nombre": "La Estancia Golf Club",
+      "cambios_propuestos": {
+        "s": "Club de golf con campo, campo de prácticas, pitching green, putting green, casa club, piscina, tienda, buggies, alquiler de palos y clases colectivas.",
+        "h": "Lunes a domingo: 08:00–21:00."
+      },
+      "confianza": "alta",
+      "nota": "Servicios contrastados con la Real Federación Española de Golf y horario publicado en la web oficial del club.",
+      "fuentes": [
+        "https://www.golflaestancia.com/",
+        "https://rfegolf.es/club/la-estancia-golf"
+      ]
+    },
+    {
+      "id_ficha": "oficial:39e413d8ffd6ae21776e",
+      "nombre": "Marisma Sancti Petri",
+      "cambios_propuestos": {
+        "s": "Hotel con encanto y habitaciones dobles y triples exteriores, con terraza o balcón. Dispone de restaurante, cafetería-bar, terraza, piscina exterior de temporada, solárium, salones para eventos y aparcamiento para clientes.",
+        "h": "Cafetería-bar: 07:30–23:00. Recepción física 24 horas en temporada alta; entrada mediante autocheck-in y códigos."
+      },
+      "confianza": "alta",
+      "nota": "Servicios y horarios publicados en la web oficial. Se distingue la recepción física estacional del acceso automatizado.",
+      "fuentes": [
+        "https://hotelmarismasanctipetri.es/servicios/",
+        "https://hotelmarismasanctipetri.es/habitaciones/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:1b562834bbb3ad3bb9a0",
+      "nombre": "Hotel Boutique Aromas de Mar",
+      "cambios_propuestos": {
+        "s": "Hotel boutique en La Barrosa, con habitaciones y servicios de alojamiento, restaurante y terraza. La web oficial publica teléfonos y correos diferenciados para hotel y restaurante.",
+        "h": "Recepción: lunes a domingo 09:30–21:30. En temporada alta (julio y agosto): 09:00–23:30."
+      },
+      "confianza": "alta",
+      "nota": "La web oficial publica horario de recepción, dirección y contactos. El correo del hotel difiere del que figura en la ficha; no se propone sustituirlo en esta operación.",
+      "fuentes": [
+        "https://www.hotelaromademar.com/contacto"
+      ]
+    },
+    {
+      "id_ficha": "oficial:842029dfae5e6887770c",
+      "nombre": "Novo Sancti Petri",
+      "cambios_propuestos": {
+        "s": "Aparthotel próximo a la playa y situado a unos 2 km del club de golf, con piscina exterior y tumbonas."
+      },
+      "confianza": "alta",
+      "nota": "Descripción e instalaciones publicadas en la web oficial del aparthotel.",
+      "fuentes": [
+        "https://www.aparthotelnovosanctipetri.com/servicios.html"
+      ]
     }
   ],
-  "resumen": "66 propuestas preparadas para revisión. Esta ampliación incorpora información de servicios, descripciones y horarios oficiales. Ninguna modifica el catálogo maestro ni la web pública.",
+  "resumen": "73 propuestas preparadas para revisión. Esta ampliación añade información de servicios y horarios contrastados en webs oficiales y fuentes sectoriales. No se modifica el catálogo maestro ni la web pública.",
   "fecha_actualizacion": "2026-10-30",
   "siguiente_lote": {
-    "revisadas_en_esta_ampliacion": 9,
+    "revisadas_en_esta_ampliacion": 7,
     "pendientes_de_verificacion": [
       "Hostal Ntra. Sra. del Rosario: no se ha localizado web propia verificable.",
-      "Zen-saciones: el dominio antiguo aparece en directorios históricos, pero no se ha confirmado que siga operativo.",
-      "Camping La Rana Verde: existen dos fichas activas para el mismo establecimiento, en Ocio y Negocio; resolver duplicidad antes de consolidar datos.",
-      "Hospital Viamed Bahía de Cádiz: discrepancia entre la dirección de Turismo municipal (Arroyuelo, 7) y el registro del Ministerio de Sanidad (Calle Ayala, 2).",
-      "Varios hoteles aparecen duplicados como fichas oficiales y OSM; no se han fusionado ni alterado."
+      "Zen-saciones: no se ha confirmado la vigencia de su dominio histórico.",
+      "Camping La Rana Verde: dos fichas activas parecen representar el mismo establecimiento; resolver duplicidad antes de consolidar.",
+      "Hospital Viamed Bahía de Cádiz: discrepancia entre dirección de Turismo municipal y registro del Ministerio de Sanidad.",
+      "Varios hoteles y servicios aparecen duplicados como fichas oficiales y OSM; no se han fusionado."
     ],
-    "criterio": "Añadir solo información pública respaldada; diferenciar horarios de servicios y horarios generales, y mantener explícita la estacionalidad."
+    "criterio": "Solo incorporar datos públicos identificables; distinguir horarios generales de horarios de servicios y señalar estacionalidad o fuentes no oficiales."
   }
 }
