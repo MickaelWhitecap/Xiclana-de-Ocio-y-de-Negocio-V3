@@ -7,27 +7,28 @@
     "catalogo": "v3/fichas_completas.json",
     "sha_catalogo": "1e5004609cfb8853353698151ad09671efef0a97",
     "propuestas": "v3/propuestas-enriquecimiento-contacto.json",
-    "sha_propuestas": "2ca463b3b5e73406f7df79d7f79e3cced86234b1"
+    "sha_propuestas": "8f4afb755e621d4f061f272aafce4bd09700d67e"
   },
   "criterio": "Campo vacío = dato_nuevo; valor distinto en campo ocupado = correccion_o_complemento; campo alternativo = alternativa que no sustituye al actual.",
   "resumen": {
-    "fichas_con_propuestas": 100,
-    "campos_propuestos": 148,
+    "fichas_con_propuestas": 104,
+    "campos_propuestos": 157,
     "por_tipo": {
-      "dato_nuevo": 89,
-      "alternativa": 6,
-      "correccion_o_complemento": 53
+      "dato_nuevo": 91,
+      "alternativa": 7,
+      "correccion_o_complemento": 59
     },
     "por_campo": {
-      "w": 20,
+      "w": 23,
       "h": 31,
       "email_alternativo": 3,
-      "a": 37,
+      "a": 38,
       "p": 3,
       "w_alternativa": 3,
-      "s": 51
+      "s": 55,
+      "p_alternativo": 1
     },
-    "fichas_con_al_menos_un_dato_nuevo": 78
+    "fichas_con_al_menos_un_dato_nuevo": 80
   },
   "detalle": [
     {
@@ -2037,6 +2038,128 @@
         "https://www.chiclana.es/delegaciones/cultura"
       ],
       "nota": "Horario de taquilla publicado por la Delegación Municipal de Cultura. No debe confundirse con el horario de apertura del edificio ni con el horario de cada espectáculo."
+    },
+    {
+      "id_ficha": "osm:node:2343120422",
+      "nombre": "A.P. Caño Chanarro",
+      "campo": "s",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Asociación de pescadores con bar-restaurante en el Puerto Deportivo de Sancti Petri. Ofrece cocina marinera y platos de pescado y marisco en un entorno portuario.",
+      "confianza": "media",
+      "fuentes": [
+        "https://www.google.com/maps/search/?api=1&query=Asociacion+de+Pescadores+Ca%C3%B1o+Chanarro+Chiclana"
+      ],
+      "nota": "La ficha empresarial confirma su actividad como asociación y restaurante en el Puerto Deportivo, así como el teléfono ya registrado. No se incorporan valoraciones de clientes."
+    },
+    {
+      "id_ficha": "oficial:666b933674555d731894",
+      "nombre": "Novo Resort",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hotel-Apartamento 5 estrellas",
+      "valor_propuesto": "Aparthotel de cinco estrellas en Novo Sancti Petri, con apartamentos de dos y tres dormitorios y suites de lujo. Dispone de U-Spa de más de 3.650 m², piscinas, una de ellas exclusiva para adultos, bares, restaurantes, beach club, bolera, jardines y anfiteatro.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://novoresort.com/es/"
+      ],
+      "nota": "La web oficial está activa y publica instalaciones, dirección y teléfono. Se corrige la URL genérica de la ficha por el dominio propio vigente."
+    },
+    {
+      "id_ficha": "oficial:666b933674555d731894",
+      "nombre": "Novo Resort",
+      "campo": "a",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Urb. Loma de Sancti Petri.  Playa de la Barrosa",
+      "valor_propuesto": "Urbanización Loma de Sancti Petri, s/n, Novo Sancti Petri, 11139 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "fuentes": [
+        "https://novoresort.com/es/"
+      ],
+      "nota": "La web oficial está activa y publica instalaciones, dirección y teléfono. Se corrige la URL genérica de la ficha por el dominio propio vigente."
+    },
+    {
+      "id_ficha": "oficial:666b933674555d731894",
+      "nombre": "Novo Resort",
+      "campo": "w",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "https://www.novoresort.com",
+      "valor_propuesto": "https://novoresort.com/es/",
+      "confianza": "alta",
+      "fuentes": [
+        "https://novoresort.com/es/"
+      ],
+      "nota": "La web oficial está activa y publica instalaciones, dirección y teléfono. Se corrige la URL genérica de la ficha por el dominio propio vigente."
+    },
+    {
+      "id_ficha": "oficial:7030c46174ade7a07af3",
+      "nombre": "Cruz Roja – Urgencias",
+      "campo": "w",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "https://Web: Abre un enlace externo en una nueva ventana www.cruzroja.es",
+      "valor_propuesto": "https://www.cruzroja.es/",
+      "confianza": "media",
+      "fuentes": [
+        "https://turismo.chiclana.es/oficina-virtual-de-turismo/telefonos-de-interes/",
+        "https://www.chiclana.es/el-ayuntamiento/contacto/directorio-de-contacto/telefonos-de-interes"
+      ],
+      "nota": "Turismo municipal publica 956 240 949 para el puesto de playa y urgencias de Cruz Roja; el directorio municipal de teléfonos de interés publica 956 497 177 como Cruz Roja Urgencias. Se conservan ambos como números alternativos pendientes de confirmación, sin sustituir el actual."
+    },
+    {
+      "id_ficha": "oficial:7030c46174ade7a07af3",
+      "nombre": "Cruz Roja – Urgencias",
+      "campo": "s",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Contacto telefónico del servicio de Cruz Roja vinculado a la atención de urgencias y al dispositivo de playa de La Barrosa. No es una ficha de establecimiento comercial ni debe confundirse con la sede local de Cruz Roja.",
+      "confianza": "media",
+      "fuentes": [
+        "https://turismo.chiclana.es/oficina-virtual-de-turismo/telefonos-de-interes/",
+        "https://www.chiclana.es/el-ayuntamiento/contacto/directorio-de-contacto/telefonos-de-interes"
+      ],
+      "nota": "Turismo municipal publica 956 240 949 para el puesto de playa y urgencias de Cruz Roja; el directorio municipal de teléfonos de interés publica 956 497 177 como Cruz Roja Urgencias. Se conservan ambos como números alternativos pendientes de confirmación, sin sustituir el actual."
+    },
+    {
+      "id_ficha": "oficial:7030c46174ade7a07af3",
+      "nombre": "Cruz Roja – Urgencias",
+      "campo": "p_alternativo",
+      "tipo": "alternativa",
+      "valor_actual": "956 240 949",
+      "valor_propuesto": "956 497 177",
+      "confianza": "media",
+      "fuentes": [
+        "https://turismo.chiclana.es/oficina-virtual-de-turismo/telefonos-de-interes/",
+        "https://www.chiclana.es/el-ayuntamiento/contacto/directorio-de-contacto/telefonos-de-interes"
+      ],
+      "nota": "Turismo municipal publica 956 240 949 para el puesto de playa y urgencias de Cruz Roja; el directorio municipal de teléfonos de interés publica 956 497 177 como Cruz Roja Urgencias. Se conservan ambos como números alternativos pendientes de confirmación, sin sustituir el actual."
+    },
+    {
+      "id_ficha": "oficial:a8082c348335857ddaa4",
+      "nombre": "Sol Sancti Petri",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hotel-Apartamento 3 estrellas",
+      "valor_propuesto": "Hotel-apartamento de cuatro estrellas en la urbanización Novo Sancti Petri. Ofrece habitaciones y apartamentos con terraza; los apartamentos disponen de zona de estar y cocina equipada. Cuenta con restaurante buffet, bar-cafetería, actividades para adultos y niños y recepción 24 horas.",
+      "confianza": "media",
+      "fuentes": [
+        "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/alojamiento/sol-sancti-petri/",
+        "https://www.booking.com/hotel/es/sol-sancti-petri.es.html"
+      ],
+      "nota": "Turismo de Chiclana confirma la categoría, dirección y teléfono. La descripción de servicios se apoya en información de alojamiento publicada para el establecimiento; conviene verificar la denominación y la URL comercial exacta con Meliá antes de sustituir el enlace."
+    },
+    {
+      "id_ficha": "oficial:a8082c348335857ddaa4",
+      "nombre": "Sol Sancti Petri",
+      "campo": "w",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "https://www.melia.com",
+      "valor_propuesto": "https://www.melia.com/es",
+      "confianza": "media",
+      "fuentes": [
+        "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/alojamiento/sol-sancti-petri/",
+        "https://www.booking.com/hotel/es/sol-sancti-petri.es.html"
+      ],
+      "nota": "Turismo de Chiclana confirma la categoría, dirección y teléfono. La descripción de servicios se apoya en información de alojamiento publicada para el establecimiento; conviene verificar la denominación y la URL comercial exacta con Meliá antes de sustituir el enlace."
     }
   ]
 }
