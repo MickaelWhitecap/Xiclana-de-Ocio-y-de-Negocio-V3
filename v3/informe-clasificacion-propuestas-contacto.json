@@ -7,29 +7,29 @@
     "catalogo": "v3/fichas_completas.json",
     "sha_catalogo": "1e5004609cfb8853353698151ad09671efef0a97",
     "propuestas": "v3/propuestas-enriquecimiento-contacto.json",
-    "sha_propuestas": "8e924b0408d03b61b748a25fba20e5a6ed9df9f2"
+    "sha_propuestas": "2a092f2a77a6e7b61b719dd9db26292263ad337d"
   },
   "criterio": "Campo vacío = dato_nuevo; valor distinto en campo ocupado = correccion_o_complemento; campo alternativo = alternativa que no sustituye al actual.",
   "resumen": {
-    "fichas_con_propuestas": 107,
-    "campos_propuestos": 165,
+    "fichas_con_propuestas": 110,
+    "campos_propuestos": 173,
     "por_tipo": {
-      "dato_nuevo": 92,
+      "dato_nuevo": 95,
       "alternativa": 8,
-      "correccion_o_complemento": 65
+      "correccion_o_complemento": 70
     },
     "por_campo": {
       "w": 24,
-      "h": 33,
+      "h": 36,
       "email_alternativo": 3,
-      "a": 39,
+      "a": 41,
       "p": 3,
       "w_alternativa": 3,
-      "s": 58,
+      "s": 61,
       "p_alternativo": 1,
       "n_alternativo": 1
     },
-    "fichas_con_al_menos_un_dato_nuevo": 81
+    "fichas_con_al_menos_un_dato_nuevo": 84
   },
   "detalle": [
     {
@@ -2271,6 +2271,119 @@
         "https://heitacademy.com/centros-deportivos/"
       ],
       "nota": "Turismo municipal publica exactamente el teléfono de la ficha (639 237 649), la dirección y las instalaciones bajo el nombre HEIT Racket Center. Se propone actualizar la denominación, no crear otra ficha."
+    },
+    {
+      "id_ficha": "oficial:ae01a77138600480635a",
+      "nombre": "Camping La Rana Verde",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Camping de 1ª categoría",
+      "valor_propuesto": "Camping de primera categoría entre Chiclana y las playas de La Barrosa y Sancti Petri. Ofrece parcelas de acampada, cabañas, bungalows y apartamentos, piscina con actividades, supermercado, restaurante-buffet, chiringuito, parque infantil y pistas de pádel.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.campinglaranaverde.com/"
+      ],
+      "nota": "La web oficial confirma servicios y fechas de temporada. La ficha manual con nombre casi idéntico parece duplicada; se propone documentar esta ficha oficial como referencia sin fusionar ni borrar la otra."
+    },
+    {
+      "id_ficha": "oficial:ae01a77138600480635a",
+      "nombre": "Camping La Rana Verde",
+      "campo": "h",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Temporada 2026: abierto del 27 de febrero al 3 de octubre. El servicio de piscina finalizó el 13 de septiembre de 2026. Próxima temporada pendiente de anuncio.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.campinglaranaverde.com/"
+      ],
+      "nota": "La web oficial confirma servicios y fechas de temporada. La ficha manual con nombre casi idéntico parece duplicada; se propone documentar esta ficha oficial como referencia sin fusionar ni borrar la otra."
+    },
+    {
+      "id_ficha": "oficial:05e7e2f7b1dc64d1d38b",
+      "nombre": "Hostal La Campa",
+      "campo": "a",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "C/ El Centollo S/n. Playa de La Barrosa",
+      "valor_propuesto": "Calle El Centollo, s/n, Playa de La Barrosa, 11139 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "fuentes": [
+        "https://en.andalucia.org/listing/la-campa/1797101/",
+        "https://www.booking.com/hotel/es/hostal-la-campa.es.html"
+      ],
+      "nota": "Turismo de Andalucía confirma categoría, dirección, teléfono, correo, 16 habitaciones y apertura anual. Los horarios de entrada y salida proceden de Booking.com, no de la web oficial."
+    },
+    {
+      "id_ficha": "oficial:05e7e2f7b1dc64d1d38b",
+      "nombre": "Hostal La Campa",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hostal 1 estrella",
+      "valor_propuesto": "Hostal familiar de una estrella situado a unos 600 metros de la Playa de La Barrosa, con 16 habitaciones dobles equipadas con baño privado, aire acondicionado, televisión, caja fuerte y wifi gratuito. Dispone de servicio de limpieza diario y bar-restaurante de cocina tradicional andaluza.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://en.andalucia.org/listing/la-campa/1797101/",
+        "https://www.booking.com/hotel/es/hostal-la-campa.es.html"
+      ],
+      "nota": "Turismo de Andalucía confirma categoría, dirección, teléfono, correo, 16 habitaciones y apertura anual. Los horarios de entrada y salida proceden de Booking.com, no de la web oficial."
+    },
+    {
+      "id_ficha": "oficial:05e7e2f7b1dc64d1d38b",
+      "nombre": "Hostal La Campa",
+      "campo": "h",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Abierto todo el año según Turismo de Andalucía. Check-in: 15:00–22:00; check-out: 11:30–12:00, según plataforma de reservas.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://en.andalucia.org/listing/la-campa/1797101/",
+        "https://www.booking.com/hotel/es/hostal-la-campa.es.html"
+      ],
+      "nota": "Turismo de Andalucía confirma categoría, dirección, teléfono, correo, 16 habitaciones y apertura anual. Los horarios de entrada y salida proceden de Booking.com, no de la web oficial."
+    },
+    {
+      "id_ficha": "oficial:34ed06142a73e6046e57",
+      "nombre": "Hostal Villa",
+      "campo": "a",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "C/ Virgen del Carmen, 11.",
+      "valor_propuesto": "Calle Virgen del Carmen, 11, 11130 Chiclana de la Frontera, Cádiz",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.andalucia.org/listing/villa/3122102/",
+        "https://www.booking.com/hotel/es/hostal-villa.es.html",
+        "https://www.expedia.es/Chiclana-De-La-Frontera-Hoteles-Hostal-Villa.h22796031.Informacion-Hotel"
+      ],
+      "nota": "Turismo de Andalucía confirma dirección, 42 habitaciones, teléfono y correo. Booking y Expedia corroboran recepción 24 horas y servicios. Horario de entrada/salida según proveedor de reservas."
+    },
+    {
+      "id_ficha": "oficial:34ed06142a73e6046e57",
+      "nombre": "Hostal Villa",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hostal 2 estrellas",
+      "valor_propuesto": "Hostal urbano de dos estrellas en el centro de Chiclana, con 42 habitaciones renovadas, aire acondicionado, baño privado y wifi gratuito. Dispone de recepción 24 horas, bar-cafetería, consigna de equipaje, asistencia turística y aparcamiento privado.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.andalucia.org/listing/villa/3122102/",
+        "https://www.booking.com/hotel/es/hostal-villa.es.html",
+        "https://www.expedia.es/Chiclana-De-La-Frontera-Hoteles-Hostal-Villa.h22796031.Informacion-Hotel"
+      ],
+      "nota": "Turismo de Andalucía confirma dirección, 42 habitaciones, teléfono y correo. Booking y Expedia corroboran recepción 24 horas y servicios. Horario de entrada/salida según proveedor de reservas."
+    },
+    {
+      "id_ficha": "oficial:34ed06142a73e6046e57",
+      "nombre": "Hostal Villa",
+      "campo": "h",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Recepción 24 horas. Check-in desde las 14:00; check-out antes de las 12:00, según plataformas de alojamiento.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.andalucia.org/listing/villa/3122102/",
+        "https://www.booking.com/hotel/es/hostal-villa.es.html",
+        "https://www.expedia.es/Chiclana-De-La-Frontera-Hoteles-Hostal-Villa.h22796031.Informacion-Hotel"
+      ],
+      "nota": "Turismo de Andalucía confirma dirección, 42 habitaciones, teléfono y correo. Booking y Expedia corroboran recepción 24 horas y servicios. Horario de entrada/salida según proveedor de reservas."
     }
   ]
 }
