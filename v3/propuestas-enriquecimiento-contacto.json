@@ -285,9 +285,137 @@
       "fuentes": [
         "https://medinamudejar.com/contacto/"
       ]
+    },
+    {
+      "id_ficha": "oficial:43660649a91443a5cf92",
+      "nombre": "Cadizfornia Surf School",
+      "cambios_propuestos": {
+        "a": "Zona náutica Torre del Puerco, entre los hoteles Barceló y Meliá, 11130 Chiclana de la Frontera, Cádiz",
+        "w": "https://cadizforniasurfschool.com/"
+      },
+      "confianza": "alta",
+      "nota": "Turismo de Chiclana y Andalucía Turismo sitúan la escuela en Torre del Puerco y confirman el correo. Un directorio turístico enlaza el dominio cadizforniasurfschool.com; el teléfono alternativo 628 43 93 35 aparece en Andalucía Turismo, mientras la ficha municipal mantiene 655 751 261. Conservar ambos números como alternativas.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/cadizfornia-surf-school/",
+        "https://en.andalucia.org/listing/cadizfornia-surf-school/22625101/",
+        "https://funly.es/game/cadizfornia-surf-school"
+      ]
+    },
+    {
+      "id_ficha": "oficial:54b3c7e7468fcb0858e3",
+      "nombre": "Esencia Surf School",
+      "cambios_propuestos": {
+        "a": "Calle Hércules, local 18, 11130 Chiclana de la Frontera, Cádiz",
+        "email_alternativo": "info@esenciasurfschool.com"
+      },
+      "confianza": "alta",
+      "nota": "Aviso legal y política de privacidad del sitio oficial confirman domicilio, teléfono y un correo de contacto adicional. La web ya está registrada correctamente; no sustituir el correo Gmail sin aprobación.",
+      "fuentes": [
+        "https://esenciasurfschool.com/aviso-legal/",
+        "https://esenciasurfschool.com/politica-privacidad/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:49d9bb308d38e11fef84",
+      "nombre": "Espacio Arqueológico Nueva Gadeira",
+      "cambios_propuestos": {
+        "a": "Calle Rosa, 13, esquina con Calle Castillo, 11130 Chiclana de la Frontera, Cádiz",
+        "w_alternativa": "https://nuevagadeira.chiclana.es/"
+      },
+      "confianza": "alta",
+      "nota": "La web de contacto oficial del espacio confirma dirección y teléfono. El dominio municipal es la página de contacto vigente; conservar la URL actual de la ficha como alternativa hasta comprobar su redirección.",
+      "fuentes": [
+        "https://nuevagadeira.chiclana.es/contacto/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:e4f5be40d91c5cd46119",
+      "nombre": "Oasis Escuela de Surf",
+      "cambios_propuestos": {
+        "a": "Centro Comercial Tartessus, locales 14–17, 11139 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "La web oficial identifica la sede principal Oasis Surf House, Shop & School en el Centro Comercial Tartessus. También declara sedes estacionales en Royal Hideaway y Loma del Puerco; no reducir la ficha a una sola ubicación si se describen varias escuelas.",
+      "fuentes": [
+        "https://oasissurfinglife.com/contacto/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:fca22ec0ae5aef3e4e69",
+      "nombre": "Sancti Petri Kayak",
+      "cambios_propuestos": {
+        "a": "Puerto Deportivo de Sancti Petri, s/n, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "La web propia y Turismo de Chiclana confirman la ubicación y los datos de contacto. La web también muestra 676 363 718 como teléfono principal; el segundo número de la ficha puede mantenerse como contacto alternativo.",
+      "fuentes": [
+        "https://www.sanctipetrikayak.com/web/",
+        "https://turismo.chiclana.es/detalle-de-recurso/sancti-petri-kayak/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:80eae20f98c7c986c7f6",
+      "nombre": "Charter Alcántara",
+      "cambios_propuestos": {
+        "a": "Puerto Deportivo de Sancti Petri, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "media",
+      "nota": "Un directorio local actualizado sitúa la actividad en el Puerto Deportivo de Sancti Petri y confirma el teléfono registrado. No se ha encontrado una dirección postal de local o pantalán.",
+      "fuentes": [
+        "https://localitybiz.es/23203576/alcantara-charter-pesca-recreo-chiclana-de-la-frontera"
+      ]
+    },
+    {
+      "id_ficha": "turismo:1e01f247b4b020d2f2af",
+      "nombre": "Oficina de Turismo Centro Ciudad",
+      "cambios_propuestos": {
+        "w": "https://turismo.chiclana.es/"
+      },
+      "confianza": "alta",
+      "nota": "Portal oficial de Turismo municipal. La dirección, teléfono y correo ya registrados coinciden con los datos publicados. Posible duplicidad funcional con «Oficina Municipal de Turismo»; revisar ambas fichas antes de consolidarlas.",
+      "fuentes": [
+        "https://turismo.chiclana.es/",
+        "https://administracion.gob.es/espanaadmon/quienesquien/ficha-unidad-organica?selectorServicio=organigramasEstructurasDirectorios&selectorget=LA0018360"
+      ]
+    },
+    {
+      "id_ficha": "turismo:4a9542c66f64772612ff",
+      "nombre": "Punto de Información Turística Novo Sancti Petri",
+      "cambios_propuestos": {
+        "w": "https://turismo.chiclana.es/"
+      },
+      "confianza": "alta",
+      "nota": "Portal oficial de Turismo municipal; la ficha oficial confirma dirección, teléfono y correo ya registrados.",
+      "fuentes": [
+        "https://turismo.chiclana.es/"
+      ]
+    },
+    {
+      "id_ficha": "turismo:0823dfb6c46c7efe5861",
+      "nombre": "Punto de Información Turística Paseo Marítimo (1ª pista)",
+      "cambios_propuestos": {
+        "w": "https://turismo.chiclana.es/"
+      },
+      "confianza": "alta",
+      "nota": "Portal oficial de Turismo municipal; la web municipal indica que este punto permanece cerrado hasta el inicio de la temporada 2027. El dato de cierre temporal conviene conservar como información operativa, no como baja de la ficha.",
+      "fuentes": [
+        "https://turismo.chiclana.es/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:55578a43f4616996e415",
+      "nombre": "NAMMU SPA Hotel Vincci Costa Golf",
+      "cambios_propuestos": {
+        "w_alternativa": "https://www.vinccicostagolf.com/"
+      },
+      "confianza": "media",
+      "nota": "Se localiza la web específica del hotel, más útil que la portada genérica de la cadena. No se ha verificado una página pública separada para NAMMU SPA; usar la web del hotel como enlace de referencia.",
+      "fuentes": [
+        "https://www.vinccicostagolf.com/"
+      ]
     }
   ],
-  "resumen": "21 propuestas preparadas para revisión. Ninguna modifica el catálogo maestro ni la web pública.",
+  "resumen": "31 propuestas preparadas para revisión. Ninguna modifica el catálogo maestro ni la web pública.",
   "fecha_actualizacion": "2026-10-30",
   "siguiente_lote": {
     "revisadas_en_esta_ampliacion": 10,
