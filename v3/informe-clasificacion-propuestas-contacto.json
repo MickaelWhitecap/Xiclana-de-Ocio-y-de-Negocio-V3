@@ -7,27 +7,27 @@
     "catalogo": "v3/fichas_completas.json",
     "sha_catalogo": "1e5004609cfb8853353698151ad09671efef0a97",
     "propuestas": "v3/propuestas-enriquecimiento-contacto.json",
-    "sha_propuestas": "4cf7aa2e7b267aeaaafc3ea7408a20fc269d0eb3"
+    "sha_propuestas": "ca04b995a83e9b9a12d0972988ac48df5048a606"
   },
-  "criterio": "Cada valor propuesto se compara con el campo equivalente de la ficha maestra. Un campo vacío se clasifica como dato_nuevo; un valor distinto en campo ya ocupado como correccion_o_complemento; los campos alternativos se conservan como alternativa y no sustituyen el valor actual.",
+  "criterio": "Un campo vacío se clasifica como dato_nuevo; un valor distinto en campo ocupado como correccion_o_complemento; campos alternativos se conservan como alternativa y no sustituyen el valor actual.",
   "resumen": {
-    "fichas_con_propuestas": 57,
-    "campos_propuestos": 75,
+    "fichas_con_propuestas": 66,
+    "campos_propuestos": 89,
     "por_tipo": {
-      "dato_nuevo": 62,
+      "dato_nuevo": 66,
       "alternativa": 5,
-      "correccion_o_complemento": 8
+      "correccion_o_complemento": 18
     },
     "por_campo": {
-      "w": 14,
-      "h": 10,
+      "w": 15,
+      "h": 15,
       "email_alternativo": 3,
       "a": 34,
       "p": 2,
       "w_alternativa": 2,
-      "s": 10
+      "s": 18
     },
-    "fichas_con_al_menos_un_dato_nuevo": 55
+    "fichas_con_al_menos_un_dato_nuevo": 58
   },
   "detalle": [
     {
@@ -1051,6 +1051,195 @@
         "https://deportes.chiclana.es/instalaciones/gestion-directa/instalaciones-al-aire-libre/"
       ],
       "nota": "Equipamiento descrito en la página oficial de la Delegación Municipal de Deportes. La fuente consultada no publica horario de apertura."
+    },
+    {
+      "id_ficha": "oficial:293bb3b4ae5e426f7cdd",
+      "nombre": "Al Sur Apartamentos Turísticos",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Apartamentos turístico de 4 llaves-lujo",
+      "valor_propuesto": "Complejo de apartamentos turísticos con dos piscinas exteriores (adultos y niños, disponibles en verano), solárium, pista de pádel, aparcamiento cubierto con cargadores para vehículos eléctricos, gimnasio privado y salones para eventos. Desayuno buffet solo en temporada de verano.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.alsurvacaciones.com/servicios/"
+      ],
+      "nota": "Servicios, instalaciones y horarios de entrada/salida publicados en la web oficial. Piscinas y desayuno se identifican expresamente como servicios de temporada."
+    },
+    {
+      "id_ficha": "oficial:293bb3b4ae5e426f7cdd",
+      "nombre": "Al Sur Apartamentos Turísticos",
+      "campo": "h",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Check-in desde las 16:00; check-out hasta las 12:00.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.alsurvacaciones.com/servicios/"
+      ],
+      "nota": "Servicios, instalaciones y horarios de entrada/salida publicados en la web oficial. Piscinas y desayuno se identifican expresamente como servicios de temporada."
+    },
+    {
+      "id_ficha": "manual:5f1945013854e4291e29",
+      "nombre": "Castillo de Sancti Petri",
+      "campo": "s",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Fortaleza del siglo XVIII situada en el islote de Sancti Petri, frente al poblado almadrabero. Ofrece visitas libres y guiadas; el acceso a la isla se realiza en barco o kayak desde el Puerto Deportivo de Sancti Petri y requiere reserva previa.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/castillo-de-sancti-petri/"
+      ],
+      "nota": "Descripción, modalidad de visitas y condiciones de acceso publicadas por Turismo de Chiclana. Se evita inventar un horario."
+    },
+    {
+      "id_ficha": "manual:5f1945013854e4291e29",
+      "nombre": "Castillo de Sancti Petri",
+      "campo": "h",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Visitas con reserva previa; la fuente municipal no publica un horario fijo de apertura.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/castillo-de-sancti-petri/"
+      ],
+      "nota": "Descripción, modalidad de visitas y condiciones de acceso publicadas por Turismo de Chiclana. Se evita inventar un horario."
+    },
+    {
+      "id_ficha": "osm:node:4258314920",
+      "nombre": "Calma Beach",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Restaurante en la playa del Hipotels Barrosa Park; terraza",
+      "valor_propuesto": "Restaurante de playa del Hipotels Barrosa Park, situado sobre la arena de La Barrosa, con servicio de comidas y bebidas y vistas al mar.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.hipotels.com/hoteles/barrosapark/servicios/"
+      ],
+      "nota": "La página oficial de Hipotels identifica Calma Beach como restaurante de playa y publica horarios estacionales. El horario actual de la ficha (11:00–24:00 todos los días) es demasiado genérico; se propone sustituirlo por el desglose oficial, sujeto a temporada."
+    },
+    {
+      "id_ficha": "osm:node:4258314920",
+      "nombre": "Calma Beach",
+      "campo": "h",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Mo-Su 11:00-24:00",
+      "valor_propuesto": "Horario publicado por Hipotels: 11:00–19:00; en temporada alta, hasta las 00:00. Almuerzos: 13:00–16:00. Cenas: 20:00–22:30, solo en temporada alta.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.hipotels.com/hoteles/barrosapark/servicios/"
+      ],
+      "nota": "La página oficial de Hipotels identifica Calma Beach como restaurante de playa y publica horarios estacionales. El horario actual de la ficha (11:00–24:00 todos los días) es demasiado genérico; se propone sustituirlo por el desglose oficial, sujeto a temporada."
+    },
+    {
+      "id_ficha": "oficial:bf8647d237bfea2ff1c5",
+      "nombre": "Club de Golf Novo Sancti Petri",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Ficha unificada: agrupa las variantes y geometrías del Club de Golf Novo Sancti Petri; se conservan sus identificadores y ubicaciones de origen. Ficha unificada: agrupa las variantes y geometrías del Club de Golf Novo Sancti Petri; se conservan sus identificadores y ubicaciones de origen. Ficha unificada: agrupa las variantes y geometrías del Club de Golf Novo Sancti Petri; se conservan sus identificadores y ubicaciones de origen. Ficha unificada: agrupa las variantes y geometrías del Club de Golf Novo Sancti Petri; se conservan sus identificadores y ubicaciones de origen. Ficha unificada: agrupa las variantes y geometrías del Club de Golf Novo Sancti Petri; se conservan sus identificadores y ubicaciones de origen. Ficha unificada: agrupa las variantes y geometrías del Club de Golf Novo Sancti Petri; se conservan sus identificadores y ubicaciones de origen. Ficha unificada: agrupa las variantes y geometrías del Club de Golf Novo Sancti Petri; se conservan sus identificadores y ubicaciones de origen. Ficha unificada: agrupa las variantes y geometrías del Club de Golf Novo Sancti Petri; se conservan sus identificadores y ubicaciones de origen. Ficha unificada: agrupa las variantes y geometrías del Club de Golf Novo Sancti Petri; se conservan sus identificadores y ubicaciones de origen.",
+      "valor_propuesto": "Club de golf diseñado por Severiano Ballesteros, con campos de golf, driving range, putting green, chipping greens, academia, casa club, restaurante, tienda Pro Shop, alquiler de buggies y material, clases particulares y colectivas.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://rfegolf.es/club/real-novo-sancti-petri-golf-club",
+        "https://www.realnovosanctipetri.com/servicios/"
+      ],
+      "nota": "La descripción actual de la ficha repite varias veces el texto de unificación y no describe el establecimiento. Se propone sustituir ese texto redundante por una descripción funcional respaldada por la Real Federación Española de Golf y la web oficial del club."
+    },
+    {
+      "id_ficha": "oficial:211265c9f18077efde7b",
+      "nombre": "Cruz Roja",
+      "campo": "w",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "https://Web: Abre un enlace externo en una nueva ventana www.cruzroja.es",
+      "valor_propuesto": "https://www.cruzroja.es/",
+      "confianza": "media",
+      "fuentes": [
+        "https://www.cruzroja.es/",
+        "https://www.cylex.es/chiclana-de-la-frontera/cruz-roja-12436536.html"
+      ],
+      "nota": "La URL actual de la ficha contiene texto de interfaz mezclado con la dirección web. Se propone normalizarla a la página institucional de Cruz Roja; el centro local se mantiene en Calle Jesús Nazareno, 11. No se propone horario sin fuente oficial local."
+    },
+    {
+      "id_ficha": "oficial:27d23432c0f85e9c7fdd",
+      "nombre": "Hospital Viamed Bahía de Cádiz",
+      "campo": "s",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Hospital privado con 32 especialidades médicas, medicina general y enfermería las 24 horas, atención a lesionados de tráfico, ginecología y obstetricia, unidad de digestivo, área quirúrgica, cuidados especiales y hospitalización con habitaciones individuales.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/hospital-viamed-bahia-de-cadiz/",
+        "https://www.sanidad.gob.es/ciudadanos/centros.do?metodo=realizarDetalle&numero=110248&tipo=hospital"
+      ],
+      "nota": "Descripción de servicios publicada por Turismo de Chiclana. La ficha mantiene la dirección Arroyuelo, 7, coincidente con Turismo municipal; el registro del Ministerio de Sanidad ofrece otra dirección (Calle Ayala, 2), por lo que se debe aclarar la discrepancia antes de modificar la dirección."
+    },
+    {
+      "id_ficha": "oficial:2f2e76e7274303e40b4e",
+      "nombre": "Hospedería Santiago",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hostal 2 estrellas",
+      "valor_propuesto": "Alojamiento hotelero familiar de estilo rústico, con patios y ambiente tranquilo, situado en la Playa de La Barrosa, a unos 200 metros del mar. Próximo al paseo marítimo y a su oferta de restaurantes, bares y terrazas.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://hospederiasantiago.com/"
+      ],
+      "nota": "Descripción y ubicación publicadas en la web propia del establecimiento. No se añade horario de recepción porque no se publica en la fuente consultada."
+    },
+    {
+      "id_ficha": "osm:way:320773048",
+      "nombre": "Hipotels Barrosa Garden",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "4 estrellas; accesible; wifi",
+      "valor_propuesto": "Hotel de 4 estrellas abierto por temporada, orientado a familias. Dispone de piscinas exteriores, zona splash y piscina infantil, piscina interior climatizada en invierno, restaurante buffet, snack-pool bar, lobby bar, animación, Hipiclub, gimnasio, spa y aparcamiento subterráneo.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.hipotels.com/hoteles/barrosagarden/servicios/",
+        "https://www.hipotels.com/hoteles/barrosagarden/"
+      ],
+      "nota": "Servicios y horarios publicados en la web oficial de Hipotels. Se deja claro que son horarios de bares y no horario de apertura del hotel."
+    },
+    {
+      "id_ficha": "osm:way:320773048",
+      "nombre": "Hipotels Barrosa Garden",
+      "campo": "h",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "24/7",
+      "valor_propuesto": "Snack-pool bar: 11:00–18:00 (hasta 19:00 en verano); snacks 12:00–17:00 (hasta 18:00 en verano). Lobby bar: 10:00–00:30. Horarios de servicios del hotel, sujetos a temporada.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.hipotels.com/hoteles/barrosagarden/servicios/",
+        "https://www.hipotels.com/hoteles/barrosagarden/"
+      ],
+      "nota": "Servicios y horarios publicados en la web oficial de Hipotels. Se deja claro que son horarios de bares y no horario de apertura del hotel."
+    },
+    {
+      "id_ficha": "osm:way:310338178",
+      "nombre": "Hipotels Barrosa Palace",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "5 estrellas; accesible; wifi",
+      "valor_propuesto": "Hotel de 5 estrellas con restaurantes buffet y a la carta, Serena Beach Club, snack-pool bar, piscinas exteriores e interior climatizada en invierno, gimnasio, spa MySenses, sauna, baño turco, tratamientos de bienestar, espectáculos y música en vivo.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.hipotels.com/hoteles/barrosapalace/servicios/",
+        "https://www.hipotels.com/hoteles/barrosapalace/spa/"
+      ],
+      "nota": "Servicios y horario del spa publicados en la web oficial de Hipotels. Se identifica el horario como propio del spa para evitar confundirlo con el horario general del hotel."
+    },
+    {
+      "id_ficha": "osm:way:310338178",
+      "nombre": "Hipotels Barrosa Palace",
+      "campo": "h",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "24/7",
+      "valor_propuesto": "Spa MySenses: 09:30–19:00; en temporada alta, hasta las 20:00. Horario del spa, no del hotel.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.hipotels.com/hoteles/barrosapalace/servicios/",
+        "https://www.hipotels.com/hoteles/barrosapalace/spa/"
+      ],
+      "nota": "Servicios y horario del spa publicados en la web oficial de Hipotels. Se identifica el horario como propio del spa para evitar confundirlo con el horario general del hotel."
     }
   ]
 }
