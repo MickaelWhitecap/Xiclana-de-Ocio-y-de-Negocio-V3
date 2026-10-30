@@ -450,7 +450,7 @@ form.addEventListener("submit",async e=>{
  }catch(err){message("No se pudo guardar: "+(err.message||"error desconocido"),"error")}
  finally{btn.disabled=false;btn.textContent="Guardar ficha"}
 });
-$("#login-form").addEventListener("submit",async e=>{e.preventDefault();const btn=$("#login-button");btn.disabled=true;try{const {data,error}=await client.auth.signInWithPassword({email:$("#email").value.trim(),password:$("#password").value});if(error)throw error;user=data.user;showApp();wireAdForms();await loadData();message("Sesión iniciada. Solo la cuenta autorizada puede guardar cambios.","ok")}catch(err){message("No se pudo iniciar sesión: "+(err.message||"revisa el correo y la contraseña."),"error")}finally{btn.disabled=false}});
+$("#login-form").addEventListener("submit",async e=>{e.preventDefault();const btn=$("#login-button");btn.disabled=true;try{const {data,error}=await client.auth.signInWithPassword({email:$("#email").value.trim(),password:$("#password").value});if(error)throw error;if((data.user?.email||"").toLowerCase()!=="surferomc@gmail.com"){await client.auth.signOut();throw new Error("Esta cuenta no está autorizada para administrar Xiclana.")}user=data.user;showApp();wireAdForms();await loadData();message("Sesión iniciada. Solo la cuenta autorizada puede guardar cambios.","ok")}catch(err){message("No se pudo iniciar sesión: "+(err.message||"revisa el correo y la contraseña."),"error")}finally{btn.disabled=false}});
 logout.onclick=async()=>{await client.auth.signOut();user=null;showLogin();message("Sesión cerrada.")};
 $("#search").addEventListener("input",refreshList);$("#new-record").onclick=startNew;$("#cancel").onclick=cancelEdit;$("#trash-refresh").onclick=async()=>{try{await loadData();message("Papelera actualizada.","ok")}catch(err){message("No se pudo actualizar la papelera: "+err.message,"error")}};
  $("#delete-button").onclick=async()=>{
@@ -474,8 +474,8 @@ async function init(){
  if(!window.supabase?.createClient){message("No se ha podido cargar la biblioteca de acceso. Recarga la página o inténtalo más tarde.","error");return}
  client=window.supabase.createClient(config.url,config.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
  const {data,error}=await client.auth.getSession();if(error){message("Error al comprobar la sesión: "+error.message,"error");showLogin();return}
- if(data.session){user=data.session.user;showApp();wireAdForms();try{await loadData();message("Sesión activa. Elige una ficha para editarla.","ok")}catch(err){message("Error al cargar fichas: "+err.message,"error")}}
- else{showLogin();message("Inicia sesión con la cuenta privada de administración.")}
+ if(data.session&&(data.session.user?.email||"").toLowerCase()==="surferomc@gmail.com"){user=data.session.user;showApp();wireAdForms();try{await loadData();message("Sesión activa. Elige una ficha para editarla.","ok")}catch(err){message("Error al cargar fichas: "+err.message,"error")}}
+ else{if(data.session)await client.auth.signOut();user=null;showLogin();message("Inicia sesión con la cuenta autorizada de administración.")}
 }
 init();
 })();
