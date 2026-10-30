@@ -7,27 +7,27 @@
     "catalogo": "v3/fichas_completas.json",
     "sha_catalogo": "1e5004609cfb8853353698151ad09671efef0a97",
     "propuestas": "v3/propuestas-enriquecimiento-contacto.json",
-    "sha_propuestas": "5337c10983eccf15402ba26dab78745f645cf5df"
+    "sha_propuestas": "99a19f0ad3e13b784f075e9bc0e074a06bc69a84"
   },
   "criterio": "Campo vacío = dato_nuevo; valor distinto en campo ocupado = correccion_o_complemento; campo alternativo = alternativa que no sustituye al actual.",
   "resumen": {
-    "fichas_con_propuestas": 80,
-    "campos_propuestos": 113,
+    "fichas_con_propuestas": 88,
+    "campos_propuestos": 125,
     "por_tipo": {
-      "dato_nuevo": 82,
+      "dato_nuevo": 85,
       "alternativa": 6,
-      "correccion_o_complemento": 25
+      "correccion_o_complemento": 34
     },
     "por_campo": {
       "w": 16,
-      "h": 23,
+      "h": 27,
       "email_alternativo": 3,
       "a": 34,
       "p": 2,
       "w_alternativa": 3,
-      "s": 32
+      "s": 40
     },
-    "fichas_con_al_menos_un_dato_nuevo": 71
+    "fichas_con_al_menos_un_dato_nuevo": 74
   },
   "detalle": [
     {
@@ -1567,6 +1567,167 @@
         "https://www.chiclana.es/el-ayuntamiento/contacto/directorio-de-contacto/telefonos-de-interes"
       ],
       "nota": "El Ayuntamiento confirma la gestión del servicio de salvamento y socorrismo de las playas por Cruz Roja y la ubicación del puesto central en la Segunda Pista. Los horarios y el despliegue varían por temporada y no se fijan aquí."
+    },
+    {
+      "id_ficha": "oficial:2ebf001f269b909d84b5",
+      "nombre": "Hotel Mariantonia",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hotel 2 estrellas",
+      "valor_propuesto": "Hotel a unos 150 metros de la Playa de La Barrosa, con habitaciones dobles, superiores, familiares y suites. Dispone de piscina exterior de temporada, terraza-solárium, jardines, zona chill-out, jacuzzi, sauna, wifi, aire acondicionado y cuatro plazas de aparcamiento con reserva previa.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.mariantoniahotel.com/habitaciones"
+      ],
+      "nota": "Servicios, habitaciones y horarios de entrada y salida publicados en la web propia del establecimiento. Parte de la información antigua sobre desayuno menciona restricciones COVID, por lo que no se propone ese servicio como permanente."
+    },
+    {
+      "id_ficha": "oficial:2ebf001f269b909d84b5",
+      "nombre": "Hotel Mariantonia",
+      "campo": "h",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Check-in desde las 14:00; check-out antes de las 12:00. Piscina y desayuno disponibles por temporada, según la información publicada por el hotel.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.mariantoniahotel.com/habitaciones"
+      ],
+      "nota": "Servicios, habitaciones y horarios de entrada y salida publicados en la web propia del establecimiento. Parte de la información antigua sobre desayuno menciona restricciones COVID, por lo que no se propone ese servicio como permanente."
+    },
+    {
+      "id_ficha": "oficial:94b518f9e95ec53a3246",
+      "nombre": "Hotel Vincci Costa Golf",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hotel 4 estrellas",
+      "valor_propuesto": "Resort de 4 estrellas en Novo Sancti Petri, con piscinas exteriores e interior, spa, gimnasio, miniclub, pistas de pádel, chiringuito de playa, restauración, espacios para eventos, aparcamiento y actividades para adultos y niños.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.vinccihoteles.com/es/hoteles/cadiz/vincci-costa-golf/servicios/",
+        "https://www.booking.com/hotel/es/resortcostagolf.es.html"
+      ],
+      "nota": "Servicios publicados en la web oficial de Vincci. Los horarios de entrada y salida proceden de una plataforma de reservas, no de la web oficial, y quedan sujetos a confirmación."
+    },
+    {
+      "id_ficha": "oficial:94b518f9e95ec53a3246",
+      "nombre": "Hotel Vincci Costa Golf",
+      "campo": "h",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "24/7",
+      "valor_propuesto": "Recepción 24 horas. Entrada desde las 15:00 y salida hasta las 12:00, según información de plataforma de reservas; confirmar condiciones vigentes con el hotel.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.vinccihoteles.com/es/hoteles/cadiz/vincci-costa-golf/servicios/",
+        "https://www.booking.com/hotel/es/resortcostagolf.es.html"
+      ],
+      "nota": "Servicios publicados en la web oficial de Vincci. Los horarios de entrada y salida proceden de una plataforma de reservas, no de la web oficial, y quedan sujetos a confirmación."
+    },
+    {
+      "id_ficha": "oficial:4f1fae0ac111065fd726",
+      "nombre": "Hotel Iberostar Selection Andalucia Playa",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hotel 5 estrellas",
+      "valor_propuesto": "Hotel de 5 estrellas con acceso directo a la Playa de La Barrosa, piscinas (incluidas piscinas climatizadas), spa, SeaSoul Beach Club, restaurantes, campo de golf cercano con traslado y descuentos, instalaciones para ciclistas, sala fitness, programa infantil Star Camp y salas de reuniones.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.iberostar.com/es/hoteles/cadiz/iberostar-selection-andalucia-playa/"
+      ],
+      "nota": "Servicios y horarios de llegada y salida publicados en la web oficial de Iberostar."
+    },
+    {
+      "id_ficha": "oficial:4f1fae0ac111065fd726",
+      "nombre": "Hotel Iberostar Selection Andalucia Playa",
+      "campo": "h",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Check-in desde las 15:00; check-out hasta las 12:00. Recepción 24 horas.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.iberostar.com/es/hoteles/cadiz/iberostar-selection-andalucia-playa/"
+      ],
+      "nota": "Servicios y horarios de llegada y salida publicados en la web oficial de Iberostar."
+    },
+    {
+      "id_ficha": "oficial:2448c5f493d5bfd4e0c0",
+      "nombre": "Hotel Iberostar Royal Andalus",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hotel 4 estrellas",
+      "valor_propuesto": "Hotel de 4 estrellas en primera línea de la Playa de La Barrosa, con piscinas, zona wellness, restauración, actividades y servicios de ocio familiar. Confirmar la denominación comercial actual, ya que la marca del hotel ha cambiado a Iberostar Waves Royal Andalus.",
+      "confianza": "media",
+      "fuentes": [
+        "https://www.iberostar.com/es/hoteles/cadiz/iberostar-waves-royal-andalus/"
+      ],
+      "nota": "La ficha puede estar desactualizada en su denominación. El hotel se comercializa actualmente como Iberostar Waves Royal Andalus; se propone revisar el nombre y completar la descripción después de confirmar la correspondencia de esta ficha con el establecimiento."
+    },
+    {
+      "id_ficha": "oficial:49a6ba652cc4f1ff131c",
+      "nombre": "Hotel Royal Hideaway Sancti Petri",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hotel 5 estrellas",
+      "valor_propuesto": "Hotel de lujo en la Playa de La Barrosa con cinco piscinas exteriores y una piscina interior climatizada con hidromasaje, oferta gastronómica con restaurante buffet y cuatro restaurantes a la carta, bares, spa y actividades para familias.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.barcelo.com/es-es/royal-hideaway-sancti-petri/",
+        "https://www.barcelo.com/es-es/royal-hideaway-sancti-petri/gastronomia/"
+      ],
+      "nota": "Instalaciones y oferta gastronómica publicadas en la web oficial de Barceló. Los horarios de restaurantes dependen de la ocupación y programación y se consultan en el hotel."
+    },
+    {
+      "id_ficha": "oficial:570f9c37af77bfd73d5c",
+      "nombre": "Las Dunas",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hotel-Apartamento 4 estrellas",
+      "valor_propuesto": "Aparthotel en Novo Sancti Petri con bar-piscina, restaurante, animación y miniclub infantil, actividades deportivas y de salud, espectáculos y programas de ocio para familias. Dispone de apartamentos y zonas ajardinadas.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.aparthotelasdunas.com/instalaciones-y-servicios.html"
+      ],
+      "nota": "Servicios e instalaciones publicados en la web oficial del aparthotel. No se propone horario general porque la página consultada no lo publica."
+    },
+    {
+      "id_ficha": "oficial:ee96c3921b8b2b24c9a7",
+      "nombre": "Hostal Noli",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hostal 1 estrella",
+      "valor_propuesto": "Hostal y restaurante a unos 50 metros de la Playa de La Barrosa, con 18 habitaciones dobles equipadas con aire acondicionado, televisión y baño completo. Dispone de aparcamiento propio y restaurante de cocina casera basada en productos del día.",
+      "confianza": "media",
+      "fuentes": [
+        "https://www.andalucia.org/listing/hostal-noli/2482102/",
+        "https://www.booking.com/hotel/es/hostal-noli.es.html"
+      ],
+      "nota": "La descripción de alojamiento y restaurante está publicada por Turismo de Andalucía. Los horarios de entrada y salida proceden de Booking.com y se mantienen como información pendiente de confirmación."
+    },
+    {
+      "id_ficha": "oficial:ee96c3921b8b2b24c9a7",
+      "nombre": "Hostal Noli",
+      "campo": "h",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Entrada: 14:30–21:30. Salida: 08:00–11:00. Horarios publicados por plataforma de reservas; confirmar directamente con el establecimiento.",
+      "confianza": "media",
+      "fuentes": [
+        "https://www.andalucia.org/listing/hostal-noli/2482102/",
+        "https://www.booking.com/hotel/es/hostal-noli.es.html"
+      ],
+      "nota": "La descripción de alojamiento y restaurante está publicada por Turismo de Andalucía. Los horarios de entrada y salida proceden de Booking.com y se mantienen como información pendiente de confirmación."
+    },
+    {
+      "id_ficha": "oficial:721068ed86ecdd268b36",
+      "nombre": "Hostal Casa la Laja",
+      "campo": "s",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "Hostal 1 estrella",
+      "valor_propuesto": "Hostal boutique ubicado en un edificio del siglo XVIII en el centro de Chiclana. Dispone de habitaciones, algunas con balcón o patio, televisión vía satélite y recepción 24 horas.",
+      "confianza": "media",
+      "fuentes": [
+        "https://www.booking.com/hotel/es/hostal-casa-la-laja.es.html"
+      ],
+      "nota": "Descripción y servicios publicados por plataforma de reservas. La web propia no se ha podido contrastar en el mismo nivel de detalle; no se propone horario de entrada/salida."
     }
   ]
 }
