@@ -7,27 +7,27 @@
     "catalogo": "v3/fichas_completas.json",
     "sha_catalogo": "1e5004609cfb8853353698151ad09671efef0a97",
     "propuestas": "v3/propuestas-enriquecimiento-contacto.json",
-    "sha_propuestas": "525c4034cab2a4fb64b12596ed8e6488510ffe66"
+    "sha_propuestas": "5337c10983eccf15402ba26dab78745f645cf5df"
   },
   "criterio": "Campo vacío = dato_nuevo; valor distinto en campo ocupado = correccion_o_complemento; campo alternativo = alternativa que no sustituye al actual.",
   "resumen": {
-    "fichas_con_propuestas": 73,
-    "campos_propuestos": 102,
+    "fichas_con_propuestas": 80,
+    "campos_propuestos": 113,
     "por_tipo": {
-      "dato_nuevo": 73,
-      "alternativa": 5,
-      "correccion_o_complemento": 24
+      "dato_nuevo": 82,
+      "alternativa": 6,
+      "correccion_o_complemento": 25
     },
     "por_campo": {
-      "w": 15,
-      "h": 21,
+      "w": 16,
+      "h": 23,
       "email_alternativo": 3,
       "a": 34,
       "p": 2,
-      "w_alternativa": 2,
-      "s": 25
+      "w_alternativa": 3,
+      "s": 32
     },
-    "fichas_con_al_menos_un_dato_nuevo": 64
+    "fichas_con_al_menos_un_dato_nuevo": 71
   },
   "detalle": [
     {
@@ -1419,6 +1419,154 @@
         "https://www.aparthotelnovosanctipetri.com/servicios.html"
       ],
       "nota": "Descripción e instalaciones publicadas en la web oficial del aparthotel."
+    },
+    {
+      "id_ficha": "oficial:e1cf9beacdacae1635d8",
+      "nombre": "Oficina Municipal de Información al Consumidor",
+      "campo": "s",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Servicio municipal gratuito de información, ayuda y orientación a consumidores y usuarios. Tramita reclamaciones y promueve la educación y formación sobre derechos de consumo.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.chiclana.es/areas-municipales/comercio-y-empleo/oficina-municipal-de-informacion-al-consumidor"
+      ],
+      "nota": "Funciones y horarios publicados en la web oficial del Ayuntamiento de Chiclana."
+    },
+    {
+      "id_ficha": "oficial:e1cf9beacdacae1635d8",
+      "nombre": "Oficina Municipal de Información al Consumidor",
+      "campo": "h",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Invierno (1 de octubre–15 de junio): lunes a viernes 09:00–13:30. Verano (16 de junio–30 de septiembre): lunes a viernes 09:00–13:00.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.chiclana.es/areas-municipales/comercio-y-empleo/oficina-municipal-de-informacion-al-consumidor"
+      ],
+      "nota": "Funciones y horarios publicados en la web oficial del Ayuntamiento de Chiclana."
+    },
+    {
+      "id_ficha": "oficial:0db8fb0560ae0ca69988",
+      "nombre": "Pabellón Polideportivo \"Ciudad de Chiclana\"",
+      "campo": "s",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Pabellón municipal de 11.760 m², con pista central de parqué divisible en tres pistas transversales, sala de musculación, sala multiusos, sala de relax, sauna, rocódromo exterior y boulder, aulas, vestuarios y botiquín.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://deportes.chiclana.es/instalaciones/gestion-directa/instalaciones-cubiertas/",
+        "https://turismo.chiclana.es/detalle-de-recurso/pabellon-polideportivo-ciudad-de-chiclana/"
+      ],
+      "nota": "Equipamiento y descripción publicados por la Delegación Municipal de Deportes y Turismo de Chiclana."
+    },
+    {
+      "id_ficha": "oficial:80c5ba280155ff113b23",
+      "nombre": "Pabellón Polideportivo \"Huerta del Rosario\"",
+      "campo": "s",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Pabellón municipal construido en 2002, utilizado por centros escolares y como sede de la liga local de fútbol sala y competiciones de clubes. Dispone de pista polideportiva central divisible en tres transversales, sala multiusos, cuatro vestuarios y botiquín.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://deportes.chiclana.es/instalaciones/gestion-directa/instalaciones-cubiertas/",
+        "https://turismo.chiclana.es/detalle-de-recurso/pabellon-polideportivo-huerta-del-rosario/"
+      ],
+      "nota": "Equipamiento y usos publicados por Deportes y Turismo municipales."
+    },
+    {
+      "id_ficha": "oficial:faae16ae201b034365d2",
+      "nombre": "Policía Municipal",
+      "campo": "w",
+      "tipo": "correccion_o_complemento",
+      "valor_actual": "https://Web: Opens internal link in current window www.chiclana.es",
+      "valor_propuesto": "https://www.chiclana.es/areas-municipales/seguridad-ciudadana-y-transporte/policia-local",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.chiclana.es/areas-municipales/seguridad-ciudadana-y-transporte/policia-local"
+      ],
+      "nota": "La ficha actual contiene una URL con texto de interfaz incrustado. La página municipal confirma dirección, teléfonos y horarios de emergencia y atención administrativa."
+    },
+    {
+      "id_ficha": "oficial:faae16ae201b034365d2",
+      "nombre": "Policía Municipal",
+      "campo": "s",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Servicio municipal de Policía Local con atención de emergencias, seguridad ciudadana y servicios administrativos. Emergencias: 092 y 112; teléfono general y administrativo disponibles en la web municipal.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.chiclana.es/areas-municipales/seguridad-ciudadana-y-transporte/policia-local"
+      ],
+      "nota": "La ficha actual contiene una URL con texto de interfaz incrustado. La página municipal confirma dirección, teléfonos y horarios de emergencia y atención administrativa."
+    },
+    {
+      "id_ficha": "oficial:faae16ae201b034365d2",
+      "nombre": "Policía Municipal",
+      "campo": "h",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Emergencias: atención 24 horas, 365 días. Atención administrativa: lunes a viernes 09:00–13:30 en invierno (1 de octubre–15 de junio) y 09:00–13:00 en verano (16 de junio–30 de septiembre).",
+      "confianza": "alta",
+      "fuentes": [
+        "https://www.chiclana.es/areas-municipales/seguridad-ciudadana-y-transporte/policia-local"
+      ],
+      "nota": "La ficha actual contiene una URL con texto de interfaz incrustado. La página municipal confirma dirección, teléfonos y horarios de emergencia y atención administrativa."
+    },
+    {
+      "id_ficha": "oficial:fbb0dd4a4bc6cf586816",
+      "nombre": "Royal Center Hípica",
+      "campo": "s",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Centro ecuestre de 15.000 m² en Novo Sancti Petri. Ofrece escuela de equitación, pupilaje y adiestramiento, rutas y paseos a caballo, cursos de verano y exámenes de galope. Ha acogido campeonatos oficiales de Andalucía y España y formación reglada de técnico deportivo en hípica.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://deportes.chiclana.es/instalaciones/gestion-indirecta/",
+        "https://royalhipica.es/"
+      ],
+      "nota": "La Delegación Municipal de Deportes describe instalaciones y servicios; la web actual del centro utiliza el dominio .es, distinto del dominio .com de la ficha. Se conserva como alternativa hasta comprobar la vigencia del .com."
+    },
+    {
+      "id_ficha": "oficial:fbb0dd4a4bc6cf586816",
+      "nombre": "Royal Center Hípica",
+      "campo": "w_alternativa",
+      "tipo": "alternativa",
+      "valor_actual": "https://www.royalhipica.com",
+      "valor_propuesto": "https://royalhipica.es/",
+      "confianza": "alta",
+      "fuentes": [
+        "https://deportes.chiclana.es/instalaciones/gestion-indirecta/",
+        "https://royalhipica.es/"
+      ],
+      "nota": "La Delegación Municipal de Deportes describe instalaciones y servicios; la web actual del centro utiliza el dominio .es, distinto del dominio .com de la ficha. Se conserva como alternativa hasta comprobar la vigencia del .com."
+    },
+    {
+      "id_ficha": "oficial:658158848536c30b426e",
+      "nombre": "Yeguada \"La Patiña\"",
+      "campo": "s",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Centro ecuestre próximo a la Playa de La Barrosa, con clases de iniciación, perfeccionamiento y salto, pupilaje y paseos a caballo por la playa y el pinar.",
+      "confianza": "media",
+      "fuentes": [
+        "https://aiunta.com/es/chiclana-de-la-frontera/ficha/yeguada-la-patina"
+      ],
+      "nota": "Descripción revisada por directorio local en octubre de 2026. El horario no está disponible; se evita inventarlo."
+    },
+    {
+      "id_ficha": "oficial:3ffbfb0d2d603e319e2d",
+      "nombre": "Cruz Roja – Puesto de Playa La Barrosa",
+      "campo": "s",
+      "tipo": "dato_nuevo",
+      "valor_actual": "",
+      "valor_propuesto": "Puesto de Cruz Roja para el servicio de salvamento y socorrismo de la Playa de La Barrosa, con dispositivo de vigilancia y atención a bañistas durante la temporada de playa.",
+      "confianza": "alta",
+      "fuentes": [
+        "https://salud.chiclana.es/noticias/detalle-noticia/el-servicio-de-salvamento-y-socorrismo-se-inicia-en-las-playas-de-chiclana/",
+        "https://www.chiclana.es/el-ayuntamiento/contacto/directorio-de-contacto/telefonos-de-interes"
+      ],
+      "nota": "El Ayuntamiento confirma la gestión del servicio de salvamento y socorrismo de las playas por Cruz Roja y la ubicación del puesto central en la Segunda Pista. Los horarios y el despliegue varían por temporada y no se fijan aquí."
     }
   ]
 }
