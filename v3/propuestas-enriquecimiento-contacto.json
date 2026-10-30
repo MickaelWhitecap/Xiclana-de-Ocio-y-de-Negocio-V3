@@ -156,7 +156,146 @@
       "fuentes": [
         "https://cuadernoamarillo.com/localizacion/"
       ]
+    },
+    {
+      "id_ficha": "oficial:8987479920db6cd0b7fa",
+      "nombre": "Escuela de Surf Chiclana-kitesurf Chiclana",
+      "cambios_propuestos": {
+        "w": "https://www.escueladesurfchiclana.com/",
+        "a": "Avenida del Atlántico, Centro Comercial El Pino, local 4, 11139 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "La web oficial confirma dirección, teléfono y correo ya registrados. El dominio actual de la ficha no estaba informado; se propone añadir el dominio propio.",
+      "fuentes": [
+        "https://www.escueladesurfchiclana.com/contact/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:bc553825c15286021ef4",
+      "nombre": "Centro de Interpretación del Vino y la Sal",
+      "cambios_propuestos": {
+        "a": "Plaza de las Bodegas, s/n, frente al Mercado de Abastos, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "Dirección confirmada por la ficha oficial de Turismo de Chiclana. El teléfono actual de la ficha también coincide con el publicado por Turismo.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/centro-de-interpretacion-del-vino-y-la-sal/",
+        "https://www.chiclana.es/el-ayuntamiento/contacto/directorio-de-contacto"
+      ]
+    },
+    {
+      "id_ficha": "oficial:00840abca4a438b77e75",
+      "nombre": "Albarco.com",
+      "cambios_propuestos": {
+        "a": "Puerto Deportivo de Sancti Petri, Poblado de Sancti Petri, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "La página específica del puerto de Sancti Petri de la propia empresa confirma que opera desde ese puerto en julio y agosto. Mantener la distinción con su oficina administrativa de Cádiz.",
+      "fuentes": [
+        "https://www.albarco.com/puertos/puertos.php?id=2",
+        "https://www.albarco.com/contacto/formulario.php"
+      ]
+    },
+    {
+      "id_ficha": "oficial:2481fb74ae3c713ec4e0",
+      "nombre": "Arsosailing",
+      "cambios_propuestos": {
+        "w": "https://argosailing.es/",
+        "a": "Puerto Deportivo de Sancti Petri, Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "El dominio registrado en la ficha contiene una errata (argosailling); la web oficial actual es argosailing.es. La empresa sitúa su punto de información y venta en el Puerto de Sancti Petri. El teléfono 684 359 288 publicado en su web difiere del actual; conservar ambos para revisión, sin sustituir el teléfono actual.",
+      "fuentes": [
+        "https://argosailing.es/contacto/",
+        "https://www.juntadeandalucia.es/organismos/culturapatrimoniohistoricoydeporte/areas/deporte/formacion-investigacion-innovacion/titulaciones-nauticas/paginas/escuelas-cadiz.html"
+      ]
+    },
+    {
+      "id_ficha": "oficial:f4f25ea982d7b4cfbe9d",
+      "nombre": "Balneario de Chiclana",
+      "cambios_propuestos": {
+        "a": "Calle de Fuente Amarga, s/n, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "media",
+      "nota": "Dirección localizada en fuentes de directorio y mapas locales. El teléfono municipal publicado para Fuente Amarga coincide con el número de la ficha. Conviene contrastar con el establecimiento antes de elevar la confianza.",
+      "fuentes": [
+        "https://www.chiclana.es/el-ayuntamiento/contacto/directorio-de-contacto/telefonos-de-interes",
+        "https://www.andalucia.org/listing/hotel-balneario-de-chiclana/"
+      ]
+    },
+    {
+      "id_ficha": "osm-extra:node:13388084791",
+      "nombre": "Oficina Municipal de Turismo",
+      "cambios_propuestos": {
+        "a": "Plaza de las Bodegas, s/n, Centro de Interpretación del Vino y la Sal, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "Dirección y contacto publicados por Turismo de Chiclana y por el directorio estatal de unidades orgánicas. Revisar posible duplicidad con la ficha «Oficina de Turismo Centro Ciudad», que parece describir el mismo punto de atención.",
+      "fuentes": [
+        "https://turismo.chiclana.es/",
+        "https://administracion.gob.es/espanaadmon/quienesquien/ficha-unidad-organica?selectorServicio=organigramasEstructurasDirectorios&selectorget=LA0018360"
+      ]
+    },
+    {
+      "id_ficha": "oficial:f82c75c0157a2e929e73",
+      "nombre": "Club Náutico Sancti Petri",
+      "cambios_propuestos": {
+        "a": "Poblado de Sancti Petri, Puerto Deportivo, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "La Agencia Pública de Puertos de Andalucía identifica el Puerto de Sancti Petri en el Poblado de Sancti Petri. La dirección propuesta es la localización portuaria; no se afirma un número de local.",
+      "fuentes": [
+        "https://www.juntadeandalucia.es/organismos/appa.html"
+      ]
+    },
+    {
+      "id_ficha": "oficial:813f69ef14d32f498327",
+      "nombre": "Novo Jet",
+      "cambios_propuestos": {
+        "a": "Puerto Deportivo de Sancti Petri, buzón 6, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "La Junta de Andalucía publica la dirección del centro náutico y teléfono de Novojet en Puerto Deportivo Sancti Petri. El correo info@novojet.net y el teléfono principal ya constan en la ficha.",
+      "fuentes": [
+        "https://www.juntadeandalucia.es/organismos/culturapatrimoniohistoricoydeporte/areas/deporte/formacion-investigacion-innovacion/titulaciones-nauticas/paginas/escuelas-cadiz.html",
+        "https://aetcadiz.com/turismo-nautico/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:2f3b30558cf222424cc3",
+      "nombre": "Ayuntamiento (edificio histórico)",
+      "cambios_propuestos": {
+        "a": "Calle Constitución, 1, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "El directorio oficial municipal identifica la sede central del Ayuntamiento en C/ Constitución, 1. La ficha representa el edificio histórico, por lo que la dirección corresponde a la sede consistorial.",
+      "fuentes": [
+        "https://www.chiclana.es/el-ayuntamiento/contacto/directorio-de-contacto",
+        "https://turismo.chiclana.es/oficina-virtual-de-turismo/telefonos-de-interes/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:62cdcd5ff7955e0bad87",
+      "nombre": "Medina Mudéjar",
+      "cambios_propuestos": {
+        "a": "Carretera de La Loma, s/n, Centro de Ocio Tartessus, Sancti Petri, 11139 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "La página oficial de contacto de Medina Mudéjar Cádiz publica dirección, teléfono y correo. El teléfono y correo actuales coinciden.",
+      "fuentes": [
+        "https://medinamudejar.com/contacto/"
+      ]
     }
   ],
-  "resumen": "11 propuestas preparadas para revisión. Ninguna modifica el catálogo maestro ni la web pública."
+  "resumen": "21 propuestas preparadas para revisión. Ninguna modifica el catálogo maestro ni la web pública.",
+  "fecha_actualizacion": "2026-10-30",
+  "siguiente_lote": {
+    "revisadas_en_esta_ampliacion": 10,
+    "fuentes_prioritarias": [
+      "webs oficiales de establecimientos",
+      "Ayuntamiento de Chiclana y Turismo municipal",
+      "Junta de Andalucía y organismos públicos"
+    ],
+    "criterio": "Solo añadir campos vacíos o corregir errores evidentes de dominio; discrepancias de teléfono se conservan como alternativas para aprobación."
+  }
 }
