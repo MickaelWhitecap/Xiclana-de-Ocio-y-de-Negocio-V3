@@ -1417,9 +1417,53 @@
         "https://turismo.chiclana.es/detalle-de-recurso/heit-racket-center/",
         "https://heitacademy.com/centros-deportivos/"
       ]
+    },
+    {
+      "id_ficha": "oficial:ae01a77138600480635a",
+      "nombre": "Camping La Rana Verde",
+      "cambios_propuestos": {
+        "s": "Camping de primera categoría entre Chiclana y las playas de La Barrosa y Sancti Petri. Ofrece parcelas de acampada, cabañas, bungalows y apartamentos, piscina con actividades, supermercado, restaurante-buffet, chiringuito, parque infantil y pistas de pádel.",
+        "h": "Temporada 2026: abierto del 27 de febrero al 3 de octubre. El servicio de piscina finalizó el 13 de septiembre de 2026. Próxima temporada pendiente de anuncio."
+      },
+      "confianza": "alta",
+      "nota": "La web oficial confirma servicios y fechas de temporada. La ficha manual con nombre casi idéntico parece duplicada; se propone documentar esta ficha oficial como referencia sin fusionar ni borrar la otra.",
+      "fuentes": [
+        "https://www.campinglaranaverde.com/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:05e7e2f7b1dc64d1d38b",
+      "nombre": "Hostal La Campa",
+      "cambios_propuestos": {
+        "a": "Calle El Centollo, s/n, Playa de La Barrosa, 11139 Chiclana de la Frontera, Cádiz",
+        "s": "Hostal familiar de una estrella situado a unos 600 metros de la Playa de La Barrosa, con 16 habitaciones dobles equipadas con baño privado, aire acondicionado, televisión, caja fuerte y wifi gratuito. Dispone de servicio de limpieza diario y bar-restaurante de cocina tradicional andaluza.",
+        "h": "Abierto todo el año según Turismo de Andalucía. Check-in: 15:00–22:00; check-out: 11:30–12:00, según plataforma de reservas."
+      },
+      "confianza": "alta",
+      "nota": "Turismo de Andalucía confirma categoría, dirección, teléfono, correo, 16 habitaciones y apertura anual. Los horarios de entrada y salida proceden de Booking.com, no de la web oficial.",
+      "fuentes": [
+        "https://en.andalucia.org/listing/la-campa/1797101/",
+        "https://www.booking.com/hotel/es/hostal-la-campa.es.html"
+      ]
+    },
+    {
+      "id_ficha": "oficial:34ed06142a73e6046e57",
+      "nombre": "Hostal Villa",
+      "cambios_propuestos": {
+        "a": "Calle Virgen del Carmen, 11, 11130 Chiclana de la Frontera, Cádiz",
+        "s": "Hostal urbano de dos estrellas en el centro de Chiclana, con 42 habitaciones renovadas, aire acondicionado, baño privado y wifi gratuito. Dispone de recepción 24 horas, bar-cafetería, consigna de equipaje, asistencia turística y aparcamiento privado.",
+        "h": "Recepción 24 horas. Check-in desde las 14:00; check-out antes de las 12:00, según plataformas de alojamiento."
+      },
+      "confianza": "alta",
+      "nota": "Turismo de Andalucía confirma dirección, 42 habitaciones, teléfono y correo. Booking y Expedia corroboran recepción 24 horas y servicios. Horario de entrada/salida según proveedor de reservas.",
+      "fuentes": [
+        "https://www.andalucia.org/listing/villa/3122102/",
+        "https://www.booking.com/hotel/es/hostal-villa.es.html",
+        "https://www.expedia.es/Chiclana-De-La-Frontera-Hoteles-Hostal-Villa.h22796031.Informacion-Hotel"
+      ]
     }
   ],
-  "resumen": "107 propuestas preparadas para revisión. Esta ampliación incluye nuevos datos oficiales de Hipotels, Valentin y HEIT Racket Center. No se modifica el catálogo maestro ni la web pública.",
+  "resumen": "110 propuestas preparadas para revisión. Se añaden datos de temporada del camping y servicios de dos hostales, contrastados con webs oficiales y fuentes turísticas. No se modifica el catálogo maestro ni la web pública.",
   "fecha_actualizacion": "2026-10-30",
   "siguiente_lote": {
     "revisadas_en_esta_ampliacion": 8,
@@ -1493,10 +1537,8 @@
   "pendientes_de_verificacion": [
     "Zen-saciones: no se ha localizado web propia vigente ni una fuente reciente que confirme actividad.",
     "Hostal Ntra. Sra. del Rosario: no se ha confirmado actividad actual ni web propia.",
-    "Hostal la Campa y Hostal Villa: falta una fuente reciente y sólida para completar servicios y horarios.",
-    "Matchpoint: falta verificar si la ficha corresponde a las pistas del centro Iberostar o a otro operador.",
     "Tie Break Carboneros: posible cambio de operador o nombre comercial; no fusionar con HEIT Carboneros sin confirmación.",
-    "Camping La Rana Verde: confirmar duplicidad y estado de actividad tras el cierre de temporada 2026.",
-    "Hotel Sol Sancti Petri: confirmar URL comercial exacta y denominación actual con Meliá."
+    "Camping La Rana Verde: existe una segunda ficha manual casi idéntica; resolver duplicidad sin borrar información.",
+    "Los registros oficiales de Riu, Hipotels, Iberostar y Gran Meliá tienen correspondencia con fichas OSM; consolidar cuando se revise la deduplicación."
   ]
 }
