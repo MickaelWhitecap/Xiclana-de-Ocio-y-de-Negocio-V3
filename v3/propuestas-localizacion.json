@@ -7,8 +7,8 @@
   "criterio": "Solo se proponen coordenadas con una referencia pública identificable. Los pines de puerto o edificios con varias entidades se marcan como aproximados y requieren revisión de precisión.",
   "resumen": {
     "correcciones_de_coordenadas": 2,
-    "nuevas_coordenadas": 12,
-    "total_propuestas": 14
+    "nuevas_coordenadas": 11,
+    "total_propuestas": 13
   },
   "propuestas": [
     {
@@ -198,20 +198,6 @@
       "fuentes": [
         "https://www.puertosdeandalucia.es/puertos/puertos/cadiz/puerto-de-sancti-petri",
         "https://argosailing.es/"
-      ]
-    },
-    {
-      "id_ficha": "osm:node:2343120422",
-      "nombre": "A.P. Caño Chanarro",
-      "propuesta": {
-        "lat": 36.3950417,
-        "lon": -6.2090778
-      },
-      "confianza": "media",
-      "nota": "Ubicación aproximada en el Puerto Deportivo de Sancti Petri, en la zona portuaria de C. de la Rivera. Se debe afinar el punto exacto dentro del muelle antes de publicar.",
-      "fuentes": [
-        "https://www.puertosdeandalucia.es/puertos/puertos/cadiz/puerto-de-sancti-petri",
-        "https://www.google.com/maps/search/?api=1&query=Asociacion+de+Pescadores+Ca%C3%B1o+Chanarro+Sancti+Petri"
       ]
     }
   ]
