@@ -413,12 +413,113 @@
       "fuentes": [
         "https://www.vinccicostagolf.com/"
       ]
+    },
+    {
+      "id_ficha": "oficial:69c0d1be602b8dfca6b3",
+      "nombre": "Puerto Deportivo Sancti Petri",
+      "cambios_propuestos": {
+        "a": "Poblado de Sancti Petri, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "La Agencia Pública de Puertos de Andalucía identifica el puerto con esa dirección postal. Teléfono, correo y web institucional ya constan en la ficha.",
+      "fuentes": [
+        "https://www.juntadeandalucia.es/organismos/appa.html"
+      ]
+    },
+    {
+      "id_ficha": "oficial:032eb937385d34062eec",
+      "nombre": "Spa Barrosa Palace",
+      "cambios_propuestos": {
+        "a": "Hotel Barrosa Palace, Urbanización Novo Sancti Petri, s/n, 11139 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "Dirección específica publicada por Turismo de Chiclana para este spa.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/spa-barrosa-palace/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:8907793cf5722f7fe608",
+      "nombre": "SPASANAR Club Hotel Riu Chiclana",
+      "cambios_propuestos": {
+        "a": "Club Hotel Riu Chiclana, Urbanización Loma de Sancti Petri, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "La ficha oficial de Turismo municipal confirma la ubicación del spa dentro del hotel.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/spasanar-hotel-riu-chiclana/",
+        "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/alojamiento/club-riu-chiclana/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:5536e72b95603ac2fd0e",
+      "nombre": "U-Spa Royal Hideaway",
+      "cambios_propuestos": {
+        "a": "Hotel Royal Hideaway Sancti Petri, Urbanización Loma de Sancti Petri, s/n, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "Dirección y ubicación dentro del hotel publicadas por Turismo de Chiclana. El teléfono y correo ya coinciden con la ficha.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/u-spa-royal-hideaway/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:81e45eab4a9f35e54e02",
+      "nombre": "Valentin Sancti Petri Spa",
+      "cambios_propuestos": {
+        "a": "Hotel Valentin Sancti Petri, Avenida Octavio Augusto, s/n, Urbanización Novo Sancti Petri, 11130 Chiclana de la Frontera, Cádiz",
+        "email_alternativo": "vsp.spa@valentinhotels.com"
+      },
+      "confianza": "alta",
+      "nota": "La web oficial del hotel confirma la dirección y publica un correo específico de contacto del Spa, distinto del actual. Conservar ambos hasta confirmar cuál está operativo.",
+      "fuentes": [
+        "https://www.valentinsanctipetri.com/es/ubicacion/",
+        "https://www.valentinsanctipetri.com/es/contacto/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:5eb71868a9d4c10c1bfa",
+      "nombre": "Waterman School",
+      "cambios_propuestos": {
+        "a": "Calle Choco, s/n, Playa de La Barrosa, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "Dirección publicada en la ficha oficial de Turismo de Chiclana. Teléfono y correo ya constan en el catálogo.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/waterman-school/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:423096c983aa24881a41",
+      "nombre": "Why-not-fly Escuela de Kitesurf",
+      "cambios_propuestos": {
+        "a": "Puerto Deportivo de Sancti Petri, oficina Novojet, 11130 Chiclana de la Frontera, Cádiz",
+        "w": "https://www.why-not-fly.com/"
+      },
+      "confianza": "alta",
+      "nota": "Turismo de Chiclana sitúa la escuela en la oficina Novojet del Puerto Deportivo; la web propia actual confirma el dominio. El teléfono actual y el correo alternativo publicado en la web coinciden con los contactos conocidos.",
+      "fuentes": [
+        "https://turismo.chiclana.es/detalle-de-recurso/why-not-fly-escuela-de-kitesurf/",
+        "https://www.why-not-fly.com/contacto.html"
+      ]
+    },
+    {
+      "id_ficha": "oficial:8e629fe7d4b2c2ddef4c",
+      "nombre": "Spa Iberostar Selection Andalucía Playa",
+      "cambios_propuestos": {
+        "a": "Hotel Iberostar Selection Andalucía Playa, Calle Amílcar Barca, s/n, Urbanización Novo Sancti Petri, 11130 Chiclana de la Frontera, Cádiz"
+      },
+      "confianza": "alta",
+      "nota": "La dirección corresponde al hotel donde se encuentra el spa y está publicada en la web oficial de Iberostar. La ficha de spa conserva su teléfono y correo específicos.",
+      "fuentes": [
+        "https://www.iberostar.com/es/hoteles/cadiz/iberostar-selection-andalucia-playa/"
+      ]
     }
   ],
-  "resumen": "31 propuestas preparadas para revisión. Ninguna modifica el catálogo maestro ni la web pública.",
+  "resumen": "39 propuestas preparadas para revisión. Ninguna modifica el catálogo maestro ni la web pública.",
   "fecha_actualizacion": "2026-10-30",
   "siguiente_lote": {
-    "revisadas_en_esta_ampliacion": 10,
+    "revisadas_en_esta_ampliacion": 8,
     "fuentes_prioritarias": [
       "webs oficiales de establecimientos",
       "Ayuntamiento de Chiclana y Turismo municipal",
