@@ -1055,21 +1055,124 @@
         "https://salud.chiclana.es/noticias/detalle-noticia/el-servicio-de-salvamento-y-socorrismo-se-inicia-en-las-playas-de-chiclana/",
         "https://www.chiclana.es/el-ayuntamiento/contacto/directorio-de-contacto/telefonos-de-interes"
       ]
+    },
+    {
+      "id_ficha": "oficial:2ebf001f269b909d84b5",
+      "nombre": "Hotel Mariantonia",
+      "cambios_propuestos": {
+        "s": "Hotel a unos 150 metros de la Playa de La Barrosa, con habitaciones dobles, superiores, familiares y suites. Dispone de piscina exterior de temporada, terraza-solárium, jardines, zona chill-out, jacuzzi, sauna, wifi, aire acondicionado y cuatro plazas de aparcamiento con reserva previa.",
+        "h": "Check-in desde las 14:00; check-out antes de las 12:00. Piscina y desayuno disponibles por temporada, según la información publicada por el hotel."
+      },
+      "confianza": "alta",
+      "nota": "Servicios, habitaciones y horarios de entrada y salida publicados en la web propia del establecimiento. Parte de la información antigua sobre desayuno menciona restricciones COVID, por lo que no se propone ese servicio como permanente.",
+      "fuentes": [
+        "https://www.mariantoniahotel.com/habitaciones"
+      ]
+    },
+    {
+      "id_ficha": "oficial:94b518f9e95ec53a3246",
+      "nombre": "Hotel Vincci Costa Golf",
+      "cambios_propuestos": {
+        "s": "Resort de 4 estrellas en Novo Sancti Petri, con piscinas exteriores e interior, spa, gimnasio, miniclub, pistas de pádel, chiringuito de playa, restauración, espacios para eventos, aparcamiento y actividades para adultos y niños.",
+        "h": "Recepción 24 horas. Entrada desde las 15:00 y salida hasta las 12:00, según información de plataforma de reservas; confirmar condiciones vigentes con el hotel."
+      },
+      "confianza": "alta",
+      "nota": "Servicios publicados en la web oficial de Vincci. Los horarios de entrada y salida proceden de una plataforma de reservas, no de la web oficial, y quedan sujetos a confirmación.",
+      "fuentes": [
+        "https://www.vinccihoteles.com/es/hoteles/cadiz/vincci-costa-golf/servicios/",
+        "https://www.booking.com/hotel/es/resortcostagolf.es.html"
+      ]
+    },
+    {
+      "id_ficha": "oficial:4f1fae0ac111065fd726",
+      "nombre": "Hotel Iberostar Selection Andalucia Playa",
+      "cambios_propuestos": {
+        "s": "Hotel de 5 estrellas con acceso directo a la Playa de La Barrosa, piscinas (incluidas piscinas climatizadas), spa, SeaSoul Beach Club, restaurantes, campo de golf cercano con traslado y descuentos, instalaciones para ciclistas, sala fitness, programa infantil Star Camp y salas de reuniones.",
+        "h": "Check-in desde las 15:00; check-out hasta las 12:00. Recepción 24 horas."
+      },
+      "confianza": "alta",
+      "nota": "Servicios y horarios de llegada y salida publicados en la web oficial de Iberostar.",
+      "fuentes": [
+        "https://www.iberostar.com/es/hoteles/cadiz/iberostar-selection-andalucia-playa/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:2448c5f493d5bfd4e0c0",
+      "nombre": "Hotel Iberostar Royal Andalus",
+      "cambios_propuestos": {
+        "s": "Hotel de 4 estrellas en primera línea de la Playa de La Barrosa, con piscinas, zona wellness, restauración, actividades y servicios de ocio familiar. Confirmar la denominación comercial actual, ya que la marca del hotel ha cambiado a Iberostar Waves Royal Andalus."
+      },
+      "confianza": "media",
+      "nota": "La ficha puede estar desactualizada en su denominación. El hotel se comercializa actualmente como Iberostar Waves Royal Andalus; se propone revisar el nombre y completar la descripción después de confirmar la correspondencia de esta ficha con el establecimiento.",
+      "fuentes": [
+        "https://www.iberostar.com/es/hoteles/cadiz/iberostar-waves-royal-andalus/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:49a6ba652cc4f1ff131c",
+      "nombre": "Hotel Royal Hideaway Sancti Petri",
+      "cambios_propuestos": {
+        "s": "Hotel de lujo en la Playa de La Barrosa con cinco piscinas exteriores y una piscina interior climatizada con hidromasaje, oferta gastronómica con restaurante buffet y cuatro restaurantes a la carta, bares, spa y actividades para familias."
+      },
+      "confianza": "alta",
+      "nota": "Instalaciones y oferta gastronómica publicadas en la web oficial de Barceló. Los horarios de restaurantes dependen de la ocupación y programación y se consultan en el hotel.",
+      "fuentes": [
+        "https://www.barcelo.com/es-es/royal-hideaway-sancti-petri/",
+        "https://www.barcelo.com/es-es/royal-hideaway-sancti-petri/gastronomia/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:570f9c37af77bfd73d5c",
+      "nombre": "Las Dunas",
+      "cambios_propuestos": {
+        "s": "Aparthotel en Novo Sancti Petri con bar-piscina, restaurante, animación y miniclub infantil, actividades deportivas y de salud, espectáculos y programas de ocio para familias. Dispone de apartamentos y zonas ajardinadas."
+      },
+      "confianza": "alta",
+      "nota": "Servicios e instalaciones publicados en la web oficial del aparthotel. No se propone horario general porque la página consultada no lo publica.",
+      "fuentes": [
+        "https://www.aparthotelasdunas.com/instalaciones-y-servicios.html"
+      ]
+    },
+    {
+      "id_ficha": "oficial:ee96c3921b8b2b24c9a7",
+      "nombre": "Hostal Noli",
+      "cambios_propuestos": {
+        "s": "Hostal y restaurante a unos 50 metros de la Playa de La Barrosa, con 18 habitaciones dobles equipadas con aire acondicionado, televisión y baño completo. Dispone de aparcamiento propio y restaurante de cocina casera basada en productos del día.",
+        "h": "Entrada: 14:30–21:30. Salida: 08:00–11:00. Horarios publicados por plataforma de reservas; confirmar directamente con el establecimiento."
+      },
+      "confianza": "media",
+      "nota": "La descripción de alojamiento y restaurante está publicada por Turismo de Andalucía. Los horarios de entrada y salida proceden de Booking.com y se mantienen como información pendiente de confirmación.",
+      "fuentes": [
+        "https://www.andalucia.org/listing/hostal-noli/2482102/",
+        "https://www.booking.com/hotel/es/hostal-noli.es.html"
+      ]
+    },
+    {
+      "id_ficha": "oficial:721068ed86ecdd268b36",
+      "nombre": "Hostal Casa la Laja",
+      "cambios_propuestos": {
+        "s": "Hostal boutique ubicado en un edificio del siglo XVIII en el centro de Chiclana. Dispone de habitaciones, algunas con balcón o patio, televisión vía satélite y recepción 24 horas."
+      },
+      "confianza": "media",
+      "nota": "Descripción y servicios publicados por plataforma de reservas. La web propia no se ha podido contrastar en el mismo nivel de detalle; no se propone horario de entrada/salida.",
+      "fuentes": [
+        "https://www.booking.com/hotel/es/hostal-casa-la-laja.es.html"
+      ]
     }
   ],
-  "resumen": "80 propuestas preparadas para revisión. Esta ampliación añade descripciones y horarios de servicios municipales, deportivos y ecuestres. Ninguna modifica el catálogo maestro ni la web pública.",
+  "resumen": "88 propuestas preparadas para revisión. Esta ampliación añade información de hoteles, aparthoteles y hostales, priorizando webs oficiales. Ninguna modifica el catálogo maestro ni la web pública.",
   "fecha_actualizacion": "2026-10-30",
   "siguiente_lote": {
-    "revisadas_en_esta_ampliacion": 7,
+    "revisadas_en_esta_ampliacion": 8,
     "pendientes_de_verificacion": [
-      "Hostal Ntra. Sra. del Rosario: sin web propia verificable localizada.",
+      "Hostal Ntra. Sra. del Rosario: no se ha localizado web propia verificable.",
       "Zen-saciones: dominio histórico sin vigencia confirmada.",
-      "A.P. Caño Chanarro: no se ha localizado una descripción específica suficientemente sólida de la entidad.",
-      "Farmacia La Barrosa: la dirección web .es encontrada podría corresponder a una versión comercial distinta de la web .com de la ficha; confirmar identidad antes de proponer sustitución.",
-      "Museo Francisco Montes Paquiro: falta una fuente actual suficientemente clara para completar su descripción.",
+      "A.P. Caño Chanarro y Museo Francisco Montes Paquiro: faltan fuentes actuales suficientemente claras para completar descripción.",
+      "Farmacia La Barrosa: discrepancia potencial entre dominios .com y .es; confirmar identidad.",
       "Camping La Rana Verde: dos fichas activas parecen representar el mismo establecimiento.",
-      "Hospital Viamed: discrepancia de dirección entre Turismo municipal y registro del Ministerio."
+      "Varias fichas de hoteles (RIU, Hipotels, Iberostar) son duplicados entre registros oficiales y OSM; resolver antes de fusionar.",
+      "Hotel Viamed: discrepancia de dirección entre Turismo municipal y registro del Ministerio."
     ],
-    "criterio": "Priorizar fuentes oficiales municipales y webs propias; los directorios externos solo se utilizan con confianza media y sin inventar horarios."
+    "criterio": "No rellenar campos con horarios genéricos de 24/7 cuando se refieren a recepción o acceso y no a apertura pública; identificar fuentes de terceros y marcar sus datos como pendientes de confirmación."
   }
 }
