@@ -85,6 +85,11 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
 <div id="trash-list" style="margin-top:.7rem"><span class="muted">Cargando papelera…</span></div>
 </section>
 
+<section class="panel" id="automatic-candidates-panel">
+ <div class="topline"><div><h2 style="margin:.2rem 0">Candidatas automáticas de OpenStreetMap</h2><div class="muted">No se publican solas. Revisa los datos y pulsa «Aprobar y publicar» solo cuando correspondan a un establecimiento o lugar real y distinto.</div></div><button id="automatic-candidates-refresh" type="button" class="secondary">Actualizar candidatas</button></div>
+ <div id="automatic-candidates-list" style="margin-top:.7rem"><span class="muted">Cargando candidatas…</span></div>
+</section>
+
 <section class="panel" id="proposals-panel">
  <div class="topline"><div><h2 style="margin:.2rem 0">Fichas provisionales</h2><div class="muted">Registra negocios y lugares de ocio como propuestas privadas. Solo pasan a la web pública cuando las apruebas.</div></div><button id="proposal-refresh" type="button" class="secondary">Actualizar propuestas</button></div>
  <form id="proposal-form" class="fields" style="margin-top:.8rem">
@@ -147,7 +152,7 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
 "use strict";
 const $=s=>document.querySelector(s), status=$("#status"), login=$("#login"), app=$("#app"), logout=$("#logout"), form=$("#record-form"), list=$("#list");
 const config=window.XICLANA_SUPABASE||{};
-let client=null,user=null,baseItems=[],overrides=[],categories=[],proposals=[],selectedId=null,isNew=false,visibleItems=[],adSlots=[];
+let client=null,user=null,baseItems=[],overrides=[],categories=[],proposals=[],reviewCandidates=[],selectedId=null,isNew=false,visibleItems=[],adSlots=[];
 const fieldNames=["n","t","c","a","p","e","w","h","s","d","lat","lon"];
 function message(text,type=""){status.textContent=text;status.className="status"+(type?" "+type:"");status.classList.remove("hidden")}
 function showLogin(){login.classList.remove("hidden");app.classList.add("hidden");logout.classList.add("hidden")}
@@ -155,17 +160,26 @@ function showApp(){login.classList.add("hidden");app.classList.remove("hidden");
 function stableId(x){if(x.id)return String(x.id);return "legacy:"+[x.n,x.t,x.a].map(v=>String(v||"").trim().toLowerCase()).join("|")}
 function effectiveItems(){
  const byId=new Map(overrides.map(o=>[o.listing_id,o]));
- let out=baseItems.filter(x=>!byId.get(stableId(x))?.fields?._xiclana_deleted).map(x=>{const id=stableId(x),o=byId.get(id);return {...x,id,...(o?.fields||{}),id,verified_at:o?.verified_at||null,is_new:false}});
+ let out=baseItems.filter(x=>x._xiclana_deleted!==true&&!byId.get(stableId(x))?.fields?._xiclana_deleted).map(x=>{const id=stableId(x),o=byId.get(id);return {...x,id,...(o?.fields||{}),id,verified_at:o?.verified_at||null,is_new:false}});
  overrides.filter(o=>o.is_new&&!o.fields?._xiclana_deleted).forEach(o=>{if(!baseItems.some(x=>stableId(x)===o.listing_id))out.push({...o.fields,id:o.listing_id,verified_at:o.verified_at,is_new:true})});
- // En la administración, agrupar las variantes del mismo Camping La Rana Verde sin borrar registros de la base de datos.
- const claveRana=x=>String(x.n||x.nombre||x.name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim().includes("rana verde");
+ // La Rana Verde es una zona geográfica; agrupar solo variantes exactas del mismo camping.
+ const claveRana=x=>String(x.n||x.nombre||x.name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()==="camping la rana verde";
  const rana=out.filter(claveRana);
  if(rana.length>1){
   const puntuacion=x=>Object.entries(x).reduce((n,[k,v])=>n+(!["id","seed","verified_at"].includes(k)&&v!=null&&String(v).trim()!==""?1:0),0)+(String(x.id||"").startsWith("manual:")?0.25:0);
   const conservar=rana.reduce((best,x)=>puntuacion(x)>puntuacion(best)?x:best);
   out=out.filter(x=>!claveRana(x)||x===conservar);
  }
- return out;
+ // Evitar que la lista de Administración muestre dos fichas con nombre, categoría, tipo y dirección idénticos.
+ // No se borra ningún registro de baseItems ni de Supabase; solo se presenta una ficha preferente.
+ const normExact=v=>String(v??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");
+ const exactKey=x=>{const n=normExact(x.n||x.nombre||x.name),c=normExact(x.c||x.categoria||x.category),t=normExact(x.t||x.tipo),a=normExact(x.a||x.direccion||x.address);return n&&c&&t&&a?[n,c,t,a].join("|"):""};
+ const priority=x=>String(x.id||"").startsWith("manual:")?0:String(x.id||"").startsWith("oficial:")?1:String(x.id||"").startsWith("consolidado:")?2:String(x.id||"").startsWith("proposal:")?3:4;
+ const exactGroups=new Map();
+ out.forEach(x=>{const k=exactKey(x);if(k){if(!exactGroups.has(k))exactGroups.set(k,[]);exactGroups.get(k).push(x)}});
+ const suppressed=new Set();
+ exactGroups.forEach(group=>{if(group.length<2)return;group.sort((a,b)=>priority(a)-priority(b));const keeper=group[0];group.slice(1).forEach(other=>{Object.entries(other).forEach(([k,v])=>{if((keeper[k]===undefined||keeper[k]===null||String(keeper[k]).trim()==="")&&v!==undefined&&v!==null&&String(v).trim()!=="")keeper[k]=v});suppressed.add(other)})});
+ return out.filter(x=>!suppressed.has(x));
 }
 function deletedItems(){
  const deleted=overrides.filter(o=>o.fields&&o.fields._xiclana_deleted===true);
@@ -200,7 +214,7 @@ function renderCategories(){
 }
 function refreshList(){
  visibleItems=effectiveItems();
- const normalize=v=>String(v??"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLocaleLowerCase("es").trim();
+ const normalize=v=>String(v??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("es").trim();
  const q=normalize($("#search").value);
  const matches=visibleItems.filter(x=>{
   if(!q)return true;
@@ -214,14 +228,77 @@ function refreshList(){
 function selectItem(id){const x=effectiveItems().find(v=>v.id===id);if(!x)return;selectedId=id;isNew=!!x.is_new;$("#form-title").textContent=x.n;$("#record-meta").textContent=x.verified_at?"Última verificación: "+new Date(x.verified_at).toLocaleString("es-ES"):"Ficha de directorio";$("#delete-button").disabled=false;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");fieldNames.forEach(k=>{const input=form.elements[k];input.value=x[k]??""});refreshList()}
 function startNew(){selectedId="new:"+crypto.randomUUID();isNew=true;$("#form-title").textContent="Nueva ficha";$("#record-meta").textContent="Se añadirá al directorio público";$("#delete-button").disabled=true;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");form.reset();$("#t").value="negocio";refreshList()}
 function cancelEdit(){selectedId=null;isNew=false;form.classList.add("hidden");$("#empty-editor").classList.remove("hidden");$("#form-title").textContent="Selecciona una ficha";$("#record-meta").textContent="";refreshList()}
+function candidateKey(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
+function candidateAlreadyExists(candidate){
+ const name=candidateKey(candidate.n),address=candidateKey(candidate.a);
+ return effectiveItems().find(x=>{
+  if(candidateKey(x.n)!==name)return false;
+  const otherAddress=candidateKey(x.a);
+  if(address&&otherAddress&&address===otherAddress)return true;
+  const hasCoords=candidate.lat!=null&&candidate.lon!=null&&x.lat!=null&&x.lon!=null;
+  const a=Number(candidate.lat),b=Number(candidate.lon),la=Number(x.lat),lo=Number(x.lon);
+  if(hasCoords&&Number.isFinite(a)&&Number.isFinite(b)&&Number.isFinite(la)&&Number.isFinite(lo))return Math.abs(a-la)<0.002&&Math.abs(b-lo)<0.003;
+  return !address&&!otherAddress&&candidateKey(x.c)===candidateKey(candidate.c);
+ });
+}
+function renderAutomaticCandidates(){
+ const root=$("#automatic-candidates-list");if(!root)return;root.textContent="";
+ const approved=new Set(overrides.filter(o=>o.is_new&&!o.fields?._xiclana_deleted).map(o=>String(o.listing_id)));
+ const rejected=new Set(proposals.filter(p=>p.status==="rejected"&&p.source_name==="OpenStreetMap").map(p=>String(proposalFields(p).id||"")));
+ const baseIds=new Set(baseItems.map(stableId));
+ const pending=reviewCandidates.filter(x=>x&&x.id&&!approved.has(String(x.id))&&!rejected.has(String(x.id))&&!baseIds.has(String(x.id))&&x.estado_revision!=="descartada");
+ if(!pending.length){root.textContent="No hay candidatas automáticas pendientes de revisión.";return}
+ pending.forEach(candidate=>{
+  const card=document.createElement("div");card.className="item";card.style.marginBottom=".65rem";
+  const title=document.createElement("strong");title.textContent=candidate.n||"Candidata sin nombre";card.append(title);
+  const detail=document.createElement("small");detail.textContent=[candidate.c||"Sin categoría",candidate.t||"Sin tipo",candidate.a||"Sin dirección",candidate.p||"",candidate.e||"",candidate.w||"",candidate.lat!=null&&candidate.lon!=null?("Coordenadas "+candidate.lat+", "+candidate.lon):"",candidate.f||"OpenStreetMap"].filter(Boolean).join(" · ");card.append(detail);
+  const osm=String(candidate.id).match(/^osm-extra:(node|way|relation):(\d+)$/);
+  if(osm){const source=document.createElement("a");source.href="https://www.openstreetmap.org/"+osm[1]+"/"+osm[2];source.target="_blank";source.rel="noopener noreferrer";source.textContent="Ver en OpenStreetMap";source.style.display="inline-block";source.style.marginTop=".25rem";card.append(source)}
+  const duplicate=candidateAlreadyExists(candidate);
+  if(duplicate){const note=document.createElement("small");note.textContent="Posible duplicado de «"+(duplicate.n||"ficha existente")+"». No se publica desde aquí; revisa la ficha existente.";note.style.color="#8a4b12";card.append(note)}
+  const actions=document.createElement("div");actions.className="actions";
+  const approve=document.createElement("button");approve.type="button";approve.textContent="Aprobar y publicar";approve.disabled=Boolean(duplicate);approve.onclick=()=>approveAutomaticCandidate(candidate);actions.append(approve);
+  const reject=document.createElement("button");reject.type="button";reject.className="danger";reject.textContent="Descartar";reject.onclick=()=>rejectAutomaticCandidate(candidate);actions.append(reject);
+  card.append(actions);root.append(card);
+ });
+}
+async function approveAutomaticCandidate(candidate){
+ const duplicate=candidateAlreadyExists(candidate);
+ if(duplicate){message("Posible duplicado de «"+(duplicate.n||"ficha existente")+"». Revisa la ficha existente antes de publicar.","error");return}
+ if(!candidate.n||!candidate.c||!["ocio","negocio"].includes(candidate.t)){message("La candidata necesita nombre, categoría y tipo válido.","error");return}
+ if(!window.confirm("¿Aprobar y publicar «"+candidate.n+"»? La ficha será visible en la web pública."))return;
+ const fields={...candidate,f:String(candidate.f||"OpenStreetMap"),fuente_estado:"Candidata automática revisada y aprobada por Administración",v:new Date().toISOString().slice(0,10)};
+ delete fields.estado_revision;
+ const known=categories.some(x=>candidateKey(x.name)===candidateKey(fields.c)&&x.type===fields.t);
+ if(!known){
+  const baseSlug=slugify(fields.c),conflict=categories.some(x=>x.slug===baseSlug&&x.type!==fields.t);
+  let slug=conflict?baseSlug+"-"+fields.t:baseSlug;
+  if(categories.some(x=>x.slug===slug&&candidateKey(x.name)!==candidateKey(fields.c)))slug=slug+"-"+Date.now().toString(36);
+  const {data:cat,error:catError}=await client.from("listing_categories").insert({slug,name:fields.c,type:fields.t,created_by:user.id}).select("slug,name,type,created_at").single();
+  if(catError){message("No se pudo registrar la categoría; la ficha no se ha publicado: "+catError.message,"error");return}
+  categories=categories.filter(x=>x.slug!==cat.slug);categories.push(cat);renderCategories();
+ }
+ const now=new Date().toISOString();
+ const {error}=await client.from("listing_overrides").upsert({listing_id:String(candidate.id),fields,is_new:true,verified_at:now,updated_at:now,updated_by:user.id},{onConflict:"listing_id"});
+ if(error){message("No se pudo publicar la candidata: "+error.message,"error");return}
+ await loadData();message("Candidata aprobada y publicada: "+candidate.n,"ok");
+}
+async function rejectAutomaticCandidate(candidate){
+ if(!window.confirm("¿Descartar «"+candidate.n+"»? Quedará registrada como rechazada y no volverá a aparecer en esta revisión."))return;
+ const match=String(candidate.id||"").match(/^osm-extra:(node|way|relation):(\d+)$/);
+ const sourceUrl=match?"https://www.openstreetmap.org/"+match[1]+"/"+match[2]:null;
+ const {error}=await client.from("listing_proposals").insert({fields:{...candidate},source_name:"OpenStreetMap",source_url:sourceUrl,source_checked_at:new Date().toISOString().slice(0,10),notes:"Candidata automática descartada desde Administración; no publicada.",status:"rejected",created_by:user.id});
+ if(error){message("No se pudo registrar el descarte: "+error.message,"error");return}
+ await loadProposals();renderAutomaticCandidates();message("Candidata descartada; no se ha publicado.","ok");
+}
 async function loadData(){
  const [dataRes,overrideRes]=await Promise.all([fetch("./fichas_completas.json",{cache:"no-store"}),client.from("listing_overrides").select("listing_id,fields,is_new,verified_at,updated_at")]);
  if(!dataRes.ok)throw new Error("No se pudo cargar fichas_completas.json. Comprueba que GitHub Pages haya publicado el sitio.");
  const data=await dataRes.json();if(overrideRes.error)throw overrideRes.error;
- baseItems=(data.items||[]).map(x=>({...x}));overrides=overrideRes.data||[];
+ baseItems=(data.items||[]).map(x=>({...x}));reviewCandidates=(data.candidatas_revision||[]).map(x=>({...x}));overrides=overrideRes.data||[];
  const categoryRes=await client.from("listing_categories").select("slug,name,type,created_at").order("name");
  if(categoryRes.error)throw new Error("No se pudieron cargar las categorías. Comprueba que has ejecutado supabase-categories.sql en Supabase: "+categoryRes.error.message);
- categories=categoryRes.data||[];renderCategories();refreshList();renderTrash();await loadProposals();await loadAdvertisingSlots();
+ categories=categoryRes.data||[];renderCategories();refreshList();renderTrash();renderAutomaticCandidates();await loadProposals();await loadAdvertisingSlots();
 }
 
 
@@ -258,25 +335,31 @@ function renderProposals(){
 }
 async function loadProposals(){
  const {data,error}=await client.from("listing_proposals").select("*").order("created_at",{ascending:false});
- if(error)throw error;proposals=data||[];renderProposals();
+ if(error)throw error;proposals=data||[];renderProposals();renderAutomaticCandidates();
 }
 async function reviewProposal(p,nextStatus){
  const f={...proposalFields(p)};
  if(nextStatus==="approved"){
+  const publicationId="proposal:"+p.id;
   const name=String(f.n||"").trim().toLocaleLowerCase("es"),address=String(f.a||"").trim().toLocaleLowerCase("es");
-  const duplicate=effectiveItems().find(x=>String(x.n||"").trim().toLocaleLowerCase("es")===name && (!address||String(x.a||"").trim().toLocaleLowerCase("es")===address));
+  // Una aprobación puede quedar parcialmente aplicada si Supabase falla al actualizar el estado de la propuesta.
+  // Reutilizar un ID estable permite reintentar sin crear otra ficha ni bloquear la propia ficha ya publicada.
+  const duplicate=effectiveItems().find(x=>x.id!==publicationId && String(x.n||"").trim().toLocaleLowerCase("es")===name && (!address||String(x.a||"").trim().toLocaleLowerCase("es")===address));
   if(duplicate){message("No se puede publicar automáticamente: ya existe una ficha con ese nombre y dirección. Revisa la ficha existente antes de continuar.","error");return}
   if(!f.n||!f.c){message("La propuesta necesita nombre y categoría antes de publicarse.","error");return}
   f.t=f.t||"negocio";f.f="Verificado por Xiclana";f.v=new Date().toISOString().slice(0,10);
-  const id="manual:"+crypto.randomUUID();
-  const {error:saveError}=await client.from("listing_overrides").upsert({listing_id:id,fields:f,is_new:true,verified_at:new Date().toISOString(),updated_at:new Date().toISOString(),updated_by:user.id},{onConflict:"listing_id"});
-  if(saveError){message("No se pudo publicar la ficha: "+saveError.message,"error");return}
-  const known=categories.some(c=>c.name.toLocaleLowerCase("es")===String(f.c).toLocaleLowerCase("es"));
+  const known=categories.some(c=>c.name.toLocaleLowerCase("es")===String(f.c).toLocaleLowerCase("es")&&c.type===f.t);
   if(!known){
-   const {data:cat,error:catError}=await client.from("listing_categories").upsert({slug:slugify(f.c),name:f.c,type:f.t,created_by:user.id},{onConflict:"slug"}).select("slug,name,type,created_at").single();
-   if(catError){message("La ficha se guardó, pero no se pudo registrar la categoría: "+catError.message,"error");return}
+   const baseSlug=slugify(f.c),conflict=categories.some(c=>c.slug===baseSlug&&c.type!==f.t);
+   let slug=conflict?baseSlug+"-"+f.t:baseSlug;
+   if(categories.some(c=>c.slug===slug&&c.name.toLocaleLowerCase("es")!==String(f.c).toLocaleLowerCase("es")))slug=slug+"-"+Date.now().toString(36);
+   const {data:cat,error:catError}=await client.from("listing_categories").insert({slug,name:f.c,type:f.t,created_by:user.id}).select("slug,name,type,created_at").single();
+   if(catError){message("No se pudo registrar la categoría; la ficha no se ha publicado: "+catError.message,"error");return}
    categories=categories.filter(c=>c.slug!==cat.slug);categories.push(cat);
   }
+  const id=publicationId;
+  const {error:saveError}=await client.from("listing_overrides").upsert({listing_id:id,fields:f,is_new:true,verified_at:new Date().toISOString(),updated_at:new Date().toISOString(),updated_by:user.id},{onConflict:"listing_id"});
+  if(saveError){message("No se pudo publicar la ficha: "+saveError.message,"error");return}
  }
  const {error}=await client.from("listing_proposals").update({status:nextStatus,reviewed_at:new Date().toISOString(),reviewed_by:user.id,review_notes:nextStatus==="approved"?"Aprobada y enviada al directorio público":"Descartada desde Administración"}).eq("id",p.id);
  if(error){message("La ficha se revisó parcialmente, pero no se pudo actualizar el estado de la propuesta: "+error.message,"error");return}
@@ -296,6 +379,7 @@ $("#proposal-form").addEventListener("submit",async e=>{
  finally{btn.disabled=false;btn.textContent="Guardar como provisional"}
 });
 $("#proposal-refresh").onclick=async()=>{try{await loadProposals();message("Propuestas actualizadas.","ok")}catch(err){message("No se pudieron cargar las propuestas: "+err.message,"error")}};
+ $("#automatic-candidates-refresh").onclick=async()=>{try{await loadData();message("Candidatas automáticas actualizadas.","ok")}catch(err){message("No se pudieron actualizar las candidatas: "+err.message,"error")}};
 
 $("#proposal-example").onclick=()=>{$("#proposal-json").value=JSON.stringify([{n:"Nombre del establecimiento",t:"negocio",c:"Restaurante",a:"Dirección por verificar",p:"",e:"",w:"https://ejemplo.es",h:"",s:"",d:"Datos públicos pendientes de verificación",source_name:"Web oficial",source_url:"https://ejemplo.es",source_checked_at:new Date().toISOString().slice(0,10),notes:"Ejemplo: sustituir por datos reales antes de importar"},{n:"Nombre del lugar de ocio",t:"ocio",c:"Camping",a:"Dirección por verificar",source_name:"Web oficial",source_url:"https://ejemplo.es",notes:"Pendiente de verificación"}],null,2)};
 $("#proposal-import").onclick=async()=>{

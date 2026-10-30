@@ -1,0 +1,44 @@
+{
+  "fecha": "2026-10-30",
+  "fuente": "v3/fichas_completas.json en rama audit/integridad-catalogo-publicacion",
+  "total_registros_historicos": 1302,
+  "total_items_activos": 1294,
+  "total_borrados": 8,
+  "total_candidatas_revision": 2,
+  "estadistica_parametros": {
+    "campos_contados": [
+      "n",
+      "t",
+      "c",
+      "a",
+      "d",
+      "p",
+      "e",
+      "w",
+      "m",
+      "lat",
+      "lon",
+      "f"
+    ],
+    "distribucion_por_numero_de_campos": {
+      "4": 6,
+      "5": 9,
+      "6": 807,
+      "7": 262,
+      "8": 76,
+      "9": 91,
+      "10": 25,
+      "11": 16,
+      "12": 2
+    },
+    "fichas_con_algun_medio_de_contacto": 256,
+    "fichas_con_email": 125
+  },
+  "ids_duplicados_o_faltantes_detectados_por_comprobacion_rapida": 0,
+  "nota": "Auditoría reproducible del catálogo consolidado el 30-10-2026: 1.302 registros históricos, 1.294 no marcados como borrados, 8 borrados, 2 candidatas de revisión, 0 IDs repetidos, 0 fichas incompletas y 0 grupos de duplicados exactos pendientes. Se consolidaron 20 grupos (20 registros excedentes) conservando los IDs maestros y las fuentes. Los 8 registros de propuestas aprobadas permanecen en Supabase como historial; no se modificaron filas de Supabase. La cifra de activos no certifica que el establecimiento siga abierto.",
+  "grupos_duplicados_exactos": 0,
+  "registros_en_grupos_duplicados": 0,
+  "excedentes_teoricos_duplicados": 0,
+  "candidatos_automaticos_heredados_activos": 265,
+  "duplicados_consolidados_en_catalogo": 20
+}

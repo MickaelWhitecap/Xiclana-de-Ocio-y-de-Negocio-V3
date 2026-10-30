@@ -14,6 +14,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   publicar:
+    if: github.actor != 'github-actions[bot]' || github.event_name != 'push'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -23,16 +24,38 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Ejecutar pruebas de regresión antes de sincronizar
+        run: python -m unittest v3/test_auditar_catalogo.py
       - name: Validar el fichero maestro único
         run: python v3/actualizar.py
       - name: Ampliar catálogo en el fichero maestro
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: python v3/ampliar_catalogo.py
+      - name: Auditar integridad del catálogo
+        run: python v3/auditar_catalogo.py
+      - name: Validar catálogo e informes antes de publicar
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for name in ("fichas_completas.json", "auditoria_integridad.json", "plan_consolidacion.json"):
+              path = Path("v3") / name
+              if not path.is_file():
+                  raise SystemExit(f"Falta el archivo requerido: {path}")
+              with path.open(encoding="utf-8") as stream:
+                  json.load(stream)
+          catalog = json.loads(Path("v3/fichas_completas.json").read_text(encoding="utf-8"))
+          if not isinstance(catalog.get("items"), list):
+              raise SystemExit("El catálogo no contiene una lista items válida.")
+          report = json.loads(Path("v3/auditoria_integridad.json").read_text(encoding="utf-8"))
+          if not isinstance(report, dict) or "parametros_documentados_por_ficha" not in report:
+              raise SystemExit("El informe de auditoría no contiene las estadísticas esperadas.")
+          PY
       - name: Guardar el catálogo maestro
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v3/fichas_completas.json
+          git add v3/fichas_completas.json v3/auditoria_integridad.json v3/plan_consolidacion.json
           if ! git diff --cached --quiet; then
             git commit -m "Actualizar catálogo maestro V3"
             git push

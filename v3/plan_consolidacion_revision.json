@@ -1,0 +1,1358 @@
+{
+  "fecha_revision": "2026-10-29",
+  "repositorio": "MickaelWhitecap/Xiclana-de-Ocio-y-de-Negocio-V3",
+  "rama": "audit/integridad-catalogo-publicacion",
+  "proposito": "Plan de consolidación no destructivo; no modifica el catálogo público ni Supabase.",
+  "resumen": {
+    "registros_historicos": 1302,
+    "activos": 1294,
+    "grupos_exactos": 20,
+    "registros_en_grupos": 40,
+    "excedentes_teoricos": 20,
+    "registros_antes": 1322,
+    "registros_despues": 1302,
+    "activos_antes": 1314,
+    "activos_despues": 1294,
+    "grupos_consolidados_en_catalogo": 20,
+    "filas_supabase_modificadas": 0
+  },
+  "reglas": [
+    "La coincidencia exacta de nombre, categoría y dirección detecta candidatos, no autoriza una fusión automática.",
+    "Priorizar ficha manual verificada frente a propuesta, conservando todos los campos complementarios.",
+    "Para pares oficial/consolidado, priorizar el ID oficial si los datos son equivalentes; verificar procedencia y referencias.",
+    "No retirar IDs ni modificar Supabase hasta comprobar listing_overrides, propuestas y cualquier otra referencia.",
+    "Cuando el campo dirección parece contener un servicio u horario, revisar su semántica antes de consolidar."
+  ],
+  "grupos": [
+    {
+      "numero": 1,
+      "nombre": "Aparcamiento El Manchón",
+      "categoria": "Parking",
+      "tipo": "negocio",
+      "direccion": "C. San Mateo, 9, 11130 Chiclana de la Frontera, Cádiz",
+      "clasificacion": "duplicado probable: ficha manual verificada + propuesta",
+      "conservar_id": "manual:e95c07cf-41c6-4d0b-b9bb-ece0bf871770",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "proposal:32c3142a-1318-401e-a957-01c5d576f92a"
+      ],
+      "registros": [
+        {
+          "a": "C. San Mateo, 9, 11130 Chiclana de la Frontera, Cádiz",
+          "c": "Parking",
+          "d": "Aparcamiento público próximo al centro. Confirmar condiciones y horario.",
+          "f": "Verificado por Xiclana",
+          "n": "Aparcamiento El Manchón",
+          "t": "negocio",
+          "v": "2026-10-24",
+          "lat": 36.42,
+          "lon": -6.145,
+          "id": "manual:e95c07cf-41c6-4d0b-b9bb-ece0bf871770",
+          "fuente_estado": "Ficha administrativa sincronizada desde Supabase"
+        },
+        {
+          "a": "C. San Mateo, 9, 11130 Chiclana de la Frontera, Cádiz",
+          "c": "Parking",
+          "d": "Aparcamiento público próximo al centro. Confirmar condiciones y horario.",
+          "n": "Aparcamiento El Manchón",
+          "t": "negocio",
+          "lat": 36.42,
+          "lon": -6.145,
+          "id": "proposal:32c3142a-1318-401e-a957-01c5d576f92a",
+          "f": "Ficha de negocio / mapas"
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "f": [
+          "Verificado por Xiclana",
+          "Ficha de negocio / mapas"
+        ],
+        "id": [
+          "manual:e95c07cf-41c6-4d0b-b9bb-ece0bf871770",
+          "proposal:32c3142a-1318-401e-a957-01c5d576f92a"
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
+      "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual.",
+      "id_maestro_conservado": "manual:e95c07cf-41c6-4d0b-b9bb-ece0bf871770",
+      "id_duplicado_retirado_del_json": "proposal:32c3142a-1318-401e-a957-01c5d576f92a",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 2,
+      "nombre": "Aparcamiento público Centro Plaza",
+      "categoria": "Parking",
+      "tipo": "negocio",
+      "direccion": "C. Concepción, 12, 11130 Chiclana de la Frontera, Cádiz",
+      "clasificacion": "duplicado probable: ficha manual verificada + propuesta",
+      "conservar_id": "manual:d28fa8a8-608b-49d0-a5da-7c8bce6aacc5",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "proposal:f9bb7e0e-dc87-48bd-83a7-534a2ea663f5"
+      ],
+      "registros": [
+        {
+          "a": "C. Concepción, 12, 11130 Chiclana de la Frontera, Cádiz",
+          "c": "Parking",
+          "d": "",
+          "e": "",
+          "f": "Verificado por Xiclana",
+          "h": "24 horas",
+          "n": "Aparcamiento público Centro Plaza",
+          "p": "956534789",
+          "s": "",
+          "t": "negocio",
+          "v": "2026-10-21",
+          "w": "https://parclick.com/parking-chiclana_de_la_frontera/ic_plaza_de_abastos",
+          "lat": null,
+          "lon": null,
+          "id": "manual:d28fa8a8-608b-49d0-a5da-7c8bce6aacc5",
+          "fuente_estado": "Ficha administrativa sincronizada desde Supabase"
+        },
+        {
+          "a": "C. Concepción, 12, 11130 Chiclana de la Frontera, Cádiz",
+          "c": "Parking",
+          "d": "",
+          "e": "",
+          "h": "24 horas",
+          "n": "Aparcamiento público Centro Plaza",
+          "p": "956534789",
+          "s": "",
+          "t": "negocio",
+          "w": "https://parclick.com/parking-chiclana_de_la_frontera/ic_plaza_de_abastos",
+          "lat": null,
+          "lon": null,
+          "id": "proposal:f9bb7e0e-dc87-48bd-83a7-534a2ea663f5",
+          "f": "el propio establecimiento"
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "f": [
+          "Verificado por Xiclana",
+          "el propio establecimiento"
+        ],
+        "id": [
+          "manual:d28fa8a8-608b-49d0-a5da-7c8bce6aacc5",
+          "proposal:f9bb7e0e-dc87-48bd-83a7-534a2ea663f5"
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
+      "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual.",
+      "id_maestro_conservado": "manual:d28fa8a8-608b-49d0-a5da-7c8bce6aacc5",
+      "id_duplicado_retirado_del_json": "proposal:f9bb7e0e-dc87-48bd-83a7-534a2ea663f5",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 3,
+      "nombre": "Bubble Aventuras",
+      "categoria": "Ocio infantil",
+      "tipo": "ocio",
+      "direccion": "Av. del Mueble, 46B, 11130 Chiclana de la Frontera, Cádiz",
+      "clasificacion": "duplicado probable: ficha manual verificada + propuesta",
+      "conservar_id": "manual:86dc79fb-99c4-4f51-ac73-a516b3e35fcc",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "proposal:64e6ab5a-7fa4-4b91-853d-51258e6ee6fd"
+      ],
+      "registros": [
+        {
+          "a": "Av. del Mueble, 46B, 11130 Chiclana de la Frontera, Cádiz",
+          "c": "Ocio infantil",
+          "d": "Centro de ocio infantil y parque de bolas; celebraciones y cumpleaños.",
+          "f": "Verificado por Xiclana",
+          "n": "Bubble Aventuras",
+          "p": "657 47 96 21",
+          "t": "ocio",
+          "v": "2026-10-24",
+          "w": "https://www.bubbleaventuras.com/",
+          "id": "manual:86dc79fb-99c4-4f51-ac73-a516b3e35fcc",
+          "fuente_estado": "Ficha administrativa sincronizada desde Supabase"
+        },
+        {
+          "a": "Av. del Mueble, 46B, 11130 Chiclana de la Frontera, Cádiz",
+          "c": "Ocio infantil",
+          "d": "Centro de ocio infantil y parque de bolas; celebraciones y cumpleaños.",
+          "n": "Bubble Aventuras",
+          "p": "657 47 96 21",
+          "t": "ocio",
+          "w": "https://www.bubbleaventuras.com/",
+          "id": "proposal:64e6ab5a-7fa4-4b91-853d-51258e6ee6fd",
+          "f": "Web del establecimiento / directorio local"
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "f": [
+          "Verificado por Xiclana",
+          "Web del establecimiento / directorio local"
+        ],
+        "id": [
+          "manual:86dc79fb-99c4-4f51-ac73-a516b3e35fcc",
+          "proposal:64e6ab5a-7fa4-4b91-853d-51258e6ee6fd"
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
+      "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual.",
+      "id_maestro_conservado": "manual:86dc79fb-99c4-4f51-ac73-a516b3e35fcc",
+      "id_duplicado_retirado_del_json": "proposal:64e6ab5a-7fa4-4b91-853d-51258e6ee6fd",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 4,
+      "nombre": "Camping La Rana Verde",
+      "categoria": "Camping",
+      "tipo": "ocio",
+      "direccion": "Carretera de las Lagunas, s/n, Pago de la Rana, 11130 Chiclana de la Frontera, Cádiz",
+      "clasificacion": "duplicado probable: ficha manual verificada + propuesta",
+      "conservar_id": "manual:ff80d59d-caab-4e1a-b1d1-1a3b74b46af7",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "proposal:37286994-c534-43dd-911b-2863c4bb1439"
+      ],
+      "registros": [
+        {
+          "a": "Carretera de las Lagunas, s/n, Pago de la Rana, 11130 Chiclana de la Frontera, Cádiz",
+          "c": "Camping",
+          "d": "Establecimiento turístico con parcelas para tiendas, caravanas y autocaravanas. También ofrece bungalows, cabañas y apartamentos. Confirmar la próxima temporada antes de planificar una estancia.",
+          "e": "recepcion@campinglaranaverde.com",
+          "f": "Verificado por Xiclana",
+          "h": "Temporada 2026 finalizada el 3 de octubre. Próxima apertura por confirmar.",
+          "n": "Camping La Rana Verde",
+          "p": "956 494 348",
+          "s": "Camping con parcelas, bungalows, cabañas y apartamentos",
+          "t": "ocio",
+          "v": "2026-10-21",
+          "w": "https://www.campinglaranaverde.com/",
+          "lat": null,
+          "lon": null,
+          "id": "manual:ff80d59d-caab-4e1a-b1d1-1a3b74b46af7",
+          "fuente_estado": "Ficha administrativa sincronizada desde Supabase"
+        },
+        {
+          "a": "Carretera de las Lagunas, s/n, Pago de la Rana, 11130 Chiclana de la Frontera, Cádiz",
+          "c": "Camping",
+          "d": "Establecimiento turístico con parcelas para tiendas, caravanas y autocaravanas. También ofrece bungalows, cabañas y apartamentos. Confirmar la próxima temporada antes de planificar una estancia.",
+          "e": "recepcion@campinglaranaverde.com",
+          "h": "Temporada 2026 finalizada el 3 de octubre. Próxima apertura por confirmar.",
+          "n": "Camping La Rana Verde",
+          "p": "956 494 348",
+          "s": "Camping con parcelas, bungalows, cabañas y apartamentos",
+          "t": "ocio",
+          "w": "https://www.campinglaranaverde.com/",
+          "lat": null,
+          "lon": null,
+          "id": "proposal:37286994-c534-43dd-911b-2863c4bb1439",
+          "f": "Web oficial de Camping La Rana Verde"
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "f": [
+          "Verificado por Xiclana",
+          "Web oficial de Camping La Rana Verde"
+        ],
+        "id": [
+          "manual:ff80d59d-caab-4e1a-b1d1-1a3b74b46af7",
+          "proposal:37286994-c534-43dd-911b-2863c4bb1439"
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
+      "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual.",
+      "id_maestro_conservado": "manual:ff80d59d-caab-4e1a-b1d1-1a3b74b46af7",
+      "id_duplicado_retirado_del_json": "proposal:37286994-c534-43dd-911b-2863c4bb1439",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 5,
+      "nombre": "Centollo Dive",
+      "categoria": "Buceo",
+      "tipo": "ocio",
+      "direccion": "C. San Alejandro, 24, 11130 Chiclana de la Frontera, Cádiz",
+      "clasificacion": "duplicado probable: ficha manual verificada + propuesta",
+      "conservar_id": "manual:3da1e819-76c4-4558-aeae-683988b300b0",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "proposal:b3e7c772-2995-4703-9066-3b30dffe07d0"
+      ],
+      "registros": [
+        {
+          "a": "C. San Alejandro, 24, 11130 Chiclana de la Frontera, Cádiz",
+          "c": "Buceo",
+          "d": "Club y centro de buceo; cursos, experiencias de iniciación e inmersiones.",
+          "f": "Verificado por Xiclana",
+          "n": "Centollo Dive",
+          "p": "633 41 18 04",
+          "t": "ocio",
+          "v": "2026-10-24",
+          "id": "manual:3da1e819-76c4-4558-aeae-683988b300b0",
+          "fuente_estado": "Ficha administrativa sincronizada desde Supabase"
+        },
+        {
+          "a": "C. San Alejandro, 24, 11130 Chiclana de la Frontera, Cádiz",
+          "c": "Buceo",
+          "d": "Club y centro de buceo; cursos, experiencias de iniciación e inmersiones.",
+          "n": "Centollo Dive",
+          "p": "633 41 18 04",
+          "t": "ocio",
+          "id": "proposal:b3e7c772-2995-4703-9066-3b30dffe07d0",
+          "f": "Ficha de negocio / mapas"
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "f": [
+          "Verificado por Xiclana",
+          "Ficha de negocio / mapas"
+        ],
+        "id": [
+          "manual:3da1e819-76c4-4558-aeae-683988b300b0",
+          "proposal:b3e7c772-2995-4703-9066-3b30dffe07d0"
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
+      "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual.",
+      "id_maestro_conservado": "manual:3da1e819-76c4-4558-aeae-683988b300b0",
+      "id_duplicado_retirado_del_json": "proposal:b3e7c772-2995-4703-9066-3b30dffe07d0",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 6,
+      "nombre": "Centro de Especialidades la Longuera",
+      "categoria": "Servicio público",
+      "tipo": "negocio",
+      "direccion": "La Longuera, s/n",
+      "clasificacion": "duplicado técnico probable: registro oficial y copia consolidada",
+      "conservar_id": "oficial:e26d071430774934a25a",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "consolidado:centro de especialidades la longuera|negocio|servicio publico|la longuera s n"
+      ],
+      "registros": [
+        {
+          "n": "Centro de Especialidades la Longuera",
+          "t": "negocio",
+          "c": "Servicio público",
+          "a": "La Longuera, s/n",
+          "p": "956 006 111 / 12",
+          "s": "Centros médicos privados",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "oficial:e26d071430774934a25a",
+          "fuentes_integradas": [
+            "v3/data.json"
+          ]
+        },
+        {
+          "n": "Centro de Especialidades la Longuera",
+          "t": "negocio",
+          "c": "Servicio público",
+          "a": "La Longuera, s/n",
+          "p": "956 006 111 / 12",
+          "s": "Centros médicos privados",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "consolidado:centro de especialidades la longuera|negocio|servicio publico|la longuera s n",
+          "fuentes_integradas": [
+            "v3/oficiales.json"
+          ]
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "id": [
+          "oficial:e26d071430774934a25a",
+          "consolidado:centro de especialidades la longuera|negocio|servicio publico|la longuera s n"
+        ],
+        "fuentes_integradas": [
+          [
+            "v3/data.json"
+          ],
+          [
+            "v3/oficiales.json"
+          ]
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:e26d071430774934a25a",
+      "id_duplicado_retirado_del_json": "consolidado:centro de especialidades la longuera|negocio|servicio publico|la longuera s n",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 7,
+      "nombre": "Centro de Especialidades la Longuera",
+      "categoria": "Servicio público",
+      "tipo": "negocio",
+      "direccion": "Urgencias (20:00 a 08:00/Festivos)",
+      "clasificacion": "duplicado técnico probable: registro oficial y copia consolidada",
+      "conservar_id": "oficial:dbb5a9e2078f3254a638",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "consolidado:centro de especialidades la longuera|negocio|servicio publico|urgencias 20 00 a 08 00 festivos"
+      ],
+      "registros": [
+        {
+          "n": "Centro de Especialidades la Longuera",
+          "t": "negocio",
+          "c": "Servicio público",
+          "a": "Urgencias (20:00 a 08:00/Festivos)",
+          "p": "662 976 719",
+          "s": "Centros médicos privados",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "oficial:dbb5a9e2078f3254a638",
+          "fuentes_integradas": [
+            "v3/data.json"
+          ]
+        },
+        {
+          "n": "Centro de Especialidades la Longuera",
+          "t": "negocio",
+          "c": "Servicio público",
+          "a": "Urgencias (20:00 a 08:00/Festivos)",
+          "p": "662 976 719",
+          "s": "Centros médicos privados",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "consolidado:centro de especialidades la longuera|negocio|servicio publico|urgencias 20 00 a 08 00 festivos",
+          "fuentes_integradas": [
+            "v3/oficiales.json"
+          ]
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "id": [
+          "oficial:dbb5a9e2078f3254a638",
+          "consolidado:centro de especialidades la longuera|negocio|servicio publico|urgencias 20 00 a 08 00 festivos"
+        ],
+        "fuentes_integradas": [
+          [
+            "v3/data.json"
+          ],
+          [
+            "v3/oficiales.json"
+          ]
+        ]
+      },
+      "advertencias": [
+        "El campo dirección parece describir un servicio/horario; verificar el modelo de datos antes de consolidar.",
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:dbb5a9e2078f3254a638",
+      "id_duplicado_retirado_del_json": "consolidado:centro de especialidades la longuera|negocio|servicio publico|urgencias 20 00 a 08 00 festivos",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 8,
+      "nombre": "Centro de Especialidades la Longuera",
+      "categoria": "Servicio público",
+      "tipo": "negocio",
+      "direccion": "Ctra. N-IV",
+      "clasificacion": "duplicado técnico probable: registro oficial y copia consolidada",
+      "conservar_id": "oficial:a8106036befa2e2799e5",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "consolidado:centro de especialidades la longuera|negocio|servicio publico|ctra n iv"
+      ],
+      "registros": [
+        {
+          "n": "Centro de Especialidades la Longuera",
+          "t": "negocio",
+          "c": "Servicio público",
+          "a": "Ctra. N-IV",
+          "p": "956 005 000",
+          "s": "Centros médicos privados",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "oficial:a8106036befa2e2799e5",
+          "fuentes_integradas": [
+            "v3/data.json"
+          ]
+        },
+        {
+          "n": "Centro de Especialidades la Longuera",
+          "t": "negocio",
+          "c": "Servicio público",
+          "a": "Ctra. N-IV",
+          "p": "956 005 000",
+          "s": "Centros médicos privados",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "consolidado:centro de especialidades la longuera|negocio|servicio publico|ctra n iv",
+          "fuentes_integradas": [
+            "v3/oficiales.json"
+          ]
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "id": [
+          "oficial:a8106036befa2e2799e5",
+          "consolidado:centro de especialidades la longuera|negocio|servicio publico|ctra n iv"
+        ],
+        "fuentes_integradas": [
+          [
+            "v3/data.json"
+          ],
+          [
+            "v3/oficiales.json"
+          ]
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:a8106036befa2e2799e5",
+      "id_duplicado_retirado_del_json": "consolidado:centro de especialidades la longuera|negocio|servicio publico|ctra n iv",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 9,
+      "nombre": "Correos",
+      "categoria": "Servicio público",
+      "tipo": "negocio",
+      "direccion": "Jesús Nazareno, 4",
+      "clasificacion": "duplicado técnico probable: registro oficial y copia consolidada",
+      "conservar_id": "oficial:85cb11586e2a761f145c",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "consolidado:correos|negocio|servicio publico|jesus nazareno 4"
+      ],
+      "registros": [
+        {
+          "n": "Correos",
+          "t": "negocio",
+          "c": "Servicio público",
+          "a": "Jesús Nazareno, 4",
+          "p": "956 402 535",
+          "w": "https://www.correos.es",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "oficial:85cb11586e2a761f145c",
+          "fuentes_integradas": [
+            "v3/data.json"
+          ]
+        },
+        {
+          "n": "Correos",
+          "t": "negocio",
+          "c": "Servicio público",
+          "a": "Jesús Nazareno, 4",
+          "p": "956 402 535",
+          "w": "https://www.correos.es",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "consolidado:correos|negocio|servicio publico|jesus nazareno 4",
+          "fuentes_integradas": [
+            "v3/oficiales.json"
+          ]
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "id": [
+          "oficial:85cb11586e2a761f145c",
+          "consolidado:correos|negocio|servicio publico|jesus nazareno 4"
+        ],
+        "fuentes_integradas": [
+          [
+            "v3/data.json"
+          ],
+          [
+            "v3/oficiales.json"
+          ]
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:85cb11586e2a761f145c",
+      "id_duplicado_retirado_del_json": "consolidado:correos|negocio|servicio publico|jesus nazareno 4",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 10,
+      "nombre": "Correos",
+      "categoria": "Servicio público",
+      "tipo": "negocio",
+      "direccion": "Alameda de Solano, 2",
+      "clasificacion": "duplicado técnico probable: registro oficial y copia consolidada",
+      "conservar_id": "oficial:2a2cd1c94cb144a7e1d6",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "consolidado:correos|negocio|servicio publico|alameda de solano 2"
+      ],
+      "registros": [
+        {
+          "n": "Correos",
+          "t": "negocio",
+          "c": "Servicio público",
+          "a": "Alameda de Solano, 2",
+          "p": "956 497 794",
+          "w": "https://www.correos.es",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "oficial:2a2cd1c94cb144a7e1d6",
+          "fuentes_integradas": [
+            "v3/data.json"
+          ]
+        },
+        {
+          "n": "Correos",
+          "t": "negocio",
+          "c": "Servicio público",
+          "a": "Alameda de Solano, 2",
+          "p": "956 497 794",
+          "w": "https://www.correos.es",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "consolidado:correos|negocio|servicio publico|alameda de solano 2",
+          "fuentes_integradas": [
+            "v3/oficiales.json"
+          ]
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "id": [
+          "oficial:2a2cd1c94cb144a7e1d6",
+          "consolidado:correos|negocio|servicio publico|alameda de solano 2"
+        ],
+        "fuentes_integradas": [
+          [
+            "v3/data.json"
+          ],
+          [
+            "v3/oficiales.json"
+          ]
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:2a2cd1c94cb144a7e1d6",
+      "id_duplicado_retirado_del_json": "consolidado:correos|negocio|servicio publico|alameda de solano 2",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 11,
+      "nombre": "Cortijo los Gallos",
+      "categoria": "Hotel",
+      "tipo": "negocio",
+      "direccion": "Ctra. de la Barrosa, Urb. Los Gallos, 461",
+      "clasificacion": "duplicado técnico probable: registro oficial y copia consolidada",
+      "conservar_id": "oficial:140aa95fd366376e93ae",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "consolidado:cortijo los gallos|negocio|hotel|ctra de la barrosa urb los gallos 461"
+      ],
+      "registros": [
+        {
+          "n": "Cortijo los Gallos",
+          "t": "negocio",
+          "c": "Hotel",
+          "a": "Ctra. de la Barrosa, Urb. Los Gallos, 461",
+          "p": "956 490 950",
+          "e": "info@hotelcortijolosgallos.com",
+          "w": "https://www.hotelcortijolosgallos.com",
+          "s": "Hotel 2 estrellas",
+          "m": "https://goo.gl/maps/SDwjGf6FNaXuhxsL7",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "oficial:140aa95fd366376e93ae",
+          "fuentes_integradas": [
+            "v3/data.json"
+          ]
+        },
+        {
+          "n": "Cortijo los Gallos",
+          "t": "negocio",
+          "c": "Hotel",
+          "a": "Ctra. de la Barrosa, Urb. Los Gallos, 461",
+          "p": "956 490 950",
+          "e": "info@hotelcortijolosgallos.com",
+          "w": "https://www.hotelcortijolosgallos.com",
+          "s": "Hotel 2 estrellas",
+          "m": "https://goo.gl/maps/SDwjGf6FNaXuhxsL7",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "consolidado:cortijo los gallos|negocio|hotel|ctra de la barrosa urb los gallos 461",
+          "fuentes_integradas": [
+            "v3/oficiales.json"
+          ]
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "id": [
+          "oficial:140aa95fd366376e93ae",
+          "consolidado:cortijo los gallos|negocio|hotel|ctra de la barrosa urb los gallos 461"
+        ],
+        "fuentes_integradas": [
+          [
+            "v3/data.json"
+          ],
+          [
+            "v3/oficiales.json"
+          ]
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:140aa95fd366376e93ae",
+      "id_duplicado_retirado_del_json": "consolidado:cortijo los gallos|negocio|hotel|ctra de la barrosa urb los gallos 461",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 12,
+      "nombre": "Cruz Roja",
+      "categoria": "Servicio público",
+      "tipo": "negocio",
+      "direccion": "Jesús Nazareno, 11",
+      "clasificacion": "duplicado técnico probable: registro oficial y copia consolidada",
+      "conservar_id": "oficial:211265c9f18077efde7b",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "consolidado:cruz roja|negocio|servicio publico|jesus nazareno 11"
+      ],
+      "registros": [
+        {
+          "n": "Cruz Roja",
+          "t": "negocio",
+          "c": "Servicio público",
+          "a": "Jesús Nazareno, 11",
+          "p": "956 400 467",
+          "e": "chiclana@cruzroja.es",
+          "w": "https://Web: Abre un enlace externo en una nueva ventana www.cruzroja.es",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "oficial:211265c9f18077efde7b",
+          "fuentes_integradas": [
+            "v3/data.json"
+          ]
+        },
+        {
+          "n": "Cruz Roja",
+          "t": "negocio",
+          "c": "Servicio público",
+          "a": "Jesús Nazareno, 11",
+          "p": "956 400 467",
+          "e": "chiclana@cruzroja.es",
+          "w": "https://Web: Abre un enlace externo en una nueva ventana www.cruzroja.es",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "consolidado:cruz roja|negocio|servicio publico|jesus nazareno 11",
+          "fuentes_integradas": [
+            "v3/oficiales.json"
+          ]
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "id": [
+          "oficial:211265c9f18077efde7b",
+          "consolidado:cruz roja|negocio|servicio publico|jesus nazareno 11"
+        ],
+        "fuentes_integradas": [
+          [
+            "v3/data.json"
+          ],
+          [
+            "v3/oficiales.json"
+          ]
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:211265c9f18077efde7b",
+      "id_duplicado_retirado_del_json": "consolidado:cruz roja|negocio|servicio publico|jesus nazareno 11",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 13,
+      "nombre": "Cruz Roja",
+      "categoria": "Servicio público",
+      "tipo": "negocio",
+      "direccion": "Playa la Barrosa 2ª Pista",
+      "clasificacion": "duplicado técnico probable: registro oficial y copia consolidada",
+      "conservar_id": "oficial:3ffbfb0d2d603e319e2d",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "consolidado:cruz roja|negocio|servicio publico|playa la barrosa 2 pista"
+      ],
+      "registros": [
+        {
+          "n": "Cruz Roja",
+          "t": "negocio",
+          "c": "Servicio público",
+          "a": "Playa la Barrosa 2ª Pista",
+          "p": "956 240 949",
+          "e": "chiclana@cruzroja.es",
+          "w": "https://Web: Abre un enlace externo en una nueva ventana www.cruzroja.es",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "oficial:3ffbfb0d2d603e319e2d",
+          "fuentes_integradas": [
+            "v3/data.json"
+          ]
+        },
+        {
+          "n": "Cruz Roja",
+          "t": "negocio",
+          "c": "Servicio público",
+          "a": "Playa la Barrosa 2ª Pista",
+          "p": "956 240 949",
+          "e": "chiclana@cruzroja.es",
+          "w": "https://Web: Abre un enlace externo en una nueva ventana www.cruzroja.es",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "consolidado:cruz roja|negocio|servicio publico|playa la barrosa 2 pista",
+          "fuentes_integradas": [
+            "v3/oficiales.json"
+          ]
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "id": [
+          "oficial:3ffbfb0d2d603e319e2d",
+          "consolidado:cruz roja|negocio|servicio publico|playa la barrosa 2 pista"
+        ],
+        "fuentes_integradas": [
+          [
+            "v3/data.json"
+          ],
+          [
+            "v3/oficiales.json"
+          ]
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:3ffbfb0d2d603e319e2d",
+      "id_duplicado_retirado_del_json": "consolidado:cruz roja|negocio|servicio publico|playa la barrosa 2 pista",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 14,
+      "nombre": "Cruz Roja",
+      "categoria": "Servicio público",
+      "tipo": "negocio",
+      "direccion": "Urgencias Cruz Roja",
+      "clasificacion": "duplicado técnico probable: registro oficial y copia consolidada",
+      "conservar_id": "oficial:7030c46174ade7a07af3",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "consolidado:cruz roja|negocio|servicio publico|urgencias cruz roja"
+      ],
+      "registros": [
+        {
+          "n": "Cruz Roja",
+          "t": "negocio",
+          "c": "Servicio público",
+          "a": "Urgencias Cruz Roja",
+          "p": "956 240 949",
+          "e": "chiclana@cruzroja.es",
+          "w": "https://Web: Abre un enlace externo en una nueva ventana www.cruzroja.es",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "oficial:7030c46174ade7a07af3",
+          "fuentes_integradas": [
+            "v3/data.json"
+          ]
+        },
+        {
+          "n": "Cruz Roja",
+          "t": "negocio",
+          "c": "Servicio público",
+          "a": "Urgencias Cruz Roja",
+          "p": "956 240 949",
+          "e": "chiclana@cruzroja.es",
+          "w": "https://Web: Abre un enlace externo en una nueva ventana www.cruzroja.es",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "consolidado:cruz roja|negocio|servicio publico|urgencias cruz roja",
+          "fuentes_integradas": [
+            "v3/oficiales.json"
+          ]
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "id": [
+          "oficial:7030c46174ade7a07af3",
+          "consolidado:cruz roja|negocio|servicio publico|urgencias cruz roja"
+        ],
+        "fuentes_integradas": [
+          [
+            "v3/data.json"
+          ],
+          [
+            "v3/oficiales.json"
+          ]
+        ]
+      },
+      "advertencias": [
+        "El campo dirección parece describir un servicio/horario; verificar el modelo de datos antes de consolidar.",
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:7030c46174ade7a07af3",
+      "id_duplicado_retirado_del_json": "consolidado:cruz roja|negocio|servicio publico|urgencias cruz roja",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 15,
+      "nombre": "Eolo School",
+      "categoria": "Aventura",
+      "tipo": "ocio",
+      "direccion": "Cjón. de la Peligra, 11130 Chiclana de la Frontera, Cádiz",
+      "clasificacion": "duplicado probable: ficha manual verificada + propuesta",
+      "conservar_id": "manual:70302956-dd7d-420a-bce0-643bbbbdae61",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "proposal:a26439de-62d5-4d4b-9685-e3e69340811e"
+      ],
+      "registros": [
+        {
+          "a": "Cjón. de la Peligra, 11130 Chiclana de la Frontera, Cádiz",
+          "c": "Aventura",
+          "d": "Escuela y experiencias de paramotor/paratrike; confirmar punto de despegue y condiciones.",
+          "f": "Verificado por Xiclana",
+          "n": "Eolo School",
+          "p": "616 39 90 81",
+          "t": "ocio",
+          "v": "2026-10-23",
+          "id": "manual:70302956-dd7d-420a-bce0-643bbbbdae61",
+          "fuente_estado": "Ficha administrativa sincronizada desde Supabase"
+        },
+        {
+          "a": "Cjón. de la Peligra, 11130 Chiclana de la Frontera, Cádiz",
+          "c": "Aventura",
+          "d": "Escuela y experiencias de paramotor/paratrike; confirmar punto de despegue y condiciones.",
+          "n": "Eolo School",
+          "p": "616 39 90 81",
+          "t": "ocio",
+          "id": "proposal:a26439de-62d5-4d4b-9685-e3e69340811e",
+          "f": "Ficha de negocio / mapas"
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "f": [
+          "Verificado por Xiclana",
+          "Ficha de negocio / mapas"
+        ],
+        "id": [
+          "manual:70302956-dd7d-420a-bce0-643bbbbdae61",
+          "proposal:a26439de-62d5-4d4b-9685-e3e69340811e"
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
+      "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual.",
+      "id_maestro_conservado": "manual:70302956-dd7d-420a-bce0-643bbbbdae61",
+      "id_duplicado_retirado_del_json": "proposal:a26439de-62d5-4d4b-9685-e3e69340811e",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 16,
+      "nombre": "Galaxy Park Bowling Chiclana",
+      "categoria": "Ocio familiar",
+      "tipo": "ocio",
+      "direccion": "Parque Comercial Las Salinas, Av. de los Descubrimientos, 11130 Chiclana de la Frontera, Cádiz",
+      "clasificacion": "duplicado probable: ficha manual verificada + propuesta",
+      "conservar_id": "manual:eeaf2f01-3f40-46a1-8dcf-87a86937dcb0",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "proposal:5c4994a2-a582-4431-977c-af3183744f1b"
+      ],
+      "registros": [
+        {
+          "a": "Parque Comercial Las Salinas, Av. de los Descubrimientos, 11130 Chiclana de la Frontera, Cádiz",
+          "c": "Ocio familiar",
+          "d": "Centro de ocio con bolera, arcade, realidad virtual, karaoke y celebraciones.",
+          "f": "Verificado por Xiclana",
+          "n": "Galaxy Park Bowling Chiclana",
+          "t": "ocio",
+          "v": "2026-10-24",
+          "w": "https://galaxypark.es/chiclana-las-salinas/",
+          "id": "manual:eeaf2f01-3f40-46a1-8dcf-87a86937dcb0",
+          "fuente_estado": "Ficha administrativa sincronizada desde Supabase"
+        },
+        {
+          "a": "Parque Comercial Las Salinas, Av. de los Descubrimientos, 11130 Chiclana de la Frontera, Cádiz",
+          "c": "Ocio familiar",
+          "d": "Centro de ocio con bolera, arcade, realidad virtual, karaoke y celebraciones.",
+          "n": "Galaxy Park Bowling Chiclana",
+          "t": "ocio",
+          "w": "https://galaxypark.es/chiclana-las-salinas/",
+          "id": "proposal:5c4994a2-a582-4431-977c-af3183744f1b",
+          "f": "Web oficial del establecimiento"
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "f": [
+          "Verificado por Xiclana",
+          "Web oficial del establecimiento"
+        ],
+        "id": [
+          "manual:eeaf2f01-3f40-46a1-8dcf-87a86937dcb0",
+          "proposal:5c4994a2-a582-4431-977c-af3183744f1b"
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
+      "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual.",
+      "id_maestro_conservado": "manual:eeaf2f01-3f40-46a1-8dcf-87a86937dcb0",
+      "id_duplicado_retirado_del_json": "proposal:5c4994a2-a582-4431-977c-af3183744f1b",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 17,
+      "nombre": "Hipotels Playa la Barrosa",
+      "categoria": "Hotel",
+      "tipo": "negocio",
+      "direccion": "Urb. Novo Sancti Petri . Playa de la Barrosa",
+      "clasificacion": "duplicado técnico probable: registro oficial y copia consolidada",
+      "conservar_id": "oficial:1154bfee050329b7afe8",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "consolidado:hipotels playa la barrosa|negocio|hotel|urb novo sancti petri playa de la barrosa"
+      ],
+      "registros": [
+        {
+          "n": "Hipotels Playa la Barrosa",
+          "t": "negocio",
+          "c": "Hotel",
+          "a": "Urb. Novo Sancti Petri . Playa de la Barrosa",
+          "p": "956 494 824",
+          "e": "playalabarrosa@hipotels.com",
+          "w": "https://www.hipotels.com",
+          "s": "Hotel 4 estrellas",
+          "m": "https://goo.gl/maps/gErJC9cmZLH6SW6s9",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "oficial:1154bfee050329b7afe8",
+          "fuentes_integradas": [
+            "v3/data.json"
+          ]
+        },
+        {
+          "n": "Hipotels Playa la Barrosa",
+          "t": "negocio",
+          "c": "Hotel",
+          "a": "Urb. Novo Sancti Petri . Playa de la Barrosa",
+          "p": "956 494 824",
+          "e": "playalabarrosa@hipotels.com",
+          "w": "https://www.hipotels.com",
+          "s": "Hotel 4 estrellas",
+          "m": "https://goo.gl/maps/gErJC9cmZLH6SW6s9",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "consolidado:hipotels playa la barrosa|negocio|hotel|urb novo sancti petri playa de la barrosa",
+          "fuentes_integradas": [
+            "v3/oficiales.json"
+          ]
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "id": [
+          "oficial:1154bfee050329b7afe8",
+          "consolidado:hipotels playa la barrosa|negocio|hotel|urb novo sancti petri playa de la barrosa"
+        ],
+        "fuentes_integradas": [
+          [
+            "v3/data.json"
+          ],
+          [
+            "v3/oficiales.json"
+          ]
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:1154bfee050329b7afe8",
+      "id_duplicado_retirado_del_json": "consolidado:hipotels playa la barrosa|negocio|hotel|urb novo sancti petri playa de la barrosa",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 18,
+      "nombre": "Hotel Escuela Fuentemar",
+      "categoria": "Hotel",
+      "tipo": "negocio",
+      "direccion": "Ctra. Fuente Amarga, s/n",
+      "clasificacion": "duplicado técnico probable: registro oficial y copia consolidada",
+      "conservar_id": "oficial:c662c7fd00b566500259",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "consolidado:hotel escuela fuentemar|negocio|hotel|ctra fuente amarga s n"
+      ],
+      "registros": [
+        {
+          "n": "Hotel Escuela Fuentemar",
+          "t": "negocio",
+          "c": "Hotel",
+          "a": "Ctra. Fuente Amarga, s/n",
+          "p": "956 400 111",
+          "e": "recepcion@balneariodechiclana.es",
+          "s": "Hotel 3 estrellas",
+          "m": "https://goo.gl/maps/KUUbVx6y1aPB7g1Q8",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "oficial:c662c7fd00b566500259",
+          "fuentes_integradas": [
+            "v3/data.json"
+          ]
+        },
+        {
+          "n": "Hotel Escuela Fuentemar",
+          "t": "negocio",
+          "c": "Hotel",
+          "a": "Ctra. Fuente Amarga, s/n",
+          "p": "956 400 111",
+          "e": "recepcion@balneariodechiclana.es",
+          "s": "Hotel 3 estrellas",
+          "m": "https://goo.gl/maps/KUUbVx6y1aPB7g1Q8",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "consolidado:hotel escuela fuentemar|negocio|hotel|ctra fuente amarga s n",
+          "fuentes_integradas": [
+            "v3/oficiales.json"
+          ]
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "id": [
+          "oficial:c662c7fd00b566500259",
+          "consolidado:hotel escuela fuentemar|negocio|hotel|ctra fuente amarga s n"
+        ],
+        "fuentes_integradas": [
+          [
+            "v3/data.json"
+          ],
+          [
+            "v3/oficiales.json"
+          ]
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:c662c7fd00b566500259",
+      "id_duplicado_retirado_del_json": "consolidado:hotel escuela fuentemar|negocio|hotel|ctra fuente amarga s n",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 19,
+      "nombre": "Hotel Mariantonia",
+      "categoria": "Hotel",
+      "tipo": "negocio",
+      "direccion": "Avda. del Cangrejo, 5. Playa de la Barrosa",
+      "clasificacion": "duplicado técnico probable: registro oficial y copia consolidada",
+      "conservar_id": "oficial:2ebf001f269b909d84b5",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "consolidado:hotel mariantonia|negocio|hotel|avda del cangrejo 5 playa de la barrosa"
+      ],
+      "registros": [
+        {
+          "n": "Hotel Mariantonia",
+          "t": "negocio",
+          "c": "Hotel",
+          "a": "Avda. del Cangrejo, 5. Playa de la Barrosa",
+          "p": "956 496 022",
+          "e": "info@alojamientosoasis.com",
+          "w": "https://www.mariantoniahotel.com",
+          "s": "Hotel 2 estrellas",
+          "m": "https://goo.gl/maps/EWF4rE9vfym",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "oficial:2ebf001f269b909d84b5",
+          "fuentes_integradas": [
+            "v3/data.json"
+          ]
+        },
+        {
+          "n": "Hotel Mariantonia",
+          "t": "negocio",
+          "c": "Hotel",
+          "a": "Avda. del Cangrejo, 5. Playa de la Barrosa",
+          "p": "956 496 022",
+          "e": "info@alojamientosoasis.com",
+          "w": "https://www.mariantoniahotel.com",
+          "s": "Hotel 2 estrellas",
+          "m": "https://goo.gl/maps/EWF4rE9vfym",
+          "f": "Ayuntamiento de Chiclana, datos abiertos (dic. 2023)",
+          "id": "consolidado:hotel mariantonia|negocio|hotel|avda del cangrejo 5 playa de la barrosa",
+          "fuentes_integradas": [
+            "v3/oficiales.json"
+          ]
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "id": [
+          "oficial:2ebf001f269b909d84b5",
+          "consolidado:hotel mariantonia|negocio|hotel|avda del cangrejo 5 playa de la barrosa"
+        ],
+        "fuentes_integradas": [
+          [
+            "v3/data.json"
+          ],
+          [
+            "v3/oficiales.json"
+          ]
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:2ebf001f269b909d84b5",
+      "id_duplicado_retirado_del_json": "consolidado:hotel mariantonia|negocio|hotel|avda del cangrejo 5 playa de la barrosa",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    },
+    {
+      "numero": 20,
+      "nombre": "Parking INDIGO Alameda del Río",
+      "categoria": "Parking",
+      "tipo": "negocio",
+      "direccion": "C. Alameda del Río, 11130 Chiclana de la Frontera, Cádiz",
+      "clasificacion": "duplicado probable: ficha manual verificada + propuesta",
+      "conservar_id": "manual:6e14031d-e690-4271-9bfb-784ceaa326cf",
+      "ids_candidatos_retirar_solo_tras_migracion": [
+        "proposal:3f5acadc-bbd6-41dd-a306-664550e38fd0"
+      ],
+      "registros": [
+        {
+          "a": "C. Alameda del Río, 11130 Chiclana de la Frontera, Cádiz",
+          "c": "Parking",
+          "d": "Aparcamiento cubierto en el centro; el directorio consultado indica servicio 24 horas.",
+          "f": "Verificado por Xiclana",
+          "n": "Parking INDIGO Alameda del Río",
+          "p": "956 53 13 26",
+          "t": "negocio",
+          "v": "2026-10-24",
+          "lat": 36.419,
+          "lon": -6.146,
+          "id": "manual:6e14031d-e690-4271-9bfb-784ceaa326cf",
+          "fuente_estado": "Ficha administrativa sincronizada desde Supabase"
+        },
+        {
+          "a": "C. Alameda del Río, 11130 Chiclana de la Frontera, Cádiz",
+          "c": "Parking",
+          "d": "Aparcamiento cubierto en el centro; el directorio consultado indica servicio 24 horas.",
+          "n": "Parking INDIGO Alameda del Río",
+          "p": "956 53 13 26",
+          "t": "negocio",
+          "lat": 36.419,
+          "lon": -6.146,
+          "id": "proposal:3f5acadc-bbd6-41dd-a306-664550e38fd0",
+          "f": "Ficha de negocio / mapas"
+        }
+      ],
+      "campos_vacios_que_podrian_completarse_en_maestra": {},
+      "conflictos": {
+        "f": [
+          "Verificado por Xiclana",
+          "Ficha de negocio / mapas"
+        ],
+        "id": [
+          "manual:6e14031d-e690-4271-9bfb-784ceaa326cf",
+          "proposal:3f5acadc-bbd6-41dd-a306-664550e38fd0"
+        ]
+      },
+      "advertencias": [
+        "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
+      ],
+      "requiere_verificar_referencias_supabase": true,
+      "aplicado": true,
+      "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
+      "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual.",
+      "id_maestro_conservado": "manual:6e14031d-e690-4271-9bfb-784ceaa326cf",
+      "id_duplicado_retirado_del_json": "proposal:3f5acadc-bbd6-41dd-a306-664550e38fd0",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
+    }
+  ],
+  "verificacion_supabase": {
+    "consulta": "Solo lectura, proyecto pewfqucupmbkgamwvaic, 29-10-2026",
+    "resultados": {
+      "propuestas_de_los_ocho_pares_manual_propuesta": "8 de 8 existen en listing_proposals y están en estado approved",
+      "overrides_de_las_ocho_fichas_manuales": "8 de 8 existen en listing_overrides con is_new=true",
+      "modificaciones_realizadas": false,
+      "recomendaciones": [
+        "No borrar filas de listing_proposals: son el historial de aprobación.",
+        "No borrar overrides manuales: son la fuente de las fichas verificadas.",
+        "La consolidación prevista afecta al catálogo JSON y a la representación pública de propuestas duplicadas; antes de aplicar, revisar cómo se reconstruye el catálogo desde Supabase para evitar que vuelvan a aparecer.",
+        "Los pares oficial/consolidado son duplicaciones del catálogo estático y no se han encontrado referencias Supabase comprobadas todavía."
+      ],
+      "filas_advertising_slots_con_ids_de_los_40_registros": 0,
+      "overrides_manuales_preservados": 8,
+      "propuestas_aprobadas_preservadas": 8
+    },
+    "propuestas_aprobadas": [
+      "32c3142a-1318-401e-a957-01c5d576f92a",
+      "f9bb7e0e-dc87-48bd-83a7-534a2ea663f5",
+      "64e6ab5a-7fa4-4b91-853d-51258e6ee6fd",
+      "37286994-c534-43dd-911b-2863c4bb1439",
+      "b3e7c772-2995-4703-9066-3b30dffe07d0",
+      "a26439de-62d5-4d4b-9685-e3e69340811e",
+      "5c4994a2-a582-4431-977c-af3183744f1b",
+      "3f5acadc-bbd6-41dd-a306-664550e38fd0"
+    ],
+    "limitacion": "La consulta confirmó existencia y estado de propuestas y overrides, pero no rastreó todas las referencias de IDs en el código ni todas las tablas posibles.",
+    "modificaciones_realizadas": false,
+    "recomendaciones": [
+      "Las 8 filas de listing_proposals aprobadas se conservan como historial; no se han borrado.",
+      "Los 8 overrides manuales siguen siendo la fuente de las fichas maestras; no se han modificado.",
+      "La consulta de referencias en listing_overrides, listing_proposals y advertising_slots no encontró referencias de Supabase para los 12 pares oficial/consolidado ni slots publicitarios vinculados a los 40 IDs.",
+      "La consolidación se aplicó únicamente al JSON maestro; no se ejecutaron escrituras ni migraciones en Supabase."
+    ]
+  },
+  "estado_final": "20 duplicados consolidados en el catálogo JSON; IDs maestros conservados; historial y overrides de Supabase preservados. La publicación queda pendiente de validación final del workflow."
+}
