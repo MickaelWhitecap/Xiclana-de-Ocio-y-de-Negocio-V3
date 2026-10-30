@@ -8,7 +8,13 @@
     "activos": 1314,
     "grupos_exactos": 20,
     "registros_en_grupos": 40,
-    "excedentes_teoricos": 20
+    "excedentes_teoricos": 20,
+    "registros_antes": 1322,
+    "registros_despues": 1302,
+    "activos_antes": 1314,
+    "activos_despues": 1294,
+    "grupos_consolidados_en_catalogo": 20,
+    "filas_supabase_modificadas": 0
   },
   "reglas": [
     "La coincidencia exacta de nombre, categoría y dirección detecta candidatos, no autoriza una fusión automática.",
@@ -70,10 +76,13 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
+      "aplicado": true,
       "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
       "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
-      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual."
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual.",
+      "id_maestro_conservado": "manual:e95c07cf-41c6-4d0b-b9bb-ece0bf871770",
+      "id_duplicado_retirado_del_json": "proposal:32c3142a-1318-401e-a957-01c5d576f92a",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 2,
@@ -137,10 +146,13 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
+      "aplicado": true,
       "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
       "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
-      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual."
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual.",
+      "id_maestro_conservado": "manual:d28fa8a8-608b-49d0-a5da-7c8bce6aacc5",
+      "id_duplicado_retirado_del_json": "proposal:f9bb7e0e-dc87-48bd-83a7-534a2ea663f5",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 3,
@@ -194,10 +206,13 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
+      "aplicado": true,
       "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
       "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
-      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual."
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual.",
+      "id_maestro_conservado": "manual:86dc79fb-99c4-4f51-ac73-a516b3e35fcc",
+      "id_duplicado_retirado_del_json": "proposal:64e6ab5a-7fa4-4b91-853d-51258e6ee6fd",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 4,
@@ -261,10 +276,13 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
+      "aplicado": true,
       "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
       "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
-      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual."
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual.",
+      "id_maestro_conservado": "manual:ff80d59d-caab-4e1a-b1d1-1a3b74b46af7",
+      "id_duplicado_retirado_del_json": "proposal:37286994-c534-43dd-911b-2863c4bb1439",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 5,
@@ -316,10 +334,13 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
+      "aplicado": true,
       "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
       "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
-      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual."
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual.",
+      "id_maestro_conservado": "manual:3da1e819-76c4-4558-aeae-683988b300b0",
+      "id_duplicado_retirado_del_json": "proposal:b3e7c772-2995-4703-9066-3b30dffe07d0",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 6,
@@ -379,8 +400,11 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
-      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:e26d071430774934a25a",
+      "id_duplicado_retirado_del_json": "consolidado:centro de especialidades la longuera|negocio|servicio publico|la longuera s n",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 7,
@@ -441,8 +465,11 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
-      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:dbb5a9e2078f3254a638",
+      "id_duplicado_retirado_del_json": "consolidado:centro de especialidades la longuera|negocio|servicio publico|urgencias 20 00 a 08 00 festivos",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 8,
@@ -502,8 +529,11 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
-      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:a8106036befa2e2799e5",
+      "id_duplicado_retirado_del_json": "consolidado:centro de especialidades la longuera|negocio|servicio publico|ctra n iv",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 9,
@@ -563,8 +593,11 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
-      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:85cb11586e2a761f145c",
+      "id_duplicado_retirado_del_json": "consolidado:correos|negocio|servicio publico|jesus nazareno 4",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 10,
@@ -624,8 +657,11 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
-      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:2a2cd1c94cb144a7e1d6",
+      "id_duplicado_retirado_del_json": "consolidado:correos|negocio|servicio publico|alameda de solano 2",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 11,
@@ -691,8 +727,11 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
-      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:140aa95fd366376e93ae",
+      "id_duplicado_retirado_del_json": "consolidado:cortijo los gallos|negocio|hotel|ctra de la barrosa urb los gallos 461",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 12,
@@ -754,8 +793,11 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
-      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:211265c9f18077efde7b",
+      "id_duplicado_retirado_del_json": "consolidado:cruz roja|negocio|servicio publico|jesus nazareno 11",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 13,
@@ -817,8 +859,11 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
-      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:3ffbfb0d2d603e319e2d",
+      "id_duplicado_retirado_del_json": "consolidado:cruz roja|negocio|servicio publico|playa la barrosa 2 pista",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 14,
@@ -881,8 +926,11 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
-      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:7030c46174ade7a07af3",
+      "id_duplicado_retirado_del_json": "consolidado:cruz roja|negocio|servicio publico|urgencias cruz roja",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 15,
@@ -934,10 +982,13 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
+      "aplicado": true,
       "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
       "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
-      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual."
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual.",
+      "id_maestro_conservado": "manual:70302956-dd7d-420a-bce0-643bbbbdae61",
+      "id_duplicado_retirado_del_json": "proposal:a26439de-62d5-4d4b-9685-e3e69340811e",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 16,
@@ -989,10 +1040,13 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
+      "aplicado": true,
       "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
       "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
-      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual."
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual.",
+      "id_maestro_conservado": "manual:eeaf2f01-3f40-46a1-8dcf-87a86937dcb0",
+      "id_duplicado_retirado_del_json": "proposal:5c4994a2-a582-4431-977c-af3183744f1b",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 17,
@@ -1058,8 +1112,11 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
-      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:1154bfee050329b7afe8",
+      "id_duplicado_retirado_del_json": "consolidado:hipotels playa la barrosa|negocio|hotel|urb novo sancti petri playa de la barrosa",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 18,
@@ -1123,8 +1180,11 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
-      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:c662c7fd00b566500259",
+      "id_duplicado_retirado_del_json": "consolidado:hotel escuela fuentemar|negocio|hotel|ctra fuente amarga s n",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 19,
@@ -1190,8 +1250,11 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
-      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias."
+      "aplicado": true,
+      "accion_catalogo_recomendada": "Conservar el registro oficial y retirar la copia consolidada del catálogo solo tras validar fuentes y referencias.",
+      "id_maestro_conservado": "oficial:2ebf001f269b909d84b5",
+      "id_duplicado_retirado_del_json": "consolidado:hotel mariantonia|negocio|hotel|avda del cangrejo 5 playa de la barrosa",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     },
     {
       "numero": 20,
@@ -1247,10 +1310,13 @@
         "Hay valores distintos entre registros; no sobrescribir sin revisar los conflictos."
       ],
       "requiere_verificar_referencias_supabase": true,
-      "aplicado": false,
+      "aplicado": true,
       "estado_supabase_propuesta": "approved; conservar el registro de propuesta como historial",
       "estado_supabase_override_maestra": "existe override de la ficha manual verificada",
-      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual."
+      "accion_catalogo_recomendada": "No repetir la propuesta como ficha pública; preservar proposal en Supabase y la ficha manual.",
+      "id_maestro_conservado": "manual:6e14031d-e690-4271-9bfb-784ceaa326cf",
+      "id_duplicado_retirado_del_json": "proposal:3f5acadc-bbd6-41dd-a306-664550e38fd0",
+      "referencias_supabase": "Comprobado: no se eliminó ni modificó ninguna fila. Las 8 propuestas aprobadas y los 8 overrides manuales permanecen; no se hallaron referencias en advertising_slots. Los 12 pares oficial/consolidado no tienen referencias en las tablas consultadas."
     }
   ],
   "verificacion_supabase": {
@@ -1264,7 +1330,10 @@
         "No borrar overrides manuales: son la fuente de las fichas verificadas.",
         "La consolidación prevista afecta al catálogo JSON y a la representación pública de propuestas duplicadas; antes de aplicar, revisar cómo se reconstruye el catálogo desde Supabase para evitar que vuelvan a aparecer.",
         "Los pares oficial/consolidado son duplicaciones del catálogo estático y no se han encontrado referencias Supabase comprobadas todavía."
-      ]
+      ],
+      "filas_advertising_slots_con_ids_de_los_40_registros": 0,
+      "overrides_manuales_preservados": 8,
+      "propuestas_aprobadas_preservadas": 8
     },
     "propuestas_aprobadas": [
       "32c3142a-1318-401e-a957-01c5d576f92a",
@@ -1276,6 +1345,8 @@
       "5c4994a2-a582-4431-977c-af3183744f1b",
       "3f5acadc-bbd6-41dd-a306-664550e38fd0"
     ],
-    "limitacion": "La consulta confirmó existencia y estado de propuestas y overrides, pero no rastreó todas las referencias de IDs en el código ni todas las tablas posibles."
-  }
+    "limitacion": "La consulta confirmó existencia y estado de propuestas y overrides, pero no rastreó todas las referencias de IDs en el código ni todas las tablas posibles.",
+    "modificaciones_realizadas": false
+  },
+  "estado_final": "20 duplicados consolidados en el catálogo JSON; IDs maestros conservados; historial y overrides de Supabase preservados. La publicación queda pendiente de validación final del workflow."
 }
