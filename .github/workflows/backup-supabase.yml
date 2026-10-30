@@ -1,0 +1,50 @@
+name: Copia de seguridad cifrada de Supabase
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 3 * * *"
+permissions:
+  contents: read
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comprobar secretos necesarios
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ] || [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::error::Configura SUPABASE_DB_URL y BACKUP_PASSPHRASE en Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Exportar esquema, roles y datos
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f schema.sql
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f roles.sql --role-only
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f data.sql --use-copy --data-only
+      - name: Cifrar las copias y eliminar los ficheros sin cifrar
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          for file in schema.sql roles.sql data.sql; do
+            openssl enc -aes-256-cbc -salt -pbkdf2 -iter 600000 \
+              -in "$file" -out "$file.enc" -pass env:BACKUP_PASSPHRASE
+          done
+          rm -f schema.sql roles.sql data.sql
+      - name: Guardar copia cifrada durante 30 días
+        uses: actions/upload-artifact@v4
+        with:
+          name: xiclana-supabase-backup-${{ github.run_id }}
+          path: |
+            schema.sql.enc
+            roles.sql.enc
+            data.sql.enc
+          if-no-files-found: error
+          retention-days: 30
