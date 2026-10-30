@@ -1319,9 +1319,64 @@
       "fuentes": [
         "https://www.chiclana.es/delegaciones/cultura"
       ]
+    },
+    {
+      "id_ficha": "osm:node:2343120422",
+      "nombre": "A.P. Caño Chanarro",
+      "cambios_propuestos": {
+        "s": "Asociación de pescadores con bar-restaurante en el Puerto Deportivo de Sancti Petri. Ofrece cocina marinera y platos de pescado y marisco en un entorno portuario."
+      },
+      "confianza": "media",
+      "nota": "La ficha empresarial confirma su actividad como asociación y restaurante en el Puerto Deportivo, así como el teléfono ya registrado. No se incorporan valoraciones de clientes.",
+      "fuentes": [
+        "https://www.google.com/maps/search/?api=1&query=Asociacion+de+Pescadores+Ca%C3%B1o+Chanarro+Chiclana"
+      ]
+    },
+    {
+      "id_ficha": "oficial:666b933674555d731894",
+      "nombre": "Novo Resort",
+      "cambios_propuestos": {
+        "s": "Aparthotel de cinco estrellas en Novo Sancti Petri, con apartamentos de dos y tres dormitorios y suites de lujo. Dispone de U-Spa de más de 3.650 m², piscinas, una de ellas exclusiva para adultos, bares, restaurantes, beach club, bolera, jardines y anfiteatro.",
+        "a": "Urbanización Loma de Sancti Petri, s/n, Novo Sancti Petri, 11139 Chiclana de la Frontera, Cádiz",
+        "w": "https://novoresort.com/es/"
+      },
+      "confianza": "alta",
+      "nota": "La web oficial está activa y publica instalaciones, dirección y teléfono. Se corrige la URL genérica de la ficha por el dominio propio vigente.",
+      "fuentes": [
+        "https://novoresort.com/es/"
+      ]
+    },
+    {
+      "id_ficha": "oficial:7030c46174ade7a07af3",
+      "nombre": "Cruz Roja – Urgencias",
+      "cambios_propuestos": {
+        "w": "https://www.cruzroja.es/",
+        "s": "Contacto telefónico del servicio de Cruz Roja vinculado a la atención de urgencias y al dispositivo de playa de La Barrosa. No es una ficha de establecimiento comercial ni debe confundirse con la sede local de Cruz Roja.",
+        "p_alternativo": "956 497 177"
+      },
+      "confianza": "media",
+      "nota": "Turismo municipal publica 956 240 949 para el puesto de playa y urgencias de Cruz Roja; el directorio municipal de teléfonos de interés publica 956 497 177 como Cruz Roja Urgencias. Se conservan ambos como números alternativos pendientes de confirmación, sin sustituir el actual.",
+      "fuentes": [
+        "https://turismo.chiclana.es/oficina-virtual-de-turismo/telefonos-de-interes/",
+        "https://www.chiclana.es/el-ayuntamiento/contacto/directorio-de-contacto/telefonos-de-interes"
+      ]
+    },
+    {
+      "id_ficha": "oficial:a8082c348335857ddaa4",
+      "nombre": "Sol Sancti Petri",
+      "cambios_propuestos": {
+        "s": "Hotel-apartamento de cuatro estrellas en la urbanización Novo Sancti Petri. Ofrece habitaciones y apartamentos con terraza; los apartamentos disponen de zona de estar y cocina equipada. Cuenta con restaurante buffet, bar-cafetería, actividades para adultos y niños y recepción 24 horas.",
+        "w": "https://www.melia.com/es"
+      },
+      "confianza": "media",
+      "nota": "Turismo de Chiclana confirma la categoría, dirección y teléfono. La descripción de servicios se apoya en información de alojamiento publicada para el establecimiento; conviene verificar la denominación y la URL comercial exacta con Meliá antes de sustituir el enlace.",
+      "fuentes": [
+        "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/alojamiento/sol-sancti-petri/",
+        "https://www.booking.com/hotel/es/sol-sancti-petri.es.html"
+      ]
     }
   ],
-  "resumen": "100 propuestas preparadas para revisión. Se amplía la información sobre alojamientos, cultura y deporte con fuentes oficiales. No se modifica el catálogo maestro ni la web pública.",
+  "resumen": "104 propuestas preparadas para revisión. Se incorporan datos adicionales de entidades, alojamientos y servicios públicos. No se modifica el catálogo maestro ni la web pública.",
   "fecha_actualizacion": "2026-10-30",
   "siguiente_lote": {
     "revisadas_en_esta_ampliacion": 8,
@@ -1335,5 +1390,70 @@
       "Hotel Viamed: discrepancia de dirección entre Turismo municipal y registro del Ministerio."
     ],
     "criterio": "No rellenar campos con horarios genéricos de 24/7 cuando se refieren a recepción o acceso y no a apertura pública; identificar fuentes de terceros y marcar sus datos como pendientes de confirmación."
-  }
+  },
+  "duplicidades_detectadas": [
+    {
+      "fichas": [
+        "Camping la Rana Verde",
+        "Camping La Rana Verde"
+      ],
+      "diagnostico": "Probable duplicado del mismo establecimiento; dirección y teléfono coinciden. No fusionar automáticamente."
+    },
+    {
+      "fichas": [
+        "Club Hotel Riu Chiclana",
+        "Hotel Riu Chiclana"
+      ],
+      "diagnostico": "Mismo hotel; una ficha oficial y otra OSM. La información ya está enriquecida en la ficha OSM."
+    },
+    {
+      "fichas": [
+        "Hotel Barrosa Garden",
+        "Hipotels Barrosa Garden"
+      ],
+      "diagnostico": "Mismo establecimiento; ficha oficial y ficha OSM. El contenido está propuesto en la ficha OSM."
+    },
+    {
+      "fichas": [
+        "Hotel Barrosa Palace",
+        "Hipotels Barrosa Palace"
+      ],
+      "diagnostico": "Mismo establecimiento; ficha oficial y ficha OSM. El contenido está propuesto en la ficha OSM."
+    },
+    {
+      "fichas": [
+        "Hotel Barrosa Park",
+        "Hipotels Barrosa Park"
+      ],
+      "diagnostico": "Mismo establecimiento; ficha oficial y ficha OSM. El contenido está propuesto en la ficha OSM."
+    },
+    {
+      "fichas": [
+        "Hotel Gran Meliá Sancti Petri",
+        "Palacio de Sancti Petri Gran Meliá"
+      ],
+      "diagnostico": "Probable duplicado del mismo hotel, con ficha oficial y ficha OSM."
+    },
+    {
+      "fichas": [
+        "Iberostar Selection Andalucía Playa"
+      ],
+      "diagnostico": "Hay ficha oficial y registro OSM del mismo establecimiento; el contenido ya se ha propuesto para la ficha OSM."
+    },
+    {
+      "fichas": [
+        "Iberostar Waves Royal Andalus"
+      ],
+      "diagnostico": "El registro oficial y el OSM parecen corresponder al mismo hotel. El nombre comercial actual debe revisarse."
+    }
+  ],
+  "pendientes_de_verificacion": [
+    "Zen-saciones: no se ha localizado web propia vigente ni una fuente reciente que confirme actividad.",
+    "Hostal Ntra. Sra. del Rosario: no se ha confirmado actividad actual ni web propia.",
+    "Hostal la Campa y Hostal Villa: falta una fuente reciente y sólida para completar servicios y horarios.",
+    "Matchpoint: falta verificar si la ficha corresponde a las pistas del centro Iberostar o a otro operador.",
+    "Tie Break Carboneros: posible cambio de operador o nombre comercial; no fusionar con HEIT Carboneros sin confirmación.",
+    "Camping La Rana Verde: confirmar duplicidad y estado de actividad tras el cierre de temporada 2026.",
+    "Hotel Sol Sancti Petri: confirmar URL comercial exacta y denominación actual con Meliá."
+  ]
 }
