@@ -13,15 +13,28 @@ ADDRESS_KEYS=("addr:full","addr:street","addr:housenumber","addr:place","addr:po
 
 def object_parts(value):
     p=str(value or "").split(":")
-    return (p[1],p[2]) if len(p)==3 and p[0]=="osm" and p[1] in {"node","way","relation"} and p[2].isdigit() else None
+    return (p[1],p[2]) if len(p)==3 and p[0] in {"osm","osm-extra"} and p[1] in {"node","way","relation"} and p[2].isdigit() else None
 
 def fetch_batch(kind, ids):
-    query=f"[out:json][timeout:90];{kind}(id:{','.join(ids)});out tags;"
-    data=urllib.parse.urlencode({"data":query}).encode()
-    req=urllib.request.Request(ENDPOINT,data=data,headers={"User-Agent":"XiclanaDirectoryAddressAudit/1.0 (public-data quality audit)","Content-Type":"application/x-www-form-urlencoded"})
-    with urllib.request.urlopen(req,timeout=120) as response:
-        payload=json.loads(response.read().decode("utf-8"))
-    return {f"{kind}:{obj['id']}":obj.get("tags",{}) for obj in payload.get("elements",[])}
+    query = f"[out:json][timeout:90];{kind}(id:{','.join(ids)});out tags;"
+    data = urllib.parse.urlencode({"data": query}).encode()
+    last_error = None
+    for endpoint in ENDPOINTS:
+        for attempt in range(3):
+            request = urllib.request.Request(
+                endpoint, data=data, headers={
+                    "User-Agent": "XiclanaDirectoryAddressAudit/1.0 (public-data quality audit)",
+                    "Content-Type": "application/x-www-form-urlencoded",
+                }
+            )
+            try:
+                with urllib.request.urlopen(request, timeout=120) as response:
+                    payload = json.loads(response.read().decode("utf-8"))
+                return {f"{kind}:{obj['id']}": obj.get("tags", {}) for obj in payload.get("elements", [])}
+            except Exception as exc:
+                last_error = exc
+                time.sleep(3 * (attempt + 1))
+    raise RuntimeError(str(last_error)[:400])
 
 def format_address(tags):
     if tags.get("addr:full"): return tags["addr:full"].strip()
