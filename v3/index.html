@@ -554,18 +554,19 @@ async function loadAdvertisingSlotsPublic(){
  }catch(err){console.warn("No se pudieron cargar los espacios publicitarios:",err)}
 }
 
+function normalizarBusqueda(v){return String(v||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().trim()}
+function buscarPrioritario(lista,q){if(!q)return lista;const termino=normalizarBusqueda(q);const nombres=lista.filter(x=>normalizarBusqueda(x.n).includes(termino));if(nombres.length)return nombres;return lista.filter(x=>normalizarBusqueda([x.c,x.a,x.d,x.p,x.e,x.w,x.h,x.s].join(" ")).includes(termino))}
 function pintarVacio(n,all,q){const e=$("#empty");e.hidden=n>0;if(n>0)return;e.textContent="";const ocio=modo==="ocio",otro=ocio?"negocio":"ocio",v=$("#q").value.trim();
-const k=q?all.filter(x=>x.t===otro&&[x.n,x.c,x.a,x.d].join(" ").toLowerCase().includes(q)).length:0;
+const k=q?buscarPrioritario(all.filter(x=>x.t===otro),q).length:0;
 e.append("Sin resultados en "+(ocio?"Ocio":"NegOcio")+(v?" para «"+v+"»":"")+". ");
 if(k){const b=el("button","btn s","Ver los "+k+" resultados en "+(ocio?"NegOcio":"Ocio"));b.onclick=()=>{const t=$("#q").value;elegir(otro);$("#q").value=t;render()};e.append(b)}else e.append("Prueba con otra palabra o quita el filtro de categoría.")}
 function render(){
- const all=[...SEED,...mine].sort((a,b)=>String(a.n||"").localeCompare(String(b.n||""),"es",{sensitivity:"base",numeric:true}));document.querySelectorAll(".cnt").forEach(e=>{const k=all.filter(x=>x.t===e.dataset.c).length;e.textContent=k.toLocaleString("es-ES")+(k===1?" ficha":" fichas")});const q=$("#q").value.toLowerCase(),t=modo;
+ const all=[...SEED,...mine].sort((a,b)=>String(a.n||"").localeCompare(String(b.n||""),"es",{sensitivity:"base",numeric:true}));document.querySelectorAll(".cnt").forEach(e=>{const k=all.filter(x=>x.t===e.dataset.c).length;e.textContent=k.toLocaleString("es-ES")+(k===1?" ficha":" fichas")});const q=$("#q").value,t=modo;
  const cs=[...new Set([...all.filter(x=>x.t===modo).map(x=>x.c),...CATEGORIAS_DB.filter(x=>String(x.type||"negocio")===modo).map(x=>x.name)])].sort();const ch=$("#chips");ch.textContent="";
  [["", "Todas"],...cs.map(c=>[c,c])].forEach(([v,l])=>{const b=el("button","chip"+(cat===v?" on":""),(cat===v?"✓ ":"")+l);b.onclick=()=>{cat=v;render()};ch.append(b)});
  const g=$("#grid");g.textContent="";let n=0;
- all.forEach((x,i)=>{
-  if(t&&x.t!==t||cat&&x.c!==cat)return;
-  if(q&&![x.n,x.c,x.a,x.d].join(" ").toLowerCase().includes(q))return;
+ const candidatos=all.filter(x=>(!t||x.t===t)&&(!cat||x.c===cat));
+ buscarPrioritario(candidatos,q).forEach((x,i)=>{
   n++;if(n>LIM)return;const c=el("details","card");const sum=el("summary","card-summary");const titulo=el("h3","",x.n);const camposFicha=["t","c","a","p","e","w","h","s","d","lat","lon"];const informados=camposFicha.filter(k=>x[k]!==undefined&&x[k]!==null&&String(x[k]).trim()!=="").length;const indicador=el("span","completitud",informados+"/11");indicador.title=informados+" de 11 datos documentados: tipo, categoría, dirección, teléfono, email, web, horario, dato destacado, descripción, latitud y longitud";const tp=el("div","top");tp.append(el("span","ic",ico(x)),el("span","tag",x.c));const meta=el("div","meta-line");meta.append(tp,indicador);sum.append(titulo,meta);c.append(sum);const info=el("div","card-details");
   if(x.a)info.append(el("p","","📍 "+x.a));{let p=el("p","");p.append("📞 ");if(x.p){const t=x.p.split(/[;,\/]|ext/i)[0].replace(/[^\d+]/g,""),a=el("a","",x.p);a.href="tel:"+(/^\d{9}$/.test(t)?"+34"+t:t);p.append(a)}else if(!/playa|parque|natur|patrimonio|mirador|plaza|atracc/i.test(x.c)){p.append("sin teléfono registrado");p.className="mut"}else p=null;if(p)info.append(p)}if(x.e){const q=el("p","");q.append("✉️ ");const a=el("a","",x.e);a.href="mailto:"+x.e;q.append(a);info.append(q)}if(x.s)info.append(el("p","s","⭐ "+x.s));if(x.h)info.append(el("p","","🕒 "+x.h));if(x.d)info.append(el("p","",x.d));
   if(x.f)info.append(el("p","f","Fuente: "+x.f));const a=el("div","acts"),m=el("a","","Ver en Google Maps");m.href=x.m&&/^https?:\/\//.test(x.m)?x.m:map(x.n+(x.c&&!x.n.toLowerCase().includes(x.c.toLowerCase())?" "+x.c:""));m.target="_blank";m.rel="noopener";a.append(m);if(x.lat){const dd=el("a","","Cómo llegar");dd.href="https://www.google.com/maps/dir/?api=1&destination="+x.lat+","+x.lon;dd.target="_blank";dd.rel="noopener";a.append(dd)}
