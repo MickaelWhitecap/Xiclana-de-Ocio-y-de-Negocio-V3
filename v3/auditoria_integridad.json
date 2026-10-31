@@ -27,7 +27,7 @@
       "12": 12
     },
     "fichas_con_algun_medio_de_contacto": 257,
-    "fichas_con_email": 126
+    "fichas_con_email": 125
   },
   "total_registros_historicos": 1302,
   "total_items_publicables": 1293,
@@ -306,20 +306,8 @@
   "fichas_sin_nombre_categoria_o_tipo_valido": [],
   "calidad_de_campos_opcionales": {
     "fichas_sin_direccion": 839,
-    "correos_invalidos": [
-      {
-        "id": "oficial:1b562834bbb3ad3bb9a0",
-        "nombre": "Hotel Boutique Aromas de Mar",
-        "valor": "reservas@hotelaromademar"
-      }
-    ],
-    "urls_colocadas_en_campo_email": [
-      {
-        "id": "oficial:94abed2977cbdf584917",
-        "nombre": "Multicines las Salinas",
-        "valor": "www.cineciudad.com"
-      }
-    ],
+    "correos_invalidos": [],
+    "urls_colocadas_en_campo_email": [],
     "telefonos_sospechosos": [],
     "urls_invalidas": [],
     "coordenadas_invalidas": [],
