@@ -304,6 +304,27 @@
   "ids_automaticos_nuevos_no_aprobados": [],
   "registros_invalidos_o_ids_repetidos": [],
   "fichas_sin_nombre_categoria_o_tipo_valido": [],
+  "calidad_de_campos_opcionales": {
+    "fichas_sin_direccion": 839,
+    "correos_invalidos": [
+      {
+        "id": "oficial:1b562834bbb3ad3bb9a0",
+        "nombre": "Hotel Boutique Aromas de Mar",
+        "valor": "reservas@hotelaromademar"
+      }
+    ],
+    "urls_colocadas_en_campo_email": [
+      {
+        "id": "oficial:94abed2977cbdf584917",
+        "nombre": "Multicines las Salinas",
+        "valor": "www.cineciudad.com"
+      }
+    ],
+    "telefonos_sospechosos": [],
+    "urls_invalidas": [],
+    "coordenadas_invalidas": [],
+    "nota": "Control informativo: no modifica fichas ni bloquea la publicación por campos opcionales."
+  },
   "grupos_duplicados_exactos_nombre_categoria_direccion": 0,
   "propuestas_consolidacion_no_destructivas": [],
   "regla": "Los nuevos hallazgos automáticos deben permanecer en candidatas_revision hasta aprobación."
