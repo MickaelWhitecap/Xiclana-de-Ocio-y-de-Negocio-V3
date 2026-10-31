@@ -555,7 +555,7 @@ async function loadAdvertisingSlotsPublic(){
 }
 
 function normalizarBusqueda(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim()}
-function buscarPrioritario(lista,q){if(!q)return lista;const termino=normalizarBusqueda(q);const nombres=lista.filter(x=>normalizarBusqueda(x.n).includes(termino));if(nombres.length)return nombres;return lista.filter(x=>normalizarBusqueda([x.c,x.a,x.d,x.p,x.e,x.w,x.h,x.s].join(" ")).includes(termino))}
+function buscarPrioritario(lista,q){if(!q)return lista;const termino=normalizarBusqueda(q);const compacto=v=>normalizarBusqueda(v).replace(/[^a-z0-9]/g,"");const nombres=lista.filter(x=>compacto(x.n).includes(compacto(q)));if(nombres.length)return nombres;return lista.filter(x=>normalizarBusqueda([x.c,x.a,x.d,x.p,x.e,x.w,x.h,x.s].join(" ")).includes(termino))}
 function pintarVacio(n,all,q){const e=$("#empty");e.hidden=n>0;if(n>0)return;e.textContent="";const ocio=modo==="ocio",otro=ocio?"negocio":"ocio",v=$("#q").value.trim();
 const k=q?buscarPrioritario(all.filter(x=>x.t===otro),q).length:0;
 e.append("Sin resultados en "+(ocio?"Ocio":"NegOcio")+(v?" para «"+v+"»":"")+". ");
