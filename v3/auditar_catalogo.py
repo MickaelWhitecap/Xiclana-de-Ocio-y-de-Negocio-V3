@@ -30,17 +30,17 @@ def validar_calidad_campos(items):
                 token = token.strip()
                 if not token:
                     continue
-                if re.match(r"^(https?://|www\\.)", token, re.I):
+                if re.match(r"^(https?://|www\.)", token, re.I):
                     urls_en_email.append({"id": ident, "nombre": nombre, "valor": token})
-                elif not re.fullmatch(r"[^\\s@,;]+@[^\\s@,;]+\\.[A-Za-z]{2,}", token):
+                elif not re.fullmatch(r"[^\s@,;]+@[^\s@,;]+\.[A-Za-z]{2,}", token):
                     emails_invalidos.append({"id": ident, "nombre": nombre, "valor": token})
         telefono = str(item.get("p") or "").strip()
         if telefono:
-            digitos = re.sub(r"\\D", "", telefono)
-            if len(digitos) < 6 or re.search(r"[^0-9A-Za-zÁÉÍÓÚÜÑáéíóúüñ+()\\s./,;\\-]", telefono):
+            digitos = re.sub(r"\D", "", telefono)
+            if len(digitos) < 6 or re.search(r"[^0-9A-Za-zÁÉÍÓÚÜÑáéíóúüñ+()\s./,;\-]", telefono):
                 telefonos_sospechosos.append({"id": ident, "nombre": nombre, "valor": telefono})
         web = str(item.get("w") or "").strip()
-        if web and not re.match(r"^(https?://|www\\.)", web, re.I):
+        if web and not re.match(r"^(https?://|www\.)", web, re.I):
             urls_invalidas.append({"id": ident, "nombre": nombre, "valor": web})
         lat, lon = item.get("lat"), item.get("lon")
         if (lat not in (None, "")) or (lon not in (None, "")):
