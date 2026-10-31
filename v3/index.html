@@ -484,8 +484,33 @@ body{background-color:var(--bg)}
 @media(prefers-reduced-motion:reduce){.card{transition:none;transform:none}}
 
 </style>
+
+<style id="cabecera-identidad-ajustada">
+/* Cabecera más compacta y lema en una sola línea */
+.hero.foto{padding-top:clamp(105px,12vw,175px)}
+.hero .t{padding:.78rem clamp(.9rem,2.4vw,1.45rem) .72rem}
+.hero h1{line-height:1.02}
+.hero p{white-space:nowrap;max-width:none;margin-top:.35rem;font-size:clamp(.54rem,1.45vw,.88rem);letter-spacing:-.012em}
+/* Ocio: degradado arcoíris */
+.brand-ocio{
+ background:linear-gradient(90deg,#ed3434 0%,#f28b22 18%,#e8c52c 35%,#39a95a 52%,#287bd1 70%,#7545b8 86%,#d34b9a 100%);
+ -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+/* Negocio: damero blanco y negro, como la bandera de meta */
+.brand-negocio{
+ color:transparent;
+ background:repeating-conic-gradient(#fff 0% 25%,#171717 0% 50%) 0 0/ .34em .34em;
+ -webkit-background-clip:text;background-clip:text;
+ -webkit-text-stroke:.35px rgba(255,255,255,.45);
+}
+@media(max-width:650px){
+ .hero.foto{padding-top:clamp(110px,28vw,170px)}
+ .hero .t{padding:.72rem .8rem .68rem}
+ .hero p{font-size:clamp(.48rem,1.75vw,.68rem);letter-spacing:-.025em}
+}
+</style>
 </head><body>
-<header class="hero foto"><svg viewBox="0 0 1200 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect class="salt" width="1200" height="340"/><rect class="p" style="--d:0" x="0" y="0" width="300" height="150" fill="#f08fa8"/><rect class="p" style="--d:1" x="308" y="0" width="220" height="100" fill="#f7c1cd"/><rect class="p" style="--d:2" x="536" y="0" width="330" height="170" fill="#e56b8d"/><rect class="p" style="--d:3" x="874" y="0" width="326" height="120" fill="#f3a3b6"/><rect class="p" style="--d:4" x="0" y="158" width="180" height="182" fill="#8cc9cf"/><rect class="p" style="--d:5" x="188" y="158" width="330" height="90" fill="#5fb0ba"/><rect class="p" style="--d:6" x="526" y="178" width="180" height="162" fill="#f7c1cd"/><rect class="p" style="--d:7" x="714" y="178" width="200" height="100" fill="#f08fa8"/><rect class="p" style="--d:8" x="922" y="128" width="278" height="212" fill="#8cc9cf"/><rect class="p" style="--d:9" x="188" y="256" width="330" height="84" fill="#f3a3b6"/><rect class="p" style="--d:10" x="714" y="286" width="200" height="54" fill="#5fb0ba"/><circle cx="1080" cy="62" r="34" fill="#f6b93b"/></svg><small class="cr" id="cr"></small><div class="t"><h1>Xiclana de Ocio y de <span class="brand-negocio">Negocio</span></h1><p>Playas, marismas, bares y comercios de Chiclana de la Frontera (11130, Cádiz) en un solo sitio.</p></div></header>
+<header class="hero foto"><svg viewBox="0 0 1200 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect class="salt" width="1200" height="340"/><rect class="p" style="--d:0" x="0" y="0" width="300" height="150" fill="#f08fa8"/><rect class="p" style="--d:1" x="308" y="0" width="220" height="100" fill="#f7c1cd"/><rect class="p" style="--d:2" x="536" y="0" width="330" height="170" fill="#e56b8d"/><rect class="p" style="--d:3" x="874" y="0" width="326" height="120" fill="#f3a3b6"/><rect class="p" style="--d:4" x="0" y="158" width="180" height="182" fill="#8cc9cf"/><rect class="p" style="--d:5" x="188" y="158" width="330" height="90" fill="#5fb0ba"/><rect class="p" style="--d:6" x="526" y="178" width="180" height="162" fill="#f7c1cd"/><rect class="p" style="--d:7" x="714" y="178" width="200" height="100" fill="#f08fa8"/><rect class="p" style="--d:8" x="922" y="128" width="278" height="212" fill="#8cc9cf"/><rect class="p" style="--d:9" x="188" y="256" width="330" height="84" fill="#f3a3b6"/><rect class="p" style="--d:10" x="714" y="286" width="200" height="54" fill="#5fb0ba"/><circle cx="1080" cy="62" r="34" fill="#f6b93b"/></svg><small class="cr" id="cr"></small><div class="t"><h1>Xiclana de <span class="brand-ocio">Ocio</span> y de <span class="brand-negocio">Negocio</span></h1><p>Playas, marismas, bares y comercios de Chiclana de la Frontera (11130, Cádiz) en un solo sitio.</p></div></header>
 <div class="cuerpo"><aside class="lado" id="lado-i" aria-label="Espacio destacado"></aside><div class="centro"><section id="elige"><h2>¿Qué buscas hoy?</h2><div class="dos">
 <button class="op" data-m="ocio"><span>🏖️</span><b>Ocio</b><small>Playas, patrimonio, naturaleza, cultura, deporte, restaurantes, bares</small><i class="cnt" data-c="ocio"></i></button>
 <button class="op" data-m="negocio"><span>🏪</span><b>NegOcio</b><small>Comercios, servicios, alojamiento, empresas, administración</small><i class="cnt" data-c="negocio"></i></button></div>
