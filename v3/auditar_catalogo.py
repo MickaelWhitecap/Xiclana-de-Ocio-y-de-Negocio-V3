@@ -60,6 +60,38 @@ def validar_calidad_campos(items):
         "nota": "Control informativo: no modifica fichas ni bloquea la publicación por campos opcionales."
     }
 
+def resumen_direcciones(items):
+    """Cuantifica fichas sin dirección y separa las que ya tienen coordenadas válidas."""
+    grupos = {}
+    total = con_coordenadas = 0
+    for item in items:
+        if str(item.get("a") or "").strip():
+            continue
+        total += 1
+        lat, lon = item.get("lat"), item.get("lon")
+        try:
+            lat, lon = float(lat), float(lon)
+            tiene_coordenadas = -90 <= lat <= 90 and -180 <= lon <= 180
+        except (TypeError, ValueError):
+            tiene_coordenadas = False
+        if tiene_coordenadas:
+            con_coordenadas += 1
+        key = (str(item.get("t") or "sin tipo"), str(item.get("c") or "sin categoría"))
+        grupo = grupos.setdefault(key, {"total": 0, "con_coordenadas": 0, "sin_coordenadas": 0})
+        grupo["total"] += 1
+        grupo["con_coordenadas" if tiene_coordenadas else "sin_coordenadas"] += 1
+    distribucion = [
+        {"tipo": tipo, "categoria": categoria, **valores}
+        for (tipo, categoria), valores in sorted(grupos.items(), key=lambda entry: (-entry[1]["total"], entry[0]))
+    ]
+    return {
+        "total_sin_direccion": total,
+        "con_coordenadas_validas": con_coordenadas,
+        "sin_coordenadas_validas": total - con_coordenadas,
+        "distribucion_por_tipo_y_categoria": distribucion,
+        "nota": "Las coordenadas permiten priorizar la búsqueda, pero no equivalen por sí solas a una dirección postal."
+    }
+
 def main():
     if not DATA.exists():
         sys.exit("ERROR: falta fichas_completas.json.")
@@ -199,6 +231,7 @@ def main():
         "registros_invalidos_o_ids_repetidos": invalid,
         "fichas_sin_nombre_categoria_o_tipo_valido": missing,
         "calidad_de_campos_opcionales": validar_calidad_campos(active_items),
+        "direcciones_pendientes": resumen_direcciones(active_items),
         "grupos_duplicados_exactos_nombre_categoria_direccion": len(duplicate_groups),
         "propuestas_consolidacion_no_destructivas": duplicate_groups,
         "regla": "Los nuevos hallazgos automáticos deben permanecer en candidatas_revision hasta aprobación."
