@@ -15,6 +15,51 @@ def norm(value):
     value = "".join(ch for ch in value if unicodedata.category(ch) != "Mn")
     return " ".join(re.findall(r"[a-z0-9]+", value))
 
+def validar_calidad_campos(items):
+    """Detecta anomalías de formato sin modificar ni bloquear fichas por datos opcionales."""
+    emails_invalidos, urls_en_email, telefonos_sospechosos, urls_invalidas, coordenadas_invalidas = [], [], [], [], []
+    sin_direccion = 0
+    for item in items:
+        ident = str(item.get("id") or "")
+        nombre = str(item.get("n") or "")
+        if not str(item.get("a") or "").strip():
+            sin_direccion += 1
+        email = str(item.get("e") or "").strip()
+        if email:
+            for token in re.split(r"[;,]", email):
+                token = token.strip()
+                if not token:
+                    continue
+                if re.match(r"^(https?://|www\\.)", token, re.I):
+                    urls_en_email.append({"id": ident, "nombre": nombre, "valor": token})
+                elif not re.fullmatch(r"[^\\s@,;]+@[^\\s@,;]+\\.[A-Za-z]{2,}", token):
+                    emails_invalidos.append({"id": ident, "nombre": nombre, "valor": token})
+        telefono = str(item.get("p") or "").strip()
+        if telefono:
+            digitos = re.sub(r"\\D", "", telefono)
+            if len(digitos) < 6 or re.search(r"[^0-9A-Za-zÁÉÍÓÚÜÑáéíóúüñ+()\\s./,;\\-]", telefono):
+                telefonos_sospechosos.append({"id": ident, "nombre": nombre, "valor": telefono})
+        web = str(item.get("w") or "").strip()
+        if web and not re.match(r"^(https?://|www\\.)", web, re.I):
+            urls_invalidas.append({"id": ident, "nombre": nombre, "valor": web})
+        lat, lon = item.get("lat"), item.get("lon")
+        if (lat not in (None, "")) or (lon not in (None, "")):
+            try:
+                lat_num, lon_num = float(lat), float(lon)
+                if not (-90 <= lat_num <= 90 and -180 <= lon_num <= 180):
+                    raise ValueError("coordenadas fuera de rango")
+            except (TypeError, ValueError):
+                coordenadas_invalidas.append({"id": ident, "nombre": nombre, "lat": lat, "lon": lon})
+    return {
+        "fichas_sin_direccion": sin_direccion,
+        "correos_invalidos": emails_invalidos,
+        "urls_colocadas_en_campo_email": urls_en_email,
+        "telefonos_sospechosos": telefonos_sospechosos,
+        "urls_invalidas": urls_invalidas,
+        "coordenadas_invalidas": coordenadas_invalidas,
+        "nota": "Control informativo: no modifica fichas ni bloquea la publicación por campos opcionales."
+    }
+
 def main():
     if not DATA.exists():
         sys.exit("ERROR: falta fichas_completas.json.")
@@ -153,6 +198,7 @@ def main():
         "ids_automaticos_nuevos_no_aprobados": unexpected_auto,
         "registros_invalidos_o_ids_repetidos": invalid,
         "fichas_sin_nombre_categoria_o_tipo_valido": missing,
+        "calidad_de_campos_opcionales": validar_calidad_campos(active_items),
         "grupos_duplicados_exactos_nombre_categoria_direccion": len(duplicate_groups),
         "propuestas_consolidacion_no_destructivas": duplicate_groups,
         "regla": "Los nuevos hallazgos automáticos deben permanecer en candidatas_revision hasta aprobación."
