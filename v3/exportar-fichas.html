@@ -22,11 +22,12 @@
 const statusEl=document.getElementById("status"),button=document.getElementById("download");
 let exportData=null;
 function norm(v){return String(v||"").normalize("NFD").replace(/\p{Diacritic}/gu,"").toLowerCase().trim()}
+function combinarCamposConDatos(base,aportados){const resultado={...base};Object.entries(aportados||{}).forEach(([clave,valor])=>{const vacio=valor===null||valor===undefined||(typeof valor==="string"&&valor.trim()==="");if(!vacio)resultado[clave]=valor});return resultado}
 async function build(){
- const response=await fetch("./data.json",{cache:"no-store"});
+ const response=await fetch("./fichas_completas.json",{cache:"no-store"});
  if(!response.ok)throw new Error("No se pudo cargar data.json (HTTP "+response.status+").");
  const j=await response.json();
- let items=(j.items||[]).map(x=>({...x}));
+ let items=(j.items||[]).filter(x=>x&&x._xiclana_deleted!==true).map(x=>({...x}));
  const cfg=window.XICLANA_SUPABASE||{};
  if(!cfg.url||!cfg.anonKey||!window.supabase?.createClient)throw new Error("No está disponible la conexión de lectura a Supabase.");
  const sb=window.supabase.createClient(cfg.url,cfg.anonKey);
@@ -38,9 +39,11 @@ async function build(){
   if(!page||page.length<1000)break;
  }
  const byId=new Map(data.map(o=>[String(o.listing_id),o]));
- items=items.map(x=>{const o=byId.get(String(x.id||""));return o?({...x,...(o.fields||{}),id:x.id,verified_at:o.verified_at}):x});
+ const deletedIds=new Set(data.filter(o=>o.fields?._xiclana_deleted===true).map(o=>String(o.listing_id)));
+ items=items.filter(x=>!deletedIds.has(String(x.id||"")));
+ items=items.map(x=>{const o=byId.get(String(x.id||""));return o?({...combinarCamposConDatos(x,o.fields),id:x.id,verified_at:o.verified_at}):x});
  const ids=new Set(items.map(x=>String(x.id||"")));
- for(const o of data){if(o.is_new&&!ids.has(String(o.listing_id))){items.push({...o.fields,id:o.listing_id,verified_at:o.verified_at});ids.add(String(o.listing_id))}}
+ for(const o of data){if(o.is_new&&!o.fields?._xiclana_deleted&&!ids.has(String(o.listing_id))){items.push({...o.fields,id:o.listing_id,verified_at:o.verified_at});ids.add(String(o.listing_id))}}
  // Keep the public site's established normalization for the known Rana Verde variants.
  const rana=items.filter(x=>norm(x.n||x.nombre||x.name||x.title).includes("rana verde"));
  if(rana.length){
