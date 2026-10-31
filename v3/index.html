@@ -590,6 +590,14 @@ grid.addEventListener("click",e=>{const target=e.target instanceof Element?e.tar
 $("#f").onsubmit=e=>{e.preventDefault();const d=new FormData(e.target);mine.push({n:d.get("n"),t:d.get("t"),c:d.get("c"),a:d.get("a"),p:d.get("p"),w:d.get("w"),s:d.get("s"),d:d.get("d")});save();e.target.reset();render()};
 $("#exp").onclick=()=>{const s=JSON.stringify(mine,null,1);navigator.clipboard?.writeText(s).then(()=>alert("JSON copiado al portapapeles"),()=>prompt("Copia el JSON:",s))||prompt("Copia el JSON:",s)};
 $("#imp").onclick=()=>{const s=prompt("Pega aquí el JSON exportado:");if(!s)return;try{const a=JSON.parse(s);if(Array.isArray(a)){mine=mine.concat(a.filter(x=>x&&x.n&&x.c&&(x.t==="ocio"||x.t==="negocio")).map(x=>({n:String(x.n),t:x.t,c:String(x.c),a:x.a?String(x.a):"",p:x.p?String(x.p):"",w:x.w?String(x.w):"",s:x.s?String(x.s):"",d:x.d?String(x.d):""})));save();render()}}catch(e){alert("JSON no válido")}};
+function combinarCamposConDatos(base, aportados){
+  const resultado={...base};
+  Object.entries(aportados||{}).forEach(([clave,valor])=>{
+    const vacio=valor===null||valor===undefined||(typeof valor==="string"&&valor.trim()==="");
+    if(!vacio)resultado[clave]=valor;
+  });
+  return resultado;
+}
 async function aplicarCambios(j){
   const esAguaGenerica=v=>["agua","agua potable"].includes(String(v||"").toLowerCase().trim().split(" ").filter(Boolean).join(" "));
   let items=(j.items||[]).filter(x=>x&&x._xiclana_deleted!==true&&!esAguaGenerica(x.n||x.nombre||x.name||x.title)).map(x=>({...x,seed:1}));
@@ -610,7 +618,7 @@ async function aplicarCambios(j){
     const byId=new Map((data||[]).map(o=>[o.listing_id,o]));
     const deletedIds=new Set((data||[]).filter(o=>o.fields?._xiclana_deleted===true).map(o=>String(o.listing_id)));
     items=items.filter(x=>!deletedIds.has(String(x.id||"legacy:"+[x.n,x.t,x.a].map(v=>String(v||"").trim().toLowerCase()).join("|"))));
-    items=items.map(x=>{const o=byId.get(String(x.id||""));return o?({...x,...(o.fields||{}),id:x.id,seed:1,verified_at:o.verified_at}):x});
+    items=items.map(x=>{const o=byId.get(String(x.id||""));return o?({...combinarCamposConDatos(x,o.fields),id:x.id,seed:1,verified_at:o.verified_at}):x});
     items=items.filter(x=>!esAguaGenerica(x.n||x.nombre||x.name||x.title));
     const ids=new Set(items.map(x=>String(x.id||"")));
     (data||[]).filter(o=>o.is_new&&!o.fields?._xiclana_deleted&&!esAguaGenerica(o.fields?.n||o.fields?.nombre||o.fields?.name||o.fields?.title)&&!ids.has(o.listing_id)).forEach(o=>items.push({...o.fields,id:o.listing_id,seed:1,verified_at:o.verified_at}));
