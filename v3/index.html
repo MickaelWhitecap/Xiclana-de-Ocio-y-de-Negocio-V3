@@ -602,7 +602,7 @@ async function aplicarCambios(j){
   const esAguaGenerica=v=>["agua","agua potable"].includes(String(v||"").toLowerCase().trim().split(" ").filter(Boolean).join(" "));
   let items=(j.items||[]).filter(x=>x&&x._xiclana_deleted!==true&&!esAguaGenerica(x.n||x.nombre||x.name||x.title)).map(x=>({...x,seed:1}));
   // Mostrar primero el catálogo local: Supabase complementa los datos, pero nunca bloquea la primera visualización.
-  SEED=items;pintarDest();
+  SEED=items;DEST=j.destacados||{};pintarDest();loadAdvertisingSlotsPublic();
   $("#fecha").textContent="Datos actualizados: "+j.actualizado+" · "+items.length+" fichas";
   render();
   const cfg=window.XICLANA_SUPABASE||{};
@@ -673,7 +673,7 @@ async function aplicarCambios(j){
   const normalizarCategoria=v=>String(v||"").normalize("NFD").replace(/\p{Diacritic}/gu,"").toLowerCase().trim();
   items=items.map(x=>["camping","nautica"].includes(normalizarCategoria(x.c))?({...x,t:"ocio"}):x);
   CATEGORIAS_DB=CATEGORIAS_DB.filter(x=>!(["camping","nautica"].includes(normalizarCategoria(x.name))&&normalizarCategoria(x.type)==="negocio"));
-  SEED=items;DEST=j.destacados||{};pintarDest();loadAdvertisingSlotsPublic();
+  SEED=items;pintarDest();
   $("#fecha").textContent="Datos actualizados: "+j.actualizado+" · "+items.length+" fichas";
   render();
  }
