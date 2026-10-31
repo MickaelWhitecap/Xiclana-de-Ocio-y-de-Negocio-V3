@@ -25,7 +25,7 @@ function norm(v){return String(v||"").normalize("NFD").replace(/\p{Diacritic}/gu
 function combinarCamposConDatos(base,aportados){const resultado={...base};Object.entries(aportados||{}).forEach(([clave,valor])=>{const vacio=valor===null||valor===undefined||(typeof valor==="string"&&valor.trim()==="");if(!vacio)resultado[clave]=valor});return resultado}
 async function build(){
  const response=await fetch("./fichas_completas.json",{cache:"no-store"});
- if(!response.ok)throw new Error("No se pudo cargar data.json (HTTP "+response.status+").");
+ if(!response.ok)throw new Error("No se pudo cargar fichas_completas.json (HTTP "+response.status+").");
  const j=await response.json();
  let items=(j.items||[]).filter(x=>x&&x._xiclana_deleted!==true).map(x=>({...x}));
  const cfg=window.XICLANA_SUPABASE||{};
@@ -44,16 +44,22 @@ async function build(){
  items=items.map(x=>{const o=byId.get(String(x.id||""));return o?({...combinarCamposConDatos(x,o.fields),id:x.id,verified_at:o.verified_at}):x});
  const ids=new Set(items.map(x=>String(x.id||"")));
  for(const o of data){if(o.is_new&&!o.fields?._xiclana_deleted&&!ids.has(String(o.listing_id))){items.push({...o.fields,id:o.listing_id,verified_at:o.verified_at});ids.add(String(o.listing_id))}}
- // Keep the public site's established normalization for the known Rana Verde variants.
- const rana=items.filter(x=>norm(x.n||x.nombre||x.name||x.title).includes("rana verde"));
- if(rana.length){
-  const score=x=>(norm(x.t)==="ocio"?100000:0)+(String(x.id||"").startsWith("manual:")?10000:0)+Object.entries(x).reduce((n,[k,v])=>n+(!["id","seed","verified_at"].includes(k)&&v!=null&&String(v).trim()!==""?1:0),0);
-  const best=rana.reduce((a,b)=>score(b)>score(a)?b:a);
-  items=items.filter(x=>!norm(x.n||x.nombre||x.name||x.title).includes("rana verde"));
-  items.push({...best,t:"ocio",c:"Camping"});
- }
- items=items.map(x=>["camping","nautica"].includes(norm(x.c))?({...x,t:"ocio"}):x);
- items.sort((a,b)=>String(a.n||"").localeCompare(String(b.n||""),"es"));
+ // Reproducir exactamente los filtros y consolidaciones de la web pública.
+ const nombreAgua=x=>String(x.n||x.nombre||x.name||x.title||"").normalize("NFD").replace(/\\p{Diacritic}/gu,"").toLowerCase().trim();
+ items=items.filter(x=>!["agua","agua potable"].includes(nombreAgua(x)));
+ const normalizarExacto=v=>String(v??"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim().replace(/\\s+/g," ");
+ const claveExacta=x=>{const n=normalizarExacto(x.n||x.nombre||x.name||x.title),c=normalizarExacto(x.c||x.categoria||x.category),t=normalizarExacto(x.t||x.tipo),a=normalizarExacto(x.a||x.direccion||x.address);return n&&c&&t&&a?[n,c,t,a].join("|"):""};
+ const prioridadExacta=x=>String(x.id||"").startsWith("manual:")?0:String(x.id||"").startsWith("oficial:")?1:String(x.id||"").startsWith("consolidado:")?2:String(x.id||"").startsWith("proposal:")?3:4;
+ const gruposExactos=new Map();
+ for(const x of items){const k=claveExacta(x);if(k){if(!gruposExactos.has(k))gruposExactos.set(k,[]);gruposExactos.get(k).push(x)}}
+ const suprimidos=new Set();
+ for(const grupo of gruposExactos.values()){if(grupo.length<2)continue;grupo.sort((a,b)=>prioridadExacta(a)-prioridadExacta(b));const maestra=grupo[0];for(const otra of grupo.slice(1)){for(const [k,v] of Object.entries(otra)){if((maestra[k]===undefined||maestra[k]===null||String(maestra[k]).trim()==="")&&v!==undefined&&v!==null&&String(v).trim()!=="")maestra[k]=v}suprimidos.add(otra)}}
+ items=items.filter(x=>!suprimidos.has(x));
+ const claveRana=x=>normalizarExacto(x.n||x.nombre||x.name||x.title)==="camping la rana verde";
+ const candidatasRana=items.filter(claveRana);
+ if(candidatasRana.length){const puntuacion=x=>(String(x.t||x.tipo||"").toLowerCase()==="ocio"?100000:0)+(String(x.id||"").startsWith("manual:")?10000:0)+Object.entries(x).reduce((n,[k,v])=>n+(!["id","seed","verified_at"].includes(k)&&v!=null&&String(v).trim()!==""?1:0),0);const mejor=candidatasRana.reduce((best,x)=>puntuacion(x)>puntuacion(best)?x:best);items=items.filter(x=>!claveRana(x));items.push({...mejor,t:"ocio",c:"Camping"})}
+ items=items.map(x=>["camping","nautica"].includes(normalizarExacto(x.c))?({...x,t:"ocio"}):x);
+
  exportData={actualizado:j.actualizado||null,total:items.length,items};
  statusEl.textContent="Inventario preparado: "+items.length+" fichas.\nBase publicada: "+(j.items||[]).length+" fichas.\nCorrecciones y fichas nuevas de Supabase: "+data.length+".";
  button.disabled=false;
