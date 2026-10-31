@@ -209,6 +209,20 @@ class AuditDuplicateTests(unittest.TestCase):
                     updater.DATA, updater.ROOT = old_data, old_root
 
 
+    def test_contact_quality_accepts_multiple_emails_and_phone_extensions(self):
+        items = [
+            {"id": "1", "n": "Dos correos", "e": "reservas@example.com, info@example.com",
+             "p": "956 123 456 ext. 708", "w": "https://example.com", "lat": 36.4, "lon": -6.2},
+            {"id": "2", "n": "URL en email", "e": "www.example.com", "p": "676 363 718 (piraguas)/ 633 283 546 (veleros)"},
+            {"id": "3", "n": "Email inválido", "e": "reservas@dominio"},
+        ]
+        result = audit.validar_calidad_campos(items)
+        self.assertEqual(len(result["correos_invalidos"]), 1)
+        self.assertEqual(len(result["urls_colocadas_en_campo_email"]), 1)
+        self.assertEqual(result["telefonos_sospechosos"], [])
+        self.assertEqual(result["urls_invalidas"], [])
+        self.assertEqual(result["coordenadas_invalidas"], [])
+
     def test_public_page_excludes_generic_water_overrides(self):
         page = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
         self.assertIn("const esAguaGenerica=", page)
