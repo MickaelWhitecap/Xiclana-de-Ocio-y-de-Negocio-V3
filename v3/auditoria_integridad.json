@@ -1,5 +1,5 @@
 {
-  "fecha": "2026-10-30",
+  "fecha": "2026-10-31",
   "parametros_documentados_por_ficha": {
     "campos_contados": [
       "n",
@@ -18,20 +18,20 @@
     "distribucion": {
       "4": 6,
       "5": 7,
-      "6": 805,
+      "6": 804,
       "7": 260,
       "8": 73,
-      "9": 75,
+      "9": 74,
       "10": 39,
-      "11": 17,
+      "11": 18,
       "12": 12
     },
     "fichas_con_algun_medio_de_contacto": 257,
     "fichas_con_email": 126
   },
   "total_registros_historicos": 1302,
-  "total_items_publicables": 1294,
-  "total_items_marcados_borrados": 8,
+  "total_items_publicables": 1293,
+  "total_items_marcados_borrados": 9,
   "total_candidatas_revision": 2,
   "candidatos_automaticos_heredados_en_items": 265,
   "ids_automaticos_heredados": [
