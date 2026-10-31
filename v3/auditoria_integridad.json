@@ -313,6 +313,679 @@
     "coordenadas_invalidas": [],
     "nota": "Control informativo: no modifica fichas ni bloquea la publicación por campos opcionales."
   },
+  "direcciones_pendientes": {
+    "total_sin_direccion": 839,
+    "con_coordenadas_validas": 832,
+    "sin_coordenadas_validas": 7,
+    "distribucion_por_tipo_y_categoria": [
+      {
+        "tipo": "negocio",
+        "categoria": "Transporte",
+        "total": 178,
+        "con_coordenadas": 178,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Bar",
+        "total": 60,
+        "con_coordenadas": 60,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Restaurante",
+        "total": 60,
+        "con_coordenadas": 60,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Parque",
+        "total": 38,
+        "con_coordenadas": 38,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Comercio",
+        "total": 37,
+        "con_coordenadas": 37,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Ropa",
+        "total": 29,
+        "con_coordenadas": 29,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Supermercado",
+        "total": 27,
+        "con_coordenadas": 27,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Colegio",
+        "total": 25,
+        "con_coordenadas": 25,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Cafetería",
+        "total": 18,
+        "con_coordenadas": 18,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Peluquería",
+        "total": 15,
+        "con_coordenadas": 15,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Gasolinera",
+        "total": 14,
+        "con_coordenadas": 14,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Arte público",
+        "total": 14,
+        "con_coordenadas": 14,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Banco",
+        "total": 13,
+        "con_coordenadas": 13,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Comida rápida",
+        "total": 13,
+        "con_coordenadas": 13,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Deporte",
+        "total": 13,
+        "con_coordenadas": 13,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Tienda de barrio",
+        "total": 12,
+        "con_coordenadas": 12,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Oficina",
+        "total": 10,
+        "con_coordenadas": 10,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Parking",
+        "total": 10,
+        "con_coordenadas": 10,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Mirador",
+        "total": 10,
+        "con_coordenadas": 10,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Patrimonio y culto",
+        "total": 10,
+        "con_coordenadas": 10,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Taller mecánico",
+        "total": 8,
+        "con_coordenadas": 8,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Instalaciones deportivas",
+        "total": 8,
+        "con_coordenadas": 8,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Parques infantiles",
+        "total": 8,
+        "con_coordenadas": 8,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Farmacia",
+        "total": 7,
+        "con_coordenadas": 7,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Hotel",
+        "total": 7,
+        "con_coordenadas": 7,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Servicios públicos",
+        "total": 7,
+        "con_coordenadas": 7,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Calzado",
+        "total": 6,
+        "con_coordenadas": 6,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Concesionario",
+        "total": 6,
+        "con_coordenadas": 6,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Joyería",
+        "total": 6,
+        "con_coordenadas": 6,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Veterinario",
+        "total": 6,
+        "con_coordenadas": 6,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Óptica",
+        "total": 6,
+        "con_coordenadas": 6,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Discoteca",
+        "total": 6,
+        "con_coordenadas": 6,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Gimnasio",
+        "total": 6,
+        "con_coordenadas": 6,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Información turística",
+        "total": 6,
+        "con_coordenadas": 6,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Patrimonio",
+        "total": 6,
+        "con_coordenadas": 6,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Ruta cultural",
+        "total": 6,
+        "con_coordenadas": 0,
+        "sin_coordenadas": 6
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Alquiler de coches",
+        "total": 5,
+        "con_coordenadas": 5,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Carnicería",
+        "total": 5,
+        "con_coordenadas": 5,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Dentista",
+        "total": 5,
+        "con_coordenadas": 5,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Deportes",
+        "total": 4,
+        "con_coordenadas": 4,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Educación",
+        "total": 4,
+        "con_coordenadas": 4,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Ferretería",
+        "total": 4,
+        "con_coordenadas": 4,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Heladería",
+        "total": 4,
+        "con_coordenadas": 4,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Autoescuela",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Correos",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Emergencias",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Estética",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Floristería",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Inmobiliaria",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Lavandería",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Muebles",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Neumáticos",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Oficios y artesanía",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Quiosco",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Regalos",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Seguros",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Atracción",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Golf",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Naturaleza",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Abogado",
+        "total": 2,
+        "con_coordenadas": 2,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Agencia de viajes",
+        "total": 2,
+        "con_coordenadas": 2,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Bazar",
+        "total": 2,
+        "con_coordenadas": 2,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Bodega y licores",
+        "total": 2,
+        "con_coordenadas": 2,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Clínica",
+        "total": 2,
+        "con_coordenadas": 2,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Guardería",
+        "total": 2,
+        "con_coordenadas": 2,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Juguetes",
+        "total": 2,
+        "con_coordenadas": 2,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Lavado de coches",
+        "total": 2,
+        "con_coordenadas": 2,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Reciclaje y residuos",
+        "total": 2,
+        "con_coordenadas": 2,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Biblioteca",
+        "total": 2,
+        "con_coordenadas": 2,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Espacios culturales",
+        "total": 2,
+        "con_coordenadas": 2,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Estadio",
+        "total": 2,
+        "con_coordenadas": 2,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Náutica",
+        "total": 2,
+        "con_coordenadas": 2,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Alojamiento",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Alquiler y movilidad",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Bicicletas",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Camping",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Decoración",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Delicatessen",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Droguería",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Electrónica",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Frutería",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Hostal",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Jardinería",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Librería",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Mascotas",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Panadería",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Papelería",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Pescadería",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Servicio público",
+        "total": 1,
+        "con_coordenadas": 0,
+        "sin_coordenadas": 1
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Telas",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Telefonía",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Balneario y spa",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Cultura",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Instalación deportiva",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Teatro",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      }
+    ],
+    "nota": "Las coordenadas permiten priorizar la búsqueda, pero no equivalen por sí solas a una dirección postal."
+  },
   "grupos_duplicados_exactos_nombre_categoria_direccion": 0,
   "propuestas_consolidacion_no_destructivas": [],
   "regla": "Los nuevos hallazgos automáticos deben permanecer en candidatas_revision hasta aprobación."
