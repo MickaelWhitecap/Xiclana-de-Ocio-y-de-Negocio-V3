@@ -214,10 +214,15 @@
         "lon": -6.1299675
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Avenida Bahía de Algeciras, 2, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.repostario.es/?locality=CHICLANA+DE+LA+FRONTERA&province=C%C3%81DIZ",
+          "tipo": "directorio de estaciones con datos MITECO"
+        }
+      ],
+      "observaciones": "El directorio identifica una estación CLC en Avenida Bahía de Algeciras, 2. La ubicación del registro es compatible; confirmar la parcela exacta en cartografía antes de publicar."
     },
     {
       "id": "osm:way:1266038256",
@@ -318,10 +323,15 @@
         "lon": -6.1709382
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Carretera de La Barrosa, s/n, esquina Calle Almeja, 11139 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.aparthotelnovosanctipetri.com/",
+          "tipo": "web oficial del Aparthotel Novo Sancti Petri"
+        }
+      ],
+      "observaciones": "La web oficial publica esta dirección para el Aparthotel Novo Sancti Petri. Coordenadas compatibles con la zona; confirmar que el nombre del catálogo corresponde a este establecimiento y no a otro alojamiento cercano."
     },
     {
       "id": "osm:way:52495333",
@@ -333,10 +343,19 @@
         "lon": -6.1723254
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Urbanización Novo Sancti Petri, s/n, 11139 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.aparthotelasdunas.com/",
+          "tipo": "web oficial Aparthotel Las Dunas"
+        },
+        {
+          "url": "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/alojamiento/las-dunas/",
+          "tipo": "ficha oficial Turismo de Chiclana"
+        }
+      ],
+      "observaciones": "Dirección confirmada por la web del establecimiento y Turismo de Chiclana. La coordenada coincide con la posición publicada para Las Dunas."
     },
     {
       "id": "osm:way:38723161",
@@ -839,10 +858,19 @@
         "lon": -6.1742855
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Avenida de la Diputación, 61, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.coviran.es/shops",
+          "tipo": "localizador oficial Covirán"
+        },
+        {
+          "url": "https://tutienda.coviran.es/marino",
+          "tipo": "ficha oficial Covirán El Marino"
+        }
+      ],
+      "observaciones": "La web oficial de Covirán identifica El Marino en Avenida de la Diputación 61. La asignación a este punto OSM debe confirmarse por coordenadas, pues la cadena tiene varias tiendas en Chiclana."
     },
     {
       "id": "osm:node:11773434229",
@@ -854,10 +882,19 @@
         "lon": -6.15002
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Calle Jesús Nazareno, 23, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.supermercadoseljamon.com/",
+          "tipo": "web de la cadena"
+        },
+        {
+          "url": "https://www.waze.com/es/live-map/directions/es/an/chiclana-de-la-frontera/supermercados-el-jamon",
+          "tipo": "directorio de navegación"
+        }
+      ],
+      "observaciones": "El resultado de negocio y la ubicación del punto son compatibles con la tienda céntrica de El Jamón. Otra fuente sitúa una tienda de la cadena en Avenida de la Diputación; revisar que no se trate de otra sucursal."
     },
     {
       "id": "osm:node:4119521789",
@@ -909,10 +946,15 @@
         "lon": -6.1412952
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Avenida de la Música, s/n, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.dia.es/tiendas/buscador-tiendas/cadiz/chiclana-de-la-frontera",
+          "tipo": "localizador oficial DIA"
+        }
+      ],
+      "observaciones": "DIA publica una tienda en Avenida de la Música s/n. Coordenadas compatibles con la zona; verificar que el formato Maxi DIA del catálogo corresponde a esta tienda concreta."
     },
     {
       "id": "osm:node:678899431",
@@ -924,10 +966,19 @@
         "lon": -6.1536931
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Avenida Nuestra Señora de los Dolores, 15, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://info.mercadona.es/document/es/listado-tiendas-listo-para-comer-0.pdf",
+          "tipo": "documento de tiendas publicado por Mercadona"
+        },
+        {
+          "url": "https://radarsuper.com/m/cadiz/chiclana-de-la-frontera",
+          "tipo": "listado de tiendas y ubicaciones"
+        }
+      ],
+      "observaciones": "Dirección documentada para una de las cuatro tiendas Mercadona de Chiclana. La asignación a este registro es provisional por proximidad de coordenadas; revisar en mapa antes de validar."
     },
     {
       "id": "osm:node:4119466790",
@@ -939,10 +990,19 @@
         "lon": -6.1419468
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Avenida de la Esperanza del Marquesado, 1, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://info.mercadona.es/document/es/listado-tiendas-listo-para-comer-0.pdf",
+          "tipo": "documento de tiendas publicado por Mercadona"
+        },
+        {
+          "url": "https://radarsuper.com/m/cadiz/chiclana-de-la-frontera",
+          "tipo": "listado de tiendas y ubicaciones"
+        }
+      ],
+      "observaciones": "Dirección documentada para una de las cuatro tiendas Mercadona de Chiclana. La asignación a este registro es provisional por proximidad de coordenadas; revisar en mapa antes de validar."
     },
     {
       "id": "osm:way:188942798",
@@ -969,10 +1029,15 @@
         "lon": -6.1442158
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Polígono Industrial El Torno II, Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.supeco.es/tiendas/?id=2",
+          "tipo": "localizador oficial Supeco"
+        }
+      ],
+      "observaciones": "El localizador oficial confirma Supeco Chiclana, 1.700 m² y aparcamiento de 480 plazas, pero no expone la dirección postal en el texto recuperado. La zona se propone por compatibilidad de coordenadas con el área comercial; falta verificar calle y número."
     },
     {
       "id": "osm:way:51864419",
@@ -992,9 +1057,9 @@
   ],
   "fecha_actualizacion": "2026-10-31",
   "resumen_investigacion": {
-    "fichas_con_propuesta": 34,
-    "fichas_sin_propuesta": 16,
+    "fichas_con_propuesta": 43,
+    "fichas_sin_propuesta": 7,
     "criterio": "Las direcciones son propuestas pendientes de revisión; no se han aplicado al catálogo maestro ni publicado.",
-    "ultima_ampliacion": "Nuevas propuestas contrastadas con webs oficiales, Turismo municipal, Junta de Andalucía y directorios con dirección y coordenadas."
+    "ultima_ampliacion": "Nuevas propuestas incorporadas desde localizadores oficiales y fuentes de direcciones. Algunas asignaciones de sucursal permanecen expresamente pendientes de comprobación cartográfica."
   }
 }
