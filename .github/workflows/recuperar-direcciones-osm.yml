@@ -1,0 +1,30 @@
+name: Recuperar propuestas de direcciones OSM
+
+on:
+  push:
+    paths:
+      - "v3/recuperar_direcciones_osm.py"
+      - ".github/workflows/recuperar-direcciones-osm.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  recuperar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+      - name: Consultar etiquetas de dirección de OpenStreetMap
+        run: python v3/recuperar_direcciones_osm.py
+      - name: Guardar informe de propuestas sin publicar cambios en fichas
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v3/propuestas_direcciones_osm.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Generar propuestas de direcciones desde OpenStreetMap"
+            git push
+          fi
