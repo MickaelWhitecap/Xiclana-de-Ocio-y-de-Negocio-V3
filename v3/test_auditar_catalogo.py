@@ -15,6 +15,20 @@ SPEC.loader.exec_module(audit)
 
 
 class AuditDuplicateTests(unittest.TestCase):
+    def test_address_summary_separates_valid_coordinates_and_groups_categories(self):
+        items = [
+            {"id": "a", "t": "ocio", "c": "Bar", "a": "", "lat": 36.4, "lon": -6.1},
+            {"id": "b", "t": "ocio", "c": "Bar", "a": "", "lat": 36.5, "lon": -6.2},
+            {"id": "c", "t": "negocio", "c": "Transporte", "a": "", "lat": "", "lon": ""},
+            {"id": "d", "t": "ocio", "c": "Bar", "a": "Calle 1", "lat": 36.4, "lon": -6.1},
+        ]
+        result = audit.resumen_direcciones(items)
+        self.assertEqual(result["total_sin_direccion"], 3)
+        self.assertEqual(result["con_coordenadas_validas"], 2)
+        self.assertEqual(result["sin_coordenadas_validas"], 1)
+        self.assertEqual(result["distribucion_por_tipo_y_categoria"][0]["categoria"], "Bar")
+        self.assertEqual(result["distribucion_por_tipo_y_categoria"][0]["con_coordenadas"], 2)
+
     def test_duplicate_catalog_ids_abort_instead_of_rewriting_ids(self):
         import importlib.util
         updater_path = Path(__file__).with_name("actualizar.py")
