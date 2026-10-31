@@ -52,9 +52,14 @@
       },
       "direccion_actual": "",
       "estado": "direccion_incorporada_catalogo",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": "",
+      "direccion_propuesta": "Camino del Águila Real, 22, 11139 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.ballenoil.es/gasolineras/locations/cadiz/",
+          "tipo": "localizador oficial Ballenoil"
+        }
+      ],
+      "observaciones": "Coincidencia prácticamente exacta entre las coordenadas del catálogo (36.3935068, -6.169201) y las coordenadas publicadas para Ballenoil Chiclana I (36.393583, -6.169250).",
       "incorporada_catalogo": true,
       "fecha_incorporacion": "2026-10-31"
     },
@@ -1140,8 +1145,8 @@
   ],
   "fecha_actualizacion": "2026-10-31",
   "resumen_investigacion": {
-    "fichas_con_propuesta": 46,
-    "fichas_sin_propuesta": 4,
+    "fichas_con_propuesta": 47,
+    "fichas_sin_propuesta": 3,
     "criterio": "Las direcciones son propuestas pendientes de revisión; no se han aplicado al catálogo maestro ni publicado.",
     "ultima_ampliacion": "Se incorporan al catálogo maestro solo coincidencias con fuente y posición compatibles. Las propuestas dudosas o ambiguas permanecen sin aplicar.",
     "direcciones_incorporadas_catalogo": 30
