@@ -293,10 +293,15 @@
         "lon": -6.1157167
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Carretera del Mediterráneo, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://distancia.es/gasolineras/chiclana-de-la-frontera/repsol/repsol-556",
+          "tipo": "ficha de estación con coordenadas OSM"
+        }
+      ],
+      "observaciones": "Coincidencia exacta de coordenadas publicadas (36.381200, -6.115717) con el punto del catálogo. Dirección sin número."
     },
     {
       "id": "osm:way:1266038245",
@@ -308,10 +313,19 @@
         "lon": -6.1432433
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Avenida del Mueble, 1, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.repsol.es/buscador-eess-y-puntos-de-recarga/cadiz/chiclana-de-la-frontera/avda-del-mueble-1/",
+          "tipo": "localizador oficial Repsol"
+        },
+        {
+          "url": "https://infogasolineras.es/gasolinera/12968/repsol-en-chiclana-de-la-frontera-12968",
+          "tipo": "ficha con coordenadas de estación"
+        }
+      ],
+      "observaciones": "La ficha de la estación publica coordenadas 36.441972, -6.143694, muy próximas al punto del catálogo. Correspondencia sólida."
     },
     {
       "id": "osm:way:52495334",
@@ -1014,10 +1028,19 @@
         "lon": -6.1678194
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Carretera de La Barrosa, s/n, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://info.mercadona.es/document/es/listado-tiendas-listo-para-comer-0.pdf",
+          "tipo": "documento de tiendas publicado por Mercadona"
+        },
+        {
+          "url": "https://radarsuper.com/m/cadiz/chiclana-de-la-frontera",
+          "tipo": "listado de tiendas y ubicaciones"
+        }
+      ],
+      "observaciones": "Mercadona confirma tienda en Ctra. de La Barrosa s/n. La coordenada del punto es compatible con el corredor comercial de La Barrosa; revisar el pin exacto antes de validar."
     },
     {
       "id": "osm:node:4119521790",
@@ -1057,9 +1080,9 @@
   ],
   "fecha_actualizacion": "2026-10-31",
   "resumen_investigacion": {
-    "fichas_con_propuesta": 43,
-    "fichas_sin_propuesta": 7,
+    "fichas_con_propuesta": 46,
+    "fichas_sin_propuesta": 4,
     "criterio": "Las direcciones son propuestas pendientes de revisión; no se han aplicado al catálogo maestro ni publicado.",
-    "ultima_ampliacion": "Nuevas propuestas incorporadas desde localizadores oficiales y fuentes de direcciones. Algunas asignaciones de sucursal permanecen expresamente pendientes de comprobación cartográfica."
+    "ultima_ampliacion": "Se han añadido dos estaciones Repsol con coincidencia cartográfica y una tienda Mercadona con dirección oficial."
   }
 }
