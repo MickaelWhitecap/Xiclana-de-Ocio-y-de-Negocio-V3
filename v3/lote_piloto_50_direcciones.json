@@ -51,10 +51,12 @@
         "lon": -6.169201
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "",
       "fuentes": [],
-      "observaciones": ""
+      "observaciones": "",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:13482885001",
@@ -66,7 +68,7 @@
         "lon": -6.138889
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Calle de los Electricistas, 1, 11130 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -78,7 +80,9 @@
           "tipo": "directorio de estaciones y direcciones"
         }
       ],
-      "observaciones": "La coordenada coincide con la ubicación publicada para Ballenoil de Calle Electricistas Los, 1. El identificador comercial del catálogo dice Ballenoil Chiclana III; verificar alias antes de consolidar."
+      "observaciones": "La coordenada coincide con la ubicación publicada para Ballenoil de Calle Electricistas Los, 1. El identificador comercial del catálogo dice Ballenoil Chiclana III; verificar alias antes de consolidar.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:1551803059",
@@ -130,7 +134,7 @@
         "lon": -6.1464597
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Carretera de Fuente Amarga, km 1,51, Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -138,7 +142,9 @@
           "tipo": "directorio de estaciones y direcciones"
         }
       ],
-      "observaciones": "La fuente identifica expresamente BP El Florín en Carretera de Fuente Amarga km 1,51; nombre y coordenadas son compatibles."
+      "observaciones": "La fuente identifica expresamente BP El Florín en Carretera de Fuente Amarga km 1,51; nombre y coordenadas son compatibles.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:way:1266038249",
@@ -150,7 +156,7 @@
         "lon": -6.1415935
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Urbanización parcela 2 del SUNC-TU 24, Camino del Lobo 1, Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -162,7 +168,9 @@
           "tipo": "directorio de estaciones y direcciones"
         }
       ],
-      "observaciones": "Easyfuel figura con esta dirección en los directorios consultados; coordenadas del registro compatibles con la zona. Confirmar parcela y acceso."
+      "observaciones": "Easyfuel figura con esta dirección en los directorios consultados; coordenadas del registro compatibles con la zona. Confirmar parcela y acceso.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:13524222888",
@@ -174,7 +182,7 @@
         "lon": -6.1302389
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Calle Cruz de la Calzada Pelaga, s/n, Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -182,7 +190,9 @@
           "tipo": "directorio de estaciones y direcciones"
         }
       ],
-      "observaciones": "Dirección publicada para Galp; nombre y posición del registro compatibles con la ubicación de la estación."
+      "observaciones": "Dirección publicada para Galp; nombre y posición del registro compatibles con la ubicación de la estación.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:way:1266038250",
@@ -194,7 +204,7 @@
         "lon": -6.1543487
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Calle Severo Ochoa, 23, 11130 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -202,7 +212,9 @@
           "tipo": "directorio de estaciones con datos MITECO"
         }
       ],
-      "observaciones": "Coincidencia muy alta: nombre CLC y coordenadas corresponden a Gasolinera CLC de Calle Severo Ochoa, 23."
+      "observaciones": "Coincidencia muy alta: nombre CLC y coordenadas corresponden a Gasolinera CLC de Calle Severo Ochoa, 23.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:11760501639",
@@ -234,7 +246,7 @@
         "lon": -6.1650657
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Camino Huerta Pitón, 1, Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -242,7 +254,9 @@
           "tipo": "directorio de estaciones y direcciones"
         }
       ],
-      "observaciones": "Dirección publicada para Lavaoil; coordenadas compatibles con la ubicación del registro."
+      "observaciones": "Dirección publicada para Lavaoil; coordenadas compatibles con la ubicación del registro.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:287011532",
@@ -269,7 +283,7 @@
         "lon": -6.147409
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Camino de Fuente Amarga, 114, Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -281,7 +295,9 @@
           "tipo": "directorio de estaciones y direcciones"
         }
       ],
-      "observaciones": "Q8 figura con esta dirección en dos directorios; nombre y coordenadas del registro son compatibles."
+      "observaciones": "Q8 figura con esta dirección en dos directorios; nombre y coordenadas del registro son compatibles.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:2370430442",
@@ -293,7 +309,7 @@
         "lon": -6.1157167
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Carretera del Mediterráneo, 11130 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -301,7 +317,9 @@
           "tipo": "ficha de estación con coordenadas OSM"
         }
       ],
-      "observaciones": "Coincidencia exacta de coordenadas publicadas (36.381200, -6.115717) con el punto del catálogo. Dirección sin número."
+      "observaciones": "Coincidencia exacta de coordenadas publicadas (36.381200, -6.115717) con el punto del catálogo. Dirección sin número.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:way:1266038245",
@@ -313,7 +331,7 @@
         "lon": -6.1432433
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Avenida del Mueble, 1, 11130 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -325,7 +343,9 @@
           "tipo": "ficha con coordenadas de estación"
         }
       ],
-      "observaciones": "La ficha de la estación publica coordenadas 36.441972, -6.143694, muy próximas al punto del catálogo. Correspondencia sólida."
+      "observaciones": "La ficha de la estación publica coordenadas 36.441972, -6.143694, muy próximas al punto del catálogo. Correspondencia sólida.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:way:52495334",
@@ -357,7 +377,7 @@
         "lon": -6.1723254
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Urbanización Novo Sancti Petri, s/n, 11139 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -369,7 +389,9 @@
           "tipo": "ficha oficial Turismo de Chiclana"
         }
       ],
-      "observaciones": "Dirección confirmada por la web del establecimiento y Turismo de Chiclana. La coordenada coincide con la posición publicada para Las Dunas."
+      "observaciones": "Dirección confirmada por la web del establecimiento y Turismo de Chiclana. La coordenada coincide con la posición publicada para Las Dunas.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:way:38723161",
@@ -381,7 +403,7 @@
         "lon": -6.1629106
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Urbanización Novo Sancti Petri, s/n, 11139 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -389,7 +411,9 @@
           "tipo": "fuente pública consultada"
         }
       ],
-      "observaciones": "Dirección publicada en la web oficial de Aldiana Club Andalusien; coincide con la urbanización indicada por la ficha."
+      "observaciones": "Dirección publicada en la web oficial de Aldiana Club Andalusien; coincide con la urbanización indicada por la ficha.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:3409527240",
@@ -421,7 +445,7 @@
         "lon": -6.1750311
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Calle Boquerón, 3, 11139 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -433,7 +457,9 @@
           "tipo": "ficha oficial de Turismo de Chiclana"
         }
       ],
-      "observaciones": "Dirección coincidente en la web del hotel y en Turismo de Chiclana; coordenadas compatibles con Sancti Petri/La Barrosa."
+      "observaciones": "Dirección coincidente en la web del hotel y en Turismo de Chiclana; coordenadas compatibles con Sancti Petri/La Barrosa.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:13505039301",
@@ -445,7 +471,7 @@
         "lon": -6.1850854
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Carretera de la Barrosa, km 3,5, 11130 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -453,7 +479,9 @@
           "tipo": "fuente pública consultada"
         }
       ],
-      "observaciones": "Dirección confirmada por Turismo de Chiclana; la web del hotel también especifica km 3,5."
+      "observaciones": "Dirección confirmada por Turismo de Chiclana; la web del hotel también especifica km 3,5.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:13541492396",
@@ -465,7 +493,7 @@
         "lon": -6.1579581
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Urbanización Loma de Sancti Petri, s/n, 11139 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -473,7 +501,9 @@
           "tipo": "web oficial Novo Resort"
         }
       ],
-      "observaciones": "La web oficial identifica Aparthotel Novo Resort en Urbanización Loma de Sancti Petri, s/n. El nombre del catálogo contiene errores tipográficos, pero el emplazamiento es compatible."
+      "observaciones": "La web oficial identifica Aparthotel Novo Resort en Urbanización Loma de Sancti Petri, s/n. El nombre del catálogo contiene errores tipográficos, pero el emplazamiento es compatible.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:11392470354",
@@ -485,7 +515,7 @@
         "lon": -6.1908029
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Playa La Barrosa, calle Asunción, 6, Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -493,7 +523,9 @@
           "tipo": "ficha oficial de Turismo de Chiclana"
         }
       ],
-      "observaciones": "Dirección confirmada por Turismo de Chiclana. La fuente describe además una finca de 18.000 m²; dato de superficie, no de afluencia."
+      "observaciones": "Dirección confirmada por Turismo de Chiclana. La fuente describe además una finca de 18.000 m²; dato de superficie, no de afluencia.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:6413239689",
@@ -505,7 +537,7 @@
         "lon": -6.1674667
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Duna Beach Gran Meliá Sancti Petri, 11130 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -517,7 +549,9 @@
           "tipo": "directorio con dirección y coordenadas"
         }
       ],
-      "observaciones": "Ubicación del beach club dentro del complejo Gran Meliá; es una referencia de emplazamiento, no una dirección postal con calle y número."
+      "observaciones": "Ubicación del beach club dentro del complejo Gran Meliá; es una referencia de emplazamiento, no una dirección postal con calle y número.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:13507888101",
@@ -529,7 +563,7 @@
         "lon": -6.1609637
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Calle Adriano, 10-12, 11130 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -541,7 +575,9 @@
           "tipo": "directorio gastronómico con dirección"
         }
       ],
-      "observaciones": "Dos fuentes publican la misma dirección. La ficha y coordenadas corresponden al establecimiento El Chozo."
+      "observaciones": "Dos fuentes publican la misma dirección. La ficha y coordenadas corresponden al establecimiento El Chozo.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:13430912301",
@@ -553,7 +589,7 @@
         "lon": -6.178795
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Carretera de la Barrosa, 114, Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -561,7 +597,9 @@
           "tipo": "noticia local sobre reapertura y nueva dirección"
         }
       ],
-      "observaciones": "La noticia de reapertura de 30/04/2025 confirma la nueva ubicación en Carretera de la Barrosa 114. La coordenada del registro es compatible."
+      "observaciones": "La noticia de reapertura de 30/04/2025 confirma la nueva ubicación en Carretera de la Barrosa 114. La coordenada del registro es compatible.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:11390566730",
@@ -613,7 +651,7 @@
         "lon": -6.1901692
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Carretera de la Barrosa, junto a las Salinas de Carboneros, 11130 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -621,7 +659,9 @@
           "tipo": "fuente pública consultada"
         }
       ],
-      "observaciones": "Dirección y emplazamiento confirmados por Turismo de Chiclana y web oficial. No existe número de portal; es una referencia de ubicación."
+      "observaciones": "Dirección y emplazamiento confirmados por Turismo de Chiclana y web oficial. No existe número de portal; es una referencia de ubicación.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:way:428046298",
@@ -653,7 +693,7 @@
         "lon": -6.1791186
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Calle La Boca, 2, 11139 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -661,7 +701,9 @@
           "tipo": "web oficial Sibuya"
         }
       ],
-      "observaciones": "Dirección publicada en el localizador oficial de Sibuya para Chiclana; coordenadas compatibles con el entorno de Calle La Boca."
+      "observaciones": "Dirección publicada en el localizador oficial de Sibuya para Chiclana; coordenadas compatibles con el entorno de Calle La Boca.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:13430860301",
@@ -673,7 +715,7 @@
         "lon": -6.1449832
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Avenida de los Descubrimientos, 107, 11130 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -685,7 +727,9 @@
           "tipo": "directorio sectorial de establecimientos"
         }
       ],
-      "observaciones": "Dos fuentes coinciden en Taco Bell Las Salinas, Avenida de los Descubrimientos 107; coordenadas compatibles con el punto OSM."
+      "observaciones": "Dos fuentes coinciden en Taco Bell Las Salinas, Avenida de los Descubrimientos 107; coordenadas compatibles con el punto OSM.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:way:198640855",
@@ -752,7 +796,7 @@
         "lon": -6.1467845
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Carretera de Fuente Amarga, s/n, 11130 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -760,7 +804,9 @@
           "tipo": "web oficial Venta El Florín"
         }
       ],
-      "observaciones": "Dirección publicada en la web oficial; la ficha OSM se encuentra en el entorno de Fuente Amarga."
+      "observaciones": "Dirección publicada en la web oficial; la ficha OSM se encuentra en el entorno de Fuente Amarga.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:13136295701",
@@ -772,7 +818,7 @@
         "lon": -6.144578
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Calle de la Plaza, 23, 11130 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -780,7 +826,9 @@
           "tipo": "localizador oficial de Carrefour"
         }
       ],
-      "observaciones": "Dirección oficial de Carrefour Express. La posición del registro coincide con el centro urbano; confirmar identidad de la ficha antes de publicar."
+      "observaciones": "Dirección oficial de Carrefour Express. La posición del registro coincide con el centro urbano; confirmar identidad de la ficha antes de publicar.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:2087473640",
@@ -792,7 +840,7 @@
         "lon": -6.1478059
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Centro Comercial Tartessus, Calle Madrid Bolívar, 15, Novo Sancti Petri, Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -800,7 +848,9 @@
           "tipo": "listado de supermercados de la Junta de Andalucía"
         }
       ],
-      "observaciones": "El listado autonómico recoge Carrefour en Chiclana con ubicación CC Tartessus / Madrid Bolívar 15. Las coordenadas del registro son compatibles con el área de Tartessus; confirmar denominación exacta de formato Market."
+      "observaciones": "El listado autonómico recoge Carrefour en Chiclana con ubicación CC Tartessus / Madrid Bolívar 15. Las coordenadas del registro son compatibles con el área de Tartessus; confirmar denominación exacta de formato Market.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:13501012501",
@@ -812,7 +862,7 @@
         "lon": -6.168023
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Carretera del Molino Viejo, 14, Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -820,7 +870,9 @@
           "tipo": "localizador oficial Cash Fresh"
         }
       ],
-      "observaciones": "Dirección publicada por Cash Fresh. Existe otro registro OSM del mismo nombre a unos 15 m; posible duplicación cartográfica de una única tienda, no fusionar automáticamente."
+      "observaciones": "Dirección publicada por Cash Fresh. Existe otro registro OSM del mismo nombre a unos 15 m; posible duplicación cartográfica de una única tienda, no fusionar automáticamente.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:13483851601",
@@ -852,7 +904,7 @@
         "lon": -6.1434533
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Avenida del Mueble, 64, 11130 Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -860,7 +912,9 @@
           "tipo": "página oficial Comarket Cash García"
         }
       ],
-      "observaciones": "Dirección oficial de Comarket Cash García; posición del registro compatible con Avenida del Mueble."
+      "observaciones": "Dirección oficial de Comarket Cash García; posición del registro compatible con Avenida del Mueble.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:13482887501",
@@ -920,7 +974,7 @@
         "lon": -6.1428613
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Avenida del Mueble, s/n, Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -928,7 +982,9 @@
           "tipo": "localizador oficial Lidl"
         }
       ],
-      "observaciones": "Lidl publica dos tiendas en Chiclana: Avenida del Mueble s/n y Carretera de la Barrosa 98. Por posición, esta ficha se asigna provisionalmente a Avenida del Mueble; validar coordenadas frente al mapa oficial."
+      "observaciones": "Lidl publica dos tiendas en Chiclana: Avenida del Mueble s/n y Carretera de la Barrosa 98. Por posición, esta ficha se asigna provisionalmente a Avenida del Mueble; validar coordenadas frente al mapa oficial.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:way:188942786",
@@ -940,7 +996,7 @@
         "lon": -6.1665912
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Carretera de la Barrosa, 98, Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -948,7 +1004,9 @@
           "tipo": "localizador oficial Lidl"
         }
       ],
-      "observaciones": "Lidl publica dos tiendas en Chiclana. Por posición, esta ficha se asigna provisionalmente a Carretera de la Barrosa 98; validar coordenadas frente al mapa oficial."
+      "observaciones": "Lidl publica dos tiendas en Chiclana. Por posición, esta ficha se asigna provisionalmente a Carretera de la Barrosa 98; validar coordenadas frente al mapa oficial.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:node:1629949916",
@@ -1052,7 +1110,7 @@
         "lon": -6.1442158
       },
       "direccion_actual": "",
-      "estado": "propuesta_pendiente_revision",
+      "estado": "direccion_incorporada_catalogo",
       "direccion_propuesta": "Polígono Industrial El Torno II, Chiclana de la Frontera, Cádiz",
       "fuentes": [
         {
@@ -1060,7 +1118,9 @@
           "tipo": "localizador oficial Supeco"
         }
       ],
-      "observaciones": "El localizador oficial confirma Supeco Chiclana, 1.700 m² y aparcamiento de 480 plazas, pero no expone la dirección postal en el texto recuperado. La zona se propone por compatibilidad de coordenadas con el área comercial; falta verificar calle y número."
+      "observaciones": "El localizador oficial confirma Supeco Chiclana, 1.700 m² y aparcamiento de 480 plazas, pero no expone la dirección postal en el texto recuperado. La zona se propone por compatibilidad de coordenadas con el área comercial; falta verificar calle y número.",
+      "incorporada_catalogo": true,
+      "fecha_incorporacion": "2026-10-31"
     },
     {
       "id": "osm:way:51864419",
@@ -1083,6 +1143,7 @@
     "fichas_con_propuesta": 46,
     "fichas_sin_propuesta": 4,
     "criterio": "Las direcciones son propuestas pendientes de revisión; no se han aplicado al catálogo maestro ni publicado.",
-    "ultima_ampliacion": "Se han añadido dos estaciones Repsol con coincidencia cartográfica y una tienda Mercadona con dirección oficial."
+    "ultima_ampliacion": "Se incorporan al catálogo maestro solo coincidencias con fuente y posición compatibles. Las propuestas dudosas o ambiguas permanecen sin aplicar.",
+    "direcciones_incorporadas_catalogo": 30
   }
 }
