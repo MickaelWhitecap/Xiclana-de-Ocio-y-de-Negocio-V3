@@ -1,0 +1,1378 @@
+{
+  "fecha_consulta_utc": "2026-10-31T06:46:16.327375+00:00",
+  "fuente": "OpenStreetMap / Overpass API",
+  "metodo": "Consulta de etiquetas de objetos OSM ya identificados; sin geocodificación inversa.",
+  "total_fichas_sin_direccion": 839,
+  "objetos_osm_identificados": 573,
+  "objetos_osm_recuperados": 333,
+  "objetos_con_etiquetas_postales": 1,
+  "propuestas_con_direccion_formateable": 1,
+  "propuestas": [
+    {
+      "id": "osm:node:11392541157",
+      "nombre": "Vidapadre",
+      "categoria": "Restaurante",
+      "tipo": "ocio",
+      "direccion_propuesta": "Carretera de la Barrosa, CP 11139",
+      "etiquetas_direccion_osm": {
+        "addr:street": "Carretera de la Barrosa",
+        "addr:postcode": "11139"
+      },
+      "url_objeto_osm": "https://www.openstreetmap.org/node/11392541157",
+      "estado": "propuesta_pendiente_revision"
+    }
+  ],
+  "fichas_sin_id_osm_consultable": [
+    {
+      "id": "osm-extra:node:9041092096",
+      "nombre": "Agustín Blázquez",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:679149071",
+      "nombre": "Alameda",
+      "categoria": "Parking"
+    },
+    {
+      "id": "osm-extra:node:2242767663",
+      "nombre": "Almendral",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13483910001",
+      "nombre": "Aparcamiento verano",
+      "categoria": "Parking"
+    },
+    {
+      "id": "osm-extra:node:9041111329",
+      "nombre": "Arenal",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:677791625",
+      "nombre": "Arroyo del Aljibe",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:12721937830",
+      "nombre": "Asociación Hípica Terapeútica Santa Ana",
+      "categoria": "Instalaciones deportivas"
+    },
+    {
+      "id": "osm-extra:node:13505100401",
+      "nombre": "Atún",
+      "categoria": "Arte público"
+    },
+    {
+      "id": "osm-extra:way:183504846",
+      "nombre": "Autobuses",
+      "categoria": "Parking"
+    },
+    {
+      "id": "osm-extra:node:13418462325",
+      "nombre": "Av. Irlanda",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2083836658",
+      "nombre": "Avenida Campesina",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2083928114",
+      "nombre": "Avenida de la Música",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9056010748",
+      "nombre": "Avenida del Comercio",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2083902593",
+      "nombre": "Avenida Libertad",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13417021110",
+      "nombre": "B. Colorada",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2083902591",
+      "nombre": "Bar Libertad",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:way:439470445",
+      "nombre": "Barco Pirata",
+      "categoria": "Parques infantiles"
+    },
+    {
+      "id": "osm-extra:node:2083902594",
+      "nombre": "Barriada El Carmen",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:4722496986",
+      "nombre": "Bolas / Goletas",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:7325754237",
+      "nombre": "Busto dedicado a Pepin Jiménez",
+      "categoria": "Arte público"
+    },
+    {
+      "id": "osm-extra:node:13416163875",
+      "nombre": "C. C. El Camino",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:679163724",
+      "nombre": "C.P.E. Longuera",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041092091",
+      "nombre": "C.P.S. Andrades",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13418462329",
+      "nombre": "C/ Everest",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13418462328",
+      "nombre": "C/ Mulhacén",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13416072817",
+      "nombre": "Calcita",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2083836655",
+      "nombre": "Calle Ancha",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9058093389",
+      "nombre": "Calle Andorra",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:1661059393",
+      "nombre": "Calle Atlántico",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9058093410",
+      "nombre": "Calle Calvario",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9058093408",
+      "nombre": "Calle Cuenca",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9058093404",
+      "nombre": "Calle Elche",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041092098",
+      "nombre": "Calle Iro",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2245157795",
+      "nombre": "Calle La Barossa",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2245157787",
+      "nombre": "Calle la Campa",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2083928121",
+      "nombre": "Calle La Pinta",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041111327",
+      "nombre": "Calle La Piña -Car",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041092112",
+      "nombre": "Calle Larga",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9058093383",
+      "nombre": "Calle León",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9058093387",
+      "nombre": "Calle Merida",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9058093414",
+      "nombre": "Calle Molinete",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:558559166",
+      "nombre": "Calle Murcia",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:4722496984",
+      "nombre": "Calle Trébol",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9058093381",
+      "nombre": "Calle Ubrique",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:4722496981",
+      "nombre": "Callejón Jerez (Macías)",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:4722496985",
+      "nombre": "Callejón La Rosa",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13415855774",
+      "nombre": "Cam. de las Parras",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13417021116",
+      "nombre": "Cam. del Olmo",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13417021119",
+      "nombre": "Cam. Encina",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13417021117",
+      "nombre": "Cam. Paloma de la Paz",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13417021106",
+      "nombre": "Cam. Velero",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9055993705",
+      "nombre": "Camino de Algodonales",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9055993707",
+      "nombre": "Camino del Arroyo",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9055993701",
+      "nombre": "Camino del Cañaveral",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9055993706",
+      "nombre": "Camino Lagunetas",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:way:479104708",
+      "nombre": "Campo de fútbol Huerta Mata (Futuro Estadio Municipal Chiclana C.F.)",
+      "categoria": "Instalaciones deportivas"
+    },
+    {
+      "id": "osm-extra:node:2244477305",
+      "nombre": "Campo Fútbol",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:way:184503719",
+      "nombre": "Campo Municipal de Deportes",
+      "categoria": "Instalaciones deportivas"
+    },
+    {
+      "id": "osm-extra:way:225552599",
+      "nombre": "Capilla de Sancti-Petri",
+      "categoria": "Patrimonio y culto"
+    },
+    {
+      "id": "osm-extra:way:183446887",
+      "nombre": "Capilla de Solagitas",
+      "categoria": "Patrimonio y culto"
+    },
+    {
+      "id": "osm-extra:way:150930522",
+      "nombre": "Capilla Nuestra Señora de la Estrella",
+      "categoria": "Patrimonio y culto"
+    },
+    {
+      "id": "osm-extra:node:4722496980",
+      "nombre": "Caracolas (Manchón)",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:1550450471",
+      "nombre": "Caraza - La Plaza",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13415855758",
+      "nombre": "Carboneros",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13415855757",
+      "nombre": "Carbón",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13418462324",
+      "nombre": "Casas Andaluzas (Fases I, II y III)",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041111331",
+      "nombre": "Castilla",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9056010742",
+      "nombre": "Cañada de los Barrancos",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:309451883",
+      "nombre": "Cañada de Los Barrancos - Los Cazadores",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9058108122",
+      "nombre": "Cementerio",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:6939282936",
+      "nombre": "Cementerio Mancomunado",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:1744526161",
+      "nombre": "Centro de Visitantes",
+      "categoria": "Información turística"
+    },
+    {
+      "id": "osm-extra:node:1661059392",
+      "nombre": "Centro Novo S.P.",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13418163242",
+      "nombre": "Cerromolino",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "oficial:80eae20f98c7c986c7f6",
+      "nombre": "Charter Alcántara",
+      "categoria": "Náutica"
+    },
+    {
+      "id": "osm-extra:way:144784400",
+      "nombre": "Circuito de coches teledirigidos",
+      "categoria": "Parques infantiles"
+    },
+    {
+      "id": "osm-extra:node:2245157784",
+      "nombre": "Clínica Novo Sancti Petri",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9058093402",
+      "nombre": "Cm. de Bejar",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9058093400",
+      "nombre": "Cm. de la Reina Cristina Eugenia",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:6116846687",
+      "nombre": "Costas Sancti-Petri 1",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9032437837",
+      "nombre": "Costas Sancti-Petri 2",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2245173835",
+      "nombre": "Coto San José",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:6116842593",
+      "nombre": "Cruce Molino",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041092110",
+      "nombre": "Cubero",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9058093412",
+      "nombre": "El Copo",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13415855772",
+      "nombre": "El Cotín",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:4722496983",
+      "nombre": "El Doctoral",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13415855770",
+      "nombre": "El Florín",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041092099",
+      "nombre": "El Pilar",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:3234860389",
+      "nombre": "El Pleito - Pinaleta",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2245157792",
+      "nombre": "El Sotillo",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:way:1547851708",
+      "nombre": "El Templo de Melkart y las Islas Gadeira",
+      "categoria": "Información turística"
+    },
+    {
+      "id": "osm-extra:node:13766385888",
+      "nombre": "El viento y el mar",
+      "categoria": "Arte público"
+    },
+    {
+      "id": "oficial:c117f8ec50ba25bad082",
+      "nombre": "Ermita de Santa Ana",
+      "categoria": "Patrimonio"
+    },
+    {
+      "id": "osm-extra:node:8986139365",
+      "nombre": "Escuela de Vela Zaida",
+      "categoria": "Instalaciones deportivas"
+    },
+    {
+      "id": "osm-extra:node:13415855767",
+      "nombre": "Farmacia Rana Verde",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13483952702",
+      "nombre": "Flosse Club",
+      "categoria": "Educación"
+    },
+    {
+      "id": "osm-extra:node:9041092100",
+      "nombre": "Fuente Amarga",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13505061601",
+      "nombre": "Fuente de agua Carboneros",
+      "categoria": "Servicios públicos"
+    },
+    {
+      "id": "osm-extra:way:425377850",
+      "nombre": "Fuente Plaza Las Bodegas",
+      "categoria": "Servicios públicos"
+    },
+    {
+      "id": "osm-extra:node:12759834930",
+      "nombre": "Futuro Cuartel de la Guardia Civil de Chiclana",
+      "categoria": "Emergencias"
+    },
+    {
+      "id": "osm-extra:node:9041092097",
+      "nombre": "G. Ulla / Manguita",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13417021118",
+      "nombre": "Garrones",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13415855776",
+      "nombre": "Geriatrico Novo",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13418163244",
+      "nombre": "Gran Duque",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13416072818",
+      "nombre": "Granizo",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13415855756",
+      "nombre": "Heracles",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2244477282",
+      "nombre": "Hipica Novo",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:4722496979",
+      "nombre": "Hormaza",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2242789099",
+      "nombre": "Hotel Aldiana",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2242789102",
+      "nombre": "Hotel Barrosa",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:3234860387",
+      "nombre": "Hotel Cortijo Los Gallos",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2232069068",
+      "nombre": "Hotel Costa",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2242789095",
+      "nombre": "Hotel Riu",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2232069066",
+      "nombre": "Hotel Royal",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2242789098",
+      "nombre": "Hoyo 3",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13418462327",
+      "nombre": "Hozanejos",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041111323",
+      "nombre": "Hta. Rosario",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:4722400880",
+      "nombre": "Huerta Mata",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13482910801",
+      "nombre": "Ibis",
+      "categoria": "Arte público"
+    },
+    {
+      "id": "osm-extra:way:150927356",
+      "nombre": "Iglesia de Jesús Nazareno",
+      "categoria": "Patrimonio y culto"
+    },
+    {
+      "id": "osm-extra:way:148595400",
+      "nombre": "Iglesia de la Santísima Trinidad (San Telmo)",
+      "categoria": "Patrimonio y culto"
+    },
+    {
+      "id": "osm-extra:way:148091927",
+      "nombre": "Iglesia de la Soledad",
+      "categoria": "Patrimonio y culto"
+    },
+    {
+      "id": "osm-extra:way:152661634",
+      "nombre": "Iglesia evangélica de Jesucristo de los Ultimos Días",
+      "categoria": "Patrimonio y culto"
+    },
+    {
+      "id": "osm-extra:way:153210684",
+      "nombre": "Iglesia Mayor (San Juan Bautista)",
+      "categoria": "Patrimonio y culto"
+    },
+    {
+      "id": "osm-extra:way:184452190",
+      "nombre": "Iglesia San Sebastián",
+      "categoria": "Patrimonio y culto"
+    },
+    {
+      "id": "osm-extra:node:679152604",
+      "nombre": "Información Turística",
+      "categoria": "Información turística"
+    },
+    {
+      "id": "osm-extra:way:155833517",
+      "nombre": "Instituto La Pedrera Blanca",
+      "categoria": "Educación"
+    },
+    {
+      "id": "osm-extra:way:186528322",
+      "nombre": "Instituto Poeta García Gutiérrez",
+      "categoria": "Educación"
+    },
+    {
+      "id": "osm-extra:node:1551821239",
+      "nombre": "Intercambiador Río Iro",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:4722400877",
+      "nombre": "Isabel la Católica",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:4722400876",
+      "nombre": "Jardines",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:4722307221",
+      "nombre": "Jardines Marquesado",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:way:44585343",
+      "nombre": "Juego de Ninos",
+      "categoria": "Parques infantiles"
+    },
+    {
+      "id": "osm-extra:node:13626757701",
+      "nombre": "Kids Club Chiclana",
+      "categoria": "Educación"
+    },
+    {
+      "id": "osm-extra:node:13417021114",
+      "nombre": "La Cabaña",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9058093413",
+      "nombre": "La Capilla",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2083836654",
+      "nombre": "La Carabina",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13415855759",
+      "nombre": "La Granja",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:10137800753",
+      "nombre": "La Hoya",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13507865201",
+      "nombre": "La Mar de Posibilidades Partyplaner",
+      "categoria": "Espacios culturales"
+    },
+    {
+      "id": "osm-extra:node:13483952601",
+      "nombre": "La Plaza",
+      "categoria": "Espacios culturales"
+    },
+    {
+      "id": "osm-extra:node:9058093416",
+      "nombre": "La Voladera",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13415855773",
+      "nombre": "Lago Negro",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13306898814",
+      "nombre": "Laguna de la Paja",
+      "categoria": "Información turística"
+    },
+    {
+      "id": "osm-extra:node:679343043",
+      "nombre": "Las Fresas",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13418163243",
+      "nombre": "Las Mogarizas",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2242767659",
+      "nombre": "Las Palomas",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:14261884561",
+      "nombre": "Las Parcelas de Roche - Finca La Petite",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2245204922",
+      "nombre": "Las Rapaces",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:1551821182",
+      "nombre": "Las Redes",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:1551821225",
+      "nombre": "Las Redes - Los Esteros",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13415855771",
+      "nombre": "Las Veguetas",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2245157785",
+      "nombre": "Loma-Tartessus",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2242767650",
+      "nombre": "Los Gallos 1",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2242767647",
+      "nombre": "Los Gallos 2",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13418163245",
+      "nombre": "Los Gallos 3",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9058093394",
+      "nombre": "Los Llanos",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:679343036",
+      "nombre": "Los Naranjos",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13415855766",
+      "nombre": "Los Visos - Garola",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2245157799",
+      "nombre": "Lucas Parrado",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2242767653",
+      "nombre": "Maite",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9055993703",
+      "nombre": "Manuel Aragón",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041092095",
+      "nombre": "Margaritas",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2244477281",
+      "nombre": "Mariposas",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:10137800746",
+      "nombre": "Marquesado",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:12887072196",
+      "nombre": "Melkart 1 La Navegación",
+      "categoria": "Arte público"
+    },
+    {
+      "id": "osm-extra:node:12887072195",
+      "nombre": "Melkart 2. La Pesca del Atún",
+      "categoria": "Arte público"
+    },
+    {
+      "id": "osm-extra:node:12887072192",
+      "nombre": "Melkart 3 . El Comercio Mediterraneo",
+      "categoria": "Arte público"
+    },
+    {
+      "id": "osm-extra:node:12887072193",
+      "nombre": "Melkart 4 . La Religión",
+      "categoria": "Arte público"
+    },
+    {
+      "id": "osm-extra:node:12887072194",
+      "nombre": "Melkart 5 La Colonización",
+      "categoria": "Arte público"
+    },
+    {
+      "id": "osm-extra:node:12092282409",
+      "nombre": "Melkart 6. La sal.",
+      "categoria": "Arte público"
+    },
+    {
+      "id": "osm-extra:node:12844410402",
+      "nombre": "Melkart 7: La agricultura: El aceite",
+      "categoria": "Arte público"
+    },
+    {
+      "id": "osm-extra:node:12844410403",
+      "nombre": "Melkart 8. La agricultura: el vino",
+      "categoria": "Arte público"
+    },
+    {
+      "id": "osm-extra:node:12844535001",
+      "nombre": "Melkart. El hogar",
+      "categoria": "Información turística"
+    },
+    {
+      "id": "osm-extra:node:2083836656",
+      "nombre": "Mendaro",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2245221090",
+      "nombre": "Menuditas",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041092104",
+      "nombre": "Millan",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13505391504",
+      "nombre": "Mobipark",
+      "categoria": "Parques infantiles"
+    },
+    {
+      "id": "osm-extra:node:9058108118",
+      "nombre": "Molino Papel",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13504972901",
+      "nombre": "Monumento de Hércules",
+      "categoria": "Arte público"
+    },
+    {
+      "id": "osm-extra:node:7490459622",
+      "nombre": "Mosca",
+      "categoria": "Arte público"
+    },
+    {
+      "id": "oficial:94abed2977cbdf584917",
+      "nombre": "Multicines las Salinas",
+      "categoria": "Cultura"
+    },
+    {
+      "id": "osm-extra:node:4722400881",
+      "nombre": "Nave Obras",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:10137800750",
+      "nombre": "Nuestra Señora de los Remedios",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:1661059391",
+      "nombre": "Oficina de Turismo",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13388084791",
+      "nombre": "Oficina Municipal de Turismo",
+      "categoria": "Información turística"
+    },
+    {
+      "id": "osm-extra:node:9041092114",
+      "nombre": "P. Humo",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:1551821212",
+      "nombre": "Pabellón",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9058093385",
+      "nombre": "Pabellón Rosario",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:way:427387812",
+      "nombre": "Padel Carboneros",
+      "categoria": "Instalaciones deportivas"
+    },
+    {
+      "id": "osm-extra:node:9058093391",
+      "nombre": "Pago los Llanos",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9058093396",
+      "nombre": "Pago Niños",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041092094",
+      "nombre": "Panaderia",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:way:475583133",
+      "nombre": "Parking Casa Carlos",
+      "categoria": "Parking"
+    },
+    {
+      "id": "osm-extra:node:13482906801",
+      "nombre": "Parking gratuito",
+      "categoria": "Parking"
+    },
+    {
+      "id": "osm-extra:node:13507803801",
+      "nombre": "Parking gratuito Sancti Petri",
+      "categoria": "Parking"
+    },
+    {
+      "id": "osm-extra:way:198638607",
+      "nombre": "parking Hotel Riu Chiclana",
+      "categoria": "Parking"
+    },
+    {
+      "id": "osm-extra:way:475583131",
+      "nombre": "Parking Venta Zacarías",
+      "categoria": "Parking"
+    },
+    {
+      "id": "osm-extra:node:13507865301",
+      "nombre": "Parque infantil",
+      "categoria": "Parques infantiles"
+    },
+    {
+      "id": "osm-extra:way:645257320",
+      "nombre": "Parque Infantil Amaranto",
+      "categoria": "Parques infantiles"
+    },
+    {
+      "id": "osm-extra:way:446160196",
+      "nombre": "Parque infantil Pinar de La Barrosa",
+      "categoria": "Parques infantiles"
+    },
+    {
+      "id": "osm-extra:node:13477035601",
+      "nombre": "Parroquia de San Antonio de Padua",
+      "categoria": "Patrimonio y culto"
+    },
+    {
+      "id": "osm-extra:node:4722400884",
+      "nombre": "Pelagatos",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041092092",
+      "nombre": "Picos de Europa",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:1659388396",
+      "nombre": "Pinar de los Franceses",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041092106",
+      "nombre": "Pinarillo",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13482940001",
+      "nombre": "Pista de baloncesto",
+      "categoria": "Parques infantiles"
+    },
+    {
+      "id": "osm-extra:way:808138957",
+      "nombre": "Pista de Tenis las Torres",
+      "categoria": "Instalaciones deportivas"
+    },
+    {
+      "id": "osm-extra:node:2235027789",
+      "nombre": "Playa Sancti-Petri",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:4722400882",
+      "nombre": "Plaza Contratación",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2083836661",
+      "nombre": "Plaza de Andalucía",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:679165865",
+      "nombre": "Plaza de Toros",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2083902592",
+      "nombre": "Plaza Esteros",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2083902590",
+      "nombre": "Plaza Panzacola",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2235027794",
+      "nombre": "Poblado de Sancti-Petri",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:1582499611",
+      "nombre": "Policía Local",
+      "categoria": "Emergencias"
+    },
+    {
+      "id": "osm-extra:node:13541286017",
+      "nombre": "Policía Local",
+      "categoria": "Emergencias"
+    },
+    {
+      "id": "osm-extra:node:565050767",
+      "nombre": "public",
+      "categoria": "Servicios públicos"
+    },
+    {
+      "id": "oficial:69c0d1be602b8dfca6b3",
+      "nombre": "Puerto Deportivo \"Sancti Petri\"",
+      "categoria": "Instalación deportiva"
+    },
+    {
+      "id": "osm-extra:node:4722400883",
+      "nombre": "Puertomar",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13482891001",
+      "nombre": "Punto Limpio la Rana Verde",
+      "categoria": "Reciclaje y residuos"
+    },
+    {
+      "id": "osm-extra:way:184597834",
+      "nombre": "Punto Limpio Urbisur",
+      "categoria": "Reciclaje y residuos"
+    },
+    {
+      "id": "osm-extra:node:9041092111",
+      "nombre": "R. El Toreo",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:10137800751",
+      "nombre": "Reyes Católicos",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:3234860388",
+      "nombre": "Rotonda Gallos",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "turismo:1bcc1232f85408378a15",
+      "nombre": "Ruta cultural: Casas Monumentales",
+      "categoria": "Ruta cultural"
+    },
+    {
+      "id": "turismo:b78e3e749fb643f1e02b",
+      "nombre": "Ruta cultural: Centro histórico",
+      "categoria": "Ruta cultural"
+    },
+    {
+      "id": "turismo:05650520a7f6fdab4319",
+      "nombre": "Ruta cultural: Chiclana, de Origen Fenicio",
+      "categoria": "Ruta cultural"
+    },
+    {
+      "id": "turismo:79c460daf4896253a637",
+      "nombre": "Ruta cultural: Chiclana, Ruta Napoleónica",
+      "categoria": "Ruta cultural"
+    },
+    {
+      "id": "turismo:e1c15f3d5dd4aad64f61",
+      "nombre": "Ruta cultural: Romántica",
+      "categoria": "Ruta cultural"
+    },
+    {
+      "id": "turismo:dbe4dd9256466355b24c",
+      "nombre": "Ruta cultural: Río Iro",
+      "categoria": "Ruta cultural"
+    },
+    {
+      "id": "osm-extra:node:13415855760",
+      "nombre": "Salmorejo",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13418462322",
+      "nombre": "San Andrés Golf",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13273199859",
+      "nombre": "San Andrés Golf (N-340)",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13505484201",
+      "nombre": "SANCTI-PETRI KAYAK",
+      "categoria": "Alquiler y movilidad"
+    },
+    {
+      "id": "osm-extra:node:4722496978",
+      "nombre": "Santa Ana",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041111326",
+      "nombre": "Solagitas",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13238356722",
+      "nombre": "Stein Wasserspender",
+      "categoria": "Servicios públicos"
+    },
+    {
+      "id": "osm-extra:node:13238360089",
+      "nombre": "Strand-Toiletten",
+      "categoria": "Servicios públicos"
+    },
+    {
+      "id": "osm-extra:node:1561823714",
+      "nombre": "Subterráneo Juzgados",
+      "categoria": "Parking"
+    },
+    {
+      "id": "osm-extra:node:679147702",
+      "nombre": "Subterráneo Plaza Mayor",
+      "categoria": "Parking"
+    },
+    {
+      "id": "osm-extra:node:2242770032",
+      "nombre": "Supersol",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041111325",
+      "nombre": "Transupra",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9032437839",
+      "nombre": "Ugaldenea",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "oficial:9427c992514c37fb8222",
+      "nombre": "Urgencias",
+      "categoria": "Servicio público"
+    },
+    {
+      "id": "osm-extra:node:9041092108",
+      "nombre": "V. Cazadores",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041092107",
+      "nombre": "V. Florencia",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041092109",
+      "nombre": "V. Sorpresa",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "oficial:81e45eab4a9f35e54e02",
+      "nombre": "Valentin Sancti Petri Spa",
+      "categoria": "Balneario y spa"
+    },
+    {
+      "id": "osm-extra:node:9041111328",
+      "nombre": "Velódromo - El Fontanal",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:679343031",
+      "nombre": "Venta Alegría",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13417021108",
+      "nombre": "Venta El Burro",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:4829549823",
+      "nombre": "Venta El Pino",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13417021120",
+      "nombre": "Venta Pepe",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9055993708",
+      "nombre": "Venta Pololo",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13416072816",
+      "nombre": "Verbena",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041092093",
+      "nombre": "Violetas",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:1794609480",
+      "nombre": "Vipren",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:2242767652",
+      "nombre": "Vta. Bernardo",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:9041092113",
+      "nombre": "Vta. La Raya",
+      "categoria": "Transporte"
+    },
+    {
+      "id": "osm-extra:node:13238341096",
+      "nombre": "Wasserspender",
+      "categoria": "Servicios públicos"
+    },
+    {
+      "id": "osm-extra:node:13238352053",
+      "nombre": "Wasserspender Stein",
+      "categoria": "Servicios públicos"
+    },
+    {
+      "id": "oficial:5eb71868a9d4c10c1bfa",
+      "nombre": "Waterman School",
+      "categoria": "Náutica"
+    },
+    {
+      "id": "osm-extra:node:12978473976",
+      "nombre": "Wu Shu Dragón Rojo",
+      "categoria": "Instalaciones deportivas"
+    },
+    {
+      "id": "osm-extra:way:53040419",
+      "nombre": "Yeguada El Chaparral",
+      "categoria": "Instalaciones deportivas"
+    }
+  ],
+  "errores_lotes": [
+    {
+      "tipo": "node",
+      "primer_id": "1837893282",
+      "cantidad": 80,
+      "error": "HTTP Error 502: Bad Gateway"
+    },
+    {
+      "tipo": "node",
+      "primer_id": "1616831311",
+      "cantidad": 80,
+      "error": "HTTP Error 502: Bad Gateway"
+    },
+    {
+      "tipo": "node",
+      "primer_id": "1647366894",
+      "cantidad": 80,
+      "error": "HTTP Error 502: Bad Gateway"
+    }
+  ],
+  "nota": "Propuestas únicamente. No modifica fichas_completas.json ni publica direcciones; requiere validación antes de incorporar."
+}
