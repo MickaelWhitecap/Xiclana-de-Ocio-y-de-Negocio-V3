@@ -334,10 +334,15 @@
         "lon": -6.1629106
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Urbanización Novo Sancti Petri, s/n, 11139 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.aldiana.com/clubs/andalusien",
+          "tipo": "fuente pública consultada"
+        }
+      ],
+      "observaciones": "Dirección publicada en la web oficial de Aldiana Club Andalusien; coincide con la urbanización indicada por la ficha."
     },
     {
       "id": "osm:node:3409527240",
@@ -349,10 +354,15 @@
         "lon": -6.1781258
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Carretera de la Barrosa, 23, Centro Comercial El Patio, 11139 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.cylex.es/chiclana-de-la-frontera/hostal-el-jardin-11651107.html",
+          "tipo": "fuente pública consultada"
+        }
+      ],
+      "observaciones": "La fuente identifica Hostal El Jardín en Ctra. de la Barrosa 23, C.C. El Patio. Confirmar que el establecimiento sigue activo y que el número corresponde a la dirección actual."
     },
     {
       "id": "osm:way:1126945769",
@@ -379,10 +389,15 @@
         "lon": -6.1850854
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Carretera de la Barrosa, km 3,5, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/alojamiento/marisma-sancti-petri/",
+          "tipo": "fuente pública consultada"
+        }
+      ],
+      "observaciones": "Dirección confirmada por Turismo de Chiclana; la web del hotel también especifica km 3,5."
     },
     {
       "id": "osm:node:13541492396",
@@ -895,8 +910,8 @@
   ],
   "fecha_actualizacion": "2026-10-31",
   "resumen_investigacion": {
-    "fichas_con_propuesta": 17,
-    "fichas_sin_propuesta": 33,
+    "fichas_con_propuesta": 20,
+    "fichas_sin_propuesta": 30,
     "criterio": "Las direcciones son propuestas pendientes de revisión; no se han aplicado al catálogo maestro ni publicado."
   }
 }
