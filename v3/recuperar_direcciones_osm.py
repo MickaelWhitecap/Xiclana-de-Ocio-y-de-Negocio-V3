@@ -6,8 +6,8 @@ from pathlib import Path
 
 CATALOG=Path("v3/fichas_completas.json")
 OUTPUT=Path("v3/propuestas_direcciones_osm.json")
-ENDPOINT="https://overpass-api.de/api/interpreter"
-BATCH_SIZE=80
+ENDPOINTS=("https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter")
+BATCH_SIZE=25
 PAUSE_SECONDS=2.5
 ADDRESS_KEYS=("addr:full","addr:street","addr:housenumber","addr:place","addr:postcode","addr:city","addr:suburb","addr:district","addr:province","addr:state","addr:unit","addr:floor")
 
