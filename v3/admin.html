@@ -180,7 +180,9 @@ function effectiveItems(){
  out.forEach(x=>{const k=exactKey(x);if(k){if(!exactGroups.has(k))exactGroups.set(k,[]);exactGroups.get(k).push(x)}});
  const suppressed=new Set();
  exactGroups.forEach(group=>{if(group.length<2)return;group.sort((a,b)=>priority(a)-priority(b));const keeper=group[0];group.slice(1).forEach(other=>{Object.entries(other).forEach(([k,v])=>{if((keeper[k]===undefined||keeper[k]===null||String(keeper[k]).trim()==="")&&v!==undefined&&v!==null&&String(v).trim()!=="")keeper[k]=v});suppressed.add(other)})});
- return out.filter(x=>!suppressed.has(x));
+ out=out.filter(x=>!suppressed.has(x));
+ out=out.filter(x=>!["agua","agua potable"].includes(String(x.n||x.nombre||x.name||x.title||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().trim()));
+ return out.map(x=>["camping","nautica"].includes(String(x.c||x.categoria||x.category||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().trim())?({...x,t:"ocio"}):x);
 }
 function deletedItems(){
  const deleted=overrides.filter(o=>o.fields&&o.fields._xiclana_deleted===true);
