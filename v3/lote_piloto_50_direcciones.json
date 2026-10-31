@@ -527,10 +527,15 @@
         "lon": -6.1561189
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Calle Doctor Pedro Vélez, s/n, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://aechiclana.org/directorio/trabajo/marisqueria-manguita-s-l/",
+          "tipo": "fuente pública consultada"
+        }
+      ],
+      "observaciones": "La Asociación de Empresas de Chiclana y el perfil del establecimiento publican Calle Doctor Pedro Vélez s/n. La marca Manguita también identifica otras instalaciones; contrastar el punto cartográfico."
     },
     {
       "id": "osm:node:11394810352",
@@ -542,10 +547,15 @@
         "lon": -6.1901692
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Carretera de la Barrosa, junto a las Salinas de Carboneros, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://turismo.chiclana.es/detalle-de-recurso/salina-santa-teresa-2/",
+          "tipo": "fuente pública consultada"
+        }
+      ],
+      "observaciones": "Dirección y emplazamiento confirmados por Turismo de Chiclana y web oficial. No existe número de portal; es una referencia de ubicación."
     },
     {
       "id": "osm:way:428046298",
@@ -617,10 +627,15 @@
         "lon": -6.1425772
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Avenida del Mueble, 14, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://es.restaurantguru.com/Venta-Agustin-Chiclana-de-la-Frontera",
+          "tipo": "fuente pública consultada"
+        }
+      ],
+      "observaciones": "Dos directorios publican Avenida del Mueble 14; la coordenada del registro es compatible con el entorno. Confirmar acceso y número sobre cartografía."
     },
     {
       "id": "osm:way:53141044",
@@ -632,10 +647,15 @@
         "lon": -6.1152014
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Carretera Nacional N-340, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://es.restaurantguru.com/Venta-Campano-Chiclana-de-la-Frontera",
+          "tipo": "fuente pública consultada"
+        }
+      ],
+      "observaciones": "La fuente sitúa Venta Campano en la N-340, sin número ni punto kilométrico. Propuesta de localización parcial."
     },
     {
       "id": "osm:way:475583129",
@@ -910,8 +930,8 @@
   ],
   "fecha_actualizacion": "2026-10-31",
   "resumen_investigacion": {
-    "fichas_con_propuesta": 20,
-    "fichas_sin_propuesta": 30,
+    "fichas_con_propuesta": 24,
+    "fichas_sin_propuesta": 26,
     "criterio": "Las direcciones son propuestas pendientes de revisión; no se han aplicado al catálogo maestro ni publicado."
   }
 }
