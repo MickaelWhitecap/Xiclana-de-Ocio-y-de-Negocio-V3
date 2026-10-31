@@ -18,10 +18,10 @@
     "distribucion": {
       "4": 6,
       "5": 7,
-      "6": 804,
-      "7": 260,
-      "8": 73,
-      "9": 74,
+      "6": 776,
+      "7": 288,
+      "8": 71,
+      "9": 76,
       "10": 39,
       "11": 18,
       "12": 12
@@ -305,7 +305,7 @@
   "registros_invalidos_o_ids_repetidos": [],
   "fichas_sin_nombre_categoria_o_tipo_valido": [],
   "calidad_de_campos_opcionales": {
-    "fichas_sin_direccion": 839,
+    "fichas_sin_direccion": 809,
     "correos_invalidos": [],
     "urls_colocadas_en_campo_email": [],
     "telefonos_sospechosos": [],
@@ -314,8 +314,8 @@
     "nota": "Control informativo: no modifica fichas ni bloquea la publicación por campos opcionales."
   },
   "direcciones_pendientes": {
-    "total_sin_direccion": 839,
-    "con_coordenadas_validas": 832,
+    "total_sin_direccion": 809,
+    "con_coordenadas_validas": 802,
     "sin_coordenadas_validas": 7,
     "distribucion_por_tipo_y_categoria": [
       {
@@ -335,8 +335,8 @@
       {
         "tipo": "ocio",
         "categoria": "Restaurante",
-        "total": 60,
-        "con_coordenadas": 60,
+        "total": 52,
+        "con_coordenadas": 52,
         "sin_coordenadas": 0
       },
       {
@@ -362,16 +362,16 @@
       },
       {
         "tipo": "negocio",
-        "categoria": "Supermercado",
-        "total": 27,
-        "con_coordenadas": 27,
+        "categoria": "Colegio",
+        "total": 25,
+        "con_coordenadas": 25,
         "sin_coordenadas": 0
       },
       {
         "tipo": "negocio",
-        "categoria": "Colegio",
-        "total": 25,
-        "con_coordenadas": 25,
+        "categoria": "Supermercado",
+        "total": 20,
+        "con_coordenadas": 20,
         "sin_coordenadas": 0
       },
       {
@@ -386,13 +386,6 @@
         "categoria": "Peluquería",
         "total": 15,
         "con_coordenadas": 15,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "negocio",
-        "categoria": "Gasolinera",
-        "total": 14,
-        "con_coordenadas": 14,
         "sin_coordenadas": 0
       },
       {
@@ -482,13 +475,6 @@
       {
         "tipo": "negocio",
         "categoria": "Farmacia",
-        "total": 7,
-        "con_coordenadas": 7,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "negocio",
-        "categoria": "Hotel",
         "total": 7,
         "con_coordenadas": 7,
         "sin_coordenadas": 0
@@ -608,6 +594,13 @@
       {
         "tipo": "negocio",
         "categoria": "Ferretería",
+        "total": 4,
+        "con_coordenadas": 4,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Gasolinera",
         "total": 4,
         "con_coordenadas": 4,
         "sin_coordenadas": 0
@@ -769,6 +762,13 @@
       {
         "tipo": "negocio",
         "categoria": "Guardería",
+        "total": 2,
+        "con_coordenadas": 2,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Hotel",
         "total": 2,
         "con_coordenadas": 2,
         "sin_coordenadas": 0
