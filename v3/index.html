@@ -540,6 +540,19 @@ body{background-color:var(--bg)}
 </style>
 
 
+
+<style id="descripcion-ocio-una-linea">
+/* Mantener la descripción de Ocio en una sola línea */
+#elige .dos > .op[data-m="ocio"] small{
+  white-space:nowrap !important;
+  max-width:none !important;
+  font-size:clamp(.46rem,1.05vw,.72rem) !important;
+  letter-spacing:-.025em;
+}
+@media(max-width:560px){
+  #elige .dos > .op[data-m="ocio"] small{font-size:clamp(.46rem,2.1vw,.68rem) !important}
+}
+</style>
 </head><body>
 <header class="hero foto"><svg viewBox="0 0 1200 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect class="salt" width="1200" height="340"/><rect class="p" style="--d:0" x="0" y="0" width="300" height="150" fill="#f08fa8"/><rect class="p" style="--d:1" x="308" y="0" width="220" height="100" fill="#f7c1cd"/><rect class="p" style="--d:2" x="536" y="0" width="330" height="170" fill="#e56b8d"/><rect class="p" style="--d:3" x="874" y="0" width="326" height="120" fill="#f3a3b6"/><rect class="p" style="--d:4" x="0" y="158" width="180" height="182" fill="#8cc9cf"/><rect class="p" style="--d:5" x="188" y="158" width="330" height="90" fill="#5fb0ba"/><rect class="p" style="--d:6" x="526" y="178" width="180" height="162" fill="#f7c1cd"/><rect class="p" style="--d:7" x="714" y="178" width="200" height="100" fill="#f08fa8"/><rect class="p" style="--d:8" x="922" y="128" width="278" height="212" fill="#8cc9cf"/><rect class="p" style="--d:9" x="188" y="256" width="330" height="84" fill="#f3a3b6"/><rect class="p" style="--d:10" x="714" y="286" width="200" height="54" fill="#5fb0ba"/><circle cx="1080" cy="62" r="34" fill="#f6b93b"/></svg><small class="cr" id="cr"></small><div class="t"><h1>Xiclana de <span class="brand-ocio">Ocio</span> y de <span class="brand-negocio">Negocio</span></h1><p>Playas, marismas, bares y comercios de Chiclana de la Frontera (11130, Cádiz) en un solo sitio.</p></div></header>
 <div class="cuerpo"><aside class="lado" id="lado-i" aria-label="Espacio destacado"></aside><div class="centro"><section id="elige"><h2>¿Qué buscas hoy?</h2><div class="dos">
