@@ -66,10 +66,19 @@
         "lon": -6.138889
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Calle de los Electricistas, 1, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.gasole.es/cadiz/chiclana-de-la-frontera/",
+          "tipo": "listado de estaciones con datos MITECO"
+        },
+        {
+          "url": "https://www.repostario.es/?locality=CHICLANA+DE+LA+FRONTERA&province=C%C3%81DIZ",
+          "tipo": "directorio de estaciones y direcciones"
+        }
+      ],
+      "observaciones": "La coordenada coincide con la ubicación publicada para Ballenoil de Calle Electricistas Los, 1. El identificador comercial del catálogo dice Ballenoil Chiclana III; verificar alias antes de consolidar."
     },
     {
       "id": "osm:node:1551803059",
@@ -185,10 +194,15 @@
         "lon": -6.1543487
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Calle Severo Ochoa, 23, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.repostario.es/?locality=CHICLANA+DE+LA+FRONTERA&province=C%C3%81DIZ",
+          "tipo": "directorio de estaciones con datos MITECO"
+        }
+      ],
+      "observaciones": "Coincidencia muy alta: nombre CLC y coordenadas corresponden a Gasolinera CLC de Calle Severo Ochoa, 23."
     },
     {
       "id": "osm:node:11760501639",
@@ -374,10 +388,19 @@
         "lon": -6.1750311
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Calle Boquerón, 3, 11139 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.hotelaromademar.com/contacto",
+          "tipo": "web oficial del hotel"
+        },
+        {
+          "url": "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/alojamiento/boutique-aroma-de-mar/",
+          "tipo": "ficha oficial de Turismo de Chiclana"
+        }
+      ],
+      "observaciones": "Dirección coincidente en la web del hotel y en Turismo de Chiclana; coordenadas compatibles con Sancti Petri/La Barrosa."
     },
     {
       "id": "osm:node:13505039301",
@@ -409,10 +432,15 @@
         "lon": -6.1579581
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Urbanización Loma de Sancti Petri, s/n, 11139 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://novoresort.com/contact-us",
+          "tipo": "web oficial Novo Resort"
+        }
+      ],
+      "observaciones": "La web oficial identifica Aparthotel Novo Resort en Urbanización Loma de Sancti Petri, s/n. El nombre del catálogo contiene errores tipográficos, pero el emplazamiento es compatible."
     },
     {
       "id": "osm:node:11392470354",
@@ -512,10 +540,15 @@
         "lon": -6.179273
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Centro Comercial La Boca, Calle La Boca de la Marea, planta baja, local 1, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.tripadvisor.es/Restaurant_Review-g187433-d23425704-Reviews-La_Famiglia_Se_Sienta_A_La_Mesa-Chiclana_de_la_Frontera_Costa_de_la_Luz_Province.html",
+          "tipo": "perfil del establecimiento con dirección"
+        }
+      ],
+      "observaciones": "La ficha OSM dice La Mafia se Sienta a La Mesa, pero la fuente localiza La Famiglia se Sienta a la Mesa en esta dirección. Probable diferencia de nombre/alias; mantener como propuesta y no asumir equivalencia sin revisión."
     },
     {
       "id": "osm:node:1964402167",
@@ -567,10 +600,15 @@
         "lon": -6.1433618
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Calle Jardines, 8, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.cylex.es/chiclana-de-la-frontera/salones-pico-de-oro-11357978.html",
+          "tipo": "directorio comercial"
+        }
+      ],
+      "observaciones": "Dirección publicada para Salones Pico de Oro; coordenadas compatibles con el centro urbano."
     },
     {
       "id": "osm:node:11390566729",
@@ -582,10 +620,15 @@
         "lon": -6.1791186
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Calle La Boca, 2, 11139 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://sibuyaurbansushibar.com/restaurantes/",
+          "tipo": "web oficial Sibuya"
+        }
+      ],
+      "observaciones": "Dirección publicada en el localizador oficial de Sibuya para Chiclana; coordenadas compatibles con el entorno de Calle La Boca."
     },
     {
       "id": "osm:node:13430860301",
@@ -597,10 +640,19 @@
         "lon": -6.1449832
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Avenida de los Descubrimientos, 107, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://www.just-eat.es/restaurants-taco-bell-las-salinas-11130/menu",
+          "tipo": "página de pedidos del establecimiento"
+        },
+        {
+          "url": "https://www.alimarket.es/restauracion/establecimiento/1059604-2026-2589717/TACO-BELL",
+          "tipo": "directorio sectorial de establecimientos"
+        }
+      ],
+      "observaciones": "Dos fuentes coinciden en Taco Bell Las Salinas, Avenida de los Descubrimientos 107; coordenadas compatibles con el punto OSM."
     },
     {
       "id": "osm:way:198640855",
@@ -667,10 +719,15 @@
         "lon": -6.1467845
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Carretera de Fuente Amarga, s/n, 11130 Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://ventaelflorin.es/",
+          "tipo": "web oficial Venta El Florín"
+        }
+      ],
+      "observaciones": "Dirección publicada en la web oficial; la ficha OSM se encuentra en el entorno de Fuente Amarga."
     },
     {
       "id": "osm:node:13136295701",
@@ -702,10 +759,15 @@
         "lon": -6.1478059
       },
       "direccion_actual": "",
-      "estado": "pendiente_investigacion",
-      "direccion_propuesta": "",
-      "fuentes": [],
-      "observaciones": ""
+      "estado": "propuesta_pendiente_revision",
+      "direccion_propuesta": "Centro Comercial Tartessus, Calle Madrid Bolívar, 15, Novo Sancti Petri, Chiclana de la Frontera, Cádiz",
+      "fuentes": [
+        {
+          "url": "https://cdn.juntadeandalucia.es/sites/default/files/inline-files/2024/06/LISTADO_SUPERMERCADOS_240627.pdf",
+          "tipo": "listado de supermercados de la Junta de Andalucía"
+        }
+      ],
+      "observaciones": "El listado autonómico recoge Carrefour en Chiclana con ubicación CC Tartessus / Madrid Bolívar 15. Las coordenadas del registro son compatibles con el área de Tartessus; confirmar denominación exacta de formato Market."
     },
     {
       "id": "osm:node:13501012501",
@@ -930,8 +992,9 @@
   ],
   "fecha_actualizacion": "2026-10-31",
   "resumen_investigacion": {
-    "fichas_con_propuesta": 24,
-    "fichas_sin_propuesta": 26,
-    "criterio": "Las direcciones son propuestas pendientes de revisión; no se han aplicado al catálogo maestro ni publicado."
+    "fichas_con_propuesta": 34,
+    "fichas_sin_propuesta": 16,
+    "criterio": "Las direcciones son propuestas pendientes de revisión; no se han aplicado al catálogo maestro ni publicado.",
+    "ultima_ampliacion": "Nuevas propuestas contrastadas con webs oficiales, Turismo municipal, Junta de Andalucía y directorios con dirección y coordenadas."
   }
 }
