@@ -1,0 +1,795 @@
+{
+  "version": 1,
+  "fecha_seleccion": "2026-10-31",
+  "objetivo": "Lote piloto de 50 fichas activas sin dirección postal. Solo propuestas documentadas; no modifica fichas_completas.json ni publica cambios.",
+  "total": 50,
+  "criterio": {
+    "principal": "Potencial de impacto económico, turístico, afluencia y uso público.",
+    "indicadores": "Capacidad/aforo/superficie, número de reseñas como proxy de visibilidad (no de afluencia real), presencia de cadenas o marcas de gran escala, actividad turística y servicios de uso frecuente.",
+    "cautela": "No se dispone de facturación, consumo energético ni visitas web por establecimiento; no se inventan valores. La selección es una hipótesis de priorización que se revisará con evidencia."
+  },
+  "distribucion": {
+    "Hotel": 7,
+    "Gasolinera": 14,
+    "Supermercado": 15,
+    "Restaurante": 14
+  },
+  "fuentes_consultadas": [
+    {
+      "url": "https://apalmet.es/gasolineras/municipio/Chiclana_de_la_Frontera",
+      "uso": "Directorio de estaciones y direcciones publicadas"
+    },
+    {
+      "url": "https://www.gasolimetro.es/provincias/cadiz/chiclana-de-la-frontera",
+      "uso": "Listado de estaciones, direcciones y actividad"
+    },
+    {
+      "url": "https://www.lidl.es/s/es-ES/tiendas/chiclana-de-la-frontera/",
+      "uso": "Localizador oficial de tiendas Lidl"
+    },
+    {
+      "url": "https://www.cashfresh.es/cash/chiclana/",
+      "uso": "Localizador oficial Cash Fresh"
+    },
+    {
+      "url": "https://www.supeco.es/tiendas/?id=2",
+      "uso": "Localizador oficial Supeco"
+    },
+    {
+      "url": "https://turismo.chiclana.es/detalle-de-recurso/atenas-playa-beachclub/",
+      "uso": "Ficha oficial de turismo de Atenas Playa"
+    }
+  ],
+  "items": [
+    {
+      "id": "osm:way:52495334",
+      "nombre": "Apartahotel Sancti Petri",
+      "categoria": "Hotel",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.3595981,
+        "lon": -6.1709382
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:way:52495333",
+      "nombre": "Aparthotel Las Dunas",
+      "categoria": "Hotel",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.3593635,
+        "lon": -6.1723254
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:way:38723161",
+      "nombre": "Club Aldiana Andalusien",
+      "categoria": "Hotel",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.3425733,
+        "lon": -6.1629106
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:3409527240",
+      "nombre": "Hostal El Jardín",
+      "categoria": "Hotel",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.3672793,
+        "lon": -6.1781258
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:way:1126945769",
+      "nombre": "Hotel Boutique Aroma de Mar",
+      "categoria": "Hotel",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.3619006,
+        "lon": -6.1750311
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:13505039301",
+      "nombre": "Hotel Marisma Sancti Petri",
+      "categoria": "Hotel",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.3875775,
+        "lon": -6.1850854
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:13541492396",
+      "nombre": "Novo Resort The Residence Luyury Apartaments",
+      "categoria": "Hotel",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.3347697,
+        "lon": -6.1579581
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:4262396011",
+      "nombre": "Ballenoil",
+      "categoria": "Gasolinera",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.3935068,
+        "lon": -6.169201
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:13482885001",
+      "nombre": "Ballenoil Chiclana de la Frontera III",
+      "categoria": "Gasolinera",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4107962,
+        "lon": -6.138889
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:1551803059",
+      "nombre": "BP",
+      "categoria": "Gasolinera",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.429357,
+        "lon": -6.1435447
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:way:923147962",
+      "nombre": "BP",
+      "categoria": "Gasolinera",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4160978,
+        "lon": -6.1336839
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:4119574389",
+      "nombre": "BP El Florín",
+      "categoria": "Gasolinera",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.3942927,
+        "lon": -6.1464597
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:way:1266038249",
+      "nombre": "Easy Fuel",
+      "categoria": "Gasolinera",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4311608,
+        "lon": -6.1415935
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:13524222888",
+      "nombre": "Galp",
+      "categoria": "Gasolinera",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4076279,
+        "lon": -6.1302389
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:way:1266038250",
+      "nombre": "Gasolinera CLC",
+      "categoria": "Gasolinera",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4266558,
+        "lon": -6.1543487
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:11760501639",
+      "nombre": "Gasolineras CLC",
+      "categoria": "Gasolinera",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4034841,
+        "lon": -6.1299675
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:way:1266038256",
+      "nombre": "Lavaoil",
+      "categoria": "Gasolinera",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4010247,
+        "lon": -6.1650657
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:287011532",
+      "nombre": "Moeve",
+      "categoria": "Gasolinera",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4267644,
+        "lon": -6.1438487
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:13484041201",
+      "nombre": "Q8 Gasolinera Chiclana",
+      "categoria": "Gasolinera",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.3941533,
+        "lon": -6.147409
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:2370430442",
+      "nombre": "Repsol",
+      "categoria": "Gasolinera",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.3811996,
+        "lon": -6.1157167
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:way:1266038245",
+      "nombre": "Repsol",
+      "categoria": "Gasolinera",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4419889,
+        "lon": -6.1432433
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:13136295701",
+      "nombre": "Carrefour Express",
+      "categoria": "Supermercado",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4231054,
+        "lon": -6.144578
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:2087473640",
+      "nombre": "Carrefour Market",
+      "categoria": "Supermercado",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.3398809,
+        "lon": -6.1478059
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:13501012501",
+      "nombre": "Cash Fresh",
+      "categoria": "Supermercado",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.3975518,
+        "lon": -6.168023
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:13136542504",
+      "nombre": "Cash García",
+      "categoria": "Supermercado",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4377573,
+        "lon": -6.1434533
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:13482887501",
+      "nombre": "Coviran",
+      "categoria": "Supermercado",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.3787586,
+        "lon": -6.1742855
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:11773434229",
+      "nombre": "El Jamón",
+      "categoria": "Supermercado",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4213623,
+        "lon": -6.15002
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:4119521789",
+      "nombre": "Lidl",
+      "categoria": "Supermercado",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.43104,
+        "lon": -6.1428613
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:way:188942786",
+      "nombre": "Lidl",
+      "categoria": "Supermercado",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4010181,
+        "lon": -6.1665912
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:1629949916",
+      "nombre": "Maxi Dia",
+      "categoria": "Supermercado",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4112827,
+        "lon": -6.1412952
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:678899431",
+      "nombre": "Mercadona",
+      "categoria": "Supermercado",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4211928,
+        "lon": -6.1536931
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:4119466790",
+      "nombre": "Mercadona",
+      "categoria": "Supermercado",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4302579,
+        "lon": -6.1419468
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:way:188942798",
+      "nombre": "Mercadona",
+      "categoria": "Supermercado",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.400428,
+        "lon": -6.1678194
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:4119521790",
+      "nombre": "Supeco",
+      "categoria": "Supermercado",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.4307908,
+        "lon": -6.1442158
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:way:51864419",
+      "nombre": "Supeco",
+      "categoria": "Supermercado",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.396406,
+        "lon": -6.169791
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:13507842602",
+      "nombre": "Supermercado Atlantida",
+      "categoria": "Supermercado",
+      "tipo": "negocio",
+      "coordenadas": {
+        "lat": 36.3765577,
+        "lon": -6.1872239
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:11392470354",
+      "nombre": "Atenas Playa",
+      "categoria": "Restaurante",
+      "tipo": "ocio",
+      "coordenadas": {
+        "lat": 36.3750207,
+        "lon": -6.1908029
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:6413239689",
+      "nombre": "Duna Beach Club",
+      "categoria": "Restaurante",
+      "tipo": "ocio",
+      "coordenadas": {
+        "lat": 36.3458584,
+        "lon": -6.1674667
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:13507888101",
+      "nombre": "El Chozo",
+      "categoria": "Restaurante",
+      "tipo": "ocio",
+      "coordenadas": {
+        "lat": 36.3526928,
+        "lon": -6.1609637
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:13430912301",
+      "nombre": "Foster's Hollywood",
+      "categoria": "Restaurante",
+      "tipo": "ocio",
+      "coordenadas": {
+        "lat": 36.3680441,
+        "lon": -6.178795
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:11390566730",
+      "nombre": "La Mafia se Sienta a La Mesa",
+      "categoria": "Restaurante",
+      "tipo": "ocio",
+      "coordenadas": {
+        "lat": 36.3694477,
+        "lon": -6.179273
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:1964402167",
+      "nombre": "Manguita",
+      "categoria": "Restaurante",
+      "tipo": "ocio",
+      "coordenadas": {
+        "lat": 36.4186477,
+        "lon": -6.1561189
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:11394810352",
+      "nombre": "Salina Santa Teresa",
+      "categoria": "Restaurante",
+      "tipo": "ocio",
+      "coordenadas": {
+        "lat": 36.3882709,
+        "lon": -6.1901692
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:way:428046298",
+      "nombre": "Salones Pico de Oro",
+      "categoria": "Restaurante",
+      "tipo": "ocio",
+      "coordenadas": {
+        "lat": 36.4194873,
+        "lon": -6.1433618
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:11390566729",
+      "nombre": "Sibuya Urban Sushi Bar",
+      "categoria": "Restaurante",
+      "tipo": "ocio",
+      "coordenadas": {
+        "lat": 36.369252,
+        "lon": -6.1791186
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:13430860301",
+      "nombre": "Taco Bell",
+      "categoria": "Restaurante",
+      "tipo": "ocio",
+      "coordenadas": {
+        "lat": 36.4305726,
+        "lon": -6.1449832
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:way:198640855",
+      "nombre": "tartessus buffet",
+      "categoria": "Restaurante",
+      "tipo": "ocio",
+      "coordenadas": {
+        "lat": 36.3404279,
+        "lon": -6.1489952
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:node:1951072736",
+      "nombre": "Venta Agustín",
+      "categoria": "Restaurante",
+      "tipo": "ocio",
+      "coordenadas": {
+        "lat": 36.4296828,
+        "lon": -6.1425772
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:way:53141044",
+      "nombre": "Venta Campano",
+      "categoria": "Restaurante",
+      "tipo": "ocio",
+      "coordenadas": {
+        "lat": 36.3784363,
+        "lon": -6.1152014
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    },
+    {
+      "id": "osm:way:475583129",
+      "nombre": "Venta El Florín",
+      "categoria": "Restaurante",
+      "tipo": "ocio",
+      "coordenadas": {
+        "lat": 36.3936173,
+        "lon": -6.1467845
+      },
+      "direccion_actual": "",
+      "estado": "pendiente_investigacion",
+      "direccion_propuesta": "",
+      "fuentes": [],
+      "observaciones": ""
+    }
+  ]
+}
