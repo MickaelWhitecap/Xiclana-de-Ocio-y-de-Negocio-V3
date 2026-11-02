@@ -109,8 +109,9 @@ def main():
 
     ordered = [collected[k] for k in sorted(collected)]
     raw = json.dumps(ordered, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-    with gzip.open(SNAPSHOT, "wb", compresslevel=9, mtime=0) as stream:
-        stream.write(raw)
+    with SNAPSHOT.open("wb") as target:
+        with gzip.GzipFile(fileobj=target, mode="wb", compresslevel=9, mtime=0) as stream:
+            stream.write(raw)
     digest = hashlib.sha256(SNAPSHOT.read_bytes()).hexdigest()
 
     report = {
