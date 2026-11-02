@@ -23,10 +23,12 @@ jobs:
           python-version: "3.12"
       - name: Descargar todos los objetos y etiquetas del municipio
         run: python v3/extraccion_inicial_osm.py
-      - name: Guardar extracción e informe
+      - name: Guardar extracción en el catálogo maestro
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v3/osm_extraccion_inicial.json.gz v3/informe_extraccion_osm.json
-          git commit -m "Guardar extracción inicial completa de OpenStreetMap"
-          git push
+          git add v3/fichas_completas.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Incorporar extracción inicial OSM al catálogo maestro"
+            git push
+          fi
