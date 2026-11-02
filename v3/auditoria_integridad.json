@@ -17,21 +17,21 @@
     ],
     "distribucion": {
       "4": 6,
-      "5": 7,
-      "6": 528,
-      "7": 277,
-      "8": 67,
+      "5": 6,
+      "6": 526,
+      "7": 276,
+      "8": 69,
       "9": 71,
-      "10": 40,
+      "10": 41,
       "11": 19,
       "12": 12
     },
-    "fichas_con_algun_medio_de_contacto": 248,
+    "fichas_con_algun_medio_de_contacto": 251,
     "fichas_con_email": 124
   },
   "total_registros_historicos": 1302,
-  "total_items_publicables": 1027,
-  "total_items_marcados_borrados": 275,
+  "total_items_publicables": 1026,
+  "total_items_marcados_borrados": 276,
   "total_candidatas_revision": 2,
   "candidatos_automaticos_heredados_en_items": 0,
   "ids_automaticos_heredados": [],
@@ -39,7 +39,7 @@
   "registros_invalidos_o_ids_repetidos": [],
   "fichas_sin_nombre_categoria_o_tipo_valido": [],
   "calidad_de_campos_opcionales": {
-    "fichas_sin_direccion": 556,
+    "fichas_sin_direccion": 554,
     "correos_invalidos": [],
     "urls_colocadas_en_campo_email": [],
     "telefonos_sospechosos": [],
@@ -48,8 +48,8 @@
     "nota": "Control informativo: no modifica fichas ni bloquea la publicación por campos opcionales."
   },
   "direcciones_pendientes": {
-    "total_sin_direccion": 556,
-    "con_coordenadas_validas": 549,
+    "total_sin_direccion": 554,
+    "con_coordenadas_validas": 547,
     "sin_coordenadas_validas": 7,
     "distribucion_por_tipo_y_categoria": [
       {
@@ -97,8 +97,8 @@
       {
         "tipo": "negocio",
         "categoria": "Supermercado",
-        "total": 20,
-        "con_coordenadas": 20,
+        "total": 19,
+        "con_coordenadas": 19,
         "sin_coordenadas": 0
       },
       {
@@ -144,17 +144,17 @@
         "sin_coordenadas": 0
       },
       {
-        "tipo": "negocio",
-        "categoria": "Oficina",
+        "tipo": "ocio",
+        "categoria": "Mirador",
         "total": 10,
         "con_coordenadas": 10,
         "sin_coordenadas": 0
       },
       {
-        "tipo": "ocio",
-        "categoria": "Mirador",
-        "total": 10,
-        "con_coordenadas": 10,
+        "tipo": "negocio",
+        "categoria": "Oficina",
+        "total": 9,
+        "con_coordenadas": 9,
         "sin_coordenadas": 0
       },
       {
