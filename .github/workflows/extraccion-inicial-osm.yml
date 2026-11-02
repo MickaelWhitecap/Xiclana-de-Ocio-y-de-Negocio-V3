@@ -1,0 +1,32 @@
+name: Extraccion inicial completa de OpenStreetMap
+
+on:
+  push:
+    paths:
+      - "v3/extraccion_inicial_osm.py"
+      - ".github/workflows/extraccion-inicial-osm.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extraer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Descargar todos los objetos y etiquetas del municipio
+        run: python v3/extraccion_inicial_osm.py
+      - name: Guardar extracción e informe
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v3/osm_extraccion_inicial.json.gz v3/informe_extraccion_osm.json
+          git commit -m "Guardar extracción inicial completa de OpenStreetMap"
+          git push
