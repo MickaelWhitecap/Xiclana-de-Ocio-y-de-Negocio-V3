@@ -1,0 +1,69 @@
+name: Auditoría municipal completa de OpenStreetMap
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/auditoria-osm-municipal.yml"
+      - "v3/auditar_osm_municipal.py"
+
+permissions:
+  contents: read
+
+jobs:
+  extraccion-y-cruce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Extraer todos los elementos OSM y cruzar con catálogo maestro
+        run: python v3/auditar_osm_municipal.py
+
+      - name: Publicar resumen de auditoría
+        if: always()
+        run: |
+          if [ -f v3/osm_chiclana_cruce_catalogo.json ]; then
+            python - <<'PY'
+          import json
+          d=json.load(open("v3/osm_chiclana_cruce_catalogo.json", encoding="utf-8"))
+          e=d["extraccion"]; c=d["cruce"]
+          lines=[
+            "## Auditoría municipal OSM — Chiclana",
+            f"- Elementos recuperados: **{e['total_elementos']}**",
+            f"- Nodos / vías / relaciones: **{e['por_tipo']}**",
+            f"- Elementos con etiquetas: **{e['elementos_con_etiquetas']}**",
+            f"- Elementos con nombre: **{e['elementos_con_nombre']}**",
+            f"- Elementos con geometría: **{e['elementos_con_geometria_completa']}**",
+            f"- Coincidencias por ID: **{c['coincidencia_por_id_osm']}**",
+            f"- Coincidencias nombre + coordenadas: **{c['coincidencia_nombre_y_coordenadas_150m']}**",
+            f"- Coincidencias solo por nombre (sin confirmar): **{c['coincidencia_nombre_sin_confirmacion_espacial']}**",
+            f"- Posibles fichas nuevas sin incorporar: **{c['elementos_osm_con_nombre_sin_ficha_candidata']}**",
+            "",
+            "La extracción y el cruce no modifican ni publican fichas del catálogo maestro."
+          ]
+          open(__import__("os").environ["GITHUB_STEP_SUMMARY"],"w",encoding="utf-8").write("\n".join(lines))
+          PY
+          else
+            echo "## Auditoría OSM no completada" >> "$GITHUB_STEP_SUMMARY"
+            echo "No se generó el informe. Consultar los registros de Overpass." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Guardar extracción completa e informe
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auditoria-osm-chiclana-${{ github.run_id }}
+          path: |
+            v3/osm_chiclana_extraccion_completa.json
+            v3/osm_chiclana_cruce_catalogo.json
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 90
