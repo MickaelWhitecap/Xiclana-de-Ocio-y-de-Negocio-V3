@@ -17,14 +17,18 @@ jobs:
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Consultar etiquetas de dirección de OpenStreetMap
         run: python v3/recuperar_direcciones_osm.py
-      - name: Guardar informe de propuestas sin publicar cambios en fichas
+      - name: Guardar propuestas dentro del catálogo maestro
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v3/propuestas_direcciones_osm.json
+          git add v3/fichas_completas.json
           if ! git diff --cached --quiet; then
-            git commit -m "Generar propuestas de direcciones desde OpenStreetMap"
+            git commit -m "Incorporar propuestas de direcciones OSM al catálogo maestro"
             git push
           fi
