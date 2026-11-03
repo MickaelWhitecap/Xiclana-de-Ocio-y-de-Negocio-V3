@@ -4,11 +4,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "30 4 * * 1"
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/auditoria-osm-municipal.yml"
-      - "v3/auditar_osm_municipal.py"
 
 permissions:
   contents: read
