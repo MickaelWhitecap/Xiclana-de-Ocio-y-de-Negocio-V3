@@ -1,5 +1,9 @@
-name: Copia de seguridad cifrada de Supabase
+name: Copia de seguridad cifrada de Supabase y Xiclana V3
+
 on:
+  push:
+    paths:
+      - ".github/workflows/backup-supabase.yml"
   workflow_dispatch:
   schedule:
     - cron: "30 3 * * *"
@@ -10,6 +14,21 @@ permissions:
 jobs:
   backup:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: restore_test_password
+          POSTGRES_DB: xiclana_restore_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d xiclana_restore_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - name: Comprobar secretos necesarios
         env:
@@ -21,14 +40,14 @@ jobs:
             exit 1
           fi
 
-      - name: Descargar el repositorio para incluir el catálogo
+      - name: Descargar el repositorio para incluir el catálogo y el código
         uses: actions/checkout@v4
 
       - uses: supabase/setup-cli@v1
         with:
           version: latest
 
-      - name: Exportar esquema, roles, datos y comprobar catálogo
+      - name: Exportar esquema, roles y datos de Supabase
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
@@ -37,24 +56,132 @@ jobs:
           supabase db dump --db-url "$SUPABASE_DB_URL" -f schema.sql
           supabase db dump --db-url "$SUPABASE_DB_URL" -f roles.sql --role-only
           supabase db dump --db-url "$SUPABASE_DB_URL" -f data.sql --use-copy --data-only
+          git archive --format=zip --output=xiclana-v3-source.zip HEAD
+          test -s xiclana-v3-source.zip
 
-      - name: Cifrar las copias y eliminar los ficheros sin cifrar
+      - name: Comprimir el catálogo y cifrar todas las copias
         env:
           BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
         run: |
           set -euo pipefail
+          gzip -9 -c v3/fichas_completas.json > fichas_completas.json.gz
           for file in schema.sql roles.sql data.sql; do
             openssl enc -aes-256-cbc -salt -pbkdf2 -iter 600000 \
               -in "$file" -out "$file.enc" -pass env:BACKUP_PASSPHRASE
           done
           openssl enc -aes-256-cbc -salt -pbkdf2 -iter 600000 \
-            -in v3/fichas_completas.json -out fichas_completas.json.enc \
+            -in fichas_completas.json.gz -out fichas_completas.json.gz.enc \
             -pass env:BACKUP_PASSPHRASE
-          rm -f schema.sql roles.sql data.sql v3/fichas_completas.json
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 600000 \
+            -in xiclana-v3-source.zip -out xiclana-v3-source.zip.enc \
+            -pass env:BACKUP_PASSPHRASE
+          rm -f schema.sql roles.sql data.sql fichas_completas.json.gz xiclana-v3-source.zip v3/fichas_completas.json
           test -s schema.sql.enc
           test -s roles.sql.enc
           test -s data.sql.enc
-          test -s fichas_completas.json.enc
+          test -s fichas_completas.json.gz.enc
+          test -s xiclana-v3-source.zip.enc
+
+      - name: Restaurar la copia cifrada en PostgreSQL temporal y verificarla
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+          RESTORE_DATABASE_URL: postgresql://postgres:restore_test_password@localhost:5432/xiclana_restore_test
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/xiclana-restore
+          for file in schema.sql roles.sql data.sql; do
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
+              -in "$file.enc" -out "/tmp/xiclana-restore/$file" \
+              -pass env:BACKUP_PASSPHRASE
+          done
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
+            -in fichas_completas.json.gz.enc \
+            -out /tmp/xiclana-restore/fichas_completas.json.gz \
+            -pass env:BACKUP_PASSPHRASE
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
+            -in xiclana-v3-source.zip.enc \
+            -out /tmp/xiclana-restore/xiclana-v3-source.zip \
+            -pass env:BACKUP_PASSPHRASE
+          gzip -t /tmp/xiclana-restore/fichas_completas.json.gz
+          unzip -t /tmp/xiclana-restore/xiclana-v3-source.zip
+          python - <<'PY'
+          import gzip, json
+          with gzip.open("/tmp/xiclana-restore/fichas_completas.json.gz", "rt", encoding="utf-8") as f:
+              catalog=json.load(f)
+          items=catalog.get("items")
+          if not isinstance(items,list):
+              raise SystemExit("El catálogo descifrado no contiene items.")
+          osm=catalog.get("osm_extraccion_inicial",{}).get("objetos",[])
+          if len(osm)!=132875:
+              raise SystemExit(f"La extracción OSM del catálogo no coincide con la referencia: {len(osm)}")
+          print(f"Catálogo descifrado y validado: {len(items)} fichas históricas y {len(osm)} objetos OSM.")
+          PY
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql-client
+          fi
+          until pg_isready -h localhost -p 5432 -U postgres -d xiclana_restore_test; do sleep 2; done
+          docker exec "$POSTGRES_CONTAINER" bash -lc 'if [ ! -f /usr/share/postgresql/17/extension/uuid-ossp.control ]; then apt-get update && apt-get install -y postgresql-contrib-17; fi'
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          p=Path("/tmp/xiclana-restore/schema.sql")
+          sql=p.read_text(encoding="utf-8")
+          # El volcado puede incluir esquemas ya creados por el entorno de prueba.
+          sql=re.sub(r'(?im)^(\s*CREATE\s+SCHEMA\s+)(?!IF\s+NOT\s+EXISTS)([A-Za-z_][A-Za-z0-9_$]*)(\s*;)', r'\1IF NOT EXISTS \2\3', sql)
+          # Son extensiones gestionadas por Supabase y no necesarias para las cuatro tablas propias de Xiclana.
+          sql=re.sub(r'(?im)^\s*CREATE\s+EXTENSION(?:\s+IF\s+NOT\s+EXISTS)?\s+"?(?:supabase_vault|pg_stat_statements)"?[^;]*;\s*$', '', sql)
+          p.with_name("schema_restore.sql").write_text(sql, encoding="utf-8")
+          PY
+          psql "$RESTORE_DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE SCHEMA IF NOT EXISTS auth;
+          CREATE SCHEMA IF NOT EXISTS extensions;
+          CREATE SCHEMA IF NOT EXISTS vault;
+          CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT NULL::uuid $$;
+          CREATE OR REPLACE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS $$ SELECT NULL::text $$;
+          CREATE OR REPLACE FUNCTION auth.jwt() RETURNS jsonb LANGUAGE sql STABLE AS $$ SELECT NULL::jsonb $$;
+          SQL
+          psql "$RESTORE_DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/xiclana-restore/roles.sql
+          psql "$RESTORE_DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/xiclana-restore/schema_restore.sql
+          psql "$RESTORE_DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/xiclana-restore/data.sql
+          python - <<'PY'
+          import re, subprocess, os
+          url=os.environ["RESTORE_DATABASE_URL"]
+          data=open("/tmp/xiclana-restore/data.sql",encoding="utf-8").read().splitlines()
+          expected={}
+          current=None
+          for line in data:
+              if current:
+                  if line.strip()==r"\.":
+                      current=None
+                  else:
+                      expected[current]=expected.get(current,0)+1
+                  continue
+              match=re.match(r"^COPY\s+([^\s(]+)",line)
+              if match:
+                  current=match.group(1)
+          if current:
+              raise SystemExit("El volcado de datos contiene un bloque COPY sin terminador.")
+          tables=subprocess.check_output(
+              ["psql",url,"-At","-c","SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename"],
+              text=True
+          ).splitlines()
+          actual={}
+          for table in tables:
+              count=subprocess.check_output(
+                  ["psql",url,"-At","-c",f'SELECT count(*) FROM public."{table}"'],
+                  text=True
+              ).strip()
+              actual["public."+table]=int(count)
+          for table,count in expected.items():
+              if actual.get(table)!=count:
+                  raise SystemExit(f"Restauración incompleta en {table}: esperado={count}, restaurado={actual.get(table)}")
+          required={"public.advertising_slots","public.listing_categories","public.listing_overrides","public.listing_proposals"}
+          if not required.issubset(actual):
+              raise SystemExit(f"Faltan tablas de Xiclana: {sorted(required-set(actual))}")
+          print("Restauración aislada verificada:",actual)
+          PY
 
       - name: Guardar copia cifrada durante 30 días
         uses: actions/upload-artifact@v4
@@ -64,6 +191,8 @@ jobs:
             schema.sql.enc
             roles.sql.enc
             data.sql.enc
-            fichas_completas.json.enc
+            fichas_completas.json.gz.enc
+            xiclana-v3-source.zip.enc
           if-no-files-found: error
+          compression-level: 6
           retention-days: 30
