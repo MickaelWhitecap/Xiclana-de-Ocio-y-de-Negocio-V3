@@ -1,10 +1,6 @@
 name: Extraccion inicial completa de OpenStreetMap
 
 on:
-  push:
-    paths:
-      - "v3/extraccion_inicial_osm.py"
-      - ".github/workflows/extraccion-inicial-osm.yml"
   workflow_dispatch:
 
 permissions:
