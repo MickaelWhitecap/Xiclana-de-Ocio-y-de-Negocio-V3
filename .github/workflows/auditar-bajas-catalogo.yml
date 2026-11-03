@@ -1,0 +1,36 @@
+name: Auditoría de bajas del catálogo maestro
+
+on:
+  push:
+    paths:
+      - ".github/workflows/auditar-bajas-catalogo.yml"
+      - "v3/auditar_bajas_catalogo.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: xiclana-auditoria-bajas
+  cancel-in-progress: false
+
+jobs:
+  auditar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Auditar las fichas marcadas como borradas
+        run: python v3/auditar_bajas_catalogo.py
+      - name: Guardar informe de auditoría
+        uses: actions/upload-artifact@v4
+        with:
+          name: auditoria-bajas-catalogo-${{ github.run_id }}
+          path: v3/auditoria_bajas_catalogo.json
+          if-no-files-found: error
+          retention-days: 90
