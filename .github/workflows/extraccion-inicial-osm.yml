@@ -10,6 +10,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: xiclana-catalogo-maestro
+  cancel-in-progress: false
+
 jobs:
   extraer:
     runs-on: ubuntu-latest
@@ -30,5 +34,6 @@ jobs:
           git add v3/fichas_completas.json
           if ! git diff --cached --quiet; then
             git commit -m "Incorporar extracción inicial OSM al catálogo maestro"
-            git push
+            git pull --rebase origin main
+            git push origin HEAD:main
           fi
