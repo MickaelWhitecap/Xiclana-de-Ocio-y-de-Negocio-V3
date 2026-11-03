@@ -202,7 +202,7 @@ jobs:
           print("Restauración aislada verificada; filas por tabla:",actual)
           PY
 
-      - name: Guardar copia cifrada durante 30 días
+      - name: Guardar copia cifrada durante 14 días
         if: always() && steps.encrypt_backup.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
