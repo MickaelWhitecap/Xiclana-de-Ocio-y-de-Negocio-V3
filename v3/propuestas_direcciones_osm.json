@@ -1,94 +1,2798 @@
 {
-  "fecha_consulta_utc": "2026-10-31T07:03:57.504633+00:00",
-  "fuente": "OpenStreetMap / Overpass API",
-  "metodo": "Consulta de etiquetas de objetos OSM ya identificados; sin geocodificación inversa.",
-  "total_fichas_sin_direccion": 839,
-  "objetos_osm_identificados": 826,
-  "objetos_osm_recuperados": 826,
-  "objetos_con_etiquetas_postales": 1,
-  "propuestas_con_direccion_formateable": 1,
+  "fecha_generacion_utc": "2026-11-03T20:00:13.127973+00:00",
+  "fuente": "OpenStreetMap / extracción municipal actual",
+  "catalogo_maestro": "v3/fichas_completas.json",
+  "extraccion_utc": "2026-11-03T20:00:00Z",
+  "regla": "Solo fichas activas sin dirección y con coincidencia exacta por ID OSM. No se modifica el catálogo ni se publica nada.",
+  "resumen": {
+    "fichas_activas": 1026,
+    "fichas_activas_sin_direccion": 554,
+    "sin_direccion_con_id_osm": 541,
+    "sin_direccion_sin_id_osm": 13,
+    "id_osm_no_encontrado_en_extraccion": 0,
+    "sin_etiquetas_postales_utilizables": 540,
+    "propuestas_direccion_generadas": 1,
+    "direcciones_existentes_sobrescritas": 0,
+    "fichas_publicadas_automaticamente": 0
+  },
   "propuestas": [
     {
-      "id": "osm:node:11392541157",
+      "id_ficha": "osm:node:11392541157",
       "nombre": "Vidapadre",
       "categoria": "Restaurante",
       "tipo": "ocio",
-      "direccion_propuesta": "Carretera de la Barrosa, CP 11139",
+      "direccion_actual": null,
+      "direccion_propuesta": "Carretera de la Barrosa, 11139",
+      "confianza": "media",
+      "osm_id": "node:11392541157",
+      "osm_nombre": "Vida Padre",
+      "campos_osm_utilizados": [
+        "addr:street",
+        "addr:postcode"
+      ],
       "etiquetas_direccion_osm": {
-        "addr:street": "Carretera de la Barrosa",
-        "addr:postcode": "11139"
+        "addr:postcode": "11139",
+        "addr:street": "Carretera de la Barrosa"
       },
-      "url_objeto_osm": "https://www.openstreetmap.org/node/11392541157",
-      "estado": "propuesta_pendiente_revision"
+      "url_osm": "https://www.openstreetmap.org/node/11392541157",
+      "estado": "pendiente_revision_manual"
     }
   ],
-  "fichas_sin_id_osm_consultable": [
+  "sin_etiquetas_postales_utilizables": [
     {
-      "id": "oficial:80eae20f98c7c986c7f6",
-      "nombre": "Charter Alcántara",
-      "categoria": "Náutica"
+      "id_ficha": "osm:node:1837893282",
+      "nombre": "5Mentarios",
+      "osm_id": "node:1837893282"
     },
     {
-      "id": "oficial:c117f8ec50ba25bad082",
-      "nombre": "Ermita de Santa Ana",
-      "categoria": "Patrimonio"
+      "id_ficha": "osm:node:4261170702",
+      "nombre": "A. Morales",
+      "osm_id": "node:4261170702"
     },
     {
-      "id": "oficial:94abed2977cbdf584917",
-      "nombre": "Multicines las Salinas",
-      "categoria": "Cultura"
+      "id_ficha": "osm:node:13136506504",
+      "nombre": "Administración de loterías N°3 El Pájaro",
+      "osm_id": "node:13136506504"
     },
     {
-      "id": "oficial:69c0d1be602b8dfca6b3",
-      "nombre": "Puerto Deportivo \"Sancti Petri\"",
-      "categoria": "Instalación deportiva"
+      "id_ficha": "osm:node:13505492101",
+      "nombre": "Administración EPPA",
+      "osm_id": "node:13505492101"
     },
     {
-      "id": "turismo:1bcc1232f85408378a15",
-      "nombre": "Ruta cultural: Casas Monumentales",
-      "categoria": "Ruta cultural"
+      "id_ficha": "osm:node:13520510201",
+      "nombre": "Agencia Generali Seguros",
+      "osm_id": "node:13520510201"
     },
     {
-      "id": "turismo:b78e3e749fb643f1e02b",
-      "nombre": "Ruta cultural: Centro histórico",
-      "categoria": "Ruta cultural"
+      "id_ficha": "osm:node:13482836901",
+      "nombre": "AGUA Y JABÓN",
+      "osm_id": "node:13482836901"
     },
     {
-      "id": "turismo:05650520a7f6fdab4319",
-      "nombre": "Ruta cultural: Chiclana, de Origen Fenicio",
-      "categoria": "Ruta cultural"
+      "id_ficha": "osm:node:4261289189",
+      "nombre": "Agustín Benítez",
+      "osm_id": "node:4261289189"
     },
     {
-      "id": "turismo:79c460daf4896253a637",
-      "nombre": "Ruta cultural: Chiclana, Ruta Napoleónica",
-      "categoria": "Ruta cultural"
+      "id_ficha": "osm:way:184500436",
+      "nombre": "Alameda del Río",
+      "osm_id": "way:184500436"
     },
     {
-      "id": "turismo:e1c15f3d5dd4aad64f61",
-      "nombre": "Ruta cultural: Romántica",
-      "categoria": "Ruta cultural"
+      "id_ficha": "osm:node:2791751958",
+      "nombre": "Alameda Solano",
+      "osm_id": "node:2791751958"
     },
     {
-      "id": "turismo:dbe4dd9256466355b24c",
-      "nombre": "Ruta cultural: Río Iro",
-      "categoria": "Ruta cultural"
+      "id_ficha": "osm:node:13505492401",
+      "nombre": "ALBARCO.COM (Sancti-Petri)",
+      "osm_id": "node:13505492401"
     },
     {
-      "id": "oficial:9427c992514c37fb8222",
-      "nombre": "Urgencias",
-      "categoria": "Servicio público"
+      "id_ficha": "osm:node:13495201801",
+      "nombre": "Albitana - rent a car",
+      "osm_id": "node:13495201801"
     },
     {
-      "id": "oficial:81e45eab4a9f35e54e02",
-      "nombre": "Valentin Sancti Petri Spa",
-      "categoria": "Balneario y spa"
+      "id_ficha": "osm:node:2093826395",
+      "nombre": "Alex Piñero",
+      "osm_id": "node:2093826395"
     },
     {
-      "id": "oficial:5eb71868a9d4c10c1bfa",
-      "nombre": "Waterman School",
-      "categoria": "Náutica"
+      "id_ficha": "osm:node:4261091892",
+      "nombre": "Alonso",
+      "osm_id": "node:4261091892"
+    },
+    {
+      "id_ficha": "osm:way:672882657",
+      "nombre": "Aluminios JM",
+      "osm_id": "way:672882657"
+    },
+    {
+      "id_ficha": "osm:node:13520510402",
+      "nombre": "Animalia centro veterenario",
+      "osm_id": "node:13520510402"
+    },
+    {
+      "id_ficha": "osm:node:13471028901",
+      "nombre": "Anticuario",
+      "osm_id": "node:13471028901"
+    },
+    {
+      "id_ficha": "osm:node:13504811801",
+      "nombre": "Antonio Paradela e Hijos, SL. (Pelagatos)",
+      "osm_id": "node:13504811801"
+    },
+    {
+      "id_ficha": "osm:node:1656256247",
+      "nombre": "Antonio Vinagre",
+      "osm_id": "node:1656256247"
+    },
+    {
+      "id_ficha": "osm:way:52495334",
+      "nombre": "Apartahotel Sancti Petri",
+      "osm_id": "way:52495334"
+    },
+    {
+      "id_ficha": "osm:node:13520527001",
+      "nombre": "AQUAGADI",
+      "osm_id": "node:13520527001"
+    },
+    {
+      "id_ficha": "osm:node:13888202351",
+      "nombre": "Arena Bay Club de mar",
+      "osm_id": "node:13888202351"
+    },
+    {
+      "id_ficha": "osm:node:13500903501",
+      "nombre": "Aromas",
+      "osm_id": "node:13500903501"
+    },
+    {
+      "id_ficha": "osm:way:184182532",
+      "nombre": "Arquillo del Reloj",
+      "osm_id": "way:184182532"
+    },
+    {
+      "id_ficha": "osm:node:4261228201",
+      "nombre": "Artemisa",
+      "osm_id": "node:4261228201"
+    },
+    {
+      "id_ficha": "osm:node:4363998601",
+      "nombre": "asador de pollo la lonja",
+      "osm_id": "node:4363998601"
+    },
+    {
+      "id_ficha": "osm:node:13500852901",
+      "nombre": "Asociación española contra el cáncer",
+      "osm_id": "node:13500852901"
+    },
+    {
+      "id_ficha": "osm:node:13289336569",
+      "nombre": "Atelier Silver Lounge",
+      "osm_id": "node:13289336569"
+    },
+    {
+      "id_ficha": "osm:way:184500437",
+      "nombre": "Auditorio alameda del rio",
+      "osm_id": "way:184500437"
+    },
+    {
+      "id_ficha": "osm:node:13626757601",
+      "nombre": "Autoescuela Kike",
+      "osm_id": "node:13626757601"
+    },
+    {
+      "id_ficha": "osm:node:13520512301",
+      "nombre": "Autoescuela Los Gallos",
+      "osm_id": "node:13520512301"
+    },
+    {
+      "id_ficha": "osm:node:10316703956",
+      "nombre": "Autoescuela Miguel",
+      "osm_id": "node:10316703956"
+    },
+    {
+      "id_ficha": "osm:node:1659253170",
+      "nombre": "Automotor Chiclana",
+      "osm_id": "node:1659253170"
+    },
+    {
+      "id_ficha": "osm:node:11392548922",
+      "nombre": "Autoreparaciones José Colchón",
+      "osm_id": "node:11392548922"
+    },
+    {
+      "id_ficha": "osm:node:1569439570",
+      "nombre": "Autos Avila",
+      "osm_id": "node:1569439570"
+    },
+    {
+      "id_ficha": "osm:node:13507855601",
+      "nombre": "Autoservicio",
+      "osm_id": "node:13507855601"
+    },
+    {
+      "id_ficha": "osm:node:8488676580",
+      "nombre": "Autoservicio Sorpresa",
+      "osm_id": "node:8488676580"
+    },
+    {
+      "id_ficha": "osm:node:1582580340",
+      "nombre": "Avila Fornell",
+      "osm_id": "node:1582580340"
+    },
+    {
+      "id_ficha": "osm:node:10797296019",
+      "nombre": "Avis",
+      "osm_id": "node:10797296019"
+    },
+    {
+      "id_ficha": "osm:node:4355444895",
+      "nombre": "B&B",
+      "osm_id": "node:4355444895"
+    },
+    {
+      "id_ficha": "osm:node:1616831335",
+      "nombre": "Banca Cívica - Cajasol",
+      "osm_id": "node:1616831335"
+    },
+    {
+      "id_ficha": "osm:node:1616831295",
+      "nombre": "Banco de Andalucía",
+      "osm_id": "node:1616831295"
+    },
+    {
+      "id_ficha": "osm:node:4261091895",
+      "nombre": "Banco Sabadell",
+      "osm_id": "node:4261091895"
+    },
+    {
+      "id_ficha": "osm:node:1616831297",
+      "nombre": "Banco Santander",
+      "osm_id": "node:1616831297"
+    },
+    {
+      "id_ficha": "osm:node:1616831314",
+      "nombre": "Bankinter",
+      "osm_id": "node:1616831314"
+    },
+    {
+      "id_ficha": "osm:node:4715573177",
+      "nombre": "Bar Casa Nacho",
+      "osm_id": "node:4715573177"
+    },
+    {
+      "id_ficha": "osm:node:13504980301",
+      "nombre": "Bar Flotante",
+      "osm_id": "node:13504980301"
+    },
+    {
+      "id_ficha": "osm:node:1569346370",
+      "nombre": "Bar Güiti",
+      "osm_id": "node:1569346370"
+    },
+    {
+      "id_ficha": "osm:node:1607577431",
+      "nombre": "Bar La Florida",
+      "osm_id": "node:1607577431"
+    },
+    {
+      "id_ficha": "osm:node:1569346408",
+      "nombre": "Bar La Libertad - Casa Toñi",
+      "osm_id": "node:1569346408"
+    },
+    {
+      "id_ficha": "osm:node:12065860576",
+      "nombre": "Bar Las Torres",
+      "osm_id": "node:12065860576"
+    },
+    {
+      "id_ficha": "osm:node:1704494717",
+      "nombre": "Bar Los Cazadores",
+      "osm_id": "node:1704494717"
+    },
+    {
+      "id_ficha": "osm:node:2406660996",
+      "nombre": "Bar Mi Bar",
+      "osm_id": "node:2406660996"
+    },
+    {
+      "id_ficha": "osm:node:1871081790",
+      "nombre": "Bar Patita",
+      "osm_id": "node:1871081790"
+    },
+    {
+      "id_ficha": "osm:node:4722400879",
+      "nombre": "Bar Poblaó",
+      "osm_id": "node:4722400879"
+    },
+    {
+      "id_ficha": "osm:node:1569346357",
+      "nombre": "Bar Richard",
+      "osm_id": "node:1569346357"
+    },
+    {
+      "id_ficha": "osm:node:1607592745",
+      "nombre": "Bar Tajo",
+      "osm_id": "node:1607592745"
+    },
+    {
+      "id_ficha": "osm:node:9734740591",
+      "nombre": "Bar-Bodega La Cooperativa",
+      "osm_id": "node:9734740591"
+    },
+    {
+      "id_ficha": "osm:node:4257163692",
+      "nombre": "Barbadillo",
+      "osm_id": "node:4257163692"
+    },
+    {
+      "id_ficha": "osm:node:13136295401",
+      "nombre": "Barbería",
+      "osm_id": "node:13136295401"
+    },
+    {
+      "id_ficha": "osm:way:425377849",
+      "nombre": "Barco Pirata",
+      "osm_id": "way:425377849"
+    },
+    {
+      "id_ficha": "osm:node:1616831320",
+      "nombre": "BBVA",
+      "osm_id": "node:1616831320"
+    },
+    {
+      "id_ficha": "osm:node:4715544894",
+      "nombre": "BBVA",
+      "osm_id": "node:4715544894"
+    },
+    {
+      "id_ficha": "osm:node:13484573702",
+      "nombre": "Biblioteca Libre",
+      "osm_id": "node:13484573702"
+    },
+    {
+      "id_ficha": "osm:node:1569346415",
+      "nombre": "Bodega Antonio Muñoz",
+      "osm_id": "node:1569346415"
+    },
+    {
+      "id_ficha": "osm:node:1551821218",
+      "nombre": "Bodega El Carretero",
+      "osm_id": "node:1551821218"
+    },
+    {
+      "id_ficha": "osm:way:53188753",
+      "nombre": "Bodega Santuario",
+      "osm_id": "way:53188753"
+    },
+    {
+      "id_ficha": "osm:node:13504976801",
+      "nombre": "BODEGUITA ALALBA RESTAURANTE",
+      "osm_id": "node:13504976801"
+    },
+    {
+      "id_ficha": "osm:node:4261091993",
+      "nombre": "Borabora shoes",
+      "osm_id": "node:4261091993"
+    },
+    {
+      "id_ficha": "osm:node:1551803059",
+      "nombre": "BP",
+      "osm_id": "node:1551803059"
+    },
+    {
+      "id_ficha": "osm:node:13484021101",
+      "nombre": "BP",
+      "osm_id": "node:13484021101"
+    },
+    {
+      "id_ficha": "osm:way:923147962",
+      "nombre": "BP",
+      "osm_id": "way:923147962"
+    },
+    {
+      "id_ficha": "osm:way:699223280",
+      "nombre": "Bubble Burguer",
+      "osm_id": "way:699223280"
+    },
+    {
+      "id_ficha": "osm:node:13484859101",
+      "nombre": "Bubble Markt Deutsche Produkte",
+      "osm_id": "node:13484859101"
+    },
+    {
+      "id_ficha": "osm:node:2430964867",
+      "nombre": "Burger King",
+      "osm_id": "node:2430964867"
+    },
+    {
+      "id_ficha": "osm:node:13484023501",
+      "nombre": "Burger King",
+      "osm_id": "node:13484023501"
+    },
+    {
+      "id_ficha": "osm:node:13458138101",
+      "nombre": "Burguer King",
+      "osm_id": "node:13458138101"
+    },
+    {
+      "id_ficha": "osm:node:4261231390",
+      "nombre": "C&E",
+      "osm_id": "node:4261231390"
+    },
+    {
+      "id_ficha": "osm:node:13505427501",
+      "nombre": "Cafetería Asador Pepín",
+      "osm_id": "node:13505427501"
+    },
+    {
+      "id_ficha": "osm:node:13464005101",
+      "nombre": "Cafetería La Fuente",
+      "osm_id": "node:13464005101"
+    },
+    {
+      "id_ficha": "osm:node:2860207036",
+      "nombre": "Café Bar CyC",
+      "osm_id": "node:2860207036"
+    },
+    {
+      "id_ficha": "osm:node:13508600901",
+      "nombre": "Café Bar Las Marianas",
+      "osm_id": "node:13508600901"
+    },
+    {
+      "id_ficha": "osm:node:4715538388",
+      "nombre": "Café Café",
+      "osm_id": "node:4715538388"
+    },
+    {
+      "id_ficha": "osm:node:4257146492",
+      "nombre": "Café Chill Out",
+      "osm_id": "node:4257146492"
+    },
+    {
+      "id_ficha": "osm:node:13477020201",
+      "nombre": "Café-Bar El Colinero",
+      "osm_id": "node:13477020201"
+    },
+    {
+      "id_ficha": "osm:node:1616831311",
+      "nombre": "Caixabank",
+      "osm_id": "node:1616831311"
+    },
+    {
+      "id_ficha": "osm:node:1837835314",
+      "nombre": "Caixabank",
+      "osm_id": "node:1837835314"
+    },
+    {
+      "id_ficha": "osm:node:1659117000",
+      "nombre": "Caja Rural",
+      "osm_id": "node:1659117000"
+    },
+    {
+      "id_ficha": "osm:node:2242744717",
+      "nombre": "Caja Rural",
+      "osm_id": "node:2242744717"
+    },
+    {
+      "id_ficha": "osm:node:1616831299",
+      "nombre": "CajaSur",
+      "osm_id": "node:1616831299"
+    },
+    {
+      "id_ficha": "osm:node:4261124301",
+      "nombre": "Calzedonia",
+      "osm_id": "node:4261124301"
+    },
+    {
+      "id_ficha": "osm:way:142797221",
+      "nombre": "Campo de fútbol La Carabina",
+      "osm_id": "way:142797221"
+    },
+    {
+      "id_ficha": "osm:way:52868185",
+      "nombre": "Campo de Golf Campano",
+      "osm_id": "way:52868185"
+    },
+    {
+      "id_ficha": "osm:way:284786347",
+      "nombre": "Campo Municipal de Fútbol Novo Sancti Petri",
+      "osm_id": "way:284786347"
+    },
+    {
+      "id_ficha": "osm:node:13483897601",
+      "nombre": "Campo Municipal de Tiro con Arco Novo Sancti Petri",
+      "osm_id": "node:13483897601"
+    },
+    {
+      "id_ficha": "osm:node:1606655605",
+      "nombre": "Campo y Hogar",
+      "osm_id": "node:1606655605"
+    },
+    {
+      "id_ficha": "osm:node:4715573178",
+      "nombre": "Candy",
+      "osm_id": "node:4715573178"
+    },
+    {
+      "id_ficha": "osm:node:1837095850",
+      "nombre": "Capote O'Donnell",
+      "osm_id": "node:1837095850"
+    },
+    {
+      "id_ficha": "osm:node:4261217597",
+      "nombre": "Caprichín",
+      "osm_id": "node:4261217597"
+    },
+    {
+      "id_ficha": "osm:node:13505033501",
+      "nombre": "Caramelo Ice Cream Shop",
+      "osm_id": "node:13505033501"
+    },
+    {
+      "id_ficha": "osm:node:1566380480",
+      "nombre": "Carnicería La Libertad",
+      "osm_id": "node:1566380480"
+    },
+    {
+      "id_ficha": "osm:node:1566380492",
+      "nombre": "Carnicería Manolito",
+      "osm_id": "node:1566380492"
+    },
+    {
+      "id_ficha": "osm:node:4261065097",
+      "nombre": "Carolina",
+      "osm_id": "node:4261065097"
+    },
+    {
+      "id_ficha": "osm:node:4261091794",
+      "nombre": "Casa Cano",
+      "osm_id": "node:4261091794"
+    },
+    {
+      "id_ficha": "osm:node:2093826391",
+      "nombre": "Casa Charo",
+      "osm_id": "node:2093826391"
+    },
+    {
+      "id_ficha": "osm:node:2093826343",
+      "nombre": "Casa María",
+      "osm_id": "node:2093826343"
+    },
+    {
+      "id_ficha": "osm:node:13516805401",
+      "nombre": "Casa Yara",
+      "osm_id": "node:13516805401"
+    },
+    {
+      "id_ficha": "osm:node:4261091695",
+      "nombre": "Catchalot",
+      "osm_id": "node:4261091695"
+    },
+    {
+      "id_ficha": "osm:node:13136287601",
+      "nombre": "Catchalot",
+      "osm_id": "node:13136287601"
+    },
+    {
+      "id_ficha": "osm:node:4261069895",
+      "nombre": "Celopman",
+      "osm_id": "node:4261069895"
+    },
+    {
+      "id_ficha": "osm:node:4261106889",
+      "nombre": "Central",
+      "osm_id": "node:4261106889"
+    },
+    {
+      "id_ficha": "osm:way:51966274",
+      "nombre": "Centro Comercial Bellamar",
+      "osm_id": "way:51966274"
+    },
+    {
+      "id_ficha": "osm:node:13520521601",
+      "nombre": "Centro de Masajes Merchi Perez",
+      "osm_id": "node:13520521601"
+    },
+    {
+      "id_ficha": "osm:way:162590251",
+      "nombre": "Centro de Recursos Ambientales Salinas de Chiclana",
+      "osm_id": "way:162590251"
+    },
+    {
+      "id_ficha": "osm:node:5628276021",
+      "nombre": "Centro Plaza",
+      "osm_id": "node:5628276021"
+    },
+    {
+      "id_ficha": "osm:node:6566048175",
+      "nombre": "Centro Social Miguel Cortés",
+      "osm_id": "node:6566048175"
+    },
+    {
+      "id_ficha": "osm:node:13484015301",
+      "nombre": "Centro Veterinario Santa Ana-Chiclana de la Frontera",
+      "osm_id": "node:13484015301"
+    },
+    {
+      "id_ficha": "osm:node:13520448201",
+      "nombre": "Centro Óptico y Auditivo Los Gallos",
+      "osm_id": "node:13520448201"
+    },
+    {
+      "id_ficha": "osm:node:1991154622",
+      "nombre": "Cervecería El Patio",
+      "osm_id": "node:1991154622"
+    },
+    {
+      "id_ficha": "osm:node:13505425501",
+      "nombre": "Che Bar",
+      "osm_id": "node:13505425501"
+    },
+    {
+      "id_ficha": "osm:node:4261199390",
+      "nombre": "Chico Valerio",
+      "osm_id": "node:4261199390"
+    },
+    {
+      "id_ficha": "osm:node:13482844901",
+      "nombre": "Chiringuito Aldiana Andalusien",
+      "osm_id": "node:13482844901"
+    },
+    {
+      "id_ficha": "osm:node:2087581024",
+      "nombre": "Chiringuito Mojama Beach",
+      "osm_id": "node:2087581024"
+    },
+    {
+      "id_ficha": "osm:way:150063023",
+      "nombre": "Ciudad Deportiva Municipal de Huerta Mata",
+      "osm_id": "way:150063023"
+    },
+    {
+      "id_ficha": "osm:way:52495343",
+      "nombre": "Clinica Novo Sancti Petri",
+      "osm_id": "way:52495343"
+    },
+    {
+      "id_ficha": "osm:node:2343120420",
+      "nombre": "Club Nautico",
+      "osm_id": "node:2343120420"
+    },
+    {
+      "id_ficha": "osm:node:4261090595",
+      "nombre": "Clínica dental poniente",
+      "osm_id": "node:4261090595"
+    },
+    {
+      "id_ficha": "osm:node:13477008901",
+      "nombre": "Clínica veterinaria Alora",
+      "osm_id": "node:13477008901"
+    },
+    {
+      "id_ficha": "osm:node:13464974101",
+      "nombre": "Cocinas El Pinar",
+      "osm_id": "node:13464974101"
+    },
+    {
+      "id_ficha": "osm:node:13543691607",
+      "nombre": "Coco Novo Beach",
+      "osm_id": "node:13543691607"
+    },
+    {
+      "id_ficha": "osm:way:148091930",
+      "nombre": "Colegio \"Al Andalus\"",
+      "osm_id": "way:148091930"
+    },
+    {
+      "id_ficha": "osm:way:148091929",
+      "nombre": "Colegio \"Sancti Petri\"",
+      "osm_id": "way:148091929"
+    },
+    {
+      "id_ficha": "osm:way:184605083",
+      "nombre": "Colegio Alameda",
+      "osm_id": "way:184605083"
+    },
+    {
+      "id_ficha": "osm:way:142802803",
+      "nombre": "Colegio Carmen Sedofeito",
+      "osm_id": "way:142802803"
+    },
+    {
+      "id_ficha": "osm:way:153204002",
+      "nombre": "Colegio El Castillo",
+      "osm_id": "way:153204002"
+    },
+    {
+      "id_ficha": "osm:way:143415250",
+      "nombre": "Colegio El Mayorazgo",
+      "osm_id": "way:143415250"
+    },
+    {
+      "id_ficha": "osm:way:186515239",
+      "nombre": "Colegio El Olivo",
+      "osm_id": "way:186515239"
+    },
+    {
+      "id_ficha": "osm:way:142802809",
+      "nombre": "Colegio El Trovador",
+      "osm_id": "way:142802809"
+    },
+    {
+      "id_ficha": "osm:way:142802808",
+      "nombre": "Colegio Federico García Lorca",
+      "osm_id": "way:142802808"
+    },
+    {
+      "id_ficha": "osm:way:142802786",
+      "nombre": "Colegio Giner de los Ríos",
+      "osm_id": "way:142802786"
+    },
+    {
+      "id_ficha": "osm:way:149762001",
+      "nombre": "Colegio Isabel La Católica",
+      "osm_id": "way:149762001"
+    },
+    {
+      "id_ficha": "osm:way:142802816",
+      "nombre": "Colegio José de la Vega",
+      "osm_id": "way:142802816"
+    },
+    {
+      "id_ficha": "osm:way:183505449",
+      "nombre": "Colegio La Atlántida",
+      "osm_id": "way:183505449"
+    },
+    {
+      "id_ficha": "osm:way:150930521",
+      "nombre": "Colegio La Salle",
+      "osm_id": "way:150930521"
+    },
+    {
+      "id_ficha": "osm:way:154899558",
+      "nombre": "Colegio Las Albinas",
+      "osm_id": "way:154899558"
+    },
+    {
+      "id_ficha": "osm:way:150228124",
+      "nombre": "Colegio Niño Jesús",
+      "osm_id": "way:150228124"
+    },
+    {
+      "id_ficha": "osm:way:186530836",
+      "nombre": "Colegio Nuestra Señora de los Remedios",
+      "osm_id": "way:186530836"
+    },
+    {
+      "id_ficha": "osm:way:148602268",
+      "nombre": "Colegio San Agustín",
+      "osm_id": "way:148602268"
+    },
+    {
+      "id_ficha": "osm:way:155354021",
+      "nombre": "Colegio Serafina Andrade",
+      "osm_id": "way:155354021"
+    },
+    {
+      "id_ficha": "osm:way:198216895",
+      "nombre": "Colegio Tierno Galván",
+      "osm_id": "way:198216895"
+    },
+    {
+      "id_ficha": "osm:way:186528299",
+      "nombre": "Colina de Santa Ana",
+      "osm_id": "way:186528299"
+    },
+    {
+      "id_ficha": "osm:node:4262393194",
+      "nombre": "Come y calla",
+      "osm_id": "node:4262393194"
+    },
+    {
+      "id_ficha": "osm:node:12107071733",
+      "nombre": "Complejo Deportivo El Fontanal",
+      "osm_id": "node:12107071733"
+    },
+    {
+      "id_ficha": "osm:node:4261286889",
+      "nombre": "Complementos Juanita",
+      "osm_id": "node:4261286889"
+    },
+    {
+      "id_ficha": "osm:node:11773377307",
+      "nombre": "Confecciones Montserrat",
+      "osm_id": "node:11773377307"
+    },
+    {
+      "id_ficha": "osm:node:13136295601",
+      "nombre": "Correos",
+      "osm_id": "node:13136295601"
+    },
+    {
+      "id_ficha": "osm:node:13507882301",
+      "nombre": "Costa Club Sancti Petri Oficina de Información",
+      "osm_id": "node:13507882301"
+    },
+    {
+      "id_ficha": "osm:node:13482887501",
+      "nombre": "Coviran",
+      "osm_id": "node:13482887501"
+    },
+    {
+      "id_ficha": "osm:node:13482914501",
+      "nombre": "Coviran",
+      "osm_id": "node:13482914501"
+    },
+    {
+      "id_ficha": "osm:node:13483872301",
+      "nombre": "Coviran",
+      "osm_id": "node:13483872301"
+    },
+    {
+      "id_ficha": "osm:node:1569346402",
+      "nombre": "Covirán",
+      "osm_id": "node:1569346402"
+    },
+    {
+      "id_ficha": "osm:node:1681881062",
+      "nombre": "Covirán",
+      "osm_id": "node:1681881062"
+    },
+    {
+      "id_ficha": "osm:node:1704494812",
+      "nombre": "Covirán",
+      "osm_id": "node:1704494812"
+    },
+    {
+      "id_ficha": "osm:node:1836992987",
+      "nombre": "Covirán",
+      "osm_id": "node:1836992987"
+    },
+    {
+      "id_ficha": "osm:node:4119553090",
+      "nombre": "Covirán",
+      "osm_id": "node:4119553090"
+    },
+    {
+      "id_ficha": "osm:node:4261032596",
+      "nombre": "Covirán",
+      "osm_id": "node:4261032596"
+    },
+    {
+      "id_ficha": "osm:node:10680366005",
+      "nombre": "Covirán",
+      "osm_id": "node:10680366005"
+    },
+    {
+      "id_ficha": "osm:node:13507839701",
+      "nombre": "Cremino Heladería crepería (2ª pista)",
+      "osm_id": "node:13507839701"
+    },
+    {
+      "id_ficha": "osm:node:4261169893",
+      "nombre": "Cristóbal",
+      "osm_id": "node:4261169893"
+    },
+    {
+      "id_ficha": "osm:node:13565608601",
+      "nombre": "Cruz Roja",
+      "osm_id": "node:13565608601"
+    },
+    {
+      "id_ficha": "osm:node:698086756",
+      "nombre": "Decor Asia",
+      "osm_id": "node:698086756"
+    },
+    {
+      "id_ficha": "osm:node:13463018101",
+      "nombre": "Delegación de Servicios Sociales Ayuntamiento de Chiclana",
+      "osm_id": "node:13463018101"
+    },
+    {
+      "id_ficha": "osm:node:4261091793",
+      "nombre": "Dental Company",
+      "osm_id": "node:4261091793"
+    },
+    {
+      "id_ficha": "osm:node:4261172291",
+      "nombre": "DIM",
+      "osm_id": "node:4261172291"
+    },
+    {
+      "id_ficha": "osm:node:13286885308",
+      "nombre": "Discoteca Blue Dolfin",
+      "osm_id": "node:13286885308"
+    },
+    {
+      "id_ficha": "osm:node:698086751",
+      "nombre": "Discoteca Le Grand",
+      "osm_id": "node:698086751"
+    },
+    {
+      "id_ficha": "osm:node:5379240474",
+      "nombre": "Drinks Bar",
+      "osm_id": "node:5379240474"
+    },
+    {
+      "id_ficha": "osm:node:4261217598",
+      "nombre": "Dulces regalos",
+      "osm_id": "node:4261217598"
+    },
+    {
+      "id_ficha": "osm:node:1566380476",
+      "nombre": "Dumbo",
+      "osm_id": "node:1566380476"
+    },
+    {
+      "id_ficha": "osm:node:4261124189",
+      "nombre": "El Ajuar",
+      "osm_id": "node:4261124189"
+    },
+    {
+      "id_ficha": "osm:node:13505022501",
+      "nombre": "El Camino de Sancti Petri",
+      "osm_id": "node:13505022501"
+    },
+    {
+      "id_ficha": "osm:node:4176398189",
+      "nombre": "El Carbón",
+      "osm_id": "node:4176398189"
+    },
+    {
+      "id_ficha": "osm:node:4261261391",
+      "nombre": "El Chamán",
+      "osm_id": "node:4261261391"
+    },
+    {
+      "id_ficha": "osm:node:11773440872",
+      "nombre": "El Chirimono",
+      "osm_id": "node:11773440872"
+    },
+    {
+      "id_ficha": "osm:node:13432038201",
+      "nombre": "El Frenazo",
+      "osm_id": "node:13432038201"
+    },
+    {
+      "id_ficha": "osm:node:1582788655",
+      "nombre": "El Garaje - Autoservicio Eva",
+      "osm_id": "node:1582788655"
+    },
+    {
+      "id_ficha": "osm:node:1647366894",
+      "nombre": "El Italiano",
+      "osm_id": "node:1647366894"
+    },
+    {
+      "id_ficha": "osm:node:13471028902",
+      "nombre": "El italiano de Fabio",
+      "osm_id": "node:13471028902"
+    },
+    {
+      "id_ficha": "osm:node:11773434229",
+      "nombre": "El Jamón",
+      "osm_id": "node:11773434229"
+    },
+    {
+      "id_ficha": "osm:node:4261309992",
+      "nombre": "El marino",
+      "osm_id": "node:4261309992"
+    },
+    {
+      "id_ficha": "osm:node:13564039601",
+      "nombre": "El Molino - comida para llevar",
+      "osm_id": "node:13564039601"
+    },
+    {
+      "id_ficha": "osm:node:13531508501",
+      "nombre": "El Molino Listo para Llevar",
+      "osm_id": "node:13531508501"
+    },
+    {
+      "id_ficha": "osm:node:13430988001",
+      "nombre": "El Molino Playa",
+      "osm_id": "node:13430988001"
+    },
+    {
+      "id_ficha": "osm:node:1566460469",
+      "nombre": "El Motorista",
+      "osm_id": "node:1566460469"
+    },
+    {
+      "id_ficha": "osm:node:13507853601",
+      "nombre": "El Papelon",
+      "osm_id": "node:13507853601"
+    },
+    {
+      "id_ficha": "osm:node:4261228202",
+      "nombre": "El pollo",
+      "osm_id": "node:4261228202"
+    },
+    {
+      "id_ficha": "osm:node:4715544895",
+      "nombre": "El Pájaro",
+      "osm_id": "node:4715544895"
+    },
+    {
+      "id_ficha": "osm:node:4261091796",
+      "nombre": "El ropero",
+      "osm_id": "node:4261091796"
+    },
+    {
+      "id_ficha": "osm:node:13520087501",
+      "nombre": "El Salón de Laura",
+      "osm_id": "node:13520087501"
+    },
+    {
+      "id_ficha": "osm:node:1569346381",
+      "nombre": "El Sitio",
+      "osm_id": "node:1569346381"
+    },
+    {
+      "id_ficha": "osm:node:1562840631",
+      "nombre": "Elefante Azul",
+      "osm_id": "node:1562840631"
+    },
+    {
+      "id_ficha": "osm:node:2093847074",
+      "nombre": "Eloy Aguilar",
+      "osm_id": "node:2093847074"
+    },
+    {
+      "id_ficha": "osm:node:1611961923",
+      "nombre": "Embrujo Chiclana",
+      "osm_id": "node:1611961923"
+    },
+    {
+      "id_ficha": "osm:node:4261170497",
+      "nombre": "Encuentro",
+      "osm_id": "node:4261170497"
+    },
+    {
+      "id_ficha": "osm:node:13482914401",
+      "nombre": "Erizo Gastrobar",
+      "osm_id": "node:13482914401"
+    },
+    {
+      "id_ficha": "osm:way:184177555",
+      "nombre": "Escuela de Adultos",
+      "osm_id": "way:184177555"
+    },
+    {
+      "id_ficha": "osm:node:1638026882",
+      "nombre": "Escuela Infantil Fantasía",
+      "osm_id": "node:1638026882"
+    },
+    {
+      "id_ficha": "osm:node:13505482001",
+      "nombre": "Espacio Náutico Sancti Petri",
+      "osm_id": "node:13505482001"
+    },
+    {
+      "id_ficha": "osm:node:11773398109",
+      "nombre": "Esprohident",
+      "osm_id": "node:11773398109"
+    },
+    {
+      "id_ficha": "osm:way:50787293",
+      "nombre": "Estadio Municipal (Chiclana C.F.)",
+      "osm_id": "way:50787293"
+    },
+    {
+      "id_ficha": "osm:node:13484055701",
+      "nombre": "Estanco El Amanecer - Loterias",
+      "osm_id": "node:13484055701"
+    },
+    {
+      "id_ficha": "osm:node:11390053212",
+      "nombre": "Estefania",
+      "osm_id": "node:11390053212"
+    },
+    {
+      "id_ficha": "osm:node:4261141902",
+      "nombre": "Estudillo sport",
+      "osm_id": "node:4261141902"
+    },
+    {
+      "id_ficha": "osm:node:4261236790",
+      "nombre": "Estética dental chiclana",
+      "osm_id": "node:4261236790"
+    },
+    {
+      "id_ficha": "osm:node:13504832201",
+      "nombre": "Eternal Pilates",
+      "osm_id": "node:13504832201"
+    },
+    {
+      "id_ficha": "osm:node:2232069064",
+      "nombre": "Europcar",
+      "osm_id": "node:2232069064"
+    },
+    {
+      "id_ficha": "osm:node:1596465863",
+      "nombre": "Eurotaller",
+      "osm_id": "node:1596465863"
+    },
+    {
+      "id_ficha": "osm:node:13463862101",
+      "nombre": "F.J. Barbería",
+      "osm_id": "node:13463862101"
+    },
+    {
+      "id_ficha": "osm:node:13432050501",
+      "nombre": "Famaluz SL",
+      "osm_id": "node:13432050501"
+    },
+    {
+      "id_ficha": "osm:node:11773400736",
+      "nombre": "Farmacia central",
+      "osm_id": "node:11773400736"
+    },
+    {
+      "id_ficha": "osm:node:12065860575",
+      "nombre": "Farmacia FuenteAmarga",
+      "osm_id": "node:12065860575"
+    },
+    {
+      "id_ficha": "osm:node:1568359220",
+      "nombre": "Farmacia La Banda",
+      "osm_id": "node:1568359220"
+    },
+    {
+      "id_ficha": "osm:node:698086753",
+      "nombre": "Farmacia Santa Ana",
+      "osm_id": "node:698086753"
+    },
+    {
+      "id_ficha": "osm:node:13072277369",
+      "nombre": "Farmacia Tartessus",
+      "osm_id": "node:13072277369"
+    },
+    {
+      "id_ficha": "osm:node:13520533801",
+      "nombre": "FERRETERIA LOS GALLOS",
+      "osm_id": "node:13520533801"
+    },
+    {
+      "id_ficha": "osm:node:13508577701",
+      "nombre": "Ferretería Alba",
+      "osm_id": "node:13508577701"
+    },
+    {
+      "id_ficha": "osm:node:13514827301",
+      "nombre": "Ferretería El Paso",
+      "osm_id": "node:13514827301"
+    },
+    {
+      "id_ficha": "osm:node:13463799401",
+      "nombre": "Ferretería Montero",
+      "osm_id": "node:13463799401"
+    },
+    {
+      "id_ficha": "osm:node:1602374270",
+      "nombre": "Feuvert",
+      "osm_id": "node:1602374270"
+    },
+    {
+      "id_ficha": "osm:node:6135776286",
+      "nombre": "Fifty Factory",
+      "osm_id": "node:6135776286"
+    },
+    {
+      "id_ficha": "osm:node:4261091692",
+      "nombre": "Fina",
+      "osm_id": "node:4261091692"
+    },
+    {
+      "id_ficha": "osm:node:1568342518",
+      "nombre": "FirstStop",
+      "osm_id": "node:1568342518"
+    },
+    {
+      "id_ficha": "osm:node:13482942401",
+      "nombre": "Fit Box Chiclana",
+      "osm_id": "node:13482942401"
+    },
+    {
+      "id_ficha": "osm:node:13483952701",
+      "nombre": "Fitness Aldiana Andalusien",
+      "osm_id": "node:13483952701"
+    },
+    {
+      "id_ficha": "osm:node:13505062001",
+      "nombre": "Floristeria Los Carmenes",
+      "osm_id": "node:13505062001"
+    },
+    {
+      "id_ficha": "osm:node:13521307801",
+      "nombre": "FotoS 3.0",
+      "osm_id": "node:13521307801"
+    },
+    {
+      "id_ficha": "osm:node:13484001901",
+      "nombre": "Fotostudio 3",
+      "osm_id": "node:13484001901"
+    },
+    {
+      "id_ficha": "osm:node:13516886002",
+      "nombre": "Frutas Romero",
+      "osm_id": "node:13516886002"
+    },
+    {
+      "id_ficha": "osm:node:11390053210",
+      "nombre": "Frutos Secos El Campito",
+      "osm_id": "node:11390053210"
+    },
+    {
+      "id_ficha": "osm:node:1659117020",
+      "nombre": "Game Stop",
+      "osm_id": "node:1659117020"
+    },
+    {
+      "id_ficha": "osm:node:11760501639",
+      "nombre": "Gasolineras CLC",
+      "osm_id": "node:11760501639"
+    },
+    {
+      "id_ficha": "osm:node:13504854001",
+      "nombre": "Gelateria Il Capriccio",
+      "osm_id": "node:13504854001"
+    },
+    {
+      "id_ficha": "osm:node:13457570801",
+      "nombre": "General Optica",
+      "osm_id": "node:13457570801"
+    },
+    {
+      "id_ficha": "osm:node:1673610617",
+      "nombre": "Gimnasio Costa Fitness",
+      "osm_id": "node:1673610617"
+    },
+    {
+      "id_ficha": "osm:way:729640031",
+      "nombre": "Golf La Estancia",
+      "osm_id": "way:729640031"
+    },
+    {
+      "id_ficha": "osm:node:4715538387",
+      "nombre": "GR García Ramos Asesores",
+      "osm_id": "node:4715538387"
+    },
+    {
+      "id_ficha": "osm:node:11390053211",
+      "nombre": "GRAB",
+      "osm_id": "node:11390053211"
+    },
+    {
+      "id_ficha": "osm:node:11392470353",
+      "nombre": "Grisalla",
+      "osm_id": "node:11392470353"
+    },
+    {
+      "id_ficha": "osm:node:13482919401",
+      "nombre": "Grupo Cauto Las Lagunas",
+      "osm_id": "node:13482919401"
+    },
+    {
+      "id_ficha": "osm:node:14078199774",
+      "nombre": "Gustavo Virués Ortega",
+      "osm_id": "node:14078199774"
+    },
+    {
+      "id_ficha": "osm:node:11390053208",
+      "nombre": "GYM&WELLNESS El Campito",
+      "osm_id": "node:11390053208"
+    },
+    {
+      "id_ficha": "osm:node:13483999001",
+      "nombre": "Halal Chiclana",
+      "osm_id": "node:13483999001"
+    },
+    {
+      "id_ficha": "osm:node:698086758",
+      "nombre": "Handicap 4",
+      "osm_id": "node:698086758"
+    },
+    {
+      "id_ficha": "osm:node:1611961849",
+      "nombre": "Higinio Casa y Hogar",
+      "osm_id": "node:1611961849"
+    },
+    {
+      "id_ficha": "osm:node:1950907262",
+      "nombre": "Hiper LI",
+      "osm_id": "node:1950907262"
+    },
+    {
+      "id_ficha": "osm:node:1616831323",
+      "nombre": "Hornos La Española",
+      "osm_id": "node:1616831323"
+    },
+    {
+      "id_ficha": "osm:node:3409527240",
+      "nombre": "Hostal El Jardín",
+      "osm_id": "node:3409527240"
+    },
+    {
+      "id_ficha": "osm:node:13286430410",
+      "nombre": "Hotelbar Atlántico",
+      "osm_id": "node:13286430410"
+    },
+    {
+      "id_ficha": "osm:way:333470235",
+      "nombre": "Huerzeler Bicycle Holidays",
+      "osm_id": "way:333470235"
+    },
+    {
+      "id_ficha": "osm:node:13136542501",
+      "nombre": "Ibermutuamur",
+      "osm_id": "node:13136542501"
+    },
+    {
+      "id_ficha": "osm:node:13507841702",
+      "nombre": "Inmobiliaria Beltrán y Bellido",
+      "osm_id": "node:13507841702"
+    },
+    {
+      "id_ficha": "osm:node:13626765201",
+      "nombre": "Inmobiliaria Punto Playa",
+      "osm_id": "node:13626765201"
+    },
+    {
+      "id_ficha": "osm:node:13136516205",
+      "nombre": "Ino",
+      "osm_id": "node:13136516205"
+    },
+    {
+      "id_ficha": "osm:node:4261170498",
+      "nombre": "Inside",
+      "osm_id": "node:4261170498"
+    },
+    {
+      "id_ficha": "osm:way:147555528",
+      "nombre": "Instituto de Educación Secundaria Ciudad de Hércules",
+      "osm_id": "way:147555528"
+    },
+    {
+      "id_ficha": "osm:way:142802799",
+      "nombre": "Instituto de Educación Secundaria Fernando Quiñones",
+      "osm_id": "way:142802799"
+    },
+    {
+      "id_ficha": "osm:way:142800230",
+      "nombre": "Instituto de Educación Secundaria Huerta del Rosario",
+      "osm_id": "way:142800230"
+    },
+    {
+      "id_ficha": "osm:node:12992884527",
+      "nombre": "Iroco",
+      "osm_id": "node:12992884527"
+    },
+    {
+      "id_ficha": "osm:node:11773475180",
+      "nombre": "Ito Tapas",
+      "osm_id": "node:11773475180"
+    },
+    {
+      "id_ficha": "osm:node:4261091893",
+      "nombre": "J&Lin",
+      "osm_id": "node:4261091893"
+    },
+    {
+      "id_ficha": "osm:node:4252456022",
+      "nombre": "Joselito",
+      "osm_id": "node:4252456022"
+    },
+    {
+      "id_ficha": "osm:node:4715573181",
+      "nombre": "Kebab Chawarma Amsterdam",
+      "osm_id": "node:4715573181"
+    },
+    {
+      "id_ficha": "osm:node:13430874401",
+      "nombre": "KIA",
+      "osm_id": "node:13430874401"
+    },
+    {
+      "id_ficha": "osm:node:13507814902",
+      "nombre": "Kiosk 1 / quiosco de Playa de Barrosa Bigaro 2",
+      "osm_id": "node:13507814902"
+    },
+    {
+      "id_ficha": "osm:node:13504853001",
+      "nombre": "Kiosko El Pinar",
+      "osm_id": "node:13504853001"
+    },
+    {
+      "id_ficha": "osm:node:13507832001",
+      "nombre": "Kite Surf Chiclana",
+      "osm_id": "node:13507832001"
+    },
+    {
+      "id_ficha": "osm:node:13432041901",
+      "nombre": "La Abeja Maya",
+      "osm_id": "node:13432041901"
+    },
+    {
+      "id_ficha": "osm:node:3409309761",
+      "nombre": "La Almadraba",
+      "osm_id": "node:3409309761"
+    },
+    {
+      "id_ficha": "osm:node:10304712843",
+      "nombre": "La Azotea by Aroma de mar",
+      "osm_id": "node:10304712843"
+    },
+    {
+      "id_ficha": "osm:node:13463805601",
+      "nombre": "La barbarie",
+      "osm_id": "node:13463805601"
+    },
+    {
+      "id_ficha": "osm:node:13505480102",
+      "nombre": "La Bella Esquina",
+      "osm_id": "node:13505480102"
+    },
+    {
+      "id_ficha": "osm:node:1569346345",
+      "nombre": "La Bodeguita der Caga",
+      "osm_id": "node:1569346345"
+    },
+    {
+      "id_ficha": "osm:node:13541286018",
+      "nombre": "La Campa",
+      "osm_id": "node:13541286018"
+    },
+    {
+      "id_ficha": "osm:node:4261281489",
+      "nombre": "La canastilla",
+      "osm_id": "node:4261281489"
+    },
+    {
+      "id_ficha": "osm:node:4261199389",
+      "nombre": "La Casa de las Carcasas",
+      "osm_id": "node:4261199389"
+    },
+    {
+      "id_ficha": "osm:node:4261090499",
+      "nombre": "La casa del peluquero",
+      "osm_id": "node:4261090499"
+    },
+    {
+      "id_ficha": "osm:node:1657465553",
+      "nombre": "La Comedia",
+      "osm_id": "node:1657465553"
+    },
+    {
+      "id_ficha": "osm:node:4261106890",
+      "nombre": "La despensa del té",
+      "osm_id": "node:4261106890"
+    },
+    {
+      "id_ficha": "osm:node:4261124202",
+      "nombre": "La Española",
+      "osm_id": "node:4261124202"
+    },
+    {
+      "id_ficha": "osm:node:1657459427",
+      "nombre": "La Esquina del Jamón",
+      "osm_id": "node:1657459427"
+    },
+    {
+      "id_ficha": "osm:node:5319649299",
+      "nombre": "La estación del te",
+      "osm_id": "node:5319649299"
+    },
+    {
+      "id_ficha": "osm:node:4252456023",
+      "nombre": "La Gaviota",
+      "osm_id": "node:4252456023"
+    },
+    {
+      "id_ficha": "osm:node:4260935731",
+      "nombre": "La Herradura",
+      "osm_id": "node:4260935731"
+    },
+    {
+      "id_ficha": "osm:node:4715573182",
+      "nombre": "La Komuna (Comida Colombiana)",
+      "osm_id": "node:4715573182"
+    },
+    {
+      "id_ficha": "osm:node:2791751169",
+      "nombre": "La Libertad",
+      "osm_id": "node:2791751169"
+    },
+    {
+      "id_ficha": "osm:node:13883801626",
+      "nombre": "La loma",
+      "osm_id": "node:13883801626"
+    },
+    {
+      "id_ficha": "osm:node:11390566730",
+      "nombre": "La Mafia se Sienta a La Mesa",
+      "osm_id": "node:11390566730"
+    },
+    {
+      "id_ficha": "osm:node:13505062002",
+      "nombre": "La penúltima Copa's bar",
+      "osm_id": "node:13505062002"
+    },
+    {
+      "id_ficha": "osm:node:13430304301",
+      "nombre": "La Pizzería La Barrosa",
+      "osm_id": "node:13430304301"
+    },
+    {
+      "id_ficha": "osm:node:4261286890",
+      "nombre": "La predilecta",
+      "osm_id": "node:4261286890"
+    },
+    {
+      "id_ficha": "osm:node:13592179201",
+      "nombre": "La Repesca",
+      "osm_id": "node:13592179201"
+    },
+    {
+      "id_ficha": "osm:node:1657465551",
+      "nombre": "La sartén",
+      "osm_id": "node:1657465551"
+    },
+    {
+      "id_ficha": "osm:node:13286885309",
+      "nombre": "La Tasca",
+      "osm_id": "node:13286885309"
+    },
+    {
+      "id_ficha": "osm:node:4252456025",
+      "nombre": "La Toscana",
+      "osm_id": "node:4252456025"
+    },
+    {
+      "id_ficha": "osm:node:1568342555",
+      "nombre": "Las Cuatro Esquinas",
+      "osm_id": "node:1568342555"
+    },
+    {
+      "id_ficha": "osm:node:13482890401",
+      "nombre": "Lavandería Autoservicio en Chiclana- Aldea Del Coto",
+      "osm_id": "node:13482890401"
+    },
+    {
+      "id_ficha": "osm:node:13505059301",
+      "nombre": "Lavandería Los Gallos",
+      "osm_id": "node:13505059301"
+    },
+    {
+      "id_ficha": "osm:node:3234860391",
+      "nombre": "Lencería Detalles",
+      "osm_id": "node:3234860391"
+    },
+    {
+      "id_ficha": "osm:node:13505409901",
+      "nombre": "Letras chiclana",
+      "osm_id": "node:13505409901"
+    },
+    {
+      "id_ficha": "osm:node:1568351660",
+      "nombre": "Librería Navarro",
+      "osm_id": "node:1568351660"
+    },
+    {
+      "id_ficha": "osm:node:11392465838",
+      "nombre": "Liderazgo Cake",
+      "osm_id": "node:11392465838"
+    },
+    {
+      "id_ficha": "osm:node:4261231591",
+      "nombre": "Little Kings",
+      "osm_id": "node:4261231591"
+    },
+    {
+      "id_ficha": "osm:node:13504823901",
+      "nombre": "Lo de Sergio y Mariana Gastronomía Gaditana S.L.",
+      "osm_id": "node:13504823901"
+    },
+    {
+      "id_ficha": "osm:node:4261257890",
+      "nombre": "Los cristales",
+      "osm_id": "node:4261257890"
+    },
+    {
+      "id_ficha": "osm:node:11773377705",
+      "nombre": "Los quintos",
+      "osm_id": "node:11773377705"
+    },
+    {
+      "id_ficha": "osm:node:11773377306",
+      "nombre": "Loterías y Apuestas del Estado",
+      "osm_id": "node:11773377306"
+    },
+    {
+      "id_ficha": "osm:way:428044497",
+      "nombre": "Lupi Padel",
+      "osm_id": "way:428044497"
+    },
+    {
+      "id_ficha": "osm:node:4261091792",
+      "nombre": "Maderas González",
+      "osm_id": "node:4261091792"
+    },
+    {
+      "id_ficha": "osm:node:1964402167",
+      "nombre": "Manguita",
+      "osm_id": "node:1964402167"
+    },
+    {
+      "id_ficha": "osm:node:4261065096",
+      "nombre": "Maná",
+      "osm_id": "node:4261065096"
+    },
+    {
+      "id_ficha": "osm:node:13471510301",
+      "nombre": "MAPFRE",
+      "osm_id": "node:13471510301"
+    },
+    {
+      "id_ficha": "osm:node:11390053207",
+      "nombre": "MAR Real State",
+      "osm_id": "node:11390053207"
+    },
+    {
+      "id_ficha": "osm:node:4252456026",
+      "nombre": "Marie",
+      "osm_id": "node:4252456026"
+    },
+    {
+      "id_ficha": "osm:node:13505368301",
+      "nombre": "Mascotas Ávila Chiclana Rana Verde",
+      "osm_id": "node:13505368301"
+    },
+    {
+      "id_ficha": "osm:node:13505388601",
+      "nombre": "Materiales Construcción RM",
+      "osm_id": "node:13505388601"
+    },
+    {
+      "id_ficha": "osm:node:1629949916",
+      "nombre": "Maxi Dia",
+      "osm_id": "node:1629949916"
+    },
+    {
+      "id_ficha": "osm:node:698086750",
+      "nombre": "McDonald's",
+      "osm_id": "node:698086750"
+    },
+    {
+      "id_ficha": "osm:node:13484831302",
+      "nombre": "Medina Mudéjar Sancti Petri",
+      "osm_id": "node:13484831302"
+    },
+    {
+      "id_ficha": "osm:node:13507832002",
+      "nombre": "Mediwa Bar",
+      "osm_id": "node:13507832002"
+    },
+    {
+      "id_ficha": "osm:node:13507826701",
+      "nombre": "Memorial \"Miki\"",
+      "osm_id": "node:13507826701"
+    },
+    {
+      "id_ficha": "osm:node:12216970279",
+      "nombre": "Memorial of Temple of Hercules",
+      "osm_id": "node:12216970279"
+    },
+    {
+      "id_ficha": "osm:node:13482921301",
+      "nombre": "Merca Centro las Lagunas",
+      "osm_id": "node:13482921301"
+    },
+    {
+      "id_ficha": "osm:node:678899431",
+      "nombre": "Mercadona",
+      "osm_id": "node:678899431"
+    },
+    {
+      "id_ficha": "osm:node:4119466790",
+      "nombre": "Mercadona",
+      "osm_id": "node:4119466790"
+    },
+    {
+      "id_ficha": "osm:way:188942798",
+      "nombre": "Mercadona",
+      "osm_id": "way:188942798"
+    },
+    {
+      "id_ficha": "osm:node:1566460548",
+      "nombre": "Michelin",
+      "osm_id": "node:1566460548"
+    },
+    {
+      "id_ficha": "osm:node:1659253136",
+      "nombre": "Michelin",
+      "osm_id": "node:1659253136"
+    },
+    {
+      "id_ficha": "osm:node:13507913001",
+      "nombre": "Mimi Pool Club",
+      "osm_id": "node:13507913001"
+    },
+    {
+      "id_ficha": "osm:node:13504850901",
+      "nombre": "Minimarket arrecife",
+      "osm_id": "node:13504850901"
+    },
+    {
+      "id_ficha": "osm:node:13289336571",
+      "nombre": "Minimarkt",
+      "osm_id": "node:13289336571"
+    },
+    {
+      "id_ficha": "osm:node:2430954769",
+      "nombre": "Miomio",
+      "osm_id": "node:2430954769"
+    },
+    {
+      "id_ficha": "osm:node:13483910101",
+      "nombre": "Mirador",
+      "osm_id": "node:13483910101"
+    },
+    {
+      "id_ficha": "osm:node:2235027743",
+      "nombre": "Mirador \"El Ancla\"",
+      "osm_id": "node:2235027743"
+    },
+    {
+      "id_ficha": "osm:node:2235027758",
+      "nombre": "Mirador \"El Anfora\"",
+      "osm_id": "node:2235027758"
+    },
+    {
+      "id_ficha": "osm:node:2235027745",
+      "nombre": "Mirador Barro Colorao",
+      "osm_id": "node:2235027745"
+    },
+    {
+      "id_ficha": "osm:node:13505059501",
+      "nombre": "Mis Paellas",
+      "osm_id": "node:13505059501"
+    },
+    {
+      "id_ficha": "osm:node:287011532",
+      "nombre": "Moeve",
+      "osm_id": "node:287011532"
+    },
+    {
+      "id_ficha": "osm:node:4261170699",
+      "nombre": "Morales & Morvel",
+      "osm_id": "node:4261170699"
+    },
+    {
+      "id_ficha": "osm:node:13136532102",
+      "nombre": "Motos Reina",
+      "osm_id": "node:13136532102"
+    },
+    {
+      "id_ficha": "osm:node:2093826376",
+      "nombre": "Movistar",
+      "osm_id": "node:2093826376"
+    },
+    {
+      "id_ficha": "osm:node:1588574892",
+      "nombre": "Muebles Vela",
+      "osm_id": "node:1588574892"
+    },
+    {
+      "id_ficha": "osm:node:2093790514",
+      "nombre": "Multixero",
+      "osm_id": "node:2093790514"
+    },
+    {
+      "id_ficha": "osm:node:13430891601",
+      "nombre": "Más que tartas - Mattilde 2",
+      "osm_id": "node:13430891601"
+    },
+    {
+      "id_ficha": "osm:node:4261092010",
+      "nombre": "Mónaco",
+      "osm_id": "node:4261092010"
+    },
+    {
+      "id_ficha": "osm:node:13504833701",
+      "nombre": "Nanami",
+      "osm_id": "node:13504833701"
+    },
+    {
+      "id_ficha": "osm:node:13482925101",
+      "nombre": "Neumaticos La Barrosa",
+      "osm_id": "node:13482925101"
+    },
+    {
+      "id_ficha": "osm:node:4261124232",
+      "nombre": "Nice Girl",
+      "osm_id": "node:4261124232"
+    },
+    {
+      "id_ficha": "osm:node:1602298566",
+      "nombre": "Noha Sancti Petri",
+      "osm_id": "node:1602298566"
+    },
+    {
+      "id_ficha": "osm:node:13883801627",
+      "nombre": "NOVA sunset club",
+      "osm_id": "node:13883801627"
+    },
+    {
+      "id_ficha": "osm:node:13626757602",
+      "nombre": "Novo can - Beauty for animals",
+      "osm_id": "node:13626757602"
+    },
+    {
+      "id_ficha": "osm:node:4261092097",
+      "nombre": "Novojoya",
+      "osm_id": "node:4261092097"
+    },
+    {
+      "id_ficha": "osm:node:13136300501",
+      "nombre": "Nuestra señora del Rosario",
+      "osm_id": "node:13136300501"
+    },
+    {
+      "id_ficha": "osm:node:2093826346",
+      "nombre": "Nueva Optica Chiclana",
+      "osm_id": "node:2093826346"
+    },
+    {
+      "id_ficha": "osm:node:13505450201",
+      "nombre": "Nuovo Fiore - Heladeria Italiana",
+      "osm_id": "node:13505450201"
+    },
+    {
+      "id_ficha": "osm:node:4252456027",
+      "nombre": "Nuovo Sassari",
+      "osm_id": "node:4252456027"
+    },
+    {
+      "id_ficha": "osm:node:1582580382",
+      "nombre": "Náutica Rivas",
+      "osm_id": "node:1582580382"
+    },
+    {
+      "id_ficha": "osm:node:13566824202",
+      "nombre": "Observación de aves Canal de Carboneros",
+      "osm_id": "node:13566824202"
+    },
+    {
+      "id_ficha": "osm:node:13566838501",
+      "nombre": "Observación de aves Marismas de Carboneros",
+      "osm_id": "node:13566838501"
+    },
+    {
+      "id_ficha": "osm:node:677219484",
+      "nombre": "Oficina de Correos",
+      "osm_id": "node:677219484"
+    },
+    {
+      "id_ficha": "osm:node:13484051901",
+      "nombre": "Oficina Tui",
+      "osm_id": "node:13484051901"
+    },
+    {
+      "id_ficha": "osm:node:4261091894",
+      "nombre": "Ofipapel",
+      "osm_id": "node:4261091894"
+    },
+    {
+      "id_ficha": "osm:node:11773418112",
+      "nombre": "Ohana",
+      "osm_id": "node:11773418112"
+    },
+    {
+      "id_ficha": "osm:node:7104630074",
+      "nombre": "OKSofás Chiclana",
+      "osm_id": "node:7104630074"
+    },
+    {
+      "id_ficha": "osm:node:13136516203",
+      "nombre": "ONCE",
+      "osm_id": "node:13136516203"
+    },
+    {
+      "id_ficha": "osm:node:13514819501",
+      "nombre": "Opel",
+      "osm_id": "node:13514819501"
+    },
+    {
+      "id_ficha": "osm:node:4261109805",
+      "nombre": "Opticalia",
+      "osm_id": "node:4261109805"
+    },
+    {
+      "id_ficha": "osm:node:4261124289",
+      "nombre": "Orange",
+      "osm_id": "node:4261124289"
+    },
+    {
+      "id_ficha": "osm:node:13136295501",
+      "nombre": "Orenes",
+      "osm_id": "node:13136295501"
+    },
+    {
+      "id_ficha": "osm:node:1611961905",
+      "nombre": "Oteros Sport",
+      "osm_id": "node:1611961905"
+    },
+    {
+      "id_ficha": "osm:node:11390053209",
+      "nombre": "Panadería El Campito",
+      "osm_id": "node:11390053209"
+    },
+    {
+      "id_ficha": "osm:node:10316703954",
+      "nombre": "Papabarber",
+      "osm_id": "node:10316703954"
+    },
+    {
+      "id_ficha": "osm:node:1566380495",
+      "nombre": "Papelería Melchor",
+      "osm_id": "node:1566380495"
+    },
+    {
+      "id_ficha": "osm:way:146378399",
+      "nombre": "Parque Aldea del Coto",
+      "osm_id": "way:146378399"
+    },
+    {
+      "id_ficha": "osm:way:797124355",
+      "nombre": "PARQUE BAHIA DE LA CONCHA",
+      "osm_id": "way:797124355"
+    },
+    {
+      "id_ficha": "osm:way:808969825",
+      "nombre": "Parque el cerrillo",
+      "osm_id": "way:808969825"
+    },
+    {
+      "id_ficha": "osm:way:808966920",
+      "nombre": "Parque el Palmar",
+      "osm_id": "way:808966920"
+    },
+    {
+      "id_ficha": "osm:node:13505008801",
+      "nombre": "Parque el triangulito",
+      "osm_id": "node:13505008801"
+    },
+    {
+      "id_ficha": "osm:way:199380340",
+      "nombre": "Parque Huerta Clemente",
+      "osm_id": "way:199380340"
+    },
+    {
+      "id_ficha": "osm:way:625037293",
+      "nombre": "Parque Huerta Rosario",
+      "osm_id": "way:625037293"
+    },
+    {
+      "id_ficha": "osm:way:810407163",
+      "nombre": "Parque Infantil Las Marismas",
+      "osm_id": "way:810407163"
+    },
+    {
+      "id_ficha": "osm:way:838282411",
+      "nombre": "Parque infantil Pinar de los Franceses",
+      "osm_id": "way:838282411"
+    },
+    {
+      "id_ficha": "osm:way:699935763",
+      "nombre": "Parque Los Gallos",
+      "osm_id": "way:699935763"
+    },
+    {
+      "id_ficha": "osm:way:326987355",
+      "nombre": "Parque Natural de Bahía de Cádiz",
+      "osm_id": "way:326987355"
+    },
+    {
+      "id_ficha": "osm:way:817250889",
+      "nombre": "Parque Paquiro",
+      "osm_id": "way:817250889"
+    },
+    {
+      "id_ficha": "osm:node:13507858202",
+      "nombre": "Parque Periurbano de La Barrosa",
+      "osm_id": "node:13507858202"
+    },
+    {
+      "id_ficha": "osm:way:142824640",
+      "nombre": "Parque Periurbano Las Albinas (Recinto Ferial)",
+      "osm_id": "way:142824640"
+    },
+    {
+      "id_ficha": "osm:way:53242852",
+      "nombre": "Parque Pinar de Hierro y La Espartosa",
+      "osm_id": "way:53242852"
+    },
+    {
+      "id_ficha": "osm:way:53815352",
+      "nombre": "Parque Público el Campito",
+      "osm_id": "way:53815352"
+    },
+    {
+      "id_ficha": "osm:way:53815281",
+      "nombre": "Parque Público La Soledad",
+      "osm_id": "way:53815281"
+    },
+    {
+      "id_ficha": "osm:way:50787287",
+      "nombre": "Parque Santa Ana",
+      "osm_id": "way:50787287"
+    },
+    {
+      "id_ficha": "osm:node:13507841701",
+      "nombre": "Parquecito cerca de la playa",
+      "osm_id": "node:13507841701"
+    },
+    {
+      "id_ficha": "osm:node:13520512103",
+      "nombre": "PASTELERIA LA DULCE VIDA",
+      "osm_id": "node:13520512103"
+    },
+    {
+      "id_ficha": "osm:node:2093826393",
+      "nombre": "Pastelería Santa Ana",
+      "osm_id": "node:2093826393"
+    },
+    {
+      "id_ficha": "osm:node:4261061899",
+      "nombre": "Payma",
+      "osm_id": "node:4261061899"
+    },
+    {
+      "id_ficha": "osm:node:5166204021",
+      "nombre": "Pazo de Iria",
+      "osm_id": "node:5166204021"
+    },
+    {
+      "id_ficha": "osm:node:4261092093",
+      "nombre": "Pekes",
+      "osm_id": "node:4261092093"
+    },
+    {
+      "id_ficha": "osm:node:13520511801",
+      "nombre": "Peluqueria ELENA PINTEÑO",
+      "osm_id": "node:13520511801"
+    },
+    {
+      "id_ficha": "osm:node:13626757702",
+      "nombre": "Peluquería Gema Guerrero",
+      "osm_id": "node:13626757702"
+    },
+    {
+      "id_ficha": "osm:node:4715538386",
+      "nombre": "Pepeluquero",
+      "osm_id": "node:4715538386"
+    },
+    {
+      "id_ficha": "osm:node:1673589452",
+      "nombre": "Peugeot Talleres Colchón",
+      "osm_id": "node:1673589452"
+    },
+    {
+      "id_ficha": "osm:way:151748289",
+      "nombre": "Peña Flamenca",
+      "osm_id": "way:151748289"
+    },
+    {
+      "id_ficha": "osm:node:4715558622",
+      "nombre": "Picos Pardos",
+      "osm_id": "node:4715558622"
+    },
+    {
+      "id_ficha": "osm:node:14322562601",
+      "nombre": "Pinar de Costa Sancti Petri",
+      "osm_id": "node:14322562601"
+    },
+    {
+      "id_ficha": "osm:node:13504856401",
+      "nombre": "Pino & Jacaranda",
+      "osm_id": "node:13504856401"
+    },
+    {
+      "id_ficha": "osm:node:1582580345",
+      "nombre": "Pinturas Andalucía",
+      "osm_id": "node:1582580345"
+    },
+    {
+      "id_ficha": "osm:node:4261142420",
+      "nombre": "Pippo",
+      "osm_id": "node:4261142420"
+    },
+    {
+      "id_ficha": "osm:node:13505004001",
+      "nombre": "PISCIFACTORIA CUPIBAR CHICLANA",
+      "osm_id": "node:13505004001"
+    },
+    {
+      "id_ficha": "osm:way:53800799",
+      "nombre": "Pistas Deportivas la Longuera",
+      "osm_id": "way:53800799"
+    },
+    {
+      "id_ficha": "osm:node:13520521602",
+      "nombre": "Pizzeria DiRoma",
+      "osm_id": "node:13520521602"
+    },
+    {
+      "id_ficha": "osm:node:13504858001",
+      "nombre": "Pizzería Di Piero I",
+      "osm_id": "node:13504858001"
+    },
+    {
+      "id_ficha": "osm:node:698086755",
+      "nombre": "Pizzería Tabita's",
+      "osm_id": "node:698086755"
+    },
+    {
+      "id_ficha": "osm:node:4715573180",
+      "nombre": "Pizzería Vanus",
+      "osm_id": "node:4715573180"
+    },
+    {
+      "id_ficha": "osm:node:4715558621",
+      "nombre": "Plató 54",
+      "osm_id": "node:4715558621"
+    },
+    {
+      "id_ficha": "osm:way:155830988",
+      "nombre": "Plaza 1º de Mayo",
+      "osm_id": "way:155830988"
+    },
+    {
+      "id_ficha": "osm:way:184592750",
+      "nombre": "Plaza Antonio Mairena",
+      "osm_id": "way:184592750"
+    },
+    {
+      "id_ficha": "osm:way:155842335",
+      "nombre": "Plaza Atenas",
+      "osm_id": "way:155842335"
+    },
+    {
+      "id_ficha": "osm:way:184177547",
+      "nombre": "Plaza Carmen Olmedo Checa",
+      "osm_id": "way:184177547"
+    },
+    {
+      "id_ficha": "osm:way:808138546",
+      "nombre": "Plaza de la Langosta",
+      "osm_id": "way:808138546"
+    },
+    {
+      "id_ficha": "osm:way:142799982",
+      "nombre": "Plaza de la Libertad",
+      "osm_id": "way:142799982"
+    },
+    {
+      "id_ficha": "osm:way:155833494",
+      "nombre": "Plaza de la Pedrera",
+      "osm_id": "way:155833494"
+    },
+    {
+      "id_ficha": "osm:way:797124603",
+      "nombre": "PLAZA DE LA PIEDRA",
+      "osm_id": "way:797124603"
+    },
+    {
+      "id_ficha": "osm:way:143415249",
+      "nombre": "Plaza de la Torre Moreno",
+      "osm_id": "way:143415249"
+    },
+    {
+      "id_ficha": "osm:way:198212776",
+      "nombre": "Plaza de las Palmeras",
+      "osm_id": "way:198212776"
+    },
+    {
+      "id_ficha": "osm:way:550878471",
+      "nombre": "plaza españa",
+      "osm_id": "way:550878471"
+    },
+    {
+      "id_ficha": "osm:node:4261286891",
+      "nombre": "Plaza Mayor",
+      "osm_id": "node:4261286891"
+    },
+    {
+      "id_ficha": "osm:way:645256828",
+      "nombre": "Plazuela Teruel",
+      "osm_id": "way:645256828"
+    },
+    {
+      "id_ficha": "osm:way:50787290",
+      "nombre": "Polideportivo Ciudad de Chiclana",
+      "osm_id": "way:50787290"
+    },
+    {
+      "id_ficha": "osm:node:1569478533",
+      "nombre": "Popeyes",
+      "osm_id": "node:1569478533"
+    },
+    {
+      "id_ficha": "osm:node:1837835304",
+      "nombre": "Portobello Sancti Petri",
+      "osm_id": "node:1837835304"
+    },
+    {
+      "id_ficha": "osm:node:13500906301",
+      "nombre": "Punta Europa",
+      "osm_id": "node:13500906301"
+    },
+    {
+      "id_ficha": "osm:node:672999525",
+      "nombre": "Punto Magico \"La Espartosa\"",
+      "osm_id": "node:672999525"
+    },
+    {
+      "id_ficha": "osm:node:1619083675",
+      "nombre": "Punto mágico \"Miralamar\"",
+      "osm_id": "node:1619083675"
+    },
+    {
+      "id_ficha": "osm:node:1568375111",
+      "nombre": "Punto mágico de Santa Ana",
+      "osm_id": "node:1568375111"
+    },
+    {
+      "id_ficha": "osm:node:1569439499",
+      "nombre": "Ramón Hoyo - Citroën",
+      "osm_id": "node:1569439499"
+    },
+    {
+      "id_ficha": "osm:node:1837835293",
+      "nombre": "Rekoveko",
+      "osm_id": "node:1837835293"
+    },
+    {
+      "id_ficha": "osm:node:4261170701",
+      "nombre": "Remy",
+      "osm_id": "node:4261170701"
+    },
+    {
+      "id_ficha": "osm:way:277250992",
+      "nombre": "Reserva Natural Concertada Laguna de la Paja",
+      "osm_id": "way:277250992"
+    },
+    {
+      "id_ficha": "osm:node:13286266786",
+      "nombre": "Restaurant Aldiana Andalusien",
+      "osm_id": "node:13286266786"
+    },
+    {
+      "id_ficha": "osm:way:1529873061",
+      "nombre": "Restaurante Cábaro",
+      "osm_id": "way:1529873061"
+    },
+    {
+      "id_ficha": "osm:node:1647366914",
+      "nombre": "Restaurante El Santuario",
+      "osm_id": "node:1647366914"
+    },
+    {
+      "id_ficha": "osm:node:7661850915",
+      "nombre": "Restaurante La Braseria",
+      "osm_id": "node:7661850915"
+    },
+    {
+      "id_ficha": "osm:node:1837085477",
+      "nombre": "Restaurante La Sartén",
+      "osm_id": "node:1837085477"
+    },
+    {
+      "id_ficha": "osm:node:11771341704",
+      "nombre": "Restaurante Mi Alma",
+      "osm_id": "node:11771341704"
+    },
+    {
+      "id_ficha": "osm:way:1523527064",
+      "nombre": "Restaurante Zurga",
+      "osm_id": "way:1523527064"
+    },
+    {
+      "id_ficha": "osm:node:13482856201",
+      "nombre": "Rotulos Velazques",
+      "osm_id": "node:13482856201"
+    },
+    {
+      "id_ficha": "osm:node:13507888102",
+      "nombre": "ROYAL EQUESTRIAN CENTER - CENTRO HIPICA",
+      "osm_id": "node:13507888102"
+    },
+    {
+      "id_ficha": "osm:way:184446454",
+      "nombre": "Sagrada Familia - SAFA",
+      "osm_id": "way:184446454"
+    },
+    {
+      "id_ficha": "osm:way:186528304",
+      "nombre": "Sala de estudios Brake",
+      "osm_id": "way:186528304"
+    },
+    {
+      "id_ficha": "osm:way:493289253",
+      "nombre": "Salina de Carboneros",
+      "osm_id": "way:493289253"
+    },
+    {
+      "id_ficha": "osm:way:428046298",
+      "nombre": "Salones Pico de Oro",
+      "osm_id": "way:428046298"
+    },
+    {
+      "id_ficha": "osm:node:13495468101",
+      "nombre": "Salón Bella Montero Peluquería y Estética natural “Secretos del Agua\"",
+      "osm_id": "node:13495468101"
+    },
+    {
+      "id_ficha": "osm:node:4260935733",
+      "nombre": "San Lorenzo",
+      "osm_id": "node:4260935733"
+    },
+    {
+      "id_ficha": "osm:relation:21447370",
+      "nombre": "Sancti Petri Hills Golf",
+      "osm_id": "relation:21447370"
+    },
+    {
+      "id_ficha": "osm:node:11773418111",
+      "nombre": "Sanny",
+      "osm_id": "node:11773418111"
+    },
+    {
+      "id_ficha": "osm:node:2087580985",
+      "nombre": "santorini",
+      "osm_id": "node:2087580985"
+    },
+    {
+      "id_ficha": "osm:node:13136527202",
+      "nombre": "Sawarma Amsterdam 2",
+      "osm_id": "node:13136527202"
+    },
+    {
+      "id_ficha": "osm:node:13505447302",
+      "nombre": "SELVÃTIKA Coffee & Brunch",
+      "osm_id": "node:13505447302"
+    },
+    {
+      "id_ficha": "osm:node:13505051801",
+      "nombre": "Sendero Salina Carboneros",
+      "osm_id": "node:13505051801"
+    },
+    {
+      "id_ficha": "osm:node:4258314921",
+      "nombre": "Sensimar",
+      "osm_id": "node:4258314921"
+    },
+    {
+      "id_ficha": "osm:node:5171035546",
+      "nombre": "SentimientosTarot",
+      "osm_id": "node:5171035546"
+    },
+    {
+      "id_ficha": "osm:node:4261091693",
+      "nombre": "Shana",
+      "osm_id": "node:4261091693"
+    },
+    {
+      "id_ficha": "osm:node:2087473509",
+      "nombre": "Show de Tapas",
+      "osm_id": "node:2087473509"
+    },
+    {
+      "id_ficha": "osm:node:4715573183",
+      "nombre": "Siva",
+      "osm_id": "node:4715573183"
+    },
+    {
+      "id_ficha": "osm:node:13483962701",
+      "nombre": "SIXT",
+      "osm_id": "node:13483962701"
+    },
+    {
+      "id_ficha": "osm:node:2791753741",
+      "nombre": "Sixto García Abogados",
+      "osm_id": "node:2791753741"
+    },
+    {
+      "id_ficha": "osm:node:1601503264",
+      "nombre": "Soho",
+      "osm_id": "node:1601503264"
+    },
+    {
+      "id_ficha": "osm:node:4261147989",
+      "nombre": "Sol",
+      "osm_id": "node:4261147989"
+    },
+    {
+      "id_ficha": "osm:node:4261142495",
+      "nombre": "Solo novias",
+      "osm_id": "node:4261142495"
+    },
+    {
+      "id_ficha": "osm:node:1837835327",
+      "nombre": "Solventa Service Center",
+      "osm_id": "node:1837835327"
+    },
+    {
+      "id_ficha": "osm:node:13482842301",
+      "nombre": "Sonreír Ana Anglada Dentista",
+      "osm_id": "node:13482842301"
+    },
+    {
+      "id_ficha": "osm:node:5645495126",
+      "nombre": "Sound kapital",
+      "osm_id": "node:5645495126"
+    },
+    {
+      "id_ficha": "osm:way:52629001",
+      "nombre": "Sports Center Hotel Riu Chiclana",
+      "osm_id": "way:52629001"
+    },
+    {
+      "id_ficha": "osm:node:4261069896",
+      "nombre": "Springfield",
+      "osm_id": "node:4261069896"
+    },
+    {
+      "id_ficha": "osm:way:759682526",
+      "nombre": "Sprint",
+      "osm_id": "way:759682526"
+    },
+    {
+      "id_ficha": "osm:node:4119521889",
+      "nombre": "Sprinter",
+      "osm_id": "node:4119521889"
+    },
+    {
+      "id_ficha": "osm:node:10301259736",
+      "nombre": "Starbikes",
+      "osm_id": "node:10301259736"
+    },
+    {
+      "id_ficha": "osm:node:2093774607",
+      "nombre": "Stefania de la llave",
+      "osm_id": "node:2093774607"
+    },
+    {
+      "id_ficha": "osm:node:4261170700",
+      "nombre": "Stilo",
+      "osm_id": "node:4261170700"
+    },
+    {
+      "id_ficha": "osm:node:13136550901",
+      "nombre": "Stop Center",
+      "osm_id": "node:13136550901"
+    },
+    {
+      "id_ficha": "osm:way:51864419",
+      "nombre": "Supeco",
+      "osm_id": "way:51864419"
+    },
+    {
+      "id_ficha": "osm:way:150056370",
+      "nombre": "Supera Chiclana (Gimnasio y Piscina municipal)",
+      "osm_id": "way:150056370"
+    },
+    {
+      "id_ficha": "osm:node:13507842602",
+      "nombre": "Supermercado Atlantida",
+      "osm_id": "node:13507842602"
+    },
+    {
+      "id_ficha": "osm:node:4693191246",
+      "nombre": "Sushi Panda",
+      "osm_id": "node:4693191246"
+    },
+    {
+      "id_ficha": "osm:node:4261016398",
+      "nombre": "Taberna la ilusión",
+      "osm_id": "node:4261016398"
+    },
+    {
+      "id_ficha": "osm:node:13430896302",
+      "nombre": "Taberna Pizzería La Cobijá",
+      "osm_id": "node:13430896302"
+    },
+    {
+      "id_ficha": "osm:node:4261090497",
+      "nombre": "Take Away",
+      "osm_id": "node:4261090497"
+    },
+    {
+      "id_ficha": "osm:node:13505088701",
+      "nombre": "TALLER DE PIEDRA LOS GALLOS",
+      "osm_id": "node:13505088701"
+    },
+    {
+      "id_ficha": "osm:node:13464972401",
+      "nombre": "Taller Mecánico El Pinar",
+      "osm_id": "node:13464972401"
+    },
+    {
+      "id_ficha": "osm:node:13514820501",
+      "nombre": "Talleres Juan González e Hijos",
+      "osm_id": "node:13514820501"
+    },
+    {
+      "id_ficha": "osm:node:13504816801",
+      "nombre": "Talleres Periver",
+      "osm_id": "node:13504816801"
+    },
+    {
+      "id_ficha": "osm:node:2093847079",
+      "nombre": "Tapería La Flamenca",
+      "osm_id": "node:2093847079"
+    },
+    {
+      "id_ficha": "osm:way:198640855",
+      "nombre": "tartessus buffet",
+      "osm_id": "way:198640855"
+    },
+    {
+      "id_ficha": "osm:node:679147705",
+      "nombre": "Teatro Moderno - Casa de la Cultura",
+      "osm_id": "node:679147705"
+    },
+    {
+      "id_ficha": "osm:node:1551803079",
+      "nombre": "Telepizza",
+      "osm_id": "node:1551803079"
+    },
+    {
+      "id_ficha": "osm:node:1657465550",
+      "nombre": "Telepizza",
+      "osm_id": "node:1657465550"
+    },
+    {
+      "id_ficha": "osm:node:13483904201",
+      "nombre": "Tennisbar Aldiana Andalusien",
+      "osm_id": "node:13483904201"
+    },
+    {
+      "id_ficha": "osm:node:11392407844",
+      "nombre": "Tercer Tiempo",
+      "osm_id": "node:11392407844"
+    },
+    {
+      "id_ficha": "osm:node:1568342535",
+      "nombre": "Tetería La Morería",
+      "osm_id": "node:1568342535"
+    },
+    {
+      "id_ficha": "osm:node:13462010201",
+      "nombre": "Todojardin",
+      "osm_id": "node:13462010201"
+    },
+    {
+      "id_ficha": "osm:node:11392504311",
+      "nombre": "Topgea",
+      "osm_id": "node:11392504311"
+    },
+    {
+      "id_ficha": "osm:node:4722257249",
+      "nombre": "Toy Planet",
+      "osm_id": "node:4722257249"
+    },
+    {
+      "id_ficha": "osm:node:4261142418",
+      "nombre": "Toñi y Ana Lucía",
+      "osm_id": "node:4261142418"
+    },
+    {
+      "id_ficha": "osm:node:1616831290",
+      "nombre": "Unicaja Banco",
+      "osm_id": "node:1616831290"
+    },
+    {
+      "id_ficha": "osm:node:11392495726",
+      "nombre": "Varadero Beach Bar",
+      "osm_id": "node:11392495726"
+    },
+    {
+      "id_ficha": "osm:node:1657465555",
+      "nombre": "Varekai",
+      "osm_id": "node:1657465555"
+    },
+    {
+      "id_ficha": "osm:node:4258324492",
+      "nombre": "VAVA",
+      "osm_id": "node:4258324492"
+    },
+    {
+      "id_ficha": "osm:way:150220495",
+      "nombre": "Velódromo - Estadio del Chiclana Industrial",
+      "osm_id": "way:150220495"
+    },
+    {
+      "id_ficha": "osm:node:1951072736",
+      "nombre": "Venta Agustín",
+      "osm_id": "node:1951072736"
+    },
+    {
+      "id_ficha": "osm:way:53141044",
+      "nombre": "Venta Campano",
+      "osm_id": "way:53141044"
+    },
+    {
+      "id_ficha": "osm:node:13136295402",
+      "nombre": "Venta de pinturas",
+      "osm_id": "node:13136295402"
+    },
+    {
+      "id_ficha": "osm:node:13431342801",
+      "nombre": "Venta del Burro",
+      "osm_id": "node:13431342801"
+    },
+    {
+      "id_ficha": "osm:node:3405804304",
+      "nombre": "Venta El Pino",
+      "osm_id": "node:3405804304"
+    },
+    {
+      "id_ficha": "osm:node:644153048",
+      "nombre": "Venta Tocino",
+      "osm_id": "node:644153048"
+    },
+    {
+      "id_ficha": "osm:node:13136506506",
+      "nombre": "Viajes",
+      "osm_id": "node:13136506506"
+    },
+    {
+      "id_ficha": "osm:node:11392548114",
+      "nombre": "Viamed Las Salinas",
+      "osm_id": "node:11392548114"
+    },
+    {
+      "id_ficha": "osm:node:13505440401",
+      "nombre": "Vibra’s lounge bar",
+      "osm_id": "node:13505440401"
+    },
+    {
+      "id_ficha": "osm:node:12992888407",
+      "nombre": "Vidal suministros eléctricos",
+      "osm_id": "node:12992888407"
+    },
+    {
+      "id_ficha": "osm:node:11390566231",
+      "nombre": "Vidamia",
+      "osm_id": "node:11390566231"
+    },
+    {
+      "id_ficha": "osm:way:199376788",
+      "nombre": "Vipren",
+      "osm_id": "way:199376788"
+    },
+    {
+      "id_ficha": "osm:node:4722562797",
+      "nombre": "VivaGym Urbisur",
+      "osm_id": "node:4722562797"
+    },
+    {
+      "id_ficha": "osm:node:13484017301",
+      "nombre": "Vivero Losteflor",
+      "osm_id": "node:13484017301"
+    },
+    {
+      "id_ficha": "osm:node:13482885101",
+      "nombre": "Welldiana by Aldiana Andalusien",
+      "osm_id": "node:13482885101"
+    },
+    {
+      "id_ficha": "osm:node:10781935171",
+      "nombre": "wild camping",
+      "osm_id": "node:10781935171"
+    },
+    {
+      "id_ficha": "osm:node:7313835918",
+      "nombre": "Wing Chun Wuyi",
+      "osm_id": "node:7313835918"
+    },
+    {
+      "id_ficha": "osm:node:4261091694",
+      "nombre": "Y-Phone Store",
+      "osm_id": "node:4261091694"
+    },
+    {
+      "id_ficha": "osm:node:2093847095",
+      "nombre": "Yoigo",
+      "osm_id": "node:2093847095"
+    },
+    {
+      "id_ficha": "osm:node:7485483044",
+      "nombre": "ZONA DE EJERCICIOS PINAR DE LOS FRANCESES",
+      "osm_id": "node:7485483044"
+    },
+    {
+      "id_ficha": "osm:way:838281999",
+      "nombre": "Zono de ejercicios del sendero",
+      "osm_id": "way:838281999"
+    },
+    {
+      "id_ficha": "osm:node:11392465837",
+      "nombre": "Ático Gadtrobar",
+      "osm_id": "node:11392465837"
+    },
+    {
+      "id_ficha": "osm:node:12992877456",
+      "nombre": "Ávila",
+      "osm_id": "node:12992877456"
+    },
+    {
+      "id_ficha": "osm:node:4261092094",
+      "nombre": "Óptica Centro",
+      "osm_id": "node:4261092094"
     }
   ],
-  "errores_lotes": [],
-  "nota": "Propuestas únicamente. No modifica fichas_completas.json ni publica direcciones; requiere validación antes de incorporar."
+  "ids_osm_no_encontrados": [],
+  "sin_identificador_osm": [
+    {
+      "id_ficha": "oficial:80eae20f98c7c986c7f6",
+      "nombre": "Charter Alcántara"
+    },
+    {
+      "id_ficha": "oficial:c117f8ec50ba25bad082",
+      "nombre": "Ermita de Santa Ana"
+    },
+    {
+      "id_ficha": "oficial:94abed2977cbdf584917",
+      "nombre": "Multicines las Salinas"
+    },
+    {
+      "id_ficha": "oficial:69c0d1be602b8dfca6b3",
+      "nombre": "Puerto Deportivo \"Sancti Petri\""
+    },
+    {
+      "id_ficha": "turismo:1bcc1232f85408378a15",
+      "nombre": "Ruta cultural: Casas Monumentales"
+    },
+    {
+      "id_ficha": "turismo:b78e3e749fb643f1e02b",
+      "nombre": "Ruta cultural: Centro histórico"
+    },
+    {
+      "id_ficha": "turismo:05650520a7f6fdab4319",
+      "nombre": "Ruta cultural: Chiclana, de Origen Fenicio"
+    },
+    {
+      "id_ficha": "turismo:79c460daf4896253a637",
+      "nombre": "Ruta cultural: Chiclana, Ruta Napoleónica"
+    },
+    {
+      "id_ficha": "turismo:e1c15f3d5dd4aad64f61",
+      "nombre": "Ruta cultural: Romántica"
+    },
+    {
+      "id_ficha": "turismo:dbe4dd9256466355b24c",
+      "nombre": "Ruta cultural: Río Iro"
+    },
+    {
+      "id_ficha": "oficial:9427c992514c37fb8222",
+      "nombre": "Urgencias"
+    },
+    {
+      "id_ficha": "oficial:81e45eab4a9f35e54e02",
+      "nombre": "Valentin Sancti Petri Spa"
+    },
+    {
+      "id_ficha": "oficial:5eb71868a9d4c10c1bfa",
+      "nombre": "Waterman School"
+    }
+  ]
 }
