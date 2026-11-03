@@ -1,10 +1,6 @@
 name: Auditoría municipal completa de OpenStreetMap
 
 on:
-  push:
-    paths:
-      - ".github/workflows/auditoria-osm-municipal.yml"
-      - "v3/proponer_direcciones_osm.py"
   workflow_dispatch:
   schedule:
     - cron: "30 4 * * 1"
