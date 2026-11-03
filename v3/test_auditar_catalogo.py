@@ -237,10 +237,14 @@ class AuditDuplicateTests(unittest.TestCase):
         self.assertEqual(result["urls_invalidas"], [])
         self.assertEqual(result["coordenadas_invalidas"], [])
 
-    def test_public_page_excludes_generic_water_overrides(self):
+    def test_public_page_uses_local_catalog_without_supabase_for_fichas(self):
         page = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
+        self.assertIn('fetch("fichas_completas.json")', page)
         self.assertIn("const esAguaGenerica=", page)
-        self.assertIn("!esAguaGenerica(o.fields?.n", page)
+        self.assertIn("!esAguaGenerica(x.n", page)
+        self.assertNotIn("https://cdn.jsdelivr.net/npm/@supabase/supabase-js", page)
+        self.assertNotIn('sb.from("listing_overrides")', page)
+        self.assertNotIn('sb.from("listing_categories")', page)
 
 
 if __name__ == "__main__":
