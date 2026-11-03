@@ -162,7 +162,15 @@ function visitorCompleteness(x){return ["a","p","e","w","h","d"].filter(k=>x[k]!
 function combinarCamposConDatos(base, aportados){const resultado={...base};Object.entries(aportados||{}).forEach(([clave,valor])=>{const vacio=valor===null||valor===undefined||(typeof valor==="string"&&valor.trim()==="");if(!vacio)resultado[clave]=valor});return resultado}
 function effectiveItems(){
  const byId=new Map(overrides.map(o=>[o.listing_id,o]));
- let out=baseItems.filter(x=>x._xiclana_deleted!==true&&!byId.get(stableId(x))?.fields?._xiclana_deleted).map(x=>{const id=stableId(x),o=byId.get(id);return {...combinarCamposConDatos(x,o?.fields),id,verified_at:o?.verified_at||null,is_new:false}});
+ let out=baseItems.filter(x=>{
+  const id=stableId(x),o=byId.get(id);
+  return o?.fields?._xiclana_deleted!==true&&(x._xiclana_deleted!==true||o?.fields?._xiclana_restore_deleted===true);
+ }).map(x=>{
+  const id=stableId(x),o=byId.get(id),fields=combinarCamposConDatos(x,o?.fields);
+  if(o?.fields?._xiclana_restore_deleted===true)delete fields._xiclana_deleted;
+  delete fields._xiclana_restore_deleted;
+  return {...fields,id,verified_at:o?.verified_at||null,is_new:false};
+ });
  overrides.filter(o=>o.is_new&&!o.fields?._xiclana_deleted).forEach(o=>{if(!baseItems.some(x=>stableId(x)===o.listing_id))out.push({...o.fields,id:o.listing_id,verified_at:o.verified_at,is_new:true})});
  // La Rana Verde es una zona geográfica; agrupar solo variantes exactas del mismo camping.
  const claveRana=x=>String(x.n||x.nombre||x.name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()==="camping la rana verde";
@@ -247,10 +255,11 @@ function candidateAlreadyExists(candidate){
 }
 function renderAutomaticCandidates(){
  const root=$("#automatic-candidates-list");if(!root)return;root.textContent="";
- const approved=new Set(overrides.filter(o=>o.is_new&&!o.fields?._xiclana_deleted).map(o=>String(o.listing_id)));
+ const approved=new Set(overrides.filter(o=>o.fields?._xiclana_deleted!==true).map(o=>String(o.listing_id)));
+ const deletedOverrides=new Set(overrides.filter(o=>o.fields?._xiclana_deleted===true).map(o=>String(o.listing_id)));
  const rejected=new Set(proposals.filter(p=>p.status==="rejected"&&p.source_name==="OpenStreetMap").map(p=>String(proposalFields(p).id||"")));
- const baseIds=new Set(baseItems.map(stableId));
- const pending=reviewCandidates.filter(x=>x&&x.id&&!approved.has(String(x.id))&&!rejected.has(String(x.id))&&!baseIds.has(String(x.id))&&x.estado_revision!=="descartada");
+ const baseIds=new Set(baseItems.filter(x=>x._xiclana_deleted!==true).map(stableId));
+ const pending=reviewCandidates.filter(x=>x&&x.id&&!approved.has(String(x.id))&&!deletedOverrides.has(String(x.id))&&!rejected.has(String(x.id))&&!baseIds.has(String(x.id))&&x.estado_revision!=="descartada");
  if(!pending.length){root.textContent="No hay candidatas automáticas pendientes de revisión.";return}
  pending.forEach(candidate=>{
   const card=document.createElement("div");card.className="item";card.style.marginBottom=".65rem";
@@ -270,9 +279,13 @@ async function approveAutomaticCandidate(candidate){
  const duplicate=candidateAlreadyExists(candidate);
  if(duplicate){message("Posible duplicado de «"+(duplicate.n||"ficha existente")+"». Revisa la ficha existente antes de publicar.","error");return}
  if(!candidate.n||!candidate.c||!["ocio","negocio"].includes(candidate.t)){message("La candidata necesita nombre, categoría y tipo válido.","error");return}
- if(!window.confirm("¿Aprobar y publicar «"+candidate.n+"»? La ficha será visible en la web pública."))return;
- const fields={...candidate,f:String(candidate.f||"OpenStreetMap"),fuente_estado:"Candidata automática revisada y aprobada por Administración",v:new Date().toISOString().slice(0,10)};
- delete fields.estado_revision;
+ const base=baseItems.find(x=>stableId(x)===String(candidate.id));
+ const isRecovery=Boolean(base&&base._xiclana_deleted===true);
+ const action=isRecovery?"recuperar y aprobar":"aprobar y publicar";
+ if(!window.confirm("¿"+action.charAt(0).toUpperCase()+action.slice(1)+" «"+candidate.n+"»? La decisión será manual y la web se actualizará en la siguiente sincronización."))return;
+ const fields={...(base||{}),...candidate,f:String(candidate.f||"OpenStreetMap"),fuente_estado:isRecovery?"Ficha recuperada de baja y aprobada manualmente":"Candidata automática revisada y aprobada por Administración",v:new Date().toISOString().slice(0,10)};
+ delete fields.estado_revision;delete fields._xiclana_osm_auto;delete fields._xiclana_recovered_from_deleted;delete fields.osm_id;delete fields.url_osm;delete fields.nota_revision;delete fields._xiclana_deleted;
+ if(isRecovery)fields._xiclana_restore_deleted=true;else delete fields._xiclana_restore_deleted;
  const known=categories.some(x=>candidateKey(x.name)===candidateKey(fields.c)&&x.type===fields.t);
  if(!known){
   const baseSlug=slugify(fields.c),conflict=categories.some(x=>x.slug===baseSlug&&x.type!==fields.t);
@@ -283,9 +296,9 @@ async function approveAutomaticCandidate(candidate){
   categories=categories.filter(x=>x.slug!==cat.slug);categories.push(cat);renderCategories();
  }
  const now=new Date().toISOString();
- const {error}=await client.from("listing_overrides").upsert({listing_id:String(candidate.id),fields,is_new:true,verified_at:now,updated_at:now,updated_by:user.id},{onConflict:"listing_id"});
+ const {error}=await client.from("listing_overrides").upsert({listing_id:String(candidate.id),fields,is_new:!base,verified_at:now,updated_at:now,updated_by:user.id},{onConflict:"listing_id"});
  if(error){message("No se pudo publicar la candidata: "+error.message,"error");return}
- await loadData();message("Candidata aprobada y publicada: "+candidate.n,"ok");
+ await loadData();message((isRecovery?"Ficha recuperada y aprobada: ":"Candidata aprobada: ")+candidate.n,"ok");
 }
 async function rejectAutomaticCandidate(candidate){
  if(!window.confirm("¿Descartar «"+candidate.n+"»? Quedará registrada como rechazada y no volverá a aparecer en esta revisión."))return;
