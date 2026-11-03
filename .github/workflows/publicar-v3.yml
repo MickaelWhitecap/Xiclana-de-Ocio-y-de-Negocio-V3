@@ -10,8 +10,8 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: pages-v3-master
-  cancel-in-progress: true
+  group: xiclana-catalogo-maestro
+  cancel-in-progress: false
 jobs:
   publicar:
     if: github.actor != 'github-actions[bot]' || github.event_name != 'push'
@@ -62,10 +62,25 @@ jobs:
           else
             echo "El catálogo maestro no ha cambiado."
           fi
-      - name: Preparar sitio V3 independiente
+      - name: Preparar sitio V3 independiente sin cargar el archivo de auditoría OSM
         run: |
+          set -euo pipefail
           mkdir -p _site
-          cp v3/index.html v3/fichas_completas.json v3/admin.html v3/exportar-fichas.html v3/supabase-config.js _site/
+          cp v3/index.html v3/admin.html v3/exportar-fichas.html v3/supabase-config.js _site/
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          source = json.loads(Path("v3/fichas_completas.json").read_text(encoding="utf-8"))
+          # La extracción íntegra y los informes permanecen en el catálogo maestro de GitHub.
+          # No se envían al navegador: son datos de auditoría y harían muy pesada la web.
+          for key in ("osm_extraccion_inicial", "auditoria_osm", "propuestas_direcciones_osm"):
+              source.pop(key, None)
+          Path("_site/fichas_completas.json").write_text(
+              json.dumps(source, ensure_ascii=False, separators=(",", ":")),
+              encoding="utf-8"
+          )
+          print(f"Catálogo público preparado: {len(source.get('items', []))} registros; auditoría OSM excluida.")
+          PY
           cp v3/fondo.jpg v3/fondo.txt _site/ 2>/dev/null || true
           cp v3/espacio-1-flamenca.jpg _site/
           cp README.md _site/README.md
