@@ -1,6 +1,10 @@
 name: Incorporar auditoría OSM verificada al catálogo maestro
 
 on:
+  push:
+    paths:
+      - ".github/workflows/incorporar-auditoria-osm.yml"
+      - "v3/incorporar_auditoria_osm.py"
   workflow_dispatch:
 
 permissions:
