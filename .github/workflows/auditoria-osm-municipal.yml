@@ -1,6 +1,10 @@
 name: Auditoría municipal completa de OpenStreetMap
 
 on:
+  push:
+    paths:
+      - ".github/workflows/auditoria-osm-municipal.yml"
+      - "v3/proponer_direcciones_osm.py"
   workflow_dispatch:
   schedule:
     - cron: "30 4 * * 1"
@@ -31,6 +35,10 @@ jobs:
       - name: Comparar consulta semanal con la extracción inicial
         if: success()
         run: python v3/comparar_cambios_osm.py
+
+      - name: Generar propuestas de direcciones para fichas sin dirección
+        if: success()
+        run: python v3/proponer_direcciones_osm.py
 
       - name: Publicar resumen de auditoría
         if: always()
@@ -84,6 +92,28 @@ jobs:
               f.write("\n".join(lines) + "\n")
           PY
 
+      - name: Añadir resumen de propuestas de direcciones
+        if: success() && hashFiles('v3/propuestas_direcciones_osm.json') != ''
+        run: |
+          python - <<'PY'
+          import json, os
+          p=json.load(open("v3/propuestas_direcciones_osm.json", encoding="utf-8"))
+          r=p["resumen"]
+          lines=[
+            "",
+            "## Propuestas de direcciones para fichas sin dirección",
+            f"- Fichas activas sin dirección: **{r['fichas_activas_sin_direccion']}**",
+            f"- Con ID OSM: **{r['sin_direccion_con_id_osm']}**",
+            f"- Sin ID OSM: **{r['sin_direccion_sin_id_osm']}**",
+            f"- Propuestas generadas: **{r['propuestas_direccion_generadas']}**",
+            f"- Sin etiquetas postales utilizables: **{r['sin_etiquetas_postales_utilizables']}**",
+            "- Direcciones existentes sobrescritas: **0**",
+            "- Fichas publicadas automáticamente: **0**"
+          ]
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
+              f.write("\n".join(lines) + "\n")
+          PY
+
       - name: Guardar extracción completa, auditoría y diferencias
         if: always()
         uses: actions/upload-artifact@v4
@@ -93,6 +123,7 @@ jobs:
             v3/osm_chiclana_extraccion_completa.json
             v3/osm_chiclana_cruce_catalogo.json
             v3/osm_chiclana_cambios_semanales.json
+            v3/propuestas_direcciones_osm.json
           if-no-files-found: warn
           compression-level: 6
           retention-days: 8
