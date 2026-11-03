@@ -202,13 +202,29 @@ def main():
         str(row.get("listing_id")) for row in overrides
         if isinstance(row.get("fields"), dict) and row["fields"].get("_xiclana_deleted") is True
     }
+    active_override_rows = [
+        row for row in overrides
+        if isinstance(row, dict) and row.get("listing_id")
+        and not (isinstance(row.get("fields"), dict) and row["fields"].get("_xiclana_deleted") is True)
+    ]
     active = [x for x in items if isinstance(x, dict) and x.get("_xiclana_deleted") is not True]
     active_by_name = collections.defaultdict(list)
     for item in active:
         name = norm(item.get("n") or item.get("nombre") or item.get("name"))
         if name:
             active_by_name[name].append(item)
-    all_ids = {str(x.get("id")) for x in items if x.get("id")}
+    # Las fichas aprobadas en Supabase también cuentan como activas aunque
+    # todavía no estén integradas en el JSON maestro.
+    for row in active_override_rows:
+        fields = row.get("fields")
+        if not isinstance(fields, dict):
+            continue
+        override_item = {**fields, "id": str(row.get("listing_id"))}
+        name = norm(override_item.get("n") or override_item.get("nombre") or override_item.get("name"))
+        if name:
+            active_by_name[name].append(override_item)
+    all_ids = {str(x.get("id")) for x in items if isinstance(x, dict) and x.get("id")}
+    all_ids.update(str(row["listing_id"]) for row in active_override_rows)
 
     recovered, skipped_recovered = [], collections.Counter()
     for item in items:
@@ -282,6 +298,18 @@ def main():
             continue
         location = entry.get("coordenadas") or None
         latlon = (location.get("lat"), location.get("lon")) if location and location.get("lat") is not None and location.get("lon") is not None else None
+        # No volver a proponer como nueva una ficha que ya fue aprobada
+        # en Supabase, aunque aún no figure dentro de items del JSON maestro.
+        candidate_name = norm(entry.get("nombre"))
+        duplicate_active = False
+        for active_item in active_by_name.get(candidate_name, []) if candidate_name else []:
+            distance = distance_m(latlon, item_coords(active_item))
+            if distance is None or distance <= 150:
+                duplicate_active = True
+                break
+        if duplicate_active:
+            skipped_new["posible_duplicado_activo"] += 1
+            continue
         candidate = tags_to_fields(entry.get("nombre"), tags, latlon, ident)
         candidate["osm_id"] = osm_id
         candidate["url_osm"] = entry.get("url") or candidate["url_osm"]
