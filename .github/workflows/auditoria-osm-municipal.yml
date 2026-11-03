@@ -28,6 +28,10 @@ jobs:
       - name: Extraer todos los elementos OSM y cruzar con catálogo maestro
         run: python v3/auditar_osm_municipal.py
 
+      - name: Comparar consulta semanal con la extracción inicial
+        if: success()
+        run: python v3/comparar_cambios_osm.py
+
       - name: Publicar resumen de auditoría
         if: always()
         run: |
@@ -57,7 +61,30 @@ jobs:
             echo "No se generó el informe. Consultar los registros de Overpass." >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - name: Guardar extracción completa e informe
+      - name: Publicar resumen de novedades y cambios
+        if: success() && hashFiles('v3/osm_chiclana_cambios_semanales.json') != ''
+        run: |
+          python - <<'PY'
+          import json, os
+          p=json.load(open("v3/osm_chiclana_cambios_semanales.json", encoding="utf-8"))
+          r=p["resumen"]
+          lines=[
+            "",
+            "## Cambios OSM respecto a la extracción inicial",
+            f"- Objetos en la extracción inicial: **{r['objetos_iniciales']}**",
+            f"- Objetos en la consulta actual: **{r['objetos_actuales']}**",
+            f"- Objetos nuevos: **{r['objetos_nuevos']}**",
+            f"- Objetos con cambios de contenido: **{r['objetos_con_cambios_de_contenido']}**",
+            f"- Objetos que ya no aparecen: **{r['objetos_eliminados_de_osm']}**",
+            f"- Cambios solo de metadatos: **{r['objetos_con_solo_cambio_de_metadatos']}**",
+            "",
+            "El informe detallado queda adjunto como artefacto. No se modifica ni publica el catálogo."
+          ]
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
+              f.write("\\n".join(lines) + "\\n")
+          PY
+
+      - name: Guardar extracción completa, auditoría y diferencias
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -65,6 +92,7 @@ jobs:
           path: |
             v3/osm_chiclana_extraccion_completa.json
             v3/osm_chiclana_cruce_catalogo.json
+            v3/osm_chiclana_cambios_semanales.json
           if-no-files-found: warn
           compression-level: 6
           retention-days: 8
