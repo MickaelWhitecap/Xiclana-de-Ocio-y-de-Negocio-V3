@@ -59,7 +59,8 @@ jobs:
           git archive --format=zip --output=xiclana-v3-source.zip HEAD
           test -s xiclana-v3-source.zip
 
-      - name: Comprimir el catálogo y cifrar todas las copias
+      - id: encrypt_backup
+        name: Comprimir el catálogo y cifrar todas las copias
         env:
           BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
         run: |
@@ -121,7 +122,7 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y postgresql-client
           fi
-          until pg_isready -h localhost -p 5432 -U postgres -d xiclana_restore_test; do sleep 2; done
+          until PGPASSWORD=restore_test_password pg_isready -h localhost -p 5432 -U postgres -d xiclana_restore_test; do sleep 2; done
           docker exec "$POSTGRES_CONTAINER" bash -lc 'if [ ! -f /usr/share/postgresql/17/extension/uuid-ossp.control ]; then apt-get update && apt-get install -y postgresql-contrib-17; fi'
           python - <<'PY'
           import re
@@ -142,6 +143,19 @@ jobs:
           CREATE OR REPLACE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS $$ SELECT NULL::text $$;
           CREATE OR REPLACE FUNCTION auth.jwt() RETURNS jsonb LANGUAGE sql STABLE AS $$ SELECT NULL::jsonb $$;
           SQL
+          python - <<'PY'
+          import os, re, subprocess
+          from pathlib import Path
+          url=os.environ["RESTORE_DATABASE_URL"]
+          roles_sql=Path("/tmp/xiclana-restore/roles.sql").read_text(encoding="utf-8")
+          names=set(re.findall(r'(?im)^\\s*ALTER\\s+ROLE\\s+"?([A-Za-z_][A-Za-z0-9_]*)"?', roles_sql))
+          names.update({"anon","authenticated","service_role","authenticator","supabase_admin"})
+          for role in sorted(names):
+              attribute=" BYPASSRLS" if role=="service_role" else ""
+              statement=f"DO $ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{role}') THEN CREATE ROLE \\"{role}\\" NOLOGIN{attribute}; END IF; END $;"
+              subprocess.run(["psql",url,"-v","ON_ERROR_STOP=1","-c",statement],check=True)
+          print("Roles preparados para la restauración aislada:", sorted(names))
+          PY
           psql "$RESTORE_DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/xiclana-restore/roles.sql
           psql "$RESTORE_DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/xiclana-restore/schema_restore.sql
           psql "$RESTORE_DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/xiclana-restore/data.sql
@@ -184,6 +198,7 @@ jobs:
           PY
 
       - name: Guardar copia cifrada durante 30 días
+        if: always() && steps.encrypt_backup.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: xiclana-supabase-backup-${{ github.run_id }}
