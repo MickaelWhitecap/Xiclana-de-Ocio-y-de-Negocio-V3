@@ -59,7 +59,8 @@ jobs:
           test -s v3/fichas_completas.json || { echo "::error::No se encuentra v3/fichas_completas.json o está vacío."; exit 1; }
           supabase db dump --db-url "$SUPABASE_DB_URL" -f schema.sql
           supabase db dump --db-url "$SUPABASE_DB_URL" -f roles.sql --role-only
-          supabase db dump --db-url "$SUPABASE_DB_URL" -f data.sql --use-copy --data-only
+          # Solo se respaldan los datos propios de Xiclana; Supabase Auth/Storage son esquemas gestionados.
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f data.sql --schema public --use-copy --data-only
           git archive --format=zip --output=xiclana-v3-source.zip HEAD -- . ':(exclude)v3/fichas_completas.json'
           test -s xiclana-v3-source.zip
 
