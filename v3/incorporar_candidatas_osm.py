@@ -17,7 +17,7 @@ REPORT = ROOT / "osm_chiclana_cruce_catalogo.json"
 SUMMARY = ROOT / "osm_candidatas_resumen.json"
 OSM_ID_RE = re.compile(r"^(?:osm|osm-extra):(node|way|relation):(\d+)$")
 INTEREST_TAGS = ("amenity", "shop", "tourism", "leisure", "office", "craft", "healthcare", "historic", "sport", "club")
-EXCLUDED_AMENITY = {"drinking_water", "shower", "toilets", "fountain", "recycling"}
+EXCLUDED_AMENITY = {"drinking_water", "shower", "toilets", "fountain", "recycling", "bus_stop", "bus_station"}
 
 
 def clean(value):
@@ -110,6 +110,8 @@ def classify(tags):
         return "negocio", "Servicios sociales"
     if amenity in {"prep_school", "language_school", "college", "childcare"}:
         return "negocio", "Educación"
+    if amenity == "place_of_worship":
+        return "ocio", "Patrimonio y culto"
     if amenity in {"social_centre", "arts_centre", "events_venue", "conference_centre"} or t.get("club") == "scout":
         return "ocio", "Espacios culturales"
     if t.get("club") == "sport" or t.get("sport") or t.get("leisure") in {"sports_centre", "pitch"}:
@@ -188,6 +190,8 @@ def main():
     items = data.get("items")
     if not isinstance(items, list) or not isinstance(raw.get("elementos"), list):
         raise SystemExit("Catálogo o extracción OSM con estructura inválida.")
+    if raw.get("relacion_municipal_osm") != 346951 or raw.get("area_overpass") != 3600346951:
+        raise SystemExit("La extracción no corresponde al ámbito municipal de Chiclana.")
     current = {f"{x.get('type')}:{x.get('id')}": x for x in raw["elementos"]}
     if len(current) != len(raw["elementos"]):
         raise SystemExit("La extracción OSM contiene IDs duplicados.")
@@ -280,6 +284,7 @@ def main():
         candidate = tags_to_fields(entry.get("nombre"), tags, latlon, ident)
         candidate["osm_id"] = osm_id
         candidate["url_osm"] = entry.get("url") or candidate["url_osm"]
+        candidate["fuente_estado"] = "Candidata automática detectada en la consulta municipal OSM; requiere aprobación manual"
         new_candidates.append(candidate)
 
     existing = data.get("candidatas_revision") if isinstance(data.get("candidatas_revision"), list) else []
@@ -290,6 +295,8 @@ def main():
     for candidate in auto:
         unique.setdefault(str(candidate.get("id")), candidate)
     auto = sorted(unique.values(), key=lambda x: clean(x.get("n")).casefold())
+    if len(auto) > 250:
+        raise SystemExit(f"Se detectaron {len(auto)} candidatas automáticas; supera el límite defensivo de 250. No se modifica el catálogo.")
     data["candidatas_revision"] = manual + auto
     data["total_candidatas_revision"] = len(data["candidatas_revision"])
     data["actualizado"] = datetime.now(timezone.utc).strftime("%Y-%m-%d")
