@@ -213,8 +213,29 @@ def main():
         if item.get("e") is not None and str(item.get("e")).strip():
             email_count += 1
 
+    category_counts = {}
+    for item in active_items:
+        category = str(item.get("c") or "").strip()
+        kind = str(item.get("t") or "").strip()
+        if not category:
+            continue
+        key = (kind, category)
+        category_counts[key] = category_counts.get(key, 0) + 1
+    category_distribution = [
+        {"tipo": kind, "categoria": category, "fichas": count}
+        for (kind, category), count in sorted(
+            category_counts.items(),
+            key=lambda pair: (pair[0][0], norm(pair[0][1]), pair[0][1])
+        )
+    ]
+
     report = {
         "fecha": datetime.date.today().isoformat(),
+        "categorias_catalogo": {
+            "total_distintas_tipo_categoria": len(category_counts),
+            "distribucion": category_distribution,
+            "nota": "Cuenta categorías literales de fichas activas, separadas por tipo; no fusiona variantes ni propone equivalencias."
+        },
         "parametros_documentados_por_ficha": {
             "campos_contados": list(documented_fields),
             "distribucion": dict(sorted(distribution.items(), key=lambda pair: int(pair[0]))),
