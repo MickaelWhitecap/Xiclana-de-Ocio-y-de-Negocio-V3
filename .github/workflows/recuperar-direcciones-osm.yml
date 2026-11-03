@@ -17,7 +17,7 @@ concurrency:
 jobs:
   recuperar:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
@@ -25,15 +25,32 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Consultar etiquetas de dirección de OpenStreetMap
-        run: python v3/recuperar_direcciones_osm.py
-      - name: Guardar propuestas dentro del catálogo maestro
+      - name: Recalcular propuestas sobre la última versión del catálogo y guardar sin rebase conflictivo
+        shell: bash
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v3/fichas_completas.json
-          if ! git diff --cached --quiet; then
+
+          # El catálogo es un único JSON grande. Si otro proceso lo actualiza,
+          # no intentamos fusionar dos versiones minificadas: recalculamos
+          # las propuestas sobre la última versión de main.
+          for attempt in 1 2 3; do
+            echo "Intento de guardado $attempt/3"
+            git fetch origin main
+            git reset --hard origin/main
+            python v3/recuperar_direcciones_osm.py
+            git add v3/fichas_completas.json
+            if git diff --cached --quiet; then
+              echo "No hay cambios en las propuestas."
+              exit 0
+            fi
             git commit -m "Incorporar propuestas de direcciones OSM al catálogo maestro"
-            git pull --rebase origin main
-            git push origin HEAD:main
-          fi
+            if git push origin HEAD:main; then
+              echo "Propuestas guardadas correctamente."
+              exit 0
+            fi
+            echo "main avanzó durante el guardado; se recalculará sobre la versión nueva."
+          done
+          echo "No se pudo guardar tras tres intentos." >&2
+          exit 1
