@@ -629,10 +629,9 @@ body{background-color:var(--bg)}
 <p style="color:var(--mut);font-size:.85rem">Tus altas se guardan en este navegador. Exporta el JSON para conservarlas o pasarlas a otro dispositivo.</p></details></div>
 </main></div><aside class="lado" id="lado-d" aria-label="Espacio destacado"></aside></div>
 <footer><div id="fecha"></div>Datos de © colaboradores de <a href="https://www.openstreetmap.org/copyright" style="color:inherit">OpenStreetMap</a> (licencia ODbL) y del Ayuntamiento de Chiclana, <a href="https://datosabiertos.chiclana.es" style="color:inherit">Portal de Datos Abiertos</a> (licencia ODC-By). Datos orientativos: comprueba horarios y teléfonos antes de ir. Sitio independiente, sin vinculación oficial con el Ayuntamiento.</footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./supabase-config.js"></script>
 <script>
-let SEED=[],LIM=2000,CATEGORIAS_DB=[];
+let SEED=[],LIM=2000;
 const CATS=["Hoteles","Apartamentos turísticos","Supermercados","Farmacias","Talleres mecánicos","Peluquerías","Inmobiliarias","Gestorías","Abogados","Clínicas","Gimnasios","Ferreterías","Panaderías","Bodegas y vinos","Tiendas de ropa","Colegios","Clubes náuticos","Alquiler de coches"];
 let mine=[];try{mine=JSON.parse(localStorage.getItem("chic")||"[]")}catch(e){}
 const save=()=>{try{localStorage.setItem("chic",JSON.stringify(mine))}catch(e){}};
@@ -659,16 +658,20 @@ const s=$("#dest-strip");s.textContent="";a.forEach(x=>s.append(tarjetaSp(x.d)))
 
 async function loadAdvertisingSlotsPublic(){
  const cfg=window.XICLANA_SUPABASE||{};
- if(!cfg.url||!cfg.anonKey||!window.supabase?.createClient)return;
+ if(!cfg.url||!cfg.anonKey)return;
+ const controller=new AbortController();
+ const timeout=setTimeout(()=>controller.abort(),5000);
  try{
-  const sb=window.supabase.createClient(cfg.url,cfg.anonKey);
-  const {data,error}=await sb.from("advertising_slots").select("slot_id,listing_name,phone,location,promotion,hook_text,image_url,target_url,status,starts_at,ends_at").order("slot_id");
-  if(error)throw error;
+  const endpoint=cfg.url.replace(/\\/+$/,"")+"/rest/v1/advertising_slots?select=slot_id,listing_name,phone,location,promotion,hook_text,image_url,target_url,status,starts_at,ends_at&order=slot_id.asc";
+  const response=await fetch(endpoint,{headers:{apikey:cfg.anonKey,Authorization:"Bearer "+cfg.anonKey},signal:controller.signal});
+  if(!response.ok)throw new Error("HTTP "+response.status);
+  const data=await response.json();
   const today=new Date().toISOString().slice(0,10);
   const rows=(data||[]).filter(x=>x.status==="active"&&x.listing_name&&(!x.starts_at||x.starts_at<=today)&&(!x.ends_at||x.ends_at>=today));
   DEST=DEST||{};DEST.espacios=rows.map(x=>({n:x.listing_name,p:x.phone,ubicacion:x.location,promo:x.promotion,lema:x.hook_text,w:x.target_url,imagen:x.image_url,lado:x.slot_id===1?"i":"d",desde:x.starts_at,hasta:x.ends_at}));
   pintarDest();
- }catch(err){console.warn("No se pudieron cargar los espacios publicitarios:",err)}
+ }catch(err){console.warn("No se pudieron cargar los espacios publicitarios; las fichas siguen disponibles:",err)}
+ finally{clearTimeout(timeout)}
 }
 
 function normalizarBusqueda(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim()}
@@ -679,7 +682,7 @@ e.append("Sin resultados en "+(ocio?"Ocio":"NegOcio")+(v?" para «"+v+"»":"")+"
 if(k){const b=el("button","btn s","Ver los "+k+" resultados en "+(ocio?"NegOcio":"Ocio"));b.onclick=()=>{const t=$("#q").value;elegir(otro);$("#q").value=t;render()};e.append(b)}else e.append("Prueba con otra palabra o quita el filtro de categoría.")}
 function render(){
  const all=[...SEED,...mine].sort((a,b)=>String(a.n||"").localeCompare(String(b.n||""),"es",{sensitivity:"base",numeric:true}));document.querySelectorAll(".cnt").forEach(e=>{const k=all.filter(x=>x.t===e.dataset.c).length;e.textContent=k.toLocaleString("es-ES")+(k===1?" ficha":" fichas")});const q=$("#q").value,t=modo;
- const cs=[...new Set([...all.filter(x=>x.t===modo).map(x=>x.c),...CATEGORIAS_DB.filter(x=>String(x.type||"negocio")===modo).map(x=>x.name)])].sort();const ch=$("#chips");ch.textContent="";
+ const cs=[...new Set([...all.filter(x=>x.t===modo).map(x=>x.c),])].sort();const ch=$("#chips");ch.textContent="";
  [["", "Todas"],...cs.map(c=>[c,c])].forEach(([v,l])=>{const b=el("button","chip"+(cat===v?" on":""),(cat===v?"✓ ":"")+l);b.onclick=()=>{cat=v;render()};ch.append(b)});
  const g=$("#grid");g.textContent="";let n=0;
  const candidatos=all.filter(x=>(!t||x.t===t)&&(!cat||x.c===cat));
@@ -718,33 +721,11 @@ function combinarCamposConDatos(base, aportados){
 async function aplicarCambios(j){
   const esAguaGenerica=v=>["agua","agua potable"].includes(String(v||"").toLowerCase().trim().split(" ").filter(Boolean).join(" "));
   let items=(j.items||[]).filter(x=>x&&x._xiclana_deleted!==true&&!esAguaGenerica(x.n||x.nombre||x.name||x.title)).map(x=>({...x,seed:1}));
-  // Mostrar primero el catálogo local: Supabase complementa los datos, pero nunca bloquea la primera visualización.
+  // Las correcciones administrativas ya se sincronizan al catálogo durante la publicación.
+  // La web pública no consulta listing_overrides ni listing_categories.
   SEED=items;DEST=j.destacados||{};pintarDest();loadAdvertisingSlotsPublic();
   $("#fecha").textContent="Datos actualizados: "+j.actualizado+" · "+items.length+" fichas";
   render();
-  const cfg=window.XICLANA_SUPABASE||{};
-  if(cfg.url&&cfg.anonKey&&window.supabase?.createClient){
-   try{
-    const sb=window.supabase.createClient(cfg.url,cfg.anonKey);
-    const {data:categorias,error:catError}=await sb.from("listing_categories").select("slug,name,type");
-    if(!catError)CATEGORIAS_DB=(categorias||[]).filter(x=>!(String(x.name||"").normalize("NFD").replace(/\p{Diacritic}/gu,"").toLowerCase().trim()==="camping"&&String(x.type||"").toLowerCase()==="negocio"));
-    else console.warn("No se pudieron cargar las categorías de Supabase:",catError);
-    const data=[];
-    for(let desde=0;;desde+=1000){
-      const {data:pagina,error}=await sb.from("listing_overrides").select("listing_id,fields,is_new,verified_at").range(desde,desde+999);
-      if(error)throw error;
-      data.push(...(pagina||[]));
-      if(!pagina||pagina.length<1000)break;
-    }
-    const byId=new Map((data||[]).map(o=>[o.listing_id,o]));
-    const deletedIds=new Set((data||[]).filter(o=>o.fields?._xiclana_deleted===true).map(o=>String(o.listing_id)));
-    items=items.filter(x=>!deletedIds.has(String(x.id||"legacy:"+[x.n,x.t,x.a].map(v=>String(v||"").trim().toLowerCase()).join("|"))));
-    items=items.map(x=>{const o=byId.get(String(x.id||""));return o?({...combinarCamposConDatos(x,o.fields),id:x.id,seed:1,verified_at:o.verified_at}):x});
-    items=items.filter(x=>!esAguaGenerica(x.n||x.nombre||x.name||x.title));
-    const ids=new Set(items.map(x=>String(x.id||"")));
-    (data||[]).filter(o=>o.is_new&&!o.fields?._xiclana_deleted&&!esAguaGenerica(o.fields?.n||o.fields?.nombre||o.fields?.name||o.fields?.title)&&!ids.has(o.listing_id)).forEach(o=>items.push({...o.fields,id:o.listing_id,seed:1,verified_at:o.verified_at}));
-   }catch(err){console.warn("No se pudieron cargar las fichas verificadas de Supabase:",err)}
-  }
   // Oculta duplicados exactos solo en la vista pública; conserva todos los IDs en el catálogo maestro y en Supabase.
   // Prioridad: ficha manual verificada > oficial > consolidado > propuesta. Solo agrupa si coinciden nombre, categoría, tipo y dirección.
   const claveExacta=x=>{
