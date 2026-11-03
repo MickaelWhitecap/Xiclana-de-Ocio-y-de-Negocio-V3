@@ -66,7 +66,7 @@ def main():
         if override_name in {"agua", "agua potable"}:
             continue
         if item is None and row.get("is_new"):
-            item = {k: v for k, v in fields.items() if k != "_xiclana_restore_deleted"}
+            item = {k: v for k, v in fields.items() if k not in {"_xiclana_restore_deleted", "_xiclana_address_proposal_rejected"}}
             item["id"] = ident
             item["fuente_estado"] = "Ficha administrativa sincronizada desde Supabase"
             items.append(item)
@@ -77,7 +77,7 @@ def main():
                 item.pop("_xiclana_deleted", None)
                 restored += 1
             for key, value in fields.items():
-                if key not in {"_xiclana_deleted", "_xiclana_restore_deleted"} and value not in (None, ""):
+                if key not in {"_xiclana_deleted", "_xiclana_restore_deleted", "_xiclana_address_proposal_rejected"} and value not in (None, ""):
                     item[key] = value
             if row.get("is_new"):
                 item.setdefault("fuente_estado", "Ficha administrativa sincronizada desde Supabase")
