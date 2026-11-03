@@ -17,7 +17,7 @@ REPORT = ROOT / "osm_chiclana_cruce_catalogo.json"
 SUMMARY = ROOT / "osm_candidatas_resumen.json"
 OSM_ID_RE = re.compile(r"^(?:osm|osm-extra):(node|way|relation):(\d+)$")
 INTEREST_TAGS = ("amenity", "shop", "tourism", "leisure", "office", "craft", "healthcare", "historic", "sport", "club")
-EXCLUDED_AMENITY = {"drinking_water", "shower", "toilets", "fountain", "recycling", "bus_stop", "bus_station"}
+EXCLUDED_AMENITY = {"drinking_water", "shower", "toilets", "fountain", "recycling", "bus_stop", "bus_station", "taxi"}
 
 
 def clean(value):
@@ -294,7 +294,33 @@ def main():
     unique = {}
     for candidate in auto:
         unique.setdefault(str(candidate.get("id")), candidate)
-    auto = sorted(unique.values(), key=lambda x: clean(x.get("n")).casefold())
+    ordered = sorted(unique.values(), key=lambda x: (norm(x.get("n")), str(x.get("id"))))
+    auto = []
+    grouped_duplicates = 0
+    proximity_warnings = 0
+    for candidate in ordered:
+        candidate_name = norm(candidate.get("n"))
+        candidate_location = item_coords(candidate)
+        duplicate = None
+        for kept in auto:
+            distance = distance_m(candidate_location, item_coords(kept))
+            same_name = candidate_name and candidate_name == norm(kept.get("n"))
+            if same_name and distance is not None and distance <= 150:
+                duplicate = kept
+                break
+            if (distance is not None and distance <= 35
+                    and candidate.get("c") == kept.get("c")
+                    and candidate.get("c")):
+                note = f"Posible coincidencia geográfica con «{candidate.get('n')}» ({distance:.0f} m); comprobar si es el mismo lugar."
+                kept["nota_revision"] = (clean(kept.get("nota_revision")) + " " + note).strip()
+                candidate["nota_revision"] = (clean(candidate.get("nota_revision")) + " " + f"Posible coincidencia geográfica con «{kept.get('n')}» ({distance:.0f} m); comprobar si es el mismo lugar.").strip()
+                proximity_warnings += 1
+        if duplicate:
+            duplicate.setdefault("osm_ids_relacionados", []).append(candidate.get("id"))
+            duplicate["nota_revision"] = "Varios objetos OSM con el mismo nombre a menos de 150 m; se agrupan para evitar una ficha duplicada."
+            grouped_duplicates += 1
+        else:
+            auto.append(candidate)
     if len(auto) > 250:
         raise SystemExit(f"Se detectaron {len(auto)} candidatas automáticas; supera el límite defensivo de 250. No se modifica el catálogo.")
     data["candidatas_revision"] = manual + auto
@@ -314,6 +340,8 @@ def main():
             "bajas_manual_supabase_excluidas": skipped_recovered["baja_manual_supabase"],
             "objetos_osm_desaparecidos_excluidos": skipped_recovered["osm_ya_no_existe"],
             "posibles_duplicados_activos_excluidos": skipped_recovered["posible_duplicado_activo"],
+            "duplicados_entre_candidatas_agrupados": grouped_duplicates,
+            "avisos_de_proximidad_entre_candidatas": proximity_warnings,
             "direcciones_existentes_sobrescritas": 0,
             "fichas_publicadas_automaticamente": 0,
         },
