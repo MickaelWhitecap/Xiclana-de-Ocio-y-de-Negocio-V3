@@ -51,7 +51,7 @@ def main():
     except Exception as exc:
         sys.exit(f"No se pudieron sincronizar todas las fichas administrativas de Supabase: {exc}")
     by_id = {str(x.get("id", "")): x for x in items if x.get("id")}
-    merged = added = hidden = 0
+    merged = added = hidden = restored = 0
     for row in overrides:
         ident = str(row.get("listing_id", ""))
         fields = row.get("fields") if isinstance(row.get("fields"), dict) else {}
@@ -66,22 +66,25 @@ def main():
         if override_name in {"agua", "agua potable"}:
             continue
         if item is None and row.get("is_new"):
-            item = dict(fields)
+            item = {k: v for k, v in fields.items() if k != "_xiclana_restore_deleted"}
             item["id"] = ident
             item["fuente_estado"] = "Ficha administrativa sincronizada desde Supabase"
             items.append(item)
             by_id[ident] = item
             added += 1
         elif item is not None:
+            if fields.get("_xiclana_restore_deleted") is True and item.get("_xiclana_deleted") is True:
+                item.pop("_xiclana_deleted", None)
+                restored += 1
             for key, value in fields.items():
-                if key != "_xiclana_deleted" and value not in (None, ""):
+                if key not in {"_xiclana_deleted", "_xiclana_restore_deleted"} and value not in (None, ""):
                     item[key] = value
             if row.get("is_new"):
                 item.setdefault("fuente_estado", "Ficha administrativa sincronizada desde Supabase")
             merged += 1
     items.sort(key=lambda x: str(x.get("n", "")).casefold())
     data["items"] = items
-    data["sincronizacion_supabase"] = {"fecha":datetime.date.today().isoformat(),"overrides_leidos":len(overrides),"fichas_nuevas_incorporadas":added,"fichas_existentes_actualizadas":merged,"marcas_de_borrado_conservadas":hidden}
+    data["sincronizacion_supabase"] = {"fecha":datetime.date.today().isoformat(),"overrides_leidos":len(overrides),"fichas_nuevas_incorporadas":added,"fichas_existentes_actualizadas":merged,"marcas_de_borrado_conservadas":hidden,"fichas_restauradas":restored}
     if not isinstance(data.get("candidatas_revision"), list): data["candidatas_revision"] = []
     data["actualizado"] = datetime.date.today().isoformat()
     data["total_fichas"] = len(items); data["total_candidatas_revision"] = len(data["candidatas_revision"])
