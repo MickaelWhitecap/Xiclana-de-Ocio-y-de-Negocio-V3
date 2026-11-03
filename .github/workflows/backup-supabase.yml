@@ -148,12 +148,13 @@ jobs:
           from pathlib import Path
           url=os.environ["RESTORE_DATABASE_URL"]
           roles_sql=Path("/tmp/xiclana-restore/roles.sql").read_text(encoding="utf-8")
-          names=set(re.findall(r'(?im)^\\s*ALTER\\s+ROLE\\s+"?([A-Za-z_][A-Za-z0-9_]*)"?', roles_sql))
+          names=set(re.findall(r'(?im)^\s*ALTER\s+ROLE\s+"?([A-Za-z_][A-Za-z0-9_]*)"?', roles_sql))
           names.update({"anon","authenticated","service_role","authenticator","supabase_admin"})
           for role in sorted(names):
-              attribute=" BYPASSRLS" if role=="service_role" else ""
-              statement=f"DO $ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{role}') THEN CREATE ROLE \\"{role}\\" NOLOGIN{attribute}; END IF; END $;"
-              subprocess.run(["psql",url,"-v","ON_ERROR_STOP=1","-c",statement],check=True)
+              exists=subprocess.check_output(["psql",url,"-At","-c",f"SELECT 1 FROM pg_roles WHERE rolname = '{role}'"],text=True).strip()
+              if not exists:
+                  attribute=" BYPASSRLS" if role=="service_role" else ""
+                  subprocess.run(["psql",url,"-v","ON_ERROR_STOP=1","-c",f'CREATE ROLE "{role}" NOLOGIN{attribute}'],check=True)
           print("Roles preparados para la restauración aislada:", sorted(names))
           PY
           psql "$RESTORE_DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/xiclana-restore/roles.sql
