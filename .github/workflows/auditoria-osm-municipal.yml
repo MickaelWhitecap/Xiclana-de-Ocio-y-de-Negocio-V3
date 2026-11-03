@@ -81,7 +81,7 @@ jobs:
             "El informe detallado queda adjunto como artefacto. No se modifica ni publica el catálogo."
           ]
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
-              f.write("\\n".join(lines) + "\\n")
+              f.write("\n".join(lines) + "\n")
           PY
 
       - name: Guardar extracción completa, auditoría y diferencias
