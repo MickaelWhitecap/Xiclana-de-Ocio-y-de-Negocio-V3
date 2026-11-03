@@ -15,6 +15,7 @@ MASTER = ROOT / "fichas_completas.json"
 RAW = ROOT / "osm_chiclana_extraccion_completa.json"
 REPORT = ROOT / "osm_chiclana_cruce_catalogo.json"
 SUMMARY = ROOT / "osm_candidatas_resumen.json"
+PENDING = ROOT / "osm_candidatas_pendientes.json"
 OSM_ID_RE = re.compile(r"^(?:osm|osm-extra):(node|way|relation):(\d+)$")
 INTEREST_TAGS = ("amenity", "shop", "tourism", "leisure", "office", "craft", "healthcare", "historic", "sport", "club")
 EXCLUDED_AMENITY = {"drinking_water", "shower", "toilets", "fountain", "recycling", "bus_stop", "bus_station", "taxi"}
@@ -323,11 +324,6 @@ def main():
             auto.append(candidate)
     if len(auto) > 250:
         raise SystemExit(f"Se detectaron {len(auto)} candidatas automáticas; supera el límite defensivo de 250. No se modifica el catálogo.")
-    data["candidatas_revision"] = manual + auto
-    data["total_candidatas_revision"] = len(data["candidatas_revision"])
-    data["actualizado"] = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    MASTER.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
-
     summary = {
         "fecha_utc": datetime.now(timezone.utc).isoformat(),
         "extraccion_utc": raw.get("fecha_extraccion_utc"),
@@ -350,6 +346,13 @@ def main():
         "descartes_recuperacion": dict(skipped_recovered),
         "descartes_nuevas": dict(skipped_new),
     }
+    pending = {
+        "fecha_generacion_utc": summary["fecha_utc"],
+        "extraccion_utc": summary["extraccion_utc"],
+        "resumen": summary["resumen"],
+        "candidatas": auto,
+    }
+    PENDING.write_text(json.dumps(pending, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     SUMMARY.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(summary["resumen"], ensure_ascii=False), flush=True)
 
