@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: xiclana-catalogo-maestro
+  group: xiclana-osm-semanal
   cancel-in-progress: false
 
 jobs:
@@ -48,11 +48,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v3/fichas_completas.json
+          git add v3/osm_candidatas_pendientes.json v3/propuestas_direcciones_osm.json
           if git diff --cached --quiet; then
-            echo "No hay cambios en candidatas_revision."
+            echo "No hay cambios en los ficheros de propuestas OSM."
           else
-            git commit -m "Actualizar candidatas OSM pendientes de revisión"
+            git commit -m "Actualizar propuestas OSM pendientes de revisión"
             for attempt in 1 2 3; do
               git fetch origin main
               git rebase origin/main
@@ -152,6 +152,7 @@ jobs:
             v3/osm_chiclana_cambios_semanales.json
             v3/propuestas_direcciones_osm.json
             v3/osm_candidatas_resumen.json
+            v3/osm_candidatas_pendientes.json
           if-no-files-found: warn
           compression-level: 6
           retention-days: 8
