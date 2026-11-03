@@ -120,22 +120,22 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
 
 <datalist id="category-options"></datalist>
 <div class="grid">
-<aside class="panel"><label for="search">Buscar ficha por nombre, categoría o dirección</label><input id="search" type="search" placeholder="Ej. restaurante, calle…"><div id="count" class="muted"></div><div class="muted" style="margin:.65rem 0;padding:.65rem;border:1px solid var(--border,#ddd);border-radius:10px"><strong style="display:block;font-size:1rem;color:var(--ink)">Parámetros de completitud (1–11)</strong><ol style="list-style:none;margin:.4rem 0 0;padding:0"><li><strong>1.</strong> Tipo</li><li><strong>2.</strong> Categoría</li><li><strong>3.</strong> Dirección</li><li><strong>4.</strong> Teléfono</li><li><strong>5.</strong> Correo electrónico</li><li><strong>6.</strong> Web</li><li><strong>7.</strong> Horario</li><li><strong>8.</strong> Dato destacado</li><li><strong>9.</strong> Descripción</li><li><strong>10.</strong> Latitud</li><li><strong>11.</strong> Longitud</li></ol><small>El nombre identifica la ficha, pero no cuenta en el indicador X/11.</small></div><div id="list"></div></aside>
+<aside class="panel"><label for="search">Buscar ficha por nombre, categoría o dirección</label><input id="search" type="search" placeholder="Ej. restaurante, calle…"><div id="count" class="muted"></div><div class="muted" style="margin:.65rem 0;padding:.65rem;border:1px solid var(--border,#ddd);border-radius:10px"><strong style="display:block;font-size:1rem;color:var(--ink)">Completitud de información útil (1–6)</strong><ol style="list-style:none;margin:.4rem 0 0;padding:0"><li><strong>1.</strong> Dirección</li><li><strong>2.</strong> Teléfono</li><li><strong>3.</strong> Correo electrónico</li><li><strong>4.</strong> Página web</li><li><strong>5.</strong> Horario</li><li><strong>6.</strong> Descripción</li></ol><small>Tipo, categoría, dato destacado y coordenadas no cuentan. El nombre tampoco.</small></div><div id="list"></div></aside>
 <section class="panel">
 <div class="topline"><div><h2 id="form-title">Selecciona una ficha</h2><div id="record-meta" class="muted"></div></div></div>
 <form id="record-form" class="fields hidden">
 <div><label for="n">Nombre *</label><input id="n" name="n" required maxlength="180"></div>
-<div><label for="t">1. Tipo *</label><select id="t" name="t"><option value="negocio">Negocio</option><option value="ocio">Ocio</option></select></div>
-<div><label for="c">2. Categoría *</label><input id="c" name="c" list="category-options" required maxlength="100" placeholder="Restaurante, Parking, Camping…"></div>
-<div><label for="a">3. Dirección</label><input id="a" name="a" maxlength="240"></div>
-<div><label for="p">4. Teléfono</label><input id="p" name="p" maxlength="100"></div>
-<div><label for="e">5. Correo electrónico</label><input id="e" name="e" type="email" maxlength="180"></div>
-<div class="wide"><label for="w">6. Web (URL completa)</label><input id="w" name="w" type="url" placeholder="https://…" maxlength="500"></div>
-<div class="wide"><label for="h">7. Horario</label><input id="h" name="h" maxlength="300"></div>
-<div class="wide"><label for="s">8. Lo mejor del sitio / dato destacado</label><input id="s" name="s" maxlength="500"></div>
-<div class="wide"><label for="d">9. Descripción</label><textarea id="d" name="d" rows="4" maxlength="3000"></textarea></div>
-<div><label for="lat">10. Latitud (opcional)</label><input id="lat" name="lat" type="number" step="any"></div>
-<div><label for="lon">11. Longitud (opcional)</label><input id="lon" name="lon" type="number" step="any"></div>
+<div><label for="t">Tipo *</label><select id="t" name="t"><option value="negocio">Negocio</option><option value="ocio">Ocio</option></select></div>
+<div><label for="c">Categoría *</label><input id="c" name="c" list="category-options" required maxlength="100" placeholder="Restaurante, Parking, Camping…"></div>
+<div><label for="a">1. Dirección</label><input id="a" name="a" maxlength="240"></div>
+<div><label for="p">2. Teléfono</label><input id="p" name="p" maxlength="100"></div>
+<div><label for="e">3. Correo electrónico</label><input id="e" name="e" type="email" maxlength="180"></div>
+<div class="wide"><label for="w">4. Página web (URL completa)</label><input id="w" name="w" type="url" placeholder="https://…" maxlength="500"></div>
+<div class="wide"><label for="h">5. Horario</label><input id="h" name="h" maxlength="300"></div>
+<div class="wide"><label for="s">Dato destacado (no computa)</label><input id="s" name="s" maxlength="500"></div>
+<div class="wide"><label for="d">6. Descripción</label><textarea id="d" name="d" rows="4" maxlength="3000"></textarea></div>
+<div><label for="lat">Latitud (opcional; no computa)</label><input id="lat" name="lat" type="number" step="any"></div>
+<div><label for="lon">Longitud (opcional; no computa)</label><input id="lon" name="lon" type="number" step="any"></div>
 <div class="wide muted">Al guardar, la ficha quedará marcada como verificada por Xiclana con la fecha de hoy. Comprueba que los datos se han recogido correctamente antes de publicarlos.</div>
 <div class="wide actions"><button id="save-button" type="submit">Guardar ficha</button><button id="delete-button" type="button" class="danger">Eliminar ficha</button><button id="cancel" type="button" class="secondary">Cancelar</button></div>
 </form>
@@ -158,6 +158,7 @@ function message(text,type=""){status.textContent=text;status.className="status"
 function showLogin(){login.classList.remove("hidden");app.classList.add("hidden");logout.classList.add("hidden")}
 function showApp(){login.classList.add("hidden");app.classList.remove("hidden");logout.classList.remove("hidden");$("#who").textContent="Sesión: "+(user?.email||"administrador")}
 function stableId(x){if(x.id)return String(x.id);return "legacy:"+[x.n,x.t,x.a].map(v=>String(v||"").trim().toLowerCase()).join("|")}
+function visitorCompleteness(x){return ["a","p","e","w","h","d"].filter(k=>x[k]!==undefined&&x[k]!==null&&String(x[k]).trim()!=="").length;}
 function combinarCamposConDatos(base, aportados){const resultado={...base};Object.entries(aportados||{}).forEach(([clave,valor])=>{const vacio=valor===null||valor===undefined||(typeof valor==="string"&&valor.trim()==="");if(!vacio)resultado[clave]=valor});return resultado}
 function effectiveItems(){
  const byId=new Map(overrides.map(o=>[o.listing_id,o]));
@@ -226,9 +227,9 @@ function refreshList(){
   return Object.entries(x).some(([k,v])=>k!=="fields"&&normalize(typeof v==="object"?JSON.stringify(v):v).includes(q));
  }).sort((a,b)=>String(a.n||a.nombre||a.name||"").localeCompare(String(b.n||b.nombre||b.name||""),"es"));
  list.textContent="";$("#count").textContent=matches.length+" fichas";
- matches.forEach(x=>{const b=document.createElement("button");b.type="button";b.className="item"+(x.id===selectedId?" active":"");b.append(document.createTextNode(x.n||x.nombre||x.name||"Sin nombre"));const small=document.createElement("small");small.textContent=(x.c||"Sin categoría")+" · "+(x.a||"Sin dirección");b.append(small);if(x.verified_at){const p=document.createElement("span");p.className="pill";p.textContent="Verificada";b.append(p)}b.onclick=()=>selectItem(x.id);list.append(b)});
+ matches.forEach(x=>{const b=document.createElement("button");b.type="button";b.className="item"+(x.id===selectedId?" active":"");b.append(document.createTextNode(x.n||x.nombre||x.name||"Sin nombre"));const small=document.createElement("small");small.textContent=(x.c||"Sin categoría")+" · "+(x.a||"Sin dirección");b.append(small);const completeness=document.createElement("span");completeness.className="pill";completeness.textContent=visitorCompleteness(x)+"/6";completeness.title="Dirección, teléfono, correo, web, horario y descripción";b.append(completeness);if(x.verified_at){const p=document.createElement("span");p.className="pill";p.textContent="Verificada";b.append(p)}b.onclick=()=>selectItem(x.id);list.append(b)});
 }
-function selectItem(id){const x=effectiveItems().find(v=>v.id===id);if(!x)return;selectedId=id;isNew=!!x.is_new;$("#form-title").textContent=x.n;$("#record-meta").textContent=x.verified_at?"Última verificación: "+new Date(x.verified_at).toLocaleString("es-ES"):"Ficha de directorio";$("#delete-button").disabled=false;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");fieldNames.forEach(k=>{const input=form.elements[k];input.value=x[k]??""});refreshList()}
+function selectItem(id){const x=effectiveItems().find(v=>v.id===id);if(!x)return;selectedId=id;isNew=!!x.is_new;$("#form-title").textContent=x.n;$("#record-meta").textContent=visitorCompleteness(x)+"/6 datos útiles · "+(x.verified_at?"Última verificación: "+new Date(x.verified_at).toLocaleString("es-ES"):"Ficha de directorio");$("#delete-button").disabled=false;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");fieldNames.forEach(k=>{const input=form.elements[k];input.value=x[k]??""});refreshList()}
 function startNew(){selectedId="new:"+crypto.randomUUID();isNew=true;$("#form-title").textContent="Nueva ficha";$("#record-meta").textContent="Se añadirá al directorio público";$("#delete-button").disabled=true;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");form.reset();$("#t").value="negocio";refreshList()}
 function cancelEdit(){selectedId=null;isNew=false;form.classList.add("hidden");$("#empty-editor").classList.remove("hidden");$("#form-title").textContent="Selecciona una ficha";$("#record-meta").textContent="";refreshList()}
 function candidateKey(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
