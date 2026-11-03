@@ -56,6 +56,11 @@ def main():
         if tags is None:
             not_found.append({"id": item.get("id"), "nombre": item.get("n")})
             continue
+        # Un CP o una localidad aislados no constituyen una dirección utilizable.
+        # Exigimos una dirección completa, calle o lugar identificado.
+        if not any(tags.get(k) for k in ("addr:full", "addr:street", "addr:place")):
+            no_address.append({"id": item.get("id"), "nombre": item.get("n")})
+            continue
         selected = {k: tags[k] for k in KEYS if tags.get(k)}
         if not selected:
             no_address.append({"id": item.get("id"), "nombre": item.get("n")})
