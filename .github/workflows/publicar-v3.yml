@@ -31,6 +31,18 @@ jobs:
           python-version: "3.12"
       - name: Ejecutar pruebas de regresión antes de sincronizar
         run: python -m unittest v3/test_auditar_catalogo.py
+      - name: Validar sintaxis JavaScript de Administración
+        run: |
+          python - <<'PY'
+          import pathlib, re
+          html=pathlib.Path("v3/admin.html").read_text(encoding="utf-8")
+          scripts=re.findall(r"<script\\b[^>]*>([\\s\\S]*?)</script>", html, re.I)
+          inline=[s for s in scripts if s.strip()]
+          if len(inline) != 1:
+              raise SystemExit(f"Se esperaba un script inline de Administración; encontrados: {len(inline)}")
+          pathlib.Path("/tmp/admin-inline-check.js").write_text(inline[0], encoding="utf-8")
+          PY
+          node --check /tmp/admin-inline-check.js
       - name: Validar el fichero maestro único
         run: python v3/actualizar.py
       - name: Ampliar catálogo en el fichero maestro
