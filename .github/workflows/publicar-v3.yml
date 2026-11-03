@@ -16,6 +16,7 @@ on:
       - "v3/auditar_bajas_catalogo.py"
       - ".github/workflows/auditoria-osm-municipal.yml"
       - ".github/workflows/auditar-bajas-catalogo.yml"
+      - ".github/workflows/backup-supabase.yml"
   schedule:
     - cron: "0 4 * * 1"
 permissions:
