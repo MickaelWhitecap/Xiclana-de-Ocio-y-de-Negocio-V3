@@ -173,7 +173,7 @@ function effectiveItems(){
  }).map(x=>{
   const id=stableId(x),o=byId.get(id),fields=combinarCamposConDatos(x,o?.fields);
   if(o?.fields?._xiclana_restore_deleted===true)delete fields._xiclana_deleted;
-  delete fields._xiclana_restore_deleted;delete fields._xiclana_address_proposal_rejected;
+  delete fields._xiclana_restore_deleted;delete fields._xiclana_address_proposal_rejected;delete fields.osm_ids_relacionados;
   return {...fields,id,verified_at:o?.verified_at||null,is_new:false};
  });
  overrides.filter(o=>o.is_new&&!o.fields?._xiclana_deleted).forEach(o=>{if(!baseItems.some(x=>stableId(x)===o.listing_id))out.push({...o.fields,id:o.listing_id,verified_at:o.verified_at,is_new:true})});
@@ -307,7 +307,7 @@ function renderAutomaticCandidates(){
  pending.forEach(candidate=>{
   const card=document.createElement("div");card.className="item";card.style.marginBottom=".65rem";
   const title=document.createElement("strong");title.textContent=candidate.n||"Candidata sin nombre";card.append(title);
-  const detail=document.createElement("small");detail.textContent=[candidate.c||"Sin categoría",candidate.t||"Sin tipo",candidate.a||"Sin dirección",candidate.p||"",candidate.e||"",candidate.w||"",candidate.lat!=null&&candidate.lon!=null?("Coordenadas "+candidate.lat+", "+candidate.lon):"",candidate.f||"OpenStreetMap",String(candidate.estado_revision||"").startsWith("recuperada_de_baja")?"Recuperada de baja":""].filter(Boolean).join(" · ");card.append(detail);
+  const detail=document.createElement("small");detail.textContent=[candidate.c||"Sin categoría",candidate.t||"Sin tipo",candidate.a||"Sin dirección",candidate.p||"",candidate.e||"",candidate.w||"",candidate.lat!=null&&candidate.lon!=null?("Coordenadas "+candidate.lat+", "+candidate.lon):"",candidate.f||"OpenStreetMap",String(candidate.estado_revision||"").startsWith("recuperada_de_baja")?"Recuperada de baja":"",candidate.nota_revision||""].filter(Boolean).join(" · ");card.append(detail);
   const osm=String(candidate.id).match(/^osm(?:-extra)?:(node|way|relation):(\d+)$/);
   if(osm){const source=document.createElement("a");source.href="https://www.openstreetmap.org/"+osm[1]+"/"+osm[2];source.target="_blank";source.rel="noopener noreferrer";source.textContent="Ver en OpenStreetMap";source.style.display="inline-block";source.style.marginTop=".25rem";card.append(source)}
   const duplicate=candidateAlreadyExists(candidate);
