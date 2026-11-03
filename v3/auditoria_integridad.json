@@ -1,5 +1,516 @@
 {
   "fecha": "2026-11-03",
+  "categorias_catalogo": {
+    "total_distintas_tipo_categoria": 101,
+    "distribucion": [
+      {
+        "tipo": "negocio",
+        "categoria": "Abogado",
+        "fichas": 2
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Administración",
+        "fichas": 2
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Agencia de viajes",
+        "fichas": 2
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Alojamiento",
+        "fichas": 2
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Alquiler de coches",
+        "fichas": 5
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Apartamentos",
+        "fichas": 1
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Autoescuela",
+        "fichas": 3
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Banco",
+        "fichas": 13
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Bazar",
+        "fichas": 7
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Bicicletas",
+        "fichas": 3
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Bodega",
+        "fichas": 1
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Bodega y licores",
+        "fichas": 2
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Calzado",
+        "fichas": 6
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Camping",
+        "fichas": 2
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Carnicería",
+        "fichas": 5
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Clínica",
+        "fichas": 3
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Colegio",
+        "fichas": 30
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Comercio",
+        "fichas": 60
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Concesionario",
+        "fichas": 7
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Consulta médica",
+        "fichas": 1
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Correos",
+        "fichas": 3
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Decoración",
+        "fichas": 2
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Delicatessen",
+        "fichas": 1
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Dentista",
+        "fichas": 8
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Deportes",
+        "fichas": 4
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Droguería",
+        "fichas": 1
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Electrónica",
+        "fichas": 4
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Empresa",
+        "fichas": 3
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Estanco",
+        "fichas": 2
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Estética",
+        "fichas": 5
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Farmacia",
+        "fichas": 18
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Ferretería",
+        "fichas": 5
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Floristería",
+        "fichas": 3
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Frutería",
+        "fichas": 2
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Gasolinera",
+        "fichas": 23
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Guardería",
+        "fichas": 4
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Hostal",
+        "fichas": 8
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Hotel",
+        "fichas": 48
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Inmobiliaria",
+        "fichas": 6
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Jardinería",
+        "fichas": 2
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Joyería",
+        "fichas": 6
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Juguetes",
+        "fichas": 3
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Lavado de coches",
+        "fichas": 3
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Lavandería",
+        "fichas": 4
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Librería",
+        "fichas": 1
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Mascotas",
+        "fichas": 1
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Mercado",
+        "fichas": 4
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Muebles",
+        "fichas": 3
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Neumáticos",
+        "fichas": 5
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Oficina",
+        "fichas": 20
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Oficios y artesanía",
+        "fichas": 9
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Óptica",
+        "fichas": 8
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Panadería",
+        "fichas": 3
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Papelería",
+        "fichas": 2
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Parking",
+        "fichas": 4
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Peluquería",
+        "fichas": 17
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Pescadería",
+        "fichas": 1
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Quiosco",
+        "fichas": 4
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Regalos",
+        "fichas": 3
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Ropa",
+        "fichas": 30
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Seguros",
+        "fichas": 5
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Servicio público",
+        "fichas": 24
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Supermercado",
+        "fichas": 43
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Taller mecánico",
+        "fichas": 13
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Telas",
+        "fichas": 1
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Telefonía",
+        "fichas": 1
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Tienda de barrio",
+        "fichas": 16
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Veterinario",
+        "fichas": 9
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Atracción",
+        "fichas": 3
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Aventura",
+        "fichas": 2
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Baile",
+        "fichas": 1
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Balneario y spa",
+        "fichas": 12
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Bar",
+        "fichas": 85
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Biblioteca",
+        "fichas": 3
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Bodega",
+        "fichas": 4
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Buceo",
+        "fichas": 1
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Cafetería",
+        "fichas": 25
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Camping",
+        "fichas": 1
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Comida rápida",
+        "fichas": 15
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Cultura",
+        "fichas": 4
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Deporte",
+        "fichas": 16
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Discoteca",
+        "fichas": 6
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Estadio",
+        "fichas": 2
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Gimnasio",
+        "fichas": 7
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Golf",
+        "fichas": 3
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Heladería",
+        "fichas": 9
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Instalación deportiva",
+        "fichas": 29
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Mirador",
+        "fichas": 10
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Museo",
+        "fichas": 6
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Naturaleza",
+        "fichas": 5
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Náutica",
+        "fichas": 16
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Ocio familiar",
+        "fichas": 1
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Ocio infantil",
+        "fichas": 1
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Oficina de turismo",
+        "fichas": 3
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Parque",
+        "fichas": 39
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Patrimonio",
+        "fichas": 15
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Playa",
+        "fichas": 2
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Plaza / paseo",
+        "fichas": 1
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Restaurante",
+        "fichas": 140
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Ruta cultural",
+        "fichas": 6
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Teatro",
+        "fichas": 1
+      }
+    ],
+    "nota": "Cuenta categorías literales de fichas activas, separadas por tipo; no fusiona variantes ni propone equivalencias."
+  },
   "parametros_documentados_por_ficha": {
     "campos_contados": [
       "n",
