@@ -662,7 +662,7 @@ async function loadAdvertisingSlotsPublic(){
  const controller=new AbortController();
  const timeout=setTimeout(()=>controller.abort(),5000);
  try{
-  const endpoint=cfg.url.replace(/\\/+$/,"")+"/rest/v1/advertising_slots?select=slot_id,listing_name,phone,location,promotion,hook_text,image_url,target_url,status,starts_at,ends_at&order=slot_id.asc";
+  const endpoint=cfg.url.replace(/\/+$/,"")+"/rest/v1/advertising_slots?select=slot_id,listing_name,phone,location,promotion,hook_text,image_url,target_url,status,starts_at,ends_at&order=slot_id.asc";
   const response=await fetch(endpoint,{headers:{apikey:cfg.anonKey,Authorization:"Bearer "+cfg.anonKey},signal:controller.signal});
   if(!response.ok)throw new Error("HTTP "+response.status);
   const data=await response.json();
@@ -682,7 +682,7 @@ e.append("Sin resultados en "+(ocio?"Ocio":"NegOcio")+(v?" para «"+v+"»":"")+"
 if(k){const b=el("button","btn s","Ver los "+k+" resultados en "+(ocio?"NegOcio":"Ocio"));b.onclick=()=>{const t=$("#q").value;elegir(otro);$("#q").value=t;render()};e.append(b)}else e.append("Prueba con otra palabra o quita el filtro de categoría.")}
 function render(){
  const all=[...SEED,...mine].sort((a,b)=>String(a.n||"").localeCompare(String(b.n||""),"es",{sensitivity:"base",numeric:true}));document.querySelectorAll(".cnt").forEach(e=>{const k=all.filter(x=>x.t===e.dataset.c).length;e.textContent=k.toLocaleString("es-ES")+(k===1?" ficha":" fichas")});const q=$("#q").value,t=modo;
- const cs=[...new Set([...all.filter(x=>x.t===modo).map(x=>x.c),])].sort();const ch=$("#chips");ch.textContent="";
+ const cs=[...new Set(all.filter(x=>x.t===modo).map(x=>x.c))].sort();const ch=$("#chips");ch.textContent="";
  [["", "Todas"],...cs.map(c=>[c,c])].forEach(([v,l])=>{const b=el("button","chip"+(cat===v?" on":""),(cat===v?"✓ ":"")+l);b.onclick=()=>{cat=v;render()};ch.append(b)});
  const g=$("#grid");g.textContent="";let n=0;
  const candidatos=all.filter(x=>(!t||x.t===t)&&(!cat||x.c===cat));
