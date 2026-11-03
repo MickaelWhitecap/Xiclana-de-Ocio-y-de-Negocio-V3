@@ -1,6 +1,11 @@
 name: Publicar Xiclana V3
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - "Auditoría municipal completa de OpenStreetMap"
+    types:
+      - completed
   push:
     branches: [main]
   schedule:
