@@ -98,3 +98,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Activación controlada de la recuperación basada exclusivamente en la extracción OSM archivada.
