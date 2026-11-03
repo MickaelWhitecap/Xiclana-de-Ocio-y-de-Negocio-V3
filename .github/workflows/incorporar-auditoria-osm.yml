@@ -1,0 +1,53 @@
+name: Incorporar auditoría OSM verificada al catálogo maestro
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: xiclana-catalogo-maestro
+  cancel-in-progress: false
+
+jobs:
+  incorporar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Recuperar el artefacto de auditoría verificada
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p v3/osm_import
+          curl --fail --silent --show-error --location \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/13172126429/zip" \
+            -o /tmp/auditoria-osm.zip
+          unzip -o /tmp/auditoria-osm.zip -d v3/osm_import
+          test -s v3/osm_import/osm_chiclana_extraccion_completa.json
+          test -s v3/osm_import/osm_chiclana_cruce_catalogo.json
+
+      - name: Verificar huella e incorporar extracción y auditoría
+        run: python v3/incorporar_auditoria_osm.py
+
+      - name: Guardar únicamente el catálogo maestro
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v3/fichas_completas.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Incorporar extracción municipal OSM verificada al catálogo maestro"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
