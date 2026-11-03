@@ -1,15 +1,18 @@
 name: Auditoría municipal completa de OpenStreetMap
 
 on:
+  push:
+    paths:
+      - "v3/incorporar_candidatas_osm.py"
   workflow_dispatch:
   schedule:
     - cron: "30 4 * * 1"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
-  group: xiclana-osm-semanal
+  group: xiclana-catalogo-maestro
   cancel-in-progress: false
 
 jobs:
@@ -35,6 +38,23 @@ jobs:
       - name: Generar propuestas de direcciones para fichas sin dirección
         if: success()
         run: python v3/proponer_direcciones_osm.py
+
+      - name: Incorporar candidatas OSM al bloque de revisión de Administración
+        if: success()
+        run: python v3/incorporar_candidatas_osm.py
+
+      - name: Guardar candidatas pendientes en el catálogo maestro
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v3/fichas_completas.json
+          if git diff --cached --quiet; then
+            echo "No hay cambios en candidatas_revision."
+          else
+            git commit -m "Actualizar candidatas OSM pendientes de revisión"
+            git push origin HEAD:main
+          fi
 
       - name: Publicar resumen de auditoría
         if: always()
@@ -120,6 +140,7 @@ jobs:
             v3/osm_chiclana_cruce_catalogo.json
             v3/osm_chiclana_cambios_semanales.json
             v3/propuestas_direcciones_osm.json
+            v3/osm_candidatas_resumen.json
           if-no-files-found: warn
           compression-level: 6
           retention-days: 8
