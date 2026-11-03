@@ -165,7 +165,7 @@ jobs:
           data= open("/tmp/xiclana-restore/data.sql",encoding="utf-8").read()
           # La exportación de Supabase omite auth.users; se crean IDs vacíos
           # solo en la base temporal para respetar las claves foráneas de Xiclana.
-          ids=sorted(set(re.findall(r'\\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\b',data)))
+          ids=sorted(set(re.findall(r'[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}',data)))
           if ids:
               values=",".join("('"+value+"')" for value in ids)
               subprocess.run(["psql",os.environ["RESTORE_DATABASE_URL"],"-v","ON_ERROR_STOP=1","-c",
