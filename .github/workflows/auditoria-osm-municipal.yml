@@ -40,7 +40,7 @@ jobs:
         if: success()
         run: python v3/incorporar_candidatas_osm.py
 
-      - name: Guardar candidatas pendientes en el catálogo maestro
+      - name: Guardar propuestas OSM pendientes para Administración
         if: success()
         run: |
           git config user.name "github-actions[bot]"
