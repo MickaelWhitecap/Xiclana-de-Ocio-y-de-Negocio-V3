@@ -187,7 +187,8 @@ jobs:
           current=None
           for line in data:
               if current:
-                  if line.strip()==r"\.":
+                  marker=line.strip()
+                  if marker.startswith(chr(92)) and marker.endswith(".") and marker[:-1].strip(chr(92))=="":
                       current=None
                   else:
                       expected[current]=expected.get(current,0)+1
