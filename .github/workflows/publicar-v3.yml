@@ -58,7 +58,9 @@ jobs:
           git add v3/fichas_completas.json v3/auditoria_integridad.json v3/plan_consolidacion.json
           if ! git diff --cached --quiet; then
             git commit -m "Actualizar catálogo maestro V3"
-            git push
+            # Integrar cualquier escritura concurrente antes de actualizar main.
+            git pull --rebase origin main
+            git push origin HEAD:main
           else
             echo "El catálogo maestro no ha cambiado."
           fi
