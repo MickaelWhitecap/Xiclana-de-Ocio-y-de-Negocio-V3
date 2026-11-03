@@ -610,7 +610,8 @@ body{background-color:var(--bg)}
 <main id="main" hidden>
 <div class="bar"><input id="q" type="search" placeholder="Buscar por nombre, categoría, dirección…" aria-label="Buscar">
 </div>
-<div class="chips" id="chips"></div>
+<div class="chips groups" id="groups" aria-label="Grupos de categorías"></div>
+<div class="chips" id="chips" aria-label="Categorías"></div>
 <div class="grid" id="grid"></div>
 <p id="empty" hidden style="color:var(--mut)">Sin resultados. Prueba otra búsqueda o añade el sitio abajo.</p>
 
@@ -637,7 +638,25 @@ let mine=[];try{mine=JSON.parse(localStorage.getItem("chic")||"[]")}catch(e){}
 const save=()=>{try{localStorage.setItem("chic",JSON.stringify(mine))}catch(e){}};
 const $=s=>document.querySelector(s),el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 const map=s=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(s+" Chiclana de la Frontera 11130");
-let cat="",modo="";
+const GROUPS={
+ ocio:{
+  "Comer y beber":["Bar","Cafetería","Comida rápida","Heladería","Restaurante","Bodega"],
+  "Cultura y visitas":["Biblioteca","Cultura","Museo","Oficina de turismo","Patrimonio","Ruta cultural","Teatro"],
+  "Naturaleza y aire libre":["Atracción","Aventura","Mirador","Naturaleza","Parque","Playa","Plaza / paseo"],
+  "Deporte y bienestar":["Baile","Balneario y spa","Buceo","Deporte","Estadio","Gimnasio","Golf","Instalación deportiva","Náutica"],
+  "Ocio familiar y estancias":["Camping","Discoteca","Ocio familiar","Ocio infantil"]
+ },
+ negocio:{
+  "Alojamiento":["Alojamiento","Apartamentos","Camping","Hostal","Hotel"],
+  "Alimentación":["Bodega","Bodega y licores","Carnicería","Delicatessen","Frutería","Mercado","Panadería","Pescadería","Supermercado","Tienda de barrio"],
+  "Compras":["Bazar","Bicicletas","Calzado","Comercio","Decoración","Deportes","Droguería","Electrónica","Estanco","Floristería","Joyería","Juguetes","Librería","Mascotas","Muebles","Óptica","Papelería","Regalos","Ropa","Telas","Telefonía"],
+  "Servicios profesionales":["Abogado","Administración","Agencia de viajes","Banco","Empresa","Inmobiliaria","Oficina","Oficios y artesanía","Seguros"],
+  "Motor y movilidad":["Alquiler de coches","Autoescuela","Concesionario","Gasolinera","Lavado de coches","Neumáticos","Parking","Taller mecánico"],
+  "Salud y cuidado":["Clínica","Consulta médica","Dentista","Estética","Farmacia","Peluquería","Veterinario"],
+  "Educación, hogar y servicios públicos":["Colegio","Correos","Ferretería","Guardería","Jardinería","Lavandería","Servicio público"]
+ }
+};
+let cat="",grupo="",modo="";
 const IC=[[/playa/i,"🏖️"],[/^bar|discoteca|baile/i,"🍹"],[/restaur|comida/i,"🍽️"],[/cafe/i,"☕"],[/helad/i,"🍦"],[/hotel|hostal|aloja|apartam|camping/i,"🏨"],[/supermerc|tienda|comercio|bazar/i,"🛒"],[/farmac|clínica|dentist|médic|veterin/i,"⚕️"],[/museo|galer|cultura|teatro|cine|bibliot/i,"🎭"],[/patrimonio|mirador|atracc/i,"🏰"],[/natur|parque|marisma/i,"🌿"],[/golf/i,"⛳"],[/gimnas|deporte|estadio|piscina|puerto/i,"🏊"],[/mercado|panader|carnic|fruter|pescad|bodega|vino/i,"🧺"],[/banco|gestor|asesor|abogado|seguros|financ/i,"🏦"],[/taller|neum|recamb|concesion|gasolin|lavado|alquiler|autoescuela/i,"🚗"],[/peluq|estética|ropa|calzado|joy|óptica/i,"✂️"],[/inmobil/i,"🏠"],[/colegio|guarder/i,"🎓"],[/plaza|paseo/i,"⛲"]];
 function ico(x){const k=IC.find(i=>i[0].test(x.c));return k?k[1]:(x.t==="ocio"?"✨":"🏪")}
 let DEST={};
@@ -682,10 +701,16 @@ e.append("Sin resultados en "+(ocio?"Ocio":"NegOcio")+(v?" para «"+v+"»":"")+"
 if(k){const b=el("button","btn s","Ver los "+k+" resultados en "+(ocio?"NegOcio":"Ocio"));b.onclick=()=>{const t=$("#q").value;elegir(otro);$("#q").value=t;render()};e.append(b)}else e.append("Prueba con otra palabra o quita el filtro de categoría.")}
 function render(){
  const all=[...SEED,...mine].sort((a,b)=>String(a.n||"").localeCompare(String(b.n||""),"es",{sensitivity:"base",numeric:true}));document.querySelectorAll(".cnt").forEach(e=>{const k=all.filter(x=>x.t===e.dataset.c).length;e.textContent=k.toLocaleString("es-ES")+(k===1?" ficha":" fichas")});const q=$("#q").value,t=modo;
- const cs=[...new Set(all.filter(x=>x.t===modo).map(x=>x.c))].sort();const ch=$("#chips");ch.textContent="";
- [["", "Todas"],...cs.map(c=>[c,c])].forEach(([v,l])=>{const b=el("button","chip"+(cat===v?" on":""),(cat===v?"✓ ":"")+l);b.onclick=()=>{cat=v;render()};ch.append(b)});
+ const groupMap=GROUPS[modo]||{};
+ const groupEntries=Object.entries(groupMap).filter(([,categories])=>categories.some(category=>all.some(x=>x.t===modo&&x.c===category)));
+ const gr=$("#groups");gr.textContent="";
+ [["","Todas"],...groupEntries].forEach(([value,label])=>{const b=el("button","chip"+(grupo===value?" on":""),(grupo===value?"✓ ":"")+label);b.onclick=()=>{grupo=value;cat="";render()};gr.append(b)});
+ const allowed=grupo?new Set(groupMap[grupo]||[]):null;
+ const cs=[...new Set(all.filter(x=>x.t===modo&&(!allowed||allowed.has(x.c))).map(x=>x.c))].sort((a,b)=>a.localeCompare(b,"es"));
+ const ch=$("#chips");ch.textContent="";
+ [["", "Todas las categorías"],...cs.map(c=>[c,c])].forEach(([v,l])=>{const b=el("button","chip"+(cat===v?" on":""),(cat===v?"✓ ":"")+l);b.onclick=()=>{cat=v;render()};ch.append(b)});
  const g=$("#grid");g.textContent="";let n=0;
- const candidatos=all.filter(x=>(!t||x.t===t)&&(!cat||x.c===cat));
+ const candidatos=all.filter(x=>(!t||x.t===t)&&(!allowed||allowed.has(x.c))&&(!cat||x.c===cat));
  buscarPrioritario(candidatos,q).forEach((x,i)=>{
   n++;if(n>LIM)return;const c=el("details","card");const sum=el("summary","card-summary");const titulo=el("h3","",x.n);const camposFicha=["t","c","a","p","e","w","h","s","d","lat","lon"];const informados=camposFicha.filter(k=>x[k]!==undefined&&x[k]!==null&&String(x[k]).trim()!=="").length;const indicador=el("span","completitud",informados+"/11");indicador.title=informados+" de 11 datos documentados: tipo, categoría, dirección, teléfono, email, web, horario, dato destacado, descripción, latitud y longitud";const tp=el("div","top");tp.append(el("span","ic",ico(x)),el("span","tag",x.c));if(x.estado_verificacion){const estados={verificada:["Verificada","verified"],pendiente:["Pendiente de verificar","pending"],insuficiente:["Información insuficiente","insufficient"]};const estado=estados[x.estado_verificacion];if(estado){const badge=el("span","verification "+estado[1],estado[0]);badge.title="Estado de verificación de la ficha";tp.append(badge)}}const meta=el("div","meta-line");meta.append(tp,indicador);sum.append(titulo,meta);c.append(sum);const info=el("div","card-details");
   if(x.a)info.append(el("p","","📍 "+x.a));{let p=el("p","");p.append("📞 ");if(x.p){const t=x.p.split(/[;,\/]|ext/i)[0].replace(/[^\d+]/g,""),a=el("a","",x.p);a.href="tel:"+(/^\d{9}$/.test(t)?"+34"+t:t);p.append(a)}else if(!/playa|parque|natur|patrimonio|mirador|plaza|atracc/i.test(x.c)){p.append("sin teléfono registrado");p.className="mut"}else p=null;if(p)info.append(p)}if(x.e){const q=el("p","");q.append("✉️ ");const a=el("a","",x.e);a.href="mailto:"+x.e;q.append(a);info.append(q)}if(x.s)info.append(el("p","s","⭐ "+x.s));if(x.h)info.append(el("p","","🕒 "+x.h));if(x.d)info.append(el("p","",x.d));
@@ -698,7 +723,7 @@ function render(){
 $("#q").oninput=()=>{LIM=120;render()};
 const MN=CATS,MO=["Restaurantes","Bares y tapas","Cafeterías","Heladerías","Playas","Chiringuitos","Museos","Parques","Rutas de senderismo","Campos de golf","Cines","Discotecas","Clubes náuticos","Parques infantiles"];
 function mapas(){const m=$("#maps");m.textContent="";$("#mt").textContent=modo==="ocio"?"Más ocio, en el mapa":"Todos los negocios, en el mapa";(modo==="ocio"?MO:MN).forEach(c=>{const a=el("a","chip",c);a.href=map(c);a.target="_blank";a.rel="noopener";a.style.textDecoration="none";m.append(a)})}
-function elegir(m){modo=m;document.body.dataset.m=m;$("#elige").classList.add("sel");cat="";q_.value="";if(typeof LIM!=="undefined")LIM=120;document.querySelectorAll(".op").forEach(b=>b.classList.toggle("on",b.dataset.m===m));$("#main").hidden=false;$("#hint").hidden=true;document.querySelector("[name=t]").value=m;mapas();render();$("#main").scrollIntoView({behavior:"smooth"})}
+function elegir(m){modo=m;document.body.dataset.m=m;$("#elige").classList.add("sel");cat="";grupo="";q_.value="";if(typeof LIM!=="undefined")LIM=120;document.querySelectorAll(".op").forEach(b=>b.classList.toggle("on",b.dataset.m===m));$("#main").hidden=false;$("#hint").hidden=true;document.querySelector("[name=t]").value=m;mapas();render();$("#main").scrollIntoView({behavior:"smooth"})}
 const q_=$("#q");
 const grid=$("#grid");
 function cardFromEvent(e){const target=e.target instanceof Element?e.target:e.target?.parentElement;return target?.closest("details.card")||null}
