@@ -246,7 +246,7 @@ function refreshList(){
 function renderAlternateContacts(item){
  const panel=$("#alternate-contacts"),root=$("#alternate-contacts-list");root.textContent="";
  const rows=(Array.isArray(item.contactos_alternativos)?item.contactos_alternativos:[]).filter(x=>x&&x.valor);
- panel.classList.toggle("hidden",!rows.length);
+ panel.classList.remove("hidden");
  rows.forEach(x=>{
   const row=document.createElement("div");row.style.cssText="padding:.35rem 0;border-top:1px solid var(--bd);overflow-wrap:anywhere";
   const names={p:"Teléfono",e:"Correo electrónico",w:"Página web"};
