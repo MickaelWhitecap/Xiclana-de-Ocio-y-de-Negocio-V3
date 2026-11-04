@@ -246,16 +246,33 @@ function selectItem(id){const x=effectiveItems().find(v=>v.id===id);if(!x)return
 function startNew(){selectedId="new:"+crypto.randomUUID();isNew=true;$("#form-title").textContent="Nueva ficha";$("#record-meta").textContent="Se añadirá al directorio público";$("#delete-button").disabled=true;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");form.reset();$("#t").value="negocio";refreshList()}
 function cancelEdit(){selectedId=null;isNew=false;form.classList.add("hidden");$("#empty-editor").classList.remove("hidden");$("#form-title").textContent="Selecciona una ficha";$("#record-meta").textContent="";refreshList()}
 function candidateKey(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
+function candidateNameSignature(value){
+ return candidateKey(value).split(" ").filter(Boolean).sort().join(" ");
+}
 function candidateAlreadyExists(candidate){
- const name=candidateKey(candidate.n),address=candidateKey(candidate.a);
+ const name=candidateNameSignature(candidate.n),address=candidateKey(candidate.a);
+ if(!name)return null;
  return effectiveItems().find(x=>{
-  if(candidateKey(x.n)!==name)return false;
-  const otherAddress=candidateKey(x.a);
-  if(address&&otherAddress&&address===otherAddress)return true;
+  const existingName=candidateNameSignature(x.n);
+  // Mismo conjunto de palabras aunque OSM y el catálogo inviertan el orden:
+  // «Charter Alcántara» = «Alcántara Charter».
+  if(existingName===name){
+   if(candidate.t&&x.t&&candidateKey(candidate.t)!==candidateKey(x.t))return false;
+   return true;
+  }
+  // Coincidencia geográfica muy próxima: solo se considera duplicado si
+  // también coincide el tipo y existe una dirección común o nombre muy parecido.
   const hasCoords=candidate.lat!=null&&candidate.lon!=null&&x.lat!=null&&x.lon!=null;
   const a=Number(candidate.lat),b=Number(candidate.lon),la=Number(x.lat),lo=Number(x.lon);
-  if(hasCoords&&Number.isFinite(a)&&Number.isFinite(b)&&Number.isFinite(la)&&Number.isFinite(lo))return Math.abs(a-la)<0.002&&Math.abs(b-lo)<0.003;
-  return !address&&!otherAddress&&candidateKey(x.c)===candidateKey(candidate.c);
+  const near=hasCoords&&Number.isFinite(a)&&Number.isFinite(b)&&Number.isFinite(la)&&Number.isFinite(lo)&&Math.abs(a-la)<0.00035&&Math.abs(b-lo)<0.00045;
+  if(near&&candidate.t&&x.t&&candidateKey(candidate.t)===candidateKey(x.t)){
+   const left=new Set(candidateKey(candidate.n).split(" ").filter(Boolean));
+   const right=new Set(candidateKey(x.n).split(" ").filter(Boolean));
+   const common=[...left].filter(token=>right.has(token)).length;
+   const similarity=common/Math.max(left.size,right.size,1);
+   return similarity>=0.5;
+  }
+  return Boolean(address&&candidateKey(x.a)&&address===candidateKey(x.a)&&candidate.t&&x.t&&candidateKey(candidate.t)===candidateKey(x.t));
  });
 }
 function renderAddressProposals(){
@@ -333,7 +350,7 @@ function renderAutomaticCandidates(){
   const extras=Object.entries(candidate).filter(([key,value])=>!["n","t","c","a","p","e","w","h","d","lat","lon","f","id","osm_id","osm_type","url_osm"].includes(key)&&value!==undefined&&value!==null&&String(value).trim()!=="");
   if(extras.length){const details=document.createElement("details");details.style.marginTop=".7rem";const summary=document.createElement("summary");summary.textContent="Mostrar otros datos recibidos de OSM";details.append(summary);extras.forEach(([key,value])=>appendField(details,key,typeof value==="object"?JSON.stringify(value):value));preview.append(details)}
   const duplicate=candidateAlreadyExists(candidate);
-  if(duplicate){const note=document.createElement("small");note.textContent="Posible duplicado de «"+(duplicate.n||"ficha existente")+"». No se publica desde aquí; revisa la ficha existente.";note.style.color="#8a4b12";card.append(note)}
+  if(duplicate){const note=document.createElement("small");note.textContent="Coincidencia con la ficha existente «"+(duplicate.n||"ficha existente")+"» (se comparan también nombres con palabras en distinto orden). No se publicará otra ficha; revisa y completa la existente.";note.style.color="#8a4b12";card.append(note)}
   const actions=document.createElement("div");actions.className="actions";
   const view=document.createElement("button");view.type="button";view.className="secondary";view.textContent="Ver ficha previa";view.setAttribute("aria-expanded","false");view.onclick=()=>{const open=preview.style.display==="none";preview.style.display=open?"block":"none";view.textContent=open?"Ocultar vista previa":"Ver ficha previa";view.setAttribute("aria-expanded",String(open))};actions.append(view);
   const approve=document.createElement("button");approve.type="button";approve.textContent=String(candidate.estado_revision||"").startsWith("recuperada_de_baja")?"Recuperar y aprobar":"Aprobar y publicar";approve.disabled=Boolean(duplicate);approve.onclick=()=>approveAutomaticCandidate(candidate);actions.append(approve);
