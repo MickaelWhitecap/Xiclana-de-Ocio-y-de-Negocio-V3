@@ -101,7 +101,7 @@ jobs:
           source = json.loads(Path("v3/fichas_completas.json").read_text(encoding="utf-8"))
           # La extracción íntegra y los informes permanecen en el catálogo maestro de GitHub.
           # No se envían al navegador: son datos de auditoría y harían muy pesada la web.
-          for key in ("osm_extraccion_inicial", "auditoria_osm", "propuestas_direcciones_osm"):
+          for key in ("osm_extraccion_inicial", "auditoria_osm"):
               source.pop(key, None)
           Path("_site/fichas_completas.json").write_text(
               json.dumps(source, ensure_ascii=False, separators=(",", ":")),
