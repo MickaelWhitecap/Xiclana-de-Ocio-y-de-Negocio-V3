@@ -254,9 +254,12 @@ function renderAlternateContacts(item){
   const info=document.createElement("span");info.style.flex="1 1 300px";
   const names={p:"Teléfono",e:"Correo electrónico",w:"Página web"};
   info.textContent=(names[x.tipo]||"Contacto")+": "+String(x.valor)+" · Fuente: "+String(x.fuente||"No indicada")+" · Fecha: "+(x.fecha?new Date(x.fecha).toLocaleDateString("es-ES"):"No indicada");
+  const actions=document.createElement("span");actions.style.cssText="display:flex;gap:.4rem;flex-wrap:wrap";
   const edit=document.createElement("button");edit.type="button";edit.className="secondary";edit.textContent="Editar";
   edit.onclick=()=>editAlternateContact(index,x,row);
-  row.append(info,edit);root.append(row);
+  const del=document.createElement("button");del.type="button";del.className="secondary";del.textContent="Borrar";
+  del.onclick=()=>confirmDeleteAlternateContact(index,x,row,del);
+  actions.append(edit,del);row.append(info,actions);root.append(row);
  });
 }
 function editAlternateContact(index,contact,row){
@@ -268,9 +271,35 @@ function editAlternateContact(index,contact,row){
  cancel.onclick=()=>selectItem(String(selectedId));
  editor.append(input,save,cancel);row.append(editor);input.focus();input.select();
 }
+function confirmDeleteAlternateContact(index,contact,row,button){
+ const ask=document.createElement("span");ask.style.cssText="display:flex;gap:.35rem;align-items:center;flex-wrap:wrap";
+ const label=document.createElement("span");label.textContent="¿Borrar este contacto?";
+ const yes=document.createElement("button");yes.type="button";yes.textContent="Confirmar borrado";
+ const no=document.createElement("button");no.type="button";no.className="secondary";no.textContent="Cancelar";
+ yes.onclick=()=>deleteAlternateContact(index,yes);
+ no.onclick=()=>selectItem(String(selectedId));
+ ask.append(label,yes,no);row.append(ask);button.disabled=true;
+}
+async function deleteAlternateContact(index,button){
+ const item=effectiveItems().find(x=>String(x.id)===String(selectedId));
+ if(!item){message("No se encuentra la ficha seleccionada.","error");return}
+ const currentOverride=overrides.find(o=>String(o.listing_id)===String(selectedId));
+ const fields={...(currentOverride?.fields||{})};
+ const rows=Array.isArray(fields.contactos_alternativos)?[...fields.contactos_alternativos]:[];
+ if(!rows[index]){message("No se encuentra el contacto que intentas borrar.","error");return}
+ rows.splice(index,1);
+ fields.contactos_alternativos=rows;
+ const now=new Date().toISOString();button.disabled=true;button.textContent="Borrando…";
+ try{
+  const {error}=await client.from("listing_overrides").upsert({listing_id:String(selectedId),fields,is_new:Boolean(currentOverride?.is_new??item.is_new),verified_at:currentOverride?.verified_at||now,updated_at:now,updated_by:user.id},{onConflict:"listing_id"});
+  if(error)throw error;
+  const id=String(selectedId);await loadData();selectItem(id);
+  message("Contacto alternativo eliminado.","ok");
+ }catch(err){message("No se pudo borrar el contacto alternativo: "+(err.message||"error desconocido"),"error");button.disabled=false;button.textContent="Confirmar borrado"}
+}
 async function saveAlternateContact(index,contact,newValue,row,button){
  const value=String(newValue||"").trim();
- if(!value){message("El contacto no puede quedar vacío.","error");return}
+ if(!value){await deleteAlternateContact(index,button);return}
  if(contact.tipo==="w"&&!(value.startsWith("http://")||value.startsWith("https://"))){message("La web alternativa debe comenzar por http:// o https://.","error");return}
  const item=effectiveItems().find(x=>String(x.id)===String(selectedId));
  if(!item){message("No se encuentra la ficha seleccionada.","error");return}
