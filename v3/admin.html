@@ -358,10 +358,49 @@ function renderAutomaticCandidates(){
   const actions=document.createElement("div");actions.className="actions";
   const view=document.createElement("button");view.type="button";view.className="secondary";view.textContent="Ver ficha previa";view.setAttribute("aria-expanded","false");view.onclick=()=>{const open=preview.style.display==="none";preview.style.display=open?"block":"none";view.textContent=open?"Ocultar vista previa":"Ver ficha previa";view.setAttribute("aria-expanded",String(open))};actions.append(view);
   const completeness=document.createElement("span");completeness.className="pill";completeness.textContent=completed.length+"/6";completeness.title=missing.length?"Datos útiles pendientes: "+missing.join(", "):"Ficha completa en los seis datos útiles";completeness.setAttribute("aria-label",completed.length+" de 6 datos útiles completos");completeness.style.cssText="display:inline-flex;align-items:center;justify-content:center;min-width:2.8rem;font-weight:700";actions.append(completeness);
-  const approve=document.createElement("button");approve.type="button";approve.textContent=String(candidate.estado_revision||"").startsWith("recuperada_de_baja")?"Recuperar y aprobar":"Aprobar y publicar";approve.disabled=Boolean(duplicate);approve.onclick=()=>approveAutomaticCandidate(candidate);actions.append(approve);
+  if(duplicate){
+   const merge=document.createElement("button");merge.type="button";merge.textContent="Completar ficha existente";merge.onclick=()=>mergeAutomaticCandidate(candidate,duplicate);actions.append(merge);
+  }else{
+   const approve=document.createElement("button");approve.type="button";approve.textContent=String(candidate.estado_revision||"").startsWith("recuperada_de_baja")?"Recuperar y aprobar":"Aprobar y publicar";approve.onclick=()=>approveAutomaticCandidate(candidate);actions.append(approve);
+  }
   const reject=document.createElement("button");reject.type="button";reject.className="danger";reject.textContent="Descartar";reject.onclick=()=>rejectAutomaticCandidate(candidate);actions.append(reject);
   card.append(actions,preview);root.append(card);
  });
+}
+async function mergeAutomaticCandidate(candidate, existing){
+ const id=stableId(existing);
+ if(!id){message("No se ha podido identificar la ficha que recibirá los datos.","error");return}
+ const keys=[["a","Dirección"],["p","Teléfono"],["e","Correo electrónico"],["w","Página web"],["h","Horario"],["d","Descripción"]];
+ const currentOverride=overrides.find(o=>String(o.listing_id)===String(id));
+ const mergedFields={...(currentOverride?.fields||{})};
+ const additions=[],conflicts=[];
+ keys.forEach(([key,label])=>{
+  const incoming=String(candidate[key]??"").trim();
+  const current=String(existing[key]??"").trim();
+  if(!incoming)return;
+  if(!current){mergedFields[key]=candidate[key];additions.push(label+": "+incoming)}
+  else if(candidateKey(current)!==candidateKey(incoming))conflicts.push(label+": se conserva «"+current+"»; no se sustituye por «"+incoming+"»")
+ });
+ if(!additions.length){
+  const detail=conflicts.length?" No se han incorporado datos porque los campos ya contienen información. "+conflicts.join(" · "):" La ficha ya contiene los seis datos útiles.";
+  if(!window.confirm("La candidata «"+candidate.n+"» coincide con «"+(existing.n||"la ficha existente")+"», pero no aporta campos vacíos."+detail+"\n\n¿Marcar la candidata como fusionada sin modificar la ficha?"))return;
+ }else{
+  const summary="Se completará «"+(existing.n||"la ficha existente")+"» con:\n• "+additions.join("\n• ")+(conflicts.length?"\n\nSe conservarán los datos actuales en caso de conflicto:\n• "+conflicts.join("\n• "):"");
+  if(!window.confirm(summary+"\n\nNo se creará una ficha nueva. ¿Confirmas la fusión?"))return;
+ }
+ const now=new Date().toISOString();
+ const metadata={fuente_estado:"Ficha existente enriquecida con datos de OpenStreetMap mediante fusión manual",fuentes_complementarias:["OpenStreetMap"],ultima_fusion_osm:now};
+ const fields={...mergedFields,...metadata};
+ const {error:mergeError}=await client.from("listing_overrides").upsert({
+  listing_id:String(id),fields,is_new:Boolean(currentOverride?.is_new),verified_at:now,updated_at:now,updated_by:user.id
+ },{onConflict:"listing_id"});
+ if(mergeError){message("No se pudo completar la ficha existente: "+mergeError.message,"error");return}
+ const {error:markError}=await client.from("listing_overrides").upsert({
+  listing_id:String(candidate.id),fields:{estado_revision:"fusionada",fusionada_en:String(id),fusionada_el:now,fuente_estado:"Candidata OSM fusionada manualmente en ficha existente"},is_new:false,verified_at:now,updated_at:now,updated_by:user.id
+ },{onConflict:"listing_id"});
+ if(markError){message("Los datos se incorporaron a la ficha existente, pero no se pudo marcar la candidata como fusionada: "+markError.message,"error");await loadData();return}
+ await loadData();
+ message(additions.length?"Ficha existente completada con "+additions.length+" campo(s); no se creó otra ficha.":"Candidata marcada como fusionada; no se creó otra ficha.", "ok");
 }
 async function approveAutomaticCandidate(candidate){
  const duplicate=candidateAlreadyExists(candidate);
