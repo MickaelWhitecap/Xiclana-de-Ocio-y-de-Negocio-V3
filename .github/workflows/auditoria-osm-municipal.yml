@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/auditoria-osm-municipal.yml"
+      - "v3/incorporar_candidatas_osm.py"
+      - "v3/proponer_direcciones_osm.py"
   schedule:
     - cron: "30 4 * * 1"
 
