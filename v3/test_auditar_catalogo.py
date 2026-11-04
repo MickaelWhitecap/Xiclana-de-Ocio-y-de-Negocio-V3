@@ -264,6 +264,29 @@ class OSMIntegrationTests(unittest.TestCase):
         self.assertEqual(result["total_candidatas_revision"], 2)
         self.assertFalse(result["integracion_osm_revision"]["publicacion_automatica"])
 
+    def test_unmatched_osm_objects_are_classified_without_promoting_them(self):
+        path = Path(__file__).with_name("incorporar_candidatas_osm.py")
+        spec = importlib.util.spec_from_file_location("incorporar_osm_classification_test", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        entries = [
+            {"etiquetas": {"highway": "residential", "name": "Calle Uno"}},
+            {"etiquetas": {"healthcare": "physiotherapist", "name": "Clínica"}},
+            {"etiquetas": {"place": "locality", "name": "Pago"}},
+            {"etiquetas": {"route": "bus", "type": "route", "name": "Línea"}},
+            {"etiquetas": {"building": "yes", "name": "Edificio"}},
+            {"etiquetas": {"tourism": "chalet", "name": "Casa"}},
+        ]
+        result = module.classify_unmatched_osm(entries)
+        self.assertEqual(result["total_objetos_sin_ficha_candidata"], 6)
+        self.assertEqual(result["distribucion_exclusiva"]["viales_y_circulacion"], 1)
+        self.assertEqual(result["distribucion_exclusiva"]["elementos_con_etiquetas_sectoriales"], 2)
+        self.assertEqual(result["distribucion_exclusiva"]["toponimos_y_lugares_geograficos"], 1)
+        self.assertEqual(result["distribucion_exclusiva"]["rutas_y_lineas_de_transporte"], 1)
+        self.assertEqual(result["distribucion_exclusiva"]["infraestructura_edificios_y_naturaleza"], 1)
+        self.assertEqual(result["objetos_sectoriales_excluidos_por_reglas"], 1)
+        self.assertEqual(result["candidatas_que_superan_el_filtro_de_relevancia"], 1)
+
     def test_admin_loads_osm_review_data_from_master_not_auxiliary_json(self):
         admin = (Path(__file__).with_name("admin.html")).read_text(encoding="utf-8")
         self.assertIn('reviewCandidates=(data.candidatas_revision||[])', admin)
