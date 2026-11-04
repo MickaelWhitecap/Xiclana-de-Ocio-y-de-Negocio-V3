@@ -95,9 +95,6 @@ jobs:
           set -euo pipefail
           mkdir -p _site
           cp v3/index.html v3/admin.html v3/exportar-fichas.html v3/supabase-config.js _site/
-          for file in osm_candidatas_pendientes.json propuestas_direcciones_osm.json; do
-            if [ -f "v3/$file" ]; then cp "v3/$file" "_site/$file"; fi
-          done
           python - <<'PY'
           import json
           from pathlib import Path
