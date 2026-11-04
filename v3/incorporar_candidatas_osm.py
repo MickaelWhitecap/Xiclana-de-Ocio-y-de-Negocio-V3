@@ -94,6 +94,51 @@ def relevant(tags):
     return any(tags.get(k) for k in INTEREST_TAGS)
 
 
+
+def classify_unmatched_osm(entries):
+    """Clasificación exclusiva de objetos OSM con nombre y sin ficha candidata."""
+    groups = {
+        "viales_y_circulacion": 0,
+        "elementos_con_etiquetas_sectoriales": 0,
+        "toponimos_y_lugares_geograficos": 0,
+        "rutas_y_lineas_de_transporte": 0,
+        "infraestructura_edificios_y_naturaleza": 0,
+    }
+    relevant_total = 0
+    sectorial_relevant = 0
+    sectorial_excluded = 0
+    for entry in entries:
+        tags = entry.get("etiquetas") or {}
+        if tags.get("highway"):
+            groups["viales_y_circulacion"] += 1
+        elif any(tags.get(k) for k in INTEREST_TAGS):
+            groups["elementos_con_etiquetas_sectoriales"] += 1
+            if relevant(tags):
+                sectorial_relevant += 1
+            else:
+                sectorial_excluded += 1
+        elif tags.get("place"):
+            groups["toponimos_y_lugares_geograficos"] += 1
+        elif tags.get("route") or tags.get("type") == "route":
+            groups["rutas_y_lineas_de_transporte"] += 1
+        else:
+            groups["infraestructura_edificios_y_naturaleza"] += 1
+        if relevant(tags):
+            relevant_total += 1
+    return {
+        "total_objetos_sin_ficha_candidata": len(entries),
+        "distribucion_exclusiva": groups,
+        "objetos_sectoriales_no_viales_aptos_para_revision": sectorial_relevant,
+        "objetos_sectoriales_excluidos_por_reglas": sectorial_excluded,
+        "candidatas_que_superan_el_filtro_de_relevancia": relevant_total,
+        "reglas": [
+            "Los objetos con etiqueta highway se clasifican como viales, aunque tengan otras etiquetas.",
+            "Los topónimos, rutas e infraestructuras no se convierten en fichas de establecimiento.",
+            "Los elementos sectoriales pasan a revisión solo si superan relevant(); nunca se publican automáticamente.",
+        ],
+    }
+
+
 def classify(tags):
     t = tags or {}
     amenity = t.get("amenity")
@@ -405,6 +450,7 @@ def main():
     if not isinstance(address_proposals, list):
         raise SystemExit("El fichero de propuestas de direcciones tiene una estructura inválida.")
     integrate_review_data(data, manual, auto, address_proposals, summary)
+    data["auditoria_osm_objetos_sin_ficha"] = classify_unmatched_osm(report.get("posibles_nuevas_fichas_sin_incorporar", []))
     MASTER.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print(json.dumps({**summary["resumen"], "maestro_actualizado": True, "propuestas_direcciones_en_maestro": len(address_proposals)}, ensure_ascii=False), flush=True)
 
