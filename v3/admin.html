@@ -360,7 +360,9 @@ async function loadData(){
  const data=await dataRes.json();if(overrideRes.error)throw overrideRes.error;
  baseItems=(data.items||[]).map(x=>({...x}));
  reviewCandidates=(data.candidatas_revision||[]).map(x=>({...x}));
- addressProposals=(data.propuestas_direcciones_osm||[]).map(x=>({...x}));
+ const rawAddressProposals=data.propuestas_direcciones_osm;
+ const normalizedAddressProposals=Array.isArray(rawAddressProposals)?rawAddressProposals:(Array.isArray(rawAddressProposals?.propuestas)?rawAddressProposals.propuestas:[]);
+ addressProposals=normalizedAddressProposals.filter(x=>x&&typeof x==="object").map(x=>({...x}));
  overrides=overrideRes.data||[];
  const categoryRes=await client.from("listing_categories").select("slug,name,type,created_at").order("name");
  if(categoryRes.error)throw new Error("No se pudieron cargar las categorías. Comprueba que has ejecutado supabase-categories.sql en Supabase: "+categoryRes.error.message);
