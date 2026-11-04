@@ -144,7 +144,7 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
 <div class="wide muted">Al guardar, la ficha quedará marcada como verificada por Xiclana con la fecha de hoy. Comprueba que los datos se han recogido correctamente antes de publicarlos.</div>
 <div class="wide actions"><button id="save-button" type="submit">Guardar ficha</button><button id="delete-button" type="button" class="danger">Eliminar ficha</button><button id="cancel" type="button" class="secondary">Cancelar</button></div>
 </form>
-<div id="alternate-contacts" class="wide muted hidden" style="margin-top:1rem;padding:.8rem;border:1px solid var(--bd);border-radius:10px"><strong>Contactos alternativos y procedencia</strong><div id="alternate-contacts-list"></div></div>
+<div id="alternate-contacts" class="wide muted hidden" style="margin-top:1rem;padding:.8rem;border:1px solid var(--bd);border-radius:10px"><strong>Contactos alternativos y procedencia</strong><div id="alternate-contacts-list"></div><div style="display:grid;grid-template-columns:minmax(130px,.7fr) minmax(180px,1.5fr) minmax(140px,1fr) auto;gap:.5rem;align-items:end;margin-top:.8rem"><div><label for="alt-type">Tipo</label><select id="alt-type"><option value="p">Teléfono</option><option value="e">Correo electrónico</option><option value="w">Web</option></select></div><div><label for="alt-value">Contacto alternativo</label><input id="alt-value" type="text" placeholder="Dato adicional"></div><div><label for="alt-source">Fuente</label><input id="alt-source" type="text" placeholder="Web oficial, OSM…"></div><button id="alt-add" type="button">Añadir</button></div><small>El contacto principal no se sustituye. Los alternativos se conservan con su fuente y se muestran en la ficha pública.</small></div>
 <div id="empty-editor" class="muted">Elige una ficha de la lista o pulsa «Nueva ficha».</div>
 </section>
 </div>
@@ -253,6 +253,32 @@ function renderAlternateContacts(item){
   row.textContent=(names[x.tipo]||"Contacto")+": "+String(x.valor)+" · Fuente: "+String(x.fuente||"No indicada")+" · Fecha: "+(x.fecha?new Date(x.fecha).toLocaleDateString("es-ES"):"No indicada");
   root.append(row);
  });
+}
+async function addAlternateContact(){
+ if(!user||!selectedId||String(selectedId).startsWith("new:")){message("Guarda primero la ficha para añadir contactos alternativos.","error");return}
+ const tipo=$("#alt-type").value,valor=$("#alt-value").value.trim(),fuente=$("#alt-source").value.trim();
+ if(!valor){message("Introduce el contacto alternativo.","error");return}
+ if(tipo==="w"&&!/^https?:\/\//i.test(valor)){message("La web alternativa debe comenzar por http:// o https://.","error");return}
+ const item=effectiveItems().find(x=>String(x.id)===String(selectedId));
+ if(!item){message("No se encuentra la ficha seleccionada.","error");return}
+ const currentOverride=overrides.find(o=>String(o.listing_id)===String(selectedId));
+ const fields={...(currentOverride?.fields||{})};
+ const rows=Array.isArray(fields.contactos_alternativos)?[...fields.contactos_alternativos]:[];
+ const norm=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+ const principal=String(item[tipo]||"").trim();
+ if(principal&&norm(principal)===norm(valor)){message("Ese dato ya es el contacto principal.","error");return}
+ if(rows.some(x=>x&&x.tipo===tipo&&norm(x.valor)===norm(valor))){message("Ese contacto alternativo ya está registrado.","error");return}
+ rows.push({tipo,valor,fuente:fuente||"Fuente no indicada",fecha:new Date().toISOString()});
+ fields.contactos_alternativos=rows;
+ const now=new Date().toISOString(),btn=$("#alt-add");btn.disabled=true;btn.textContent="Guardando…";
+ try{
+  const {error}=await client.from("listing_overrides").upsert({listing_id:String(selectedId),fields,is_new:Boolean(currentOverride?.is_new??item.is_new),verified_at:currentOverride?.verified_at||now,updated_at:now,updated_by:user.id},{onConflict:"listing_id"});
+  if(error)throw error;
+  $("#alt-value").value="";$("#alt-source").value="";
+  const id=String(selectedId);await loadData();selectItem(id);
+  message("Contacto alternativo guardado. Se conserva el contacto principal.","ok");
+ }catch(err){message("No se pudo guardar el contacto alternativo: "+(err.message||"error desconocido"),"error")}
+ finally{btn.disabled=false;btn.textContent="Añadir"}
 }
 function selectItem(id){const x=effectiveItems().find(v=>v.id===id);if(!x)return;selectedId=id;isNew=!!x.is_new;$("#form-title").textContent=x.n;$("#record-meta").textContent=visitorCompleteness(x)+"/6 datos útiles · "+(x.verified_at?"Última verificación: "+new Date(x.verified_at).toLocaleString("es-ES"):"Ficha de directorio");$("#delete-button").disabled=false;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");fieldNames.forEach(k=>{const input=form.elements[k];input.value=x[k]??""});renderAlternateContacts(x);refreshList()}
 function startNew(){selectedId="new:"+crypto.randomUUID();isNew=true;$("#alternate-contacts").classList.add("hidden");$("#form-title").textContent="Nueva ficha";$("#record-meta").textContent="Se añadirá al directorio público";$("#delete-button").disabled=true;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");form.reset();$("#t").value="negocio";refreshList()}
@@ -636,6 +662,7 @@ form.addEventListener("submit",async e=>{
 });
 $("#login-form").addEventListener("submit",async e=>{e.preventDefault();const btn=$("#login-button");btn.disabled=true;try{const {data,error}=await client.auth.signInWithPassword({email:$("#email").value.trim(),password:$("#password").value});if(error)throw error;if(data.user?.id!=="2ebd10a1-fbae-454b-a12b-e1692f1eed17"){await client.auth.signOut();throw new Error("Esta cuenta no está autorizada para administrar Xiclana.")}user=data.user;showApp();wireAdForms();await loadData();message("Sesión iniciada. Solo la cuenta autorizada puede guardar cambios.","ok")}catch(err){message("No se pudo iniciar sesión: "+(err.message||"revisa el correo y la contraseña."),"error")}finally{btn.disabled=false}});
 logout.onclick=async()=>{await client.auth.signOut();user=null;showLogin();message("Sesión cerrada.")};
+$("#alt-add").onclick=addAlternateContact;
 $("#search").addEventListener("input",refreshList);$("#new-record").onclick=startNew;$("#cancel").onclick=cancelEdit;$("#trash-refresh").onclick=async()=>{try{await loadData();message("Papelera actualizada.","ok")}catch(err){message("No se pudo actualizar la papelera: "+err.message,"error")}};
  $("#delete-button").onclick=async()=>{
   if(!user||!selectedId||String(selectedId).startsWith("new:"))return;
