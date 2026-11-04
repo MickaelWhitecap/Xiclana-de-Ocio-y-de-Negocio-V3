@@ -405,7 +405,7 @@ def main():
     if not isinstance(address_proposals, list):
         raise SystemExit("El fichero de propuestas de direcciones tiene una estructura inválida.")
     integrate_review_data(data, manual, auto, address_proposals, summary)
-    MASTER.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\\n", encoding="utf-8")
+    MASTER.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print(json.dumps({**summary["resumen"], "maestro_actualizado": True, "propuestas_direcciones_en_maestro": len(address_proposals)}, ensure_ascii=False), flush=True)
 
 
