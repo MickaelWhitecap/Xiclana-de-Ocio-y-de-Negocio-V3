@@ -339,6 +339,13 @@ function renderAutomaticCandidates(){
   const detail=document.createElement("small");detail.textContent=[candidate.c||"Sin categoría",candidate.t||"Sin tipo",candidate.a||"Sin dirección",candidate.f||"OpenStreetMap"].filter(Boolean).join(" · ");card.append(detail);
   const preview=document.createElement("div");preview.style.cssText="display:none;margin-top:.75rem;padding:.85rem;background:var(--soft,#f5f7f7);border:1px solid var(--bd);border-radius:9px";
   const heading=document.createElement("h3");heading.textContent="Vista previa de la ficha que se incorporaría";heading.style.margin="0 0 .55rem";preview.append(heading);
+  // Mismo indicador de completitud que utiliza el catálogo: solo los seis datos útiles al visitante.
+  const completenessFields=[["a","Dirección"],["p","Teléfono"],["e","Correo electrónico"],["w","Página web"],["h","Horario"],["d","Descripción"]];
+  const completed=completenessFields.filter(([key])=>candidate[key]!==undefined&&candidate[key]!==null&&String(candidate[key]).trim()!=="");
+  const completeness=document.createElement("div");completeness.style.cssText="display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;margin:.2rem 0 .75rem;padding:.55rem .7rem;border:1px solid var(--bd);border-radius:8px;background:var(--card,#fff)";
+  const score=document.createElement("strong");score.textContent=completed.length+"/6 datos útiles";score.style.cssText="font-size:1rem";completeness.append(score);
+  const missing=completenessFields.filter(([key])=>!completed.some(([done])=>done===key)).map(([,label])=>label);
+  const missingText=document.createElement("small");missingText.textContent=missing.length?"Pendientes: "+missing.join(" · "):"Ficha completa en los seis datos útiles";missingText.style.color="var(--muted)";completeness.append(missingText);preview.append(completeness);
   const identity=document.createElement("div");identity.style.cssText="font-size:1.05rem;font-weight:700;margin-bottom:.25rem";identity.textContent=candidate.n||"Sin nombre";preview.append(identity);
   const subtitle=document.createElement("div");subtitle.style.cssText="color:var(--muted);margin-bottom:.65rem";subtitle.textContent=[candidate.t==="ocio"?"Ocio":candidate.t==="negocio"?"Negocio":candidate.t,candidate.c].filter(Boolean).join(" · ");preview.append(subtitle);
   const fields=document.createElement("div");fields.style.cssText="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 .9rem";
