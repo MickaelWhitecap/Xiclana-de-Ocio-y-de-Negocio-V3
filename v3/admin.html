@@ -144,6 +144,7 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
 <div class="wide muted">Al guardar, la ficha quedará marcada como verificada por Xiclana con la fecha de hoy. Comprueba que los datos se han recogido correctamente antes de publicarlos.</div>
 <div class="wide actions"><button id="save-button" type="submit">Guardar ficha</button><button id="delete-button" type="button" class="danger">Eliminar ficha</button><button id="cancel" type="button" class="secondary">Cancelar</button></div>
 </form>
+<div id="alternate-contacts" class="wide muted hidden" style="margin-top:1rem;padding:.8rem;border:1px solid var(--bd);border-radius:10px"><strong>Contactos alternativos y procedencia</strong><div id="alternate-contacts-list"></div></div>
 <div id="empty-editor" class="muted">Elige una ficha de la lista o pulsa «Nueva ficha».</div>
 </section>
 </div>
@@ -242,9 +243,20 @@ function refreshList(){
  list.textContent="";$("#count").textContent=matches.length+" fichas";
  matches.forEach(x=>{const b=document.createElement("button");b.type="button";b.className="item"+(x.id===selectedId?" active":"");b.append(document.createTextNode(x.n||x.nombre||x.name||"Sin nombre"));const small=document.createElement("small");small.textContent=(x.c||"Sin categoría")+" · "+(x.a||"Sin dirección");b.append(small);const completeness=document.createElement("span");completeness.className="pill";completeness.textContent=visitorCompleteness(x)+"/6";completeness.title="Dirección, teléfono, correo, web, horario y descripción";b.append(completeness);if(x.verified_at){const p=document.createElement("span");p.className="pill";p.textContent="Verificada";b.append(p)}b.onclick=()=>selectItem(x.id);list.append(b)});
 }
-function selectItem(id){const x=effectiveItems().find(v=>v.id===id);if(!x)return;selectedId=id;isNew=!!x.is_new;$("#form-title").textContent=x.n;$("#record-meta").textContent=visitorCompleteness(x)+"/6 datos útiles · "+(x.verified_at?"Última verificación: "+new Date(x.verified_at).toLocaleString("es-ES"):"Ficha de directorio");$("#delete-button").disabled=false;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");fieldNames.forEach(k=>{const input=form.elements[k];input.value=x[k]??""});refreshList()}
+function renderAlternateContacts(item){
+ const panel=$("#alternate-contacts"),root=$("#alternate-contacts-list");root.textContent="";
+ const rows=(Array.isArray(item.contactos_alternativos)?item.contactos_alternativos:[]).filter(x=>x&&x.valor);
+ panel.classList.toggle("hidden",!rows.length);
+ rows.forEach(x=>{
+  const row=document.createElement("div");row.style.cssText="padding:.35rem 0;border-top:1px solid var(--bd);overflow-wrap:anywhere";
+  const names={p:"Teléfono",e:"Correo electrónico",w:"Página web"};
+  row.textContent=(names[x.tipo]||"Contacto")+": "+String(x.valor)+" · Fuente: "+String(x.fuente||"No indicada")+" · Fecha: "+(x.fecha?new Date(x.fecha).toLocaleDateString("es-ES"):"No indicada");
+  root.append(row);
+ });
+}
+function selectItem(id){const x=effectiveItems().find(v=>v.id===id);if(!x)return;selectedId=id;isNew=!!x.is_new;$("#form-title").textContent=x.n;$("#record-meta").textContent=visitorCompleteness(x)+"/6 datos útiles · "+(x.verified_at?"Última verificación: "+new Date(x.verified_at).toLocaleString("es-ES"):"Ficha de directorio");$("#delete-button").disabled=false;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");fieldNames.forEach(k=>{const input=form.elements[k];input.value=x[k]??""});renderAlternateContacts(x);refreshList()}
 function startNew(){selectedId="new:"+crypto.randomUUID();isNew=true;$("#form-title").textContent="Nueva ficha";$("#record-meta").textContent="Se añadirá al directorio público";$("#delete-button").disabled=true;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");form.reset();$("#t").value="negocio";refreshList()}
-function cancelEdit(){selectedId=null;isNew=false;form.classList.add("hidden");$("#empty-editor").classList.remove("hidden");$("#form-title").textContent="Selecciona una ficha";$("#record-meta").textContent="";refreshList()}
+function cancelEdit(){selectedId=null;isNew=false;form.classList.add("hidden");$("#alternate-contacts").classList.add("hidden");$("#empty-editor").classList.remove("hidden");$("#form-title").textContent="Selecciona una ficha";$("#record-meta").textContent="";refreshList()}
 function candidateKey(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
 function candidateNameSignature(value){
  return candidateKey(value).split(" ").filter(Boolean).sort().join(" ");
@@ -373,13 +385,23 @@ async function mergeAutomaticCandidate(candidate, existing){
  const keys=[["a","Dirección"],["p","Teléfono"],["e","Correo electrónico"],["w","Página web"],["h","Horario"],["d","Descripción"]];
  const currentOverride=overrides.find(o=>String(o.listing_id)===String(id));
  const mergedFields={...(currentOverride?.fields||{})};
- const additions=[],conflicts=[];
+ const additions=[],conflicts=[],alternativesToAdd=[];
+ const multiContactLabels={p:"Teléfono",e:"Correo electrónico",w:"Página web"};
+ const previousAlternatives=Array.isArray(mergedFields.contactos_alternativos)?mergedFields.contactos_alternativos:[];
  keys.forEach(([key,label])=>{
   const incoming=String(candidate[key]??"").trim();
   const current=String(existing[key]??"").trim();
   if(!incoming)return;
-  if(!current){mergedFields[key]=candidate[key];additions.push(label+": "+incoming)}
-  else if(candidateKey(current)!==candidateKey(incoming))conflicts.push(label+": se conserva «"+current+"»; no se sustituye por «"+incoming+"»")
+  if(!current){mergedFields[key]=candidate[key];additions.push(label+": "+incoming);return}
+  if(candidateKey(current)===candidateKey(incoming))return;
+  if(multiContactLabels[key]){
+   const alreadyStored=previousAlternatives.some(item=>item&&item.tipo===key&&candidateKey(item.valor)===candidateKey(incoming));
+   const alreadyProposed=alternativesToAdd.some(item=>item.tipo===key&&candidateKey(item.valor)===candidateKey(incoming));
+   if(!alreadyStored&&!alreadyProposed){
+    alternativesToAdd.push({tipo:key,valor:incoming,fuente:String(candidate.f||"OpenStreetMap"),fecha:null});
+    additions.push(multiContactLabels[key]+" alternativo: "+incoming+" (fuente: "+String(candidate.f||"OpenStreetMap")+")");
+   }
+  }else conflicts.push(label+": se conserva «"+current+"»; no se sustituye por «"+incoming+"»")
  });
  if(!additions.length){
   const detail=conflicts.length?" No se han incorporado datos porque los campos ya contienen información. "+conflicts.join(" · "):" La ficha ya contiene los seis datos útiles.";
@@ -389,6 +411,8 @@ async function mergeAutomaticCandidate(candidate, existing){
   if(!window.confirm(summary+"\n\nNo se creará una ficha nueva. ¿Confirmas la fusión?"))return;
  }
  const now=new Date().toISOString();
+ alternativesToAdd.forEach(item=>item.fecha=now);
+ const contactosAlternativos=[...previousAlternatives,...alternativesToAdd];
  const previousSources=Array.isArray(mergedFields.fuentes_complementarias)?mergedFields.fuentes_complementarias:[];
  const history=Array.isArray(mergedFields.historial_fusiones_osm)?mergedFields.historial_fusiones_osm:[];
  const metadata={
@@ -397,7 +421,7 @@ async function mergeAutomaticCandidate(candidate, existing){
   historial_fusiones_osm:[...history,{candidata_id:String(candidate.id),candidata_nombre:String(candidate.n||""),fecha:now}],
   ultima_fusion_osm:now
  };
- const fields={...mergedFields,...metadata};
+ const fields={...mergedFields,...metadata,contactos_alternativos:contactosAlternativos};
  const {error:mergeError}=await client.from("listing_overrides").upsert({
   listing_id:String(id),fields,is_new:Boolean(currentOverride?.is_new),verified_at:now,updated_at:now,updated_by:user.id
  },{onConflict:"listing_id"});
