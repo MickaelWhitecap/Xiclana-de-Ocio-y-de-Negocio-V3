@@ -389,7 +389,14 @@ async function mergeAutomaticCandidate(candidate, existing){
   if(!window.confirm(summary+"\n\nNo se creará una ficha nueva. ¿Confirmas la fusión?"))return;
  }
  const now=new Date().toISOString();
- const metadata={fuente_estado:"Ficha existente enriquecida con datos de OpenStreetMap mediante fusión manual",fuentes_complementarias:["OpenStreetMap"],ultima_fusion_osm:now};
+ const previousSources=Array.isArray(mergedFields.fuentes_complementarias)?mergedFields.fuentes_complementarias:[];
+ const history=Array.isArray(mergedFields.historial_fusiones_osm)?mergedFields.historial_fusiones_osm:[];
+ const metadata={
+  fuente_estado:mergedFields.fuente_estado||"Ficha existente enriquecida con datos de OpenStreetMap mediante fusión manual",
+  fuentes_complementarias:[...new Set([...previousSources,"OpenStreetMap"])],
+  historial_fusiones_osm:[...history,{candidata_id:String(candidate.id),candidata_nombre:String(candidate.n||""),fecha:now}],
+  ultima_fusion_osm:now
+ };
  const fields={...mergedFields,...metadata};
  const {error:mergeError}=await client.from("listing_overrides").upsert({
   listing_id:String(id),fields,is_new:Boolean(currentOverride?.is_new),verified_at:now,updated_at:now,updated_by:user.id
