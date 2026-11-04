@@ -296,7 +296,9 @@ class OSMIntegrationTests(unittest.TestCase):
     def test_admin_loads_osm_review_data_from_master_not_auxiliary_json(self):
         admin = (Path(__file__).with_name("admin.html")).read_text(encoding="utf-8")
         self.assertIn('reviewCandidates=(data.candidatas_revision||[])', admin)
-        self.assertIn('addressProposals=(data.propuestas_direcciones_osm||[])', admin)
+        self.assertIn('const rawAddressProposals=data.propuestas_direcciones_osm', admin)
+        self.assertIn('Array.isArray(rawAddressProposals?.propuestas)', admin)
+        self.assertIn('addressProposals=normalizedAddressProposals.filter', admin)
         self.assertNotIn('fetch("./osm_candidatas_pendientes.json"', admin)
         self.assertNotIn('fetch("./propuestas_direcciones_osm.json"', admin)
         workflow = (Path(__file__).parents[1] / ".github" / "workflows" / "publicar-v3.yml").read_text(encoding="utf-8")
