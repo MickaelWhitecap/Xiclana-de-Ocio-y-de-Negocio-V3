@@ -190,6 +190,14 @@ def main():
         review = []
         data["candidatas_revision"] = review
 
+    def tiene_aprobacion_manual_explicita(item):
+        estado = norm(item.get("fuente_estado"))
+        return any(marca in estado for marca in (
+            "aprobada por administracion",
+            "aprobada manualmente",
+            "ficha administrativa sincronizada desde supabase"
+        ))
+
     unexpected_auto = sorted(
         (set(automatic) - baseline_ids)
         | {
@@ -198,7 +206,7 @@ def main():
             if isinstance(item, dict)
             and str(item.get("id") or "").startswith("osm-extra:")
             and str(item.get("id") or "") not in baseline_ids
-            and "ficha administrativa sincronizada desde supabase" not in str(item.get("fuente_estado") or "").casefold()
+            and not tiene_aprobacion_manual_explicita(item)
         }
     )
     # Estadísticas reproducibles para priorizar mejoras de fichas sin revisar una a una.
