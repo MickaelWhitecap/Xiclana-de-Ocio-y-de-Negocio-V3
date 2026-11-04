@@ -247,5 +247,30 @@ class AuditDuplicateTests(unittest.TestCase):
         self.assertNotIn('sb.from("listing_categories")', page)
 
 
+class OSMIntegrationTests(unittest.TestCase):
+    def test_osm_review_proposals_are_stored_in_the_master_catalog(self):
+        path = Path(__file__).with_name("incorporar_candidatas_osm.py")
+        spec = importlib.util.spec_from_file_location("incorporar_candidatas_osm_test", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        manual = [{"id": "manual:review", "n": "Ficha manual"}]
+        automatic = [{"id": "osm-extra:node:123", "n": "Candidata OSM"}]
+        addresses = [{"id_ficha": "osm:node:456", "direccion_propuesta": "Calle Uno"}]
+        summary = {"fecha_utc": "2026-11-04T00:00:00+00:00"}
+        master = {"items": [{"id": "osm:node:456"}]}
+        result = module.integrate_review_data(master, manual, automatic, addresses, summary)
+        self.assertEqual(result["candidatas_revision"], manual + automatic)
+        self.assertEqual(result["propuestas_direcciones_osm"], addresses)
+        self.assertEqual(result["total_candidatas_revision"], 2)
+        self.assertFalse(result["integracion_osm_revision"]["publicacion_automatica"])
+
+    def test_admin_loads_osm_review_data_from_master_not_auxiliary_json(self):
+        admin = (Path(__file__).with_name("admin.html")).read_text(encoding="utf-8")
+        self.assertIn('reviewCandidates=(data.candidatas_revision||[])', admin)
+        self.assertIn('addressProposals=(data.propuestas_direcciones_osm||[])', admin)
+        self.assertNotIn('fetch("./osm_candidatas_pendientes.json"', admin)
+        self.assertNotIn('fetch("./propuestas_direcciones_osm.json"', admin)
+
+
 if __name__ == "__main__":
     unittest.main()
