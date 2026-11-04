@@ -1,7 +1,7 @@
 {
   "fecha": "2026-11-04",
   "categorias_catalogo": {
-    "total_distintas_tipo_categoria": 101,
+    "total_distintas_tipo_categoria": 102,
     "distribucion": [
       {
         "tipo": "negocio",
@@ -440,6 +440,11 @@
       },
       {
         "tipo": "ocio",
+        "categoria": "Instalaciones deportivas",
+        "fichas": 1
+      },
+      {
+        "tipo": "ocio",
         "categoria": "Mirador",
         "fichas": 10
       },
@@ -530,7 +535,7 @@
       "4": 6,
       "5": 6,
       "6": 526,
-      "7": 276,
+      "7": 277,
       "8": 69,
       "9": 71,
       "10": 41,
@@ -540,10 +545,10 @@
     "fichas_con_algun_medio_de_contacto": 251,
     "fichas_con_email": 124
   },
-  "total_registros_historicos": 1302,
-  "total_items_publicables": 1026,
+  "total_registros_historicos": 1303,
+  "total_items_publicables": 1027,
   "total_items_marcados_borrados": 276,
-  "total_candidatas_revision": 2,
+  "total_candidatas_revision": 114,
   "candidatos_automaticos_heredados_en_items": 0,
   "ids_automaticos_heredados": [],
   "ids_automaticos_nuevos_no_aprobados": [],
@@ -573,8 +578,8 @@
       {
         "tipo": "ocio",
         "categoria": "Restaurante",
-        "total": 52,
-        "con_coordenadas": 52,
+        "total": 51,
+        "con_coordenadas": 51,
         "sin_coordenadas": 0
       },
       {
@@ -1119,6 +1124,13 @@
       {
         "tipo": "ocio",
         "categoria": "Cultura",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Instalaciones deportivas",
         "total": 1,
         "con_coordenadas": 1,
         "sin_coordenadas": 0
