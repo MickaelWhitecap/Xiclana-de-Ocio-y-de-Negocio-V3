@@ -255,7 +255,7 @@ function renderAlternateContacts(item){
  });
 }
 function selectItem(id){const x=effectiveItems().find(v=>v.id===id);if(!x)return;selectedId=id;isNew=!!x.is_new;$("#form-title").textContent=x.n;$("#record-meta").textContent=visitorCompleteness(x)+"/6 datos útiles · "+(x.verified_at?"Última verificación: "+new Date(x.verified_at).toLocaleString("es-ES"):"Ficha de directorio");$("#delete-button").disabled=false;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");fieldNames.forEach(k=>{const input=form.elements[k];input.value=x[k]??""});renderAlternateContacts(x);refreshList()}
-function startNew(){selectedId="new:"+crypto.randomUUID();isNew=true;$("#form-title").textContent="Nueva ficha";$("#record-meta").textContent="Se añadirá al directorio público";$("#delete-button").disabled=true;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");form.reset();$("#t").value="negocio";refreshList()}
+function startNew(){selectedId="new:"+crypto.randomUUID();isNew=true;$("#alternate-contacts").classList.add("hidden");$("#form-title").textContent="Nueva ficha";$("#record-meta").textContent="Se añadirá al directorio público";$("#delete-button").disabled=true;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");form.reset();$("#t").value="negocio";refreshList()}
 function cancelEdit(){selectedId=null;isNew=false;form.classList.add("hidden");$("#alternate-contacts").classList.add("hidden");$("#empty-editor").classList.remove("hidden");$("#form-title").textContent="Selecciona una ficha";$("#record-meta").textContent="";refreshList()}
 function candidateKey(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
 function candidateNameSignature(value){
@@ -615,7 +615,7 @@ form.addEventListener("submit",async e=>{
  e.preventDefault();if(!user)return;
  const btn=$("#save-button");btn.disabled=true;btn.textContent="Guardando…";
  try{
-  const fields={};fieldNames.forEach(k=>{const raw=form.elements[k].value;fields[k]=["lat","lon"].includes(k)?(raw===""?null:Number(raw)):raw.trim()});
+  const fields={...(overrides.find(o=>String(o.listing_id)===String(selectedId))?.fields||{})};fieldNames.forEach(k=>{const raw=form.elements[k].value;fields[k]=["lat","lon"].includes(k)?(raw===""?null:Number(raw)):raw.trim()});
   if(!fields.n||!fields.c)throw new Error("El nombre y la categoría son obligatorios.");
   const newRecord=String(selectedId||"").startsWith("new:"), id=newRecord?"manual:"+crypto.randomUUID():selectedId;
   fields.f="Verificado por Xiclana";fields.v=new Date().toISOString().slice(0,10);
