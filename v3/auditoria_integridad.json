@@ -1,7 +1,7 @@
 {
   "fecha": "2026-11-04",
   "categorias_catalogo": {
-    "total_distintas_tipo_categoria": 103,
+    "total_distintas_tipo_categoria": 104,
     "distribucion": [
       {
         "tipo": "negocio",
@@ -136,6 +136,11 @@
       {
         "tipo": "negocio",
         "categoria": "Droguería",
+        "fichas": 1
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Educación",
         "fichas": 1
       },
       {
@@ -539,7 +544,7 @@
     "distribucion": {
       "4": 6,
       "5": 6,
-      "6": 527,
+      "6": 528,
       "7": 277,
       "8": 69,
       "9": 71,
@@ -550,8 +555,8 @@
     "fichas_con_algun_medio_de_contacto": 251,
     "fichas_con_email": 124
   },
-  "total_registros_historicos": 1303,
-  "total_items_publicables": 1028,
+  "total_registros_historicos": 1304,
+  "total_items_publicables": 1029,
   "total_items_marcados_borrados": 275,
   "total_candidatas_revision": 114,
   "candidatos_automaticos_heredados_en_items": 0,
@@ -560,7 +565,7 @@
   "registros_invalidos_o_ids_repetidos": [],
   "fichas_sin_nombre_categoria_o_tipo_valido": [],
   "calidad_de_campos_opcionales": {
-    "fichas_sin_direccion": 555,
+    "fichas_sin_direccion": 556,
     "correos_invalidos": [],
     "urls_colocadas_en_campo_email": [],
     "telefonos_sospechosos": [],
@@ -569,8 +574,8 @@
     "nota": "Control informativo: no modifica fichas ni bloquea la publicación por campos opcionales."
   },
   "direcciones_pendientes": {
-    "total_sin_direccion": 555,
-    "con_coordenadas_validas": 548,
+    "total_sin_direccion": 556,
+    "con_coordenadas_validas": 549,
     "sin_coordenadas_validas": 7,
     "distribucion_por_tipo_y_categoria": [
       {
@@ -1031,6 +1036,13 @@
       {
         "tipo": "negocio",
         "categoria": "Droguería",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Educación",
         "total": 1,
         "con_coordenadas": 1,
         "sin_coordenadas": 0
