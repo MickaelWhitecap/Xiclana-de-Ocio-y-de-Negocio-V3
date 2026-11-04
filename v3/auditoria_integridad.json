@@ -1,7 +1,7 @@
 {
   "fecha": "2026-11-04",
   "categorias_catalogo": {
-    "total_distintas_tipo_categoria": 102,
+    "total_distintas_tipo_categoria": 103,
     "distribucion": [
       {
         "tipo": "negocio",
@@ -37,6 +37,11 @@
         "tipo": "negocio",
         "categoria": "Autoescuela",
         "fichas": 3
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Balneario y spa",
+        "fichas": 1
       },
       {
         "tipo": "negocio",
@@ -180,6 +185,11 @@
       },
       {
         "tipo": "negocio",
+        "categoria": "Golf",
+        "fichas": 1
+      },
+      {
+        "tipo": "negocio",
         "categoria": "Guardería",
         "fichas": 4
       },
@@ -276,7 +286,7 @@
       {
         "tipo": "negocio",
         "categoria": "Parking",
-        "fichas": 4
+        "fichas": 5
       },
       {
         "tipo": "negocio",
@@ -291,7 +301,7 @@
       {
         "tipo": "negocio",
         "categoria": "Quiosco",
-        "fichas": 4
+        "fichas": 3
       },
       {
         "tipo": "negocio",
@@ -361,7 +371,7 @@
       {
         "tipo": "ocio",
         "categoria": "Balneario y spa",
-        "fichas": 12
+        "fichas": 11
       },
       {
         "tipo": "ocio",
@@ -426,7 +436,7 @@
       {
         "tipo": "ocio",
         "categoria": "Golf",
-        "fichas": 3
+        "fichas": 9
       },
       {
         "tipo": "ocio",
@@ -436,12 +446,7 @@
       {
         "tipo": "ocio",
         "categoria": "Instalación deportiva",
-        "fichas": 29
-      },
-      {
-        "tipo": "ocio",
-        "categoria": "Instalaciones deportivas",
-        "fichas": 1
+        "fichas": 24
       },
       {
         "tipo": "ocio",
@@ -534,7 +539,7 @@
     "distribucion": {
       "4": 6,
       "5": 6,
-      "6": 526,
+      "6": 527,
       "7": 277,
       "8": 69,
       "9": 71,
@@ -546,8 +551,8 @@
     "fichas_con_email": 124
   },
   "total_registros_historicos": 1303,
-  "total_items_publicables": 1027,
-  "total_items_marcados_borrados": 276,
+  "total_items_publicables": 1028,
+  "total_items_marcados_borrados": 275,
   "total_candidatas_revision": 114,
   "candidatos_automaticos_heredados_en_items": 0,
   "ids_automaticos_heredados": [],
@@ -555,7 +560,7 @@
   "registros_invalidos_o_ids_repetidos": [],
   "fichas_sin_nombre_categoria_o_tipo_valido": [],
   "calidad_de_campos_opcionales": {
-    "fichas_sin_direccion": 554,
+    "fichas_sin_direccion": 555,
     "correos_invalidos": [],
     "urls_colocadas_en_campo_email": [],
     "telefonos_sospechosos": [],
@@ -564,8 +569,8 @@
     "nota": "Control informativo: no modifica fichas ni bloquea la publicación por campos opcionales."
   },
   "direcciones_pendientes": {
-    "total_sin_direccion": 554,
-    "con_coordenadas_validas": 547,
+    "total_sin_direccion": 555,
+    "con_coordenadas_validas": 548,
     "sin_coordenadas_validas": 7,
     "distribucion_por_tipo_y_categoria": [
       {
@@ -794,6 +799,13 @@
       },
       {
         "tipo": "ocio",
+        "categoria": "Golf",
+        "total": 4,
+        "con_coordenadas": 4,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
         "categoria": "Heladería",
         "total": 4,
         "con_coordenadas": 4,
@@ -886,13 +898,6 @@
       {
         "tipo": "ocio",
         "categoria": "Atracción",
-        "total": 3,
-        "con_coordenadas": 3,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "ocio",
-        "categoria": "Golf",
         "total": 3,
         "con_coordenadas": 3,
         "sin_coordenadas": 0
@@ -1088,6 +1093,13 @@
       },
       {
         "tipo": "negocio",
+        "categoria": "Parking",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
         "categoria": "Pescadería",
         "total": 1,
         "con_coordenadas": 1,
@@ -1124,13 +1136,6 @@
       {
         "tipo": "ocio",
         "categoria": "Cultura",
-        "total": 1,
-        "con_coordenadas": 1,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "ocio",
-        "categoria": "Instalaciones deportivas",
         "total": 1,
         "con_coordenadas": 1,
         "sin_coordenadas": 0
