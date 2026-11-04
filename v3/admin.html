@@ -311,18 +311,34 @@ function renderAutomaticCandidates(){
  const baseIds=new Set(baseItems.filter(x=>x._xiclana_deleted!==true).map(stableId));
  const pending=reviewCandidates.filter(x=>x&&x.id&&!approved.has(String(x.id))&&!deletedOverrides.has(String(x.id))&&!rejected.has(String(x.id))&&!baseIds.has(String(x.id))&&x.estado_revision!=="descartada");
  if(!pending.length){root.textContent="No hay candidatas automáticas pendientes de revisión.";return}
+ const appendField=(container,label,value)=>{
+  if(value===undefined||value===null||String(value).trim()==="")return;
+  const row=document.createElement("div");row.style.cssText="padding:.42rem 0;border-bottom:1px solid var(--bd);overflow-wrap:anywhere";
+  const name=document.createElement("strong");name.textContent=label+": ";row.append(name,document.createTextNode(String(value)));container.append(row);
+ };
  pending.forEach(candidate=>{
-  const card=document.createElement("div");card.className="item";card.style.marginBottom=".65rem";
+  const card=document.createElement("div");card.className="item";card.style.marginBottom=".8rem";
   const title=document.createElement("strong");title.textContent=candidate.n||"Candidata sin nombre";card.append(title);
-  const detail=document.createElement("small");detail.textContent=[candidate.c||"Sin categoría",candidate.t||"Sin tipo",candidate.a||"Sin dirección",candidate.p||"",candidate.e||"",candidate.w||"",candidate.lat!=null&&candidate.lon!=null?("Coordenadas "+candidate.lat+", "+candidate.lon):"",candidate.f||"OpenStreetMap",String(candidate.estado_revision||"").startsWith("recuperada_de_baja")?"Recuperada de baja":"",candidate.nota_revision||""].filter(Boolean).join(" · ");card.append(detail);
-  const osm=String(candidate.id).match(/^osm(?:-extra)?:(node|way|relation):(\d+)$/);
-  if(osm){const source=document.createElement("a");source.href="https://www.openstreetmap.org/"+osm[1]+"/"+osm[2];source.target="_blank";source.rel="noopener noreferrer";source.textContent="Ver en OpenStreetMap";source.style.display="inline-block";source.style.marginTop=".25rem";card.append(source)}
+  const detail=document.createElement("small");detail.textContent=[candidate.c||"Sin categoría",candidate.t||"Sin tipo",candidate.a||"Sin dirección",candidate.f||"OpenStreetMap"].filter(Boolean).join(" · ");card.append(detail);
+  const preview=document.createElement("div");preview.style.cssText="display:none;margin-top:.75rem;padding:.85rem;background:var(--soft,#f5f7f7);border:1px solid var(--bd);border-radius:9px";
+  const heading=document.createElement("h3");heading.textContent="Vista previa de la ficha que se incorporaría";heading.style.margin="0 0 .55rem";preview.append(heading);
+  const identity=document.createElement("div");identity.style.cssText="font-size:1.05rem;font-weight:700;margin-bottom:.25rem";identity.textContent=candidate.n||"Sin nombre";preview.append(identity);
+  const subtitle=document.createElement("div");subtitle.style.cssText="color:var(--muted);margin-bottom:.65rem";subtitle.textContent=[candidate.t==="ocio"?"Ocio":candidate.t==="negocio"?"Negocio":candidate.t,candidate.c].filter(Boolean).join(" · ");preview.append(subtitle);
+  const fields=document.createElement("div");fields.style.cssText="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 .9rem";
+  [["Dirección",candidate.a],["Teléfono",candidate.p],["Correo electrónico",candidate.e],["Página web",candidate.w],["Horario",candidate.h],["Descripción",candidate.d],["Latitud",candidate.lat],["Longitud",candidate.lon],["Fuente",candidate.f||"OpenStreetMap"]].forEach(([label,value])=>appendField(fields,label,value));
+  if(!fields.childNodes.length){const empty=document.createElement("p");empty.textContent="La propuesta no contiene datos descriptivos adicionales.";fields.append(empty)}
+  preview.append(fields);
+  const match=String(candidate.id||"").match(/^osm(?:-extra)?:(node|way|relation):(\d+)$/);
+  if(match){const source=document.createElement("a");source.href="https://www.openstreetmap.org/"+match[1]+"/"+match[2];source.target="_blank";source.rel="noopener noreferrer";source.textContent="Comprobar objeto original en OpenStreetMap";source.style.display="inline-block";source.style.marginTop=".65rem";preview.append(source)}
+  const extras=Object.entries(candidate).filter(([key,value])=>!["n","t","c","a","p","e","w","h","d","lat","lon","f","id","osm_id","osm_type","url_osm"].includes(key)&&value!==undefined&&value!==null&&String(value).trim()!=="");
+  if(extras.length){const details=document.createElement("details");details.style.marginTop=".7rem";const summary=document.createElement("summary");summary.textContent="Mostrar otros datos recibidos de OSM";details.append(summary);extras.forEach(([key,value])=>appendField(details,key,typeof value==="object"?JSON.stringify(value):value));preview.append(details)}
   const duplicate=candidateAlreadyExists(candidate);
   if(duplicate){const note=document.createElement("small");note.textContent="Posible duplicado de «"+(duplicate.n||"ficha existente")+"». No se publica desde aquí; revisa la ficha existente.";note.style.color="#8a4b12";card.append(note)}
   const actions=document.createElement("div");actions.className="actions";
+  const view=document.createElement("button");view.type="button";view.className="secondary";view.textContent="Ver ficha previa";view.setAttribute("aria-expanded","false");view.onclick=()=>{const open=preview.style.display==="none";preview.style.display=open?"block":"none";view.textContent=open?"Ocultar vista previa":"Ver ficha previa";view.setAttribute("aria-expanded",String(open))};actions.append(view);
   const approve=document.createElement("button");approve.type="button";approve.textContent=String(candidate.estado_revision||"").startsWith("recuperada_de_baja")?"Recuperar y aprobar":"Aprobar y publicar";approve.disabled=Boolean(duplicate);approve.onclick=()=>approveAutomaticCandidate(candidate);actions.append(approve);
   const reject=document.createElement("button");reject.type="button";reject.className="danger";reject.textContent="Descartar";reject.onclick=()=>rejectAutomaticCandidate(candidate);actions.append(reject);
-  card.append(actions);root.append(card);
+  card.append(actions,preview);root.append(card);
  });
 }
 async function approveAutomaticCandidate(candidate){
