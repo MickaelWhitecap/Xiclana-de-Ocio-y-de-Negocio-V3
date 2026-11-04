@@ -271,7 +271,6 @@ class OSMIntegrationTests(unittest.TestCase):
         self.assertNotIn('fetch("./osm_candidatas_pendientes.json"', admin)
         self.assertNotIn('fetch("./propuestas_direcciones_osm.json"', admin)
         workflow = (Path(__file__).parents[1] / ".github" / "workflows" / "publicar-v3.yml").read_text(encoding="utf-8")
-        self.assertIn('"propuestas_direcciones_osm": []', "propuestas_direcciones_osm: []") if False else None
         self.assertIn('for key in ("osm_extraccion_inicial", "auditoria_osm"):', workflow)
         self.assertNotIn('for key in ("osm_extraccion_inicial", "auditoria_osm", "propuestas_direcciones_osm"):', workflow)
 
