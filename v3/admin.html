@@ -249,12 +249,48 @@ function renderAlternateContacts(item){
  const panel=$("#alternate-contacts"),root=$("#alternate-contacts-list");root.textContent="";
  const rows=(Array.isArray(item.contactos_alternativos)?item.contactos_alternativos:[]).filter(x=>x&&x.valor);
  panel.classList.remove("hidden");
- rows.forEach(x=>{
-  const row=document.createElement("div");row.style.cssText="padding:.35rem 0;border-top:1px solid var(--bd);overflow-wrap:anywhere";
+ rows.forEach((x,index)=>{
+  const row=document.createElement("div");row.style.cssText="padding:.45rem 0;border-top:1px solid var(--bd);overflow-wrap:anywhere;display:flex;gap:.55rem;align-items:center;flex-wrap:wrap";
+  const info=document.createElement("span");info.style.flex="1 1 300px";
   const names={p:"Teléfono",e:"Correo electrónico",w:"Página web"};
-  row.textContent=(names[x.tipo]||"Contacto")+": "+String(x.valor)+" · Fuente: "+String(x.fuente||"No indicada")+" · Fecha: "+(x.fecha?new Date(x.fecha).toLocaleDateString("es-ES"):"No indicada");
-  root.append(row);
+  info.textContent=(names[x.tipo]||"Contacto")+": "+String(x.valor)+" · Fuente: "+String(x.fuente||"No indicada")+" · Fecha: "+(x.fecha?new Date(x.fecha).toLocaleDateString("es-ES"):"No indicada");
+  const edit=document.createElement("button");edit.type="button";edit.className="secondary";edit.textContent="Editar";
+  edit.onclick=()=>editAlternateContact(index,x,row);
+  row.append(info,edit);root.append(row);
  });
+}
+function editAlternateContact(index,contact,row){
+ const editor=document.createElement("div");editor.style.cssText="display:flex;gap:.45rem;align-items:center;flex:1 1 100%;flex-wrap:wrap";
+ const input=document.createElement("input");input.type="text";input.value=String(contact.valor||"");input.setAttribute("aria-label","Corregir contacto alternativo");input.style.flex="1 1 240px";
+ const save=document.createElement("button");save.type="button";save.textContent="Guardar";
+ const cancel=document.createElement("button");cancel.type="button";cancel.className="secondary";cancel.textContent="Cancelar";
+ save.onclick=()=>saveAlternateContact(index,contact,input.value,row,save);
+ cancel.onclick=()=>selectItem(String(selectedId));
+ editor.append(input,save,cancel);row.append(editor);input.focus();input.select();
+}
+async function saveAlternateContact(index,contact,newValue,row,button){
+ const value=String(newValue||"").trim();
+ if(!value){message("El contacto no puede quedar vacío.","error");return}
+ if(contact.tipo==="w"&&!/^https?:\\/\\//i.test(value)){message("La web alternativa debe comenzar por http:// o https://.","error");return}
+ const item=effectiveItems().find(x=>String(x.id)===String(selectedId));
+ if(!item){message("No se encuentra la ficha seleccionada.","error");return}
+ const currentOverride=overrides.find(o=>String(o.listing_id)===String(selectedId));
+ const fields={...(currentOverride?.fields||{})};
+ const rows=Array.isArray(fields.contactos_alternativos)?[...fields.contactos_alternativos]:[];
+ if(!rows[index]){message("No se encuentra el contacto que intentas corregir.","error");return}
+ const norm=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+ const principal=String(item[contact.tipo]||"").trim();
+ if(principal&&norm(principal)===norm(value)){message("Ese dato ya es el contacto principal.","error");return}
+ if(rows.some((x,i)=>i!==index&&x&&x.tipo===contact.tipo&&norm(x.valor)===norm(value))){message("Ese contacto alternativo ya está registrado.","error");return}
+ rows[index]={...rows[index],valor:value,fecha:new Date().toISOString()};
+ fields.contactos_alternativos=rows;
+ const now=new Date().toISOString();button.disabled=true;button.textContent="Guardando…";
+ try{
+  const {error}=await client.from("listing_overrides").upsert({listing_id:String(selectedId),fields,is_new:Boolean(currentOverride?.is_new??item.is_new),verified_at:currentOverride?.verified_at||now,updated_at:now,updated_by:user.id},{onConflict:"listing_id"});
+  if(error)throw error;
+  const id=String(selectedId);await loadData();selectItem(id);
+  message("Contacto alternativo corregido y guardado.","ok");
+ }catch(err){message("No se pudo corregir el contacto alternativo: "+(err.message||"error desconocido"),"error");button.disabled=false;button.textContent="Guardar"}
 }
 async function addAlternateContact(){
  if(!user||!selectedId||String(selectedId).startsWith("new:")){message("Guarda primero la ficha para añadir contactos alternativos.","error");return}
