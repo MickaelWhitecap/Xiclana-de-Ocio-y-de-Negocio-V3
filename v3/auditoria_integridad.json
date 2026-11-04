@@ -1,7 +1,7 @@
 {
   "fecha": "2026-11-04",
   "categorias_catalogo": {
-    "total_distintas_tipo_categoria": 104,
+    "total_distintas_tipo_categoria": 116,
     "distribucion": [
       {
         "tipo": "negocio",
@@ -57,6 +57,11 @@
         "tipo": "negocio",
         "categoria": "Bicicletas",
         "fichas": 3
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Bienestar",
+        "fichas": 1
       },
       {
         "tipo": "negocio",
@@ -141,11 +146,16 @@
       {
         "tipo": "negocio",
         "categoria": "Educación",
-        "fichas": 1
+        "fichas": 6
       },
       {
         "tipo": "negocio",
         "categoria": "Electrónica",
+        "fichas": 4
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Emergencias",
         "fichas": 4
       },
       {
@@ -206,7 +216,7 @@
       {
         "tipo": "negocio",
         "categoria": "Hotel",
-        "fichas": 48
+        "fichas": 50
       },
       {
         "tipo": "negocio",
@@ -291,7 +301,7 @@
       {
         "tipo": "negocio",
         "categoria": "Parking",
-        "fichas": 5
+        "fichas": 14
       },
       {
         "tipo": "negocio",
@@ -320,6 +330,11 @@
       },
       {
         "tipo": "negocio",
+        "categoria": "Salud",
+        "fichas": 6
+      },
+      {
+        "tipo": "negocio",
         "categoria": "Seguros",
         "fichas": 5
       },
@@ -327,6 +342,16 @@
         "tipo": "negocio",
         "categoria": "Servicio público",
         "fichas": 24
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Servicios públicos",
+        "fichas": 1
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Servicios sociales",
+        "fichas": 2
       },
       {
         "tipo": "negocio",
@@ -355,8 +380,18 @@
       },
       {
         "tipo": "negocio",
+        "categoria": "Transporte",
+        "fichas": 2
+      },
+      {
+        "tipo": "negocio",
         "categoria": "Veterinario",
         "fichas": 9
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Arte público",
+        "fichas": 14
       },
       {
         "tipo": "ocio",
@@ -430,6 +465,11 @@
       },
       {
         "tipo": "ocio",
+        "categoria": "Espacios culturales",
+        "fichas": 6
+      },
+      {
+        "tipo": "ocio",
         "categoria": "Estadio",
         "fichas": 2
       },
@@ -450,8 +490,18 @@
       },
       {
         "tipo": "ocio",
+        "categoria": "Información turística",
+        "fichas": 6
+      },
+      {
+        "tipo": "ocio",
         "categoria": "Instalación deportiva",
-        "fichas": 24
+        "fichas": 25
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Instalaciones deportivas",
+        "fichas": 9
       },
       {
         "tipo": "ocio",
@@ -466,7 +516,7 @@
       {
         "tipo": "ocio",
         "categoria": "Naturaleza",
-        "fichas": 5
+        "fichas": 6
       },
       {
         "tipo": "ocio",
@@ -481,7 +531,7 @@
       {
         "tipo": "ocio",
         "categoria": "Ocio infantil",
-        "fichas": 1
+        "fichas": 2
       },
       {
         "tipo": "ocio",
@@ -495,8 +545,18 @@
       },
       {
         "tipo": "ocio",
+        "categoria": "Parques infantiles",
+        "fichas": 7
+      },
+      {
+        "tipo": "ocio",
         "categoria": "Patrimonio",
         "fichas": 15
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Patrimonio y culto",
+        "fichas": 12
       },
       {
         "tipo": "ocio",
@@ -511,7 +571,7 @@
       {
         "tipo": "ocio",
         "categoria": "Restaurante",
-        "fichas": 140
+        "fichas": 141
       },
       {
         "tipo": "ocio",
@@ -544,20 +604,20 @@
     "distribucion": {
       "4": 6,
       "5": 6,
-      "6": 528,
-      "7": 277,
-      "8": 69,
-      "9": 71,
+      "6": 597,
+      "7": 287,
+      "8": 74,
+      "9": 77,
       "10": 41,
       "11": 19,
       "12": 12
     },
-    "fichas_con_algun_medio_de_contacto": 251,
-    "fichas_con_email": 124
+    "fichas_con_algun_medio_de_contacto": 263,
+    "fichas_con_email": 126
   },
-  "total_registros_historicos": 1304,
-  "total_items_publicables": 1029,
-  "total_items_marcados_borrados": 275,
+  "total_registros_historicos": 1326,
+  "total_items_publicables": 1119,
+  "total_items_marcados_borrados": 207,
   "total_candidatas_revision": 114,
   "candidatos_automaticos_heredados_en_items": 0,
   "ids_automaticos_heredados": [],
@@ -565,7 +625,7 @@
   "registros_invalidos_o_ids_repetidos": [],
   "fichas_sin_nombre_categoria_o_tipo_valido": [],
   "calidad_de_campos_opcionales": {
-    "fichas_sin_direccion": 556,
+    "fichas_sin_direccion": 630,
     "correos_invalidos": [],
     "urls_colocadas_en_campo_email": [],
     "telefonos_sospechosos": [],
@@ -574,8 +634,8 @@
     "nota": "Control informativo: no modifica fichas ni bloquea la publicación por campos opcionales."
   },
   "direcciones_pendientes": {
-    "total_sin_direccion": 556,
-    "con_coordenadas_validas": 549,
+    "total_sin_direccion": 630,
+    "con_coordenadas_validas": 623,
     "sin_coordenadas_validas": 7,
     "distribucion_por_tipo_y_categoria": [
       {
@@ -642,6 +702,13 @@
         "sin_coordenadas": 0
       },
       {
+        "tipo": "ocio",
+        "categoria": "Arte público",
+        "total": 14,
+        "con_coordenadas": 14,
+        "sin_coordenadas": 0
+      },
+      {
         "tipo": "negocio",
         "categoria": "Banco",
         "total": 13,
@@ -677,8 +744,22 @@
         "sin_coordenadas": 0
       },
       {
+        "tipo": "ocio",
+        "categoria": "Patrimonio y culto",
+        "total": 10,
+        "con_coordenadas": 10,
+        "sin_coordenadas": 0
+      },
+      {
         "tipo": "negocio",
         "categoria": "Oficina",
+        "total": 9,
+        "con_coordenadas": 9,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Parking",
         "total": 9,
         "con_coordenadas": 9,
         "sin_coordenadas": 0
@@ -691,8 +772,22 @@
         "sin_coordenadas": 0
       },
       {
+        "tipo": "ocio",
+        "categoria": "Instalaciones deportivas",
+        "total": 8,
+        "con_coordenadas": 8,
+        "sin_coordenadas": 0
+      },
+      {
         "tipo": "negocio",
         "categoria": "Farmacia",
+        "total": 7,
+        "con_coordenadas": 7,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Parques infantiles",
         "total": 7,
         "con_coordenadas": 7,
         "sin_coordenadas": 0
@@ -748,6 +843,13 @@
       },
       {
         "tipo": "ocio",
+        "categoria": "Información turística",
+        "total": 6,
+        "con_coordenadas": 6,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
         "categoria": "Patrimonio",
         "total": 6,
         "con_coordenadas": 6,
@@ -783,6 +885,13 @@
       },
       {
         "tipo": "negocio",
+        "categoria": "Educación",
+        "total": 5,
+        "con_coordenadas": 5,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
         "categoria": "Deportes",
         "total": 4,
         "con_coordenadas": 4,
@@ -803,6 +912,20 @@
         "sin_coordenadas": 0
       },
       {
+        "tipo": "negocio",
+        "categoria": "Hotel",
+        "total": 4,
+        "con_coordenadas": 4,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Espacios culturales",
+        "total": 4,
+        "con_coordenadas": 4,
+        "sin_coordenadas": 0
+      },
+      {
         "tipo": "ocio",
         "categoria": "Golf",
         "total": 4,
@@ -812,6 +935,13 @@
       {
         "tipo": "ocio",
         "categoria": "Heladería",
+        "total": 4,
+        "con_coordenadas": 4,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Naturaleza",
         "total": 4,
         "con_coordenadas": 4,
         "sin_coordenadas": 0
@@ -908,13 +1038,6 @@
         "sin_coordenadas": 0
       },
       {
-        "tipo": "ocio",
-        "categoria": "Naturaleza",
-        "total": 3,
-        "con_coordenadas": 3,
-        "sin_coordenadas": 0
-      },
-      {
         "tipo": "negocio",
         "categoria": "Abogado",
         "total": 2,
@@ -951,14 +1074,14 @@
       },
       {
         "tipo": "negocio",
-        "categoria": "Guardería",
+        "categoria": "Emergencias",
         "total": 2,
         "con_coordenadas": 2,
         "sin_coordenadas": 0
       },
       {
         "tipo": "negocio",
-        "categoria": "Hotel",
+        "categoria": "Guardería",
         "total": 2,
         "con_coordenadas": 2,
         "sin_coordenadas": 0
@@ -973,6 +1096,20 @@
       {
         "tipo": "negocio",
         "categoria": "Lavado de coches",
+        "total": 2,
+        "con_coordenadas": 2,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Salud",
+        "total": 2,
+        "con_coordenadas": 2,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Transporte",
         "total": 2,
         "con_coordenadas": 2,
         "sin_coordenadas": 0
@@ -1014,6 +1151,13 @@
       },
       {
         "tipo": "negocio",
+        "categoria": "Bienestar",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
         "categoria": "Camping",
         "total": 1,
         "con_coordenadas": 1,
@@ -1036,13 +1180,6 @@
       {
         "tipo": "negocio",
         "categoria": "Droguería",
-        "total": 1,
-        "con_coordenadas": 1,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "negocio",
-        "categoria": "Educación",
         "total": 1,
         "con_coordenadas": 1,
         "sin_coordenadas": 0
@@ -1105,13 +1242,6 @@
       },
       {
         "tipo": "negocio",
-        "categoria": "Parking",
-        "total": 1,
-        "con_coordenadas": 1,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "negocio",
         "categoria": "Pescadería",
         "total": 1,
         "con_coordenadas": 1,
@@ -1123,6 +1253,20 @@
         "total": 1,
         "con_coordenadas": 0,
         "sin_coordenadas": 1
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Servicios públicos",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Servicios sociales",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
       },
       {
         "tipo": "negocio",
@@ -1155,6 +1299,13 @@
       {
         "tipo": "ocio",
         "categoria": "Instalación deportiva",
+        "total": 1,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Ocio infantil",
         "total": 1,
         "con_coordenadas": 1,
         "sin_coordenadas": 0
