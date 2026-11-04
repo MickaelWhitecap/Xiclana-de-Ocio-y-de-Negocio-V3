@@ -382,7 +382,24 @@ def main():
     }
     PENDING.write_text(json.dumps(pending, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     SUMMARY.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps(summary["resumen"], ensure_ascii=False), flush=True)
+
+    # El catálogo maestro es la única fuente que consume Administración.
+    address_path = ROOT / "propuestas_direcciones_osm.json"
+    address_doc = json.loads(address_path.read_text(encoding="utf-8")) if address_path.is_file() else {}
+    address_proposals = address_doc.get("propuestas", [])
+    if not isinstance(address_proposals, list):
+        raise SystemExit("El fichero de propuestas de direcciones tiene una estructura inválida.")
+    data["candidatas_revision"] = manual + auto
+    data["propuestas_direcciones_osm"] = address_proposals
+    data["total_candidatas_revision"] = len(data["candidatas_revision"])
+    data["integracion_osm_revision"] = {
+        "fecha_utc": summary["fecha_utc"],
+        "candidatas_revision": len(data["candidatas_revision"]),
+        "propuestas_direcciones": len(address_proposals),
+        "publicacion_automatica": False,
+    }
+    MASTER.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\\n", encoding="utf-8")
+    print(json.dumps({**summary["resumen"], "maestro_actualizado": True, "propuestas_direcciones_en_maestro": len(address_proposals)}, ensure_ascii=False), flush=True)
 
 
 if __name__ == "__main__":
