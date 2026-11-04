@@ -271,7 +271,7 @@ function editAlternateContact(index,contact,row){
 async function saveAlternateContact(index,contact,newValue,row,button){
  const value=String(newValue||"").trim();
  if(!value){message("El contacto no puede quedar vacío.","error");return}
- if(contact.tipo==="w"&&!/^https?:\\/\\//i.test(value)){message("La web alternativa debe comenzar por http:// o https://.","error");return}
+ if(contact.tipo==="w"&&!(value.startsWith("http://")||value.startsWith("https://"))){message("La web alternativa debe comenzar por http:// o https://.","error");return}
  const item=effectiveItems().find(x=>String(x.id)===String(selectedId));
  if(!item){message("No se encuentra la ficha seleccionada.","error");return}
  const currentOverride=overrides.find(o=>String(o.listing_id)===String(selectedId));
