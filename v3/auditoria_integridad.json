@@ -607,8 +607,8 @@
       "6": 597,
       "7": 287,
       "8": 74,
-      "9": 77,
-      "10": 41,
+      "9": 76,
+      "10": 42,
       "11": 19,
       "12": 12
     },
@@ -625,7 +625,7 @@
   "registros_invalidos_o_ids_repetidos": [],
   "fichas_sin_nombre_categoria_o_tipo_valido": [],
   "calidad_de_campos_opcionales": {
-    "fichas_sin_direccion": 630,
+    "fichas_sin_direccion": 629,
     "correos_invalidos": [],
     "urls_colocadas_en_campo_email": [],
     "telefonos_sospechosos": [],
@@ -634,8 +634,8 @@
     "nota": "Control informativo: no modifica fichas ni bloquea la publicación por campos opcionales."
   },
   "direcciones_pendientes": {
-    "total_sin_direccion": 630,
-    "con_coordenadas_validas": 623,
+    "total_sin_direccion": 629,
+    "con_coordenadas_validas": 622,
     "sin_coordenadas_validas": 7,
     "distribucion_por_tipo_y_categoria": [
       {
@@ -843,13 +843,6 @@
       },
       {
         "tipo": "ocio",
-        "categoria": "Información turística",
-        "total": 6,
-        "con_coordenadas": 6,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "ocio",
         "categoria": "Patrimonio",
         "total": 6,
         "con_coordenadas": 6,
@@ -886,6 +879,13 @@
       {
         "tipo": "negocio",
         "categoria": "Educación",
+        "total": 5,
+        "con_coordenadas": 5,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Información turística",
         "total": 5,
         "con_coordenadas": 5,
         "sin_coordenadas": 0
