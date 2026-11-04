@@ -287,6 +287,12 @@ class OSMIntegrationTests(unittest.TestCase):
         self.assertEqual(result["objetos_sectoriales_excluidos_por_reglas"], 1)
         self.assertEqual(result["candidatas_que_superan_el_filtro_de_relevancia"], 1)
 
+    def test_address_proposals_are_preserved_from_master_after_auxiliary_file_removal(self):
+        source = (Path(__file__).with_name("incorporar_candidatas_osm.py")).read_text(encoding="utf-8")
+        self.assertIn('address_proposals = data.get("propuestas_direcciones_osm", [])', source)
+        self.assertIn('stored_proposals = address_doc.get("propuestas", [])', source)
+        self.assertIn('data["propuestas_direcciones_osm"] = address_proposals', source)
+
     def test_admin_loads_osm_review_data_from_master_not_auxiliary_json(self):
         admin = (Path(__file__).with_name("admin.html")).read_text(encoding="utf-8")
         self.assertIn('reviewCandidates=(data.candidatas_revision||[])', admin)
