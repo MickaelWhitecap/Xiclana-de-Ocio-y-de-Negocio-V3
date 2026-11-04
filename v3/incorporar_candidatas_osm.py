@@ -445,10 +445,16 @@ def main():
 
     # El catálogo maestro es la única fuente que consume Administración.
     address_path = ROOT / "propuestas_direcciones_osm.json"
-    address_doc = json.loads(address_path.read_text(encoding="utf-8")) if address_path.is_file() else {}
-    address_proposals = address_doc.get("propuestas", [])
+    address_proposals = data.get("propuestas_direcciones_osm", [])
+    if address_path.is_file():
+        address_doc = json.loads(address_path.read_text(encoding="utf-8"))
+        stored_proposals = address_doc.get("propuestas", [])
+        if not isinstance(stored_proposals, list):
+            raise SystemExit("El fichero de propuestas de direcciones tiene una estructura inválida.")
+        known = {str(x.get("id_ficha")) for x in address_proposals if isinstance(x, dict)}
+        address_proposals.extend(x for x in stored_proposals if isinstance(x, dict) and str(x.get("id_ficha")) not in known)
     if not isinstance(address_proposals, list):
-        raise SystemExit("El fichero de propuestas de direcciones tiene una estructura inválida.")
+        raise SystemExit("Las propuestas de direcciones del catálogo maestro tienen una estructura inválida.")
     integrate_review_data(data, manual, auto, address_proposals, summary)
     data["auditoria_osm_objetos_sin_ficha"] = classify_unmatched_osm(report.get("posibles_nuevas_fichas_sin_incorporar", []))
     MASTER.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
