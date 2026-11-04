@@ -261,17 +261,24 @@ function candidateAlreadyExists(candidate){
 function renderAddressProposals(){
  const root=$("#address-proposals-list");if(!root)return;root.textContent="";
  const resolved=new Set(overrides.filter(o=>o.fields?._xiclana_address_proposal_rejected===true||Boolean(String(o.fields?.a||"").trim())).map(o=>String(o.listing_id)));
- const pending=addressProposals.filter(p=>p&&p.id_ficha&&!resolved.has(String(p.id_ficha))&&!String(effectiveItems().find(x=>stableId(x)===String(p.id_ficha))?.a||"").trim());
+ const items=effectiveItems();
+ const pending=addressProposals.filter(p=>p&&p.id_ficha&&!resolved.has(String(p.id_ficha))&&!String(items.find(x=>stableId(x)===String(p.id_ficha))?.a||"").trim());
  if(!pending.length){root.textContent="No hay propuestas de direcciones pendientes.";return}
- pending.forEach(proposal=>{
+ pending.forEach((proposal,index)=>{
+  const item=items.find(x=>stableId(x)===String(proposal.id_ficha))||baseItems.find(x=>stableId(x)===String(proposal.id_ficha))||{};
   const card=document.createElement("div");card.className="item";card.style.marginBottom=".65rem";
-  const title=document.createElement("strong");title.textContent=proposal.nombre||"Ficha sin nombre";card.append(title);
-  const detail=document.createElement("small");detail.textContent=[proposal.direccion_propuesta||"Sin dirección propuesta","Confianza "+(proposal.confianza||"no indicada"),"OpenStreetMap"].join(" · ");card.append(detail);
-  if(proposal.url_osm){const a=document.createElement("a");a.href=proposal.url_osm;a.target="_blank";a.rel="noopener noreferrer";a.textContent="Ver objeto en OpenStreetMap";a.style.display="inline-block";a.style.marginTop=".25rem";card.append(a)}
+  const title=document.createElement("strong");title.textContent=item.n||proposal.nombre||"Ficha sin nombre";card.append(title);
+  const detail=document.createElement("small");detail.textContent=["Dirección propuesta: "+(proposal.direccion_propuesta||"Sin dirección propuesta"),"Confianza "+(proposal.confianza||"no indicada"),"OpenStreetMap"].join(" · ");card.append(detail);
+  const preview=document.createElement("div");preview.className="address-proposal-preview";preview.style.cssText="display:none;margin-top:.7rem;padding:.75rem;background:#f5f7f7;border:1px solid var(--bd);border-radius:8px";
+  const heading=document.createElement("strong");heading.textContent="Comparación antes de aprobar";preview.append(heading);
+  const fields=[["Nombre",item.n||proposal.nombre],["Tipo",item.t],["Categoría",item.c],["Dirección actual",item.a||"Sin dirección registrada"],["Dirección propuesta por OSM",proposal.direccion_propuesta],["Teléfono",item.p],["Correo",item.e],["Web",item.w],["Horario",item.h],["Descripción",item.d],["Confianza OSM",proposal.confianza],["Identificador de ficha",proposal.id_ficha]];
+  fields.forEach(([label,value])=>{if(value===undefined||value===null||String(value).trim()==="")return;const row=document.createElement("p");row.style.cssText="margin:.35rem 0;overflow-wrap:anywhere";const strong=document.createElement("b");strong.textContent=label+": ";row.append(strong,document.createTextNode(String(value)));preview.append(row)});
+  if(proposal.url_osm){const source=document.createElement("a");source.href=proposal.url_osm;source.target="_blank";source.rel="noopener noreferrer";source.textContent="Abrir objeto original en OpenStreetMap";source.style.display="inline-block";source.style.marginTop=".3rem";preview.append(source)}
   const actions=document.createElement("div");actions.className="actions";
+  const view=document.createElement("button");view.type="button";view.className="secondary";view.textContent="Ver comparación";view.setAttribute("aria-expanded","false");view.onclick=()=>{const open=preview.style.display==="none";preview.style.display=open?"block":"none";view.textContent=open?"Ocultar comparación":"Ver comparación";view.setAttribute("aria-expanded",String(open))};actions.append(view);
   const approve=document.createElement("button");approve.type="button";approve.textContent="Aplicar dirección";approve.onclick=()=>approveAddressProposal(proposal);actions.append(approve);
   const reject=document.createElement("button");reject.type="button";reject.className="danger";reject.textContent="Descartar";reject.onclick=()=>rejectAddressProposal(proposal);actions.append(reject);
-  card.append(actions);root.append(card);
+  card.append(actions,preview);root.append(card);
  });
 }
 async function approveAddressProposal(proposal){
