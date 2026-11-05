@@ -1,4 +1,5 @@
 name: Copia de seguridad cifrada de Supabase y Xiclana V3
+# Verificación integral de copia y restauración aislada: 2026-11-05.
 
 on:
   push:
