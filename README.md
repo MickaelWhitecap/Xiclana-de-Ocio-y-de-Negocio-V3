@@ -7,6 +7,6 @@ V3 utiliza un único fichero JSON maestro: `v3/fichas_completas.json`. Contiene 
 
 Cada publicación valida el catálogo maestro y sincroniza las modificaciones administrativas vigentes de Supabase antes de generar la web pública.
 
-Las candidatas de revisión no se publican automáticamente como fichas verificadas. La ampliación desde OpenStreetMap escribe las nuevas fichas en el catálogo maestro.
+Las candidatas de revisión no se publican automáticamente como fichas verificadas. La ampliación desde OpenStreetMap escribe las nuevas fichas en el catálogo maestro. La recuperación de direcciones utiliza exclusivamente la extracción archivada y genera propuestas pendientes, sin nuevas consultas a Overpass ni publicación automática.
 
 - `v3/propuestas-enriquecimiento-contacto.json`: propuestas pendientes de aprobación para enriquecer fichas que ya disponen de correo electrónico. No modifica el catálogo público.
