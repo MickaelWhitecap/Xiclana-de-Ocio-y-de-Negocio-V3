@@ -436,7 +436,7 @@
       {
         "tipo": "ocio",
         "categoria": "Cafetería",
-        "fichas": 25
+        "fichas": 26
       },
       {
         "tipo": "ocio",
@@ -541,7 +541,7 @@
       {
         "tipo": "ocio",
         "categoria": "Parque",
-        "fichas": 39
+        "fichas": 40
       },
       {
         "tipo": "ocio",
@@ -604,20 +604,20 @@
     "distribucion": {
       "4": 6,
       "5": 6,
-      "6": 597,
-      "7": 287,
-      "8": 75,
-      "9": 76,
-      "10": 42,
-      "11": 19,
-      "12": 12
+      "6": 591,
+      "7": 293,
+      "8": 69,
+      "9": 81,
+      "10": 44,
+      "11": 18,
+      "12": 14
     },
-    "fichas_con_algun_medio_de_contacto": 264,
+    "fichas_con_algun_medio_de_contacto": 265,
     "fichas_con_email": 126
   },
   "total_registros_historicos": 1327,
-  "total_items_publicables": 1120,
-  "total_items_marcados_borrados": 207,
+  "total_items_publicables": 1122,
+  "total_items_marcados_borrados": 205,
   "total_candidatas_revision": 116,
   "candidatos_automaticos_heredados_en_items": 0,
   "ids_automaticos_heredados": [],
@@ -625,7 +625,7 @@
   "registros_invalidos_o_ids_repetidos": [],
   "fichas_sin_nombre_categoria_o_tipo_valido": [],
   "calidad_de_campos_opcionales": {
-    "fichas_sin_direccion": 629,
+    "fichas_sin_direccion": 610,
     "correos_invalidos": [],
     "urls_colocadas_en_campo_email": [],
     "telefonos_sospechosos": [],
@@ -634,29 +634,29 @@
     "nota": "Control informativo: no modifica fichas ni bloquea la publicación por campos opcionales."
   },
   "direcciones_pendientes": {
-    "total_sin_direccion": 629,
-    "con_coordenadas_validas": 622,
+    "total_sin_direccion": 610,
+    "con_coordenadas_validas": 603,
     "sin_coordenadas_validas": 7,
     "distribucion_por_tipo_y_categoria": [
       {
         "tipo": "ocio",
         "categoria": "Bar",
-        "total": 60,
-        "con_coordenadas": 60,
+        "total": 59,
+        "con_coordenadas": 59,
         "sin_coordenadas": 0
       },
       {
         "tipo": "ocio",
         "categoria": "Restaurante",
-        "total": 51,
-        "con_coordenadas": 51,
+        "total": 49,
+        "con_coordenadas": 49,
         "sin_coordenadas": 0
       },
       {
         "tipo": "ocio",
         "categoria": "Parque",
-        "total": 38,
-        "con_coordenadas": 38,
+        "total": 39,
+        "con_coordenadas": 39,
         "sin_coordenadas": 0
       },
       {
@@ -683,8 +683,8 @@
       {
         "tipo": "negocio",
         "categoria": "Supermercado",
-        "total": 19,
-        "con_coordenadas": 19,
+        "total": 18,
+        "con_coordenadas": 18,
         "sin_coordenadas": 0
       },
       {
@@ -716,24 +716,24 @@
         "sin_coordenadas": 0
       },
       {
-        "tipo": "ocio",
-        "categoria": "Comida rápida",
-        "total": 13,
-        "con_coordenadas": 13,
+        "tipo": "negocio",
+        "categoria": "Tienda de barrio",
+        "total": 12,
+        "con_coordenadas": 12,
         "sin_coordenadas": 0
       },
       {
         "tipo": "ocio",
         "categoria": "Deporte",
-        "total": 13,
-        "con_coordenadas": 13,
+        "total": 12,
+        "con_coordenadas": 12,
         "sin_coordenadas": 0
       },
       {
-        "tipo": "negocio",
-        "categoria": "Tienda de barrio",
-        "total": 12,
-        "con_coordenadas": 12,
+        "tipo": "ocio",
+        "categoria": "Comida rápida",
+        "total": 11,
+        "con_coordenadas": 11,
         "sin_coordenadas": 0
       },
       {
@@ -752,13 +752,6 @@
       },
       {
         "tipo": "negocio",
-        "categoria": "Oficina",
-        "total": 9,
-        "con_coordenadas": 9,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "negocio",
         "categoria": "Parking",
         "total": 9,
         "con_coordenadas": 9,
@@ -766,23 +759,16 @@
       },
       {
         "tipo": "negocio",
-        "categoria": "Taller mecánico",
-        "total": 8,
-        "con_coordenadas": 8,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "ocio",
-        "categoria": "Instalaciones deportivas",
+        "categoria": "Oficina",
         "total": 8,
         "con_coordenadas": 8,
         "sin_coordenadas": 0
       },
       {
         "tipo": "negocio",
-        "categoria": "Farmacia",
-        "total": 7,
-        "con_coordenadas": 7,
+        "categoria": "Taller mecánico",
+        "total": 8,
+        "con_coordenadas": 8,
         "sin_coordenadas": 0
       },
       {
@@ -802,6 +788,13 @@
       {
         "tipo": "negocio",
         "categoria": "Concesionario",
+        "total": 6,
+        "con_coordenadas": 6,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Farmacia",
         "total": 6,
         "con_coordenadas": 6,
         "sin_coordenadas": 0
@@ -837,6 +830,13 @@
       {
         "tipo": "ocio",
         "categoria": "Gimnasio",
+        "total": 6,
+        "con_coordenadas": 6,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Instalaciones deportivas",
         "total": 6,
         "con_coordenadas": 6,
         "sin_coordenadas": 0
@@ -912,22 +912,8 @@
         "sin_coordenadas": 0
       },
       {
-        "tipo": "negocio",
-        "categoria": "Hotel",
-        "total": 4,
-        "con_coordenadas": 4,
-        "sin_coordenadas": 0
-      },
-      {
         "tipo": "ocio",
         "categoria": "Espacios culturales",
-        "total": 4,
-        "con_coordenadas": 4,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "ocio",
-        "categoria": "Golf",
         "total": 4,
         "con_coordenadas": 4,
         "sin_coordenadas": 0
@@ -970,6 +956,13 @@
       {
         "tipo": "negocio",
         "categoria": "Floristería",
+        "total": 3,
+        "con_coordenadas": 3,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Hotel",
         "total": 3,
         "con_coordenadas": 3,
         "sin_coordenadas": 0
@@ -1067,13 +1060,6 @@
       },
       {
         "tipo": "negocio",
-        "categoria": "Clínica",
-        "total": 2,
-        "con_coordenadas": 2,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "negocio",
         "categoria": "Emergencias",
         "total": 2,
         "con_coordenadas": 2,
@@ -1130,7 +1116,7 @@
       },
       {
         "tipo": "ocio",
-        "categoria": "Náutica",
+        "categoria": "Golf",
         "total": 2,
         "con_coordenadas": 2,
         "sin_coordenadas": 0
@@ -1284,21 +1270,7 @@
       },
       {
         "tipo": "ocio",
-        "categoria": "Balneario y spa",
-        "total": 1,
-        "con_coordenadas": 1,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "ocio",
-        "categoria": "Cultura",
-        "total": 1,
-        "con_coordenadas": 1,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "ocio",
-        "categoria": "Instalación deportiva",
+        "categoria": "Náutica",
         "total": 1,
         "con_coordenadas": 1,
         "sin_coordenadas": 0
