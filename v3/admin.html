@@ -431,7 +431,7 @@ function renderAutomaticCandidates(){
  const deletedOverrides=new Set(overrides.filter(o=>o.fields?._xiclana_deleted===true).map(o=>String(o.listing_id)));
  const rejected=new Set(proposals.filter(p=>p.status==="rejected"&&p.source_name==="OpenStreetMap").map(p=>String(proposalFields(p).id||"")));
  const baseIds=new Set(baseItems.filter(x=>x._xiclana_deleted!==true).map(stableId));
- const pending=reviewCandidates.filter(x=>x&&x.id&&!approved.has(String(x.id))&&!deletedOverrides.has(String(x.id))&&!rejected.has(String(x.id))&&!baseIds.has(String(x.id))&&x.estado_revision!=="descartada");
+ const pending=reviewCandidates.filter(x=>{const id=String(x?.id||"");const recovery=String(x?.estado_revision||"").startsWith("recuperada_de_baja");return x&&id&&!approved.has(id)&&(!deletedOverrides.has(id)||recovery)&&!rejected.has(id)&&!baseIds.has(id)&&x.estado_revision!=="descartada"});
  if(!pending.length){root.textContent="No hay candidatas automáticas pendientes de revisión.";return}
  const appendField=(container,label,value)=>{
   if(value===undefined||value===null||String(value).trim()==="")return;
@@ -455,7 +455,7 @@ function renderAutomaticCandidates(){
   if(!fields.childNodes.length){const empty=document.createElement("p");empty.textContent="La propuesta no contiene datos descriptivos adicionales.";fields.append(empty)}
   preview.append(fields);
   const match=String(candidate.id||"").match(/^osm(?:-extra)?:(node|way|relation):(\d+)$/);
-  if(match){const source=document.createElement("a");source.href="https://www.openstreetmap.org/"+match[1]+"/"+match[2];source.target="_blank";source.rel="noopener noreferrer";source.textContent="Comprobar objeto original en OpenStreetMap";source.style.display="inline-block";source.style.marginTop=".65rem";preview.append(source)}
+  if(candidate.source_url){const external=document.createElement("a");external.href=candidate.source_url;external.target="_blank";external.rel="noopener noreferrer";external.textContent="Abrir fuente de verificación";external.style.display="inline-block";external.style.marginTop=".65rem";preview.append(external)}if(match){const source=document.createElement("a");source.href="https://www.openstreetmap.org/"+match[1]+"/"+match[2];source.target="_blank";source.rel="noopener noreferrer";source.textContent="Comprobar objeto original en OpenStreetMap";source.style.display="inline-block";source.style.marginTop=".65rem";preview.append(source)}
   const extras=Object.entries(candidate).filter(([key,value])=>!["n","t","c","a","p","e","w","h","d","lat","lon","f","id","osm_id","osm_type","url_osm"].includes(key)&&value!==undefined&&value!==null&&String(value).trim()!=="");
   if(extras.length){const details=document.createElement("details");details.style.marginTop=".7rem";const summary=document.createElement("summary");summary.textContent="Mostrar otros datos recibidos de OSM";details.append(summary);extras.forEach(([key,value])=>appendField(details,key,typeof value==="object"?JSON.stringify(value):value));preview.append(details)}
   const duplicate=candidateAlreadyExists(candidate);
