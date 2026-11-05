@@ -105,3 +105,4 @@ if __name__ == "__main__":
     main()
 
 # Activación controlada de la recuperación basada exclusivamente en la extracción OSM archivada.
+# Auditoría de direcciones 2026-11-05: recalcular sobre la extracción archivada sin consultas nuevas.
