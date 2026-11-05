@@ -1,4 +1,5 @@
 name: Auditoría de bajas del catálogo maestro
+# Ejecución de revisión 2026-11-05; análisis de lectura, sin restaurar ni modificar fichas.
 
 on:
   push:
