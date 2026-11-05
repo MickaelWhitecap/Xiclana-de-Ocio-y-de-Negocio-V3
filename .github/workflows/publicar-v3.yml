@@ -4,6 +4,7 @@ on:
   workflow_run:
     workflows:
       - "Auditoría municipal completa de OpenStreetMap"
+      - "Recuperar propuestas de direcciones OSM"
     types:
       - completed
   push:
@@ -14,6 +15,8 @@ on:
       - "v3/propuestas_direcciones_osm.json"
       - "v3/osm_candidatas_resumen.json"
       - "v3/auditar_bajas_catalogo.py"
+      - "v3/recuperar_direcciones_osm.py"
+      - ".github/workflows/recuperar-direcciones-osm.yml"
       - ".github/workflows/auditoria-osm-municipal.yml"
       - ".github/workflows/auditar-bajas-catalogo.yml"
       - ".github/workflows/backup-supabase.yml"
