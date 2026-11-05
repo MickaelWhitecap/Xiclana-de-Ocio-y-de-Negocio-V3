@@ -266,7 +266,7 @@
       {
         "tipo": "negocio",
         "categoria": "Muebles",
-        "fichas": 3
+        "fichas": 4
       },
       {
         "tipo": "negocio",
@@ -606,17 +606,17 @@
       "5": 6,
       "6": 597,
       "7": 287,
-      "8": 74,
+      "8": 75,
       "9": 76,
       "10": 42,
       "11": 19,
       "12": 12
     },
-    "fichas_con_algun_medio_de_contacto": 263,
+    "fichas_con_algun_medio_de_contacto": 264,
     "fichas_con_email": 126
   },
-  "total_registros_historicos": 1326,
-  "total_items_publicables": 1119,
+  "total_registros_historicos": 1327,
+  "total_items_publicables": 1120,
   "total_items_marcados_borrados": 207,
   "total_candidatas_revision": 114,
   "candidatos_automaticos_heredados_en_items": 0,
