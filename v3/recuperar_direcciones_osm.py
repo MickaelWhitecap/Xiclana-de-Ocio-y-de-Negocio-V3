@@ -195,6 +195,72 @@ def main():
         existing_proposal_ids.add(candidate["id_ficha"])
         external_added += 1
 
+    # Recuperaciones de bajas detectadas en la auditoría: se exponen solo para revisión manual.
+    # No se restauran ni se publican hasta que un administrador las apruebe en Administración.
+    recovery_candidates = [
+        {
+            "id": "osm-extra:node:13483910001",
+            "n": "Aparcamiento verano",
+            "t": "negocio",
+            "c": "Parking",
+            "lat": 36.3410985,
+            "lon": -6.1599126,
+            "f": "OpenStreetMap; candidata recuperable detectada en auditoría de bajas",
+            "osm_id": "node:13483910001",
+            "url_osm": "https://www.openstreetmap.org/node/13483910001",
+            "estado_revision": "recuperada_de_baja_pendiente_aprobacion",
+            "_xiclana_recovered_from_deleted": True,
+            "nota_revision": "Verificar si corresponde a una bolsa de aparcamiento público estival estable y distinta de la zona naranja general.",
+        },
+        {
+            "id": "osm:way:550875337",
+            "n": "Parque Santa Anguela de la Cruz",
+            "t": "ocio",
+            "c": "Parque",
+            "lat": 36.420044483333335,
+            "lon": -6.144833533333333,
+            "f": "OpenStreetMap; candidata recuperable detectada en auditoría de bajas",
+            "osm_id": "way:550875337",
+            "url_osm": "https://www.openstreetmap.org/way/550875337",
+            "estado_revision": "recuperada_de_baja_pendiente_aprobacion",
+            "_xiclana_recovered_from_deleted": True,
+            "nota_revision": "No se ha localizado una fuente municipal que confirme la denominación; comprobar nombre y utilidad de una ficha independiente.",
+        },
+        {
+            "id": "osm:way:452656583",
+            "n": "Pista 9 Bar Heit",
+            "t": "ocio",
+            "c": "Cafetería",
+            "a": "Avenida Octavio Augusto, 38, Centro Deportivo Hipotels, Urbanización Novo Sancti Petri, 11139 Chiclana de la Frontera, Cádiz",
+            "p": "+34 956 49 73 56",
+            "w": "https://heitacademy.com",
+            "d": "Bar-restaurante integrado en el Centro Deportivo HEIT, con servicio de cafetería y restauración.",
+            "lat": 36.353194,
+            "lon": -6.1540858,
+            "f": "Ficha comercial verificada por propietario en pos.do (consulta 05-11-2026)",
+            "osm_id": "way:452656583",
+            "url_osm": "https://www.openstreetmap.org/way/452656583",
+            "source_url": "https://pos.do/es/chiclana-de-la-frontera/restaurante/pista-9-bar-heit",
+            "estado_revision": "recuperada_de_baja_pendiente_aprobacion",
+            "_xiclana_recovered_from_deleted": True,
+            "nota_revision": "Establecimiento de restauración distinto de la ficha de la escuela deportiva HEIT; comprobar antes de recuperar.",
+        },
+    ]
+    review_candidates = data.get("candidatas_revision")
+    if not isinstance(review_candidates, list):
+        review_candidates = []
+    review_ids = {str(candidate.get("id")) for candidate in review_candidates if isinstance(candidate, dict)}
+    items_by_id = {str(item.get("id")): item for item in items if isinstance(item, dict)}
+    recovery_added = 0
+    for candidate in recovery_candidates:
+        base = items_by_id.get(candidate["id"])
+        if not base or base.get("_xiclana_deleted") is not True or candidate["id"] in review_ids:
+            continue
+        review_candidates.append(candidate)
+        review_ids.add(candidate["id"])
+        recovery_added += 1
+    data["candidatas_revision"] = review_candidates
+
     data["propuestas_direcciones_osm"] = {
         "fecha_utc": datetime.now(timezone.utc).isoformat(),
         "fuente": "Extracción OSM archivada y fuentes oficiales externas; sin nuevas consultas a Overpass",
@@ -216,6 +282,7 @@ def main():
         "objetos_recuperados": consulted - len(not_found),
         "propuestas_direccion": len(proposals),
         "propuestas_externas_verificadas": external_added,
+        "recuperaciones_pendientes_revision": recovery_added,
         "sin_id_osm": len(not_osm),
         "sin_objeto_en_extraccion": len(not_found),
         "sin_tags_direccion": len(no_address),
