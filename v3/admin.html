@@ -707,27 +707,37 @@ $("#category-form").addEventListener("submit",async e=>{
  finally{btn.disabled=false;btn.textContent="＋ Crear categoría"}
 });
 form.addEventListener("submit",async e=>{
- e.preventDefault();if(!user)return;
+ e.preventDefault();
+ if(!user){message("No hay una sesión administrativa activa. Vuelve a iniciar sesión antes de guardar.","error");return}
+ if(!selectedId){message("No hay una ficha abierta. Pulsa «Nueva ficha» antes de guardar.","error");return}
  const btn=$("#save-button");btn.disabled=true;btn.textContent="Guardando…";
+ message("Guardando ficha en Supabase…");
+ let savedId=null;
  try{
-  const fields={...(overrides.find(o=>String(o.listing_id)===String(selectedId))?.fields||{})};fieldNames.forEach(k=>{const raw=form.elements[k].value;fields[k]=["lat","lon"].includes(k)?(raw===""?null:Number(raw)):raw.trim()});
+  const fields={...(overrides.find(o=>String(o.listing_id)===String(selectedId))?.fields||{})};
+  fieldNames.forEach(k=>{const input=form.elements[k];if(!input)throw new Error("Falta el campo "+k+" en el formulario.");const raw=input.value;fields[k]=["lat","lon"].includes(k)?(raw===""?null:Number(raw)):raw.trim()});
   if(!fields.n||!fields.c)throw new Error("El nombre y la categoría son obligatorios.");
-  const newRecord=String(selectedId||"").startsWith("new:"), id=newRecord?"manual:"+crypto.randomUUID():selectedId;
+  const newRecord=String(selectedId).startsWith("new:"),id=newRecord?"manual:"+crypto.randomUUID():selectedId;
   fields.f="Verificado por Xiclana";fields.v=new Date().toISOString().slice(0,10);
   const keepAsNew=newRecord||Boolean(overrides.find(o=>o.listing_id===id)?.is_new);
-  const row={listing_id:id,fields,is_new:keepAsNew,verified_at:new Date().toISOString(),updated_at:new Date().toISOString(),updated_by:user.id};
-  const {error}=await client.from("listing_overrides").upsert(row,{onConflict:"listing_id"});if(error)throw error;
+  const now=new Date().toISOString();
+  const row={listing_id:id,fields,is_new:keepAsNew,verified_at:now,updated_at:now,updated_by:user.id};
+  const {error}=await client.from("listing_overrides").upsert(row,{onConflict:"listing_id"});
+  if(error)throw error;
+  savedId=id;
   const categorySlug=slugify(fields.c);
   const categoryKnown=categories.some(c=>c.name.toLocaleLowerCase("es")===fields.c.toLocaleLowerCase("es"));
   if(!categoryKnown){
    const {data:catData,error:catError}=await client.from("listing_categories").upsert({slug:categorySlug,name:fields.c,type:fields.t||"negocio",created_by:user.id},{onConflict:"slug"}).select("slug,name,type,created_at").single();
-   if(catError)throw new Error("La ficha se guardó, pero no se pudo registrar la categoría: "+catError.message);
+   if(catError){message("La ficha se ha guardado, pero no se pudo registrar la categoría: "+catError.message,"error");await loadData();selectItem(id);return}
    categories=categories.filter(c=>c.slug!==catData.slug);categories.push(catData);renderCategories();
   }
-  message("Ficha guardada. Los cambios ya están almacenados y aparecerán en la web pública al recargarla.","ok");
   await loadData();selectItem(id);
- }catch(err){message("No se pudo guardar: "+(err.message||"error desconocido"),"error")}
- finally{btn.disabled=false;btn.textContent="Guardar ficha"}
+  message("Ficha guardada correctamente. Ya está en Administración y disponible para la web pública.","ok");
+ }catch(err){
+  message((savedId?"La ficha se guardó, pero hubo un problema al actualizar la vista: ":"No se pudo guardar la ficha: ")+(err.message||"error desconocido"),"error");
+  if(savedId){try{await loadData();selectItem(savedId)}catch(refreshError){message("La ficha está guardada en Supabase, pero no se pudo recargar Administración: "+refreshError.message,"error")}}
+ }finally{btn.disabled=false;btn.textContent="Guardar ficha"}
 });
 $("#login-form").addEventListener("submit",async e=>{e.preventDefault();const btn=$("#login-button");btn.disabled=true;try{const {data,error}=await client.auth.signInWithPassword({email:$("#email").value.trim(),password:$("#password").value});if(error)throw error;if(data.user?.id!=="2ebd10a1-fbae-454b-a12b-e1692f1eed17"){await client.auth.signOut();throw new Error("Esta cuenta no está autorizada para administrar Xiclana.")}user=data.user;showApp();wireAdForms();await loadData();message("Sesión iniciada. Solo la cuenta autorizada puede guardar cambios.","ok")}catch(err){message("No se pudo iniciar sesión: "+(err.message||"revisa el correo y la contraseña."),"error")}finally{btn.disabled=false}});
 logout.onclick=async()=>{await client.auth.signOut();user=null;showLogin();message("Sesión cerrada.")};
