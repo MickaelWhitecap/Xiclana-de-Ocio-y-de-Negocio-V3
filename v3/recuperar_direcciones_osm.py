@@ -210,6 +210,7 @@ def main():
             "url_osm": "https://www.openstreetmap.org/node/13483910001",
             "estado_revision": "recuperada_de_baja_pendiente_aprobacion",
             "_xiclana_recovered_from_deleted": True,
+            "_xiclana_recovery_review_batch": "2026-11-05",
             "nota_revision": "Verificar si corresponde a una bolsa de aparcamiento público estival estable y distinta de la zona naranja general.",
         },
         {
@@ -224,6 +225,7 @@ def main():
             "url_osm": "https://www.openstreetmap.org/way/550875337",
             "estado_revision": "recuperada_de_baja_pendiente_aprobacion",
             "_xiclana_recovered_from_deleted": True,
+            "_xiclana_recovery_review_batch": "2026-11-05",
             "nota_revision": "No se ha localizado una fuente municipal que confirme la denominación; comprobar nombre y utilidad de una ficha independiente.",
         },
         {
@@ -243,22 +245,29 @@ def main():
             "source_url": "https://pos.do/es/chiclana-de-la-frontera/restaurante/pista-9-bar-heit",
             "estado_revision": "recuperada_de_baja_pendiente_aprobacion",
             "_xiclana_recovered_from_deleted": True,
+            "_xiclana_recovery_review_batch": "2026-11-05",
             "nota_revision": "Establecimiento de restauración distinto de la ficha de la escuela deportiva HEIT; comprobar antes de recuperar.",
         },
     ]
     review_candidates = data.get("candidatas_revision")
     if not isinstance(review_candidates, list):
         review_candidates = []
-    review_ids = {str(candidate.get("id")) for candidate in review_candidates if isinstance(candidate, dict)}
+    review_by_id = {str(candidate.get("id")): candidate for candidate in review_candidates if isinstance(candidate, dict)}
     items_by_id = {str(item.get("id")): item for item in items if isinstance(item, dict)}
     recovery_added = 0
+    recovery_updated = 0
     for candidate in recovery_candidates:
         base = items_by_id.get(candidate["id"])
-        if not base or base.get("_xiclana_deleted") is not True or candidate["id"] in review_ids:
+        if not base or base.get("_xiclana_deleted") is not True:
             continue
-        review_candidates.append(candidate)
-        review_ids.add(candidate["id"])
-        recovery_added += 1
+        existing = review_by_id.get(candidate["id"])
+        if existing:
+            existing.update(candidate)
+            recovery_updated += 1
+        else:
+            review_candidates.append(candidate)
+            review_by_id[candidate["id"]] = candidate
+            recovery_added += 1
     data["candidatas_revision"] = review_candidates
 
     data["propuestas_direcciones_osm"] = {
@@ -282,7 +291,8 @@ def main():
         "objetos_recuperados": consulted - len(not_found),
         "propuestas_direccion": len(proposals),
         "propuestas_externas_verificadas": external_added,
-        "recuperaciones_pendientes_revision": recovery_added,
+        "recuperaciones_pendientes_revision": recovery_added + recovery_updated,
+        "recuperaciones_actualizadas": recovery_updated,
         "sin_id_osm": len(not_osm),
         "sin_objeto_en_extraccion": len(not_found),
         "sin_tags_direccion": len(no_address),
