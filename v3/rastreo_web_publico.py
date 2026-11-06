@@ -150,7 +150,8 @@ def flatten_jsonld(value):
     if isinstance(value,dict):
         typ=value.get("@type","")
         types=typ if isinstance(typ,list) else [typ]
-        if any(t in {"LocalBusiness","Organization","Store","ProfessionalService","Restaurant","FoodEstablishment","AutomotiveBusiness","HealthAndBeautyBusiness","HomeAndConstructionBusiness","LodgingBusiness","TouristInformationCenter"} for t in types):
+        known={"LocalBusiness","Organization","Store","ProfessionalService","Restaurant","FoodEstablishment","AutomotiveBusiness","HealthAndBeautyBusiness","HomeAndConstructionBusiness","LodgingBusiness","TouristInformationCenter"}
+        if any(str(t).rsplit("/",1)[-1].rsplit("#",1)[-1] in known for t in types):
             out.append(value)
         for v in value.values(): out.extend(flatten_jsonld(v))
     elif isinstance(value,list):
@@ -194,7 +195,7 @@ def is_chiclana(address, locality, postal, body, title, url):
     if postal in LOCAL_POSTCODES: return True
     if address and "chiclana de la frontera" in norm(address): return True
     host=urllib.parse.urlparse(url).netloc.lower()
-    if host.endswith(".chiclana.es") and "chiclana" in norm(title+" "+body[:1200]): return True
+    if (host=="chiclana.es" or host.endswith(".chiclana.es")) and "chiclana" in norm(title+" "+body[:1200]): return True
     return False
 
 def extract(url):
@@ -224,7 +225,17 @@ def extract(url):
     email=textval(obj.get("email"))
     website=textval(obj.get("url")) or final_url
     hours=obj.get("openingHours") or obj.get("openingHoursSpecification") or ""
-    if isinstance(hours,list): hours="; ".join(textval(x) for x in hours)
+    if isinstance(hours,list):
+        parts=[]
+        for entry in hours:
+            if isinstance(entry,dict):
+                days=entry.get("dayOfWeek") or ""
+                if isinstance(days,list): days=", ".join(textval(x).rsplit("/",1)[-1] for x in days)
+                opens=entry.get("opens") or ""; closes=entry.get("closes") or ""
+                part=" ".join(x for x in [str(days),(str(opens)+"-"+str(closes)).strip("-")] if x)
+                if part: parts.append(part)
+            elif textval(entry): parts.append(textval(entry))
+        hours="; ".join(parts)
     blob=" ".join(p.text)
     if not phone:
         m=re.search(r"(?<!\d)(?:\+34[ .-]?)?(?:[6789]\d{2})[ .-]?\d{2,3}[ .-]?\d{2,3}(?!\d)",blob)
