@@ -31,7 +31,7 @@ QUERIES = [
     f'{CITY} asociación comerciantes empresas socios',
 ]
 MAX_RESULTS_PER_QUERY = 12
-MAX_PAGES = 100
+MAX_PAGES = 140
 TIMEOUT = 18
 DIRECTORY_SEEDS = [
     "https://aechiclana.org/directorio/",
@@ -375,7 +375,7 @@ def main():
                 if parsed.scheme not in ("http","https") or parsed.netloc.lower()!=seed_host: continue
                 if any(parsed.path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS.get(seed_host,())):
                     trusted_urls.add(target); seed_count+=1
-                    if seed_count>=40: break
+                    if seed_count>=20: break
         except Exception as exc:
             print(f"Fuente directa no disponible ({seed}): {exc}",flush=True)
     links.extend(sorted(trusted_urls))
