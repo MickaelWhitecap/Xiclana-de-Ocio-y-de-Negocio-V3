@@ -58,9 +58,9 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add v3/fichas_completas.json
           if git diff --cached --quiet; then
-            echo "No hay cambios en los ficheros de propuestas OSM."
+            echo "No hay cambios en las propuestas OSM/RAD del catálogo maestro."
           else
-            git commit -m "Actualizar propuestas OSM pendientes de revisión"
+            git commit -m "Actualizar propuestas OSM y RAD pendientes de revisión"
             for attempt in 1 2 3; do
               git fetch origin main
               git rebase origin/main
@@ -95,7 +95,7 @@ jobs:
             f"- Coincidencias solo por nombre (sin confirmar): **{c['coincidencia_nombre_sin_confirmacion_espacial']}**",
             f"- Posibles fichas nuevas sin incorporar: **{c['elementos_osm_con_nombre_sin_ficha_candidata']}**",
             "",
-            "La extracción y el cruce no modifican ni publican fichas del catálogo maestro."
+            "Las propuestas detectadas quedan pendientes de validación manual; no se publican automáticamente."
           ]
           open(__import__("os").environ["GITHUB_STEP_SUMMARY"],"w",encoding="utf-8").write("\n".join(lines))
           PY
@@ -103,6 +103,28 @@ jobs:
             echo "## Auditoría OSM no completada" >> "$GITHUB_STEP_SUMMARY"
             echo "No se generó el informe. Consultar los registros de Overpass." >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      - name: Publicar resumen del Gran Rastreo RAD
+        if: success() && hashFiles('v3/fichas_completas.json') != ''
+        run: |
+          python - <<'PY'
+          import json, os
+          d=json.load(open("v3/fichas_completas.json", encoding="utf-8"))
+          r=d.get("rad_ultima_ejecucion", {})
+          lines=[
+            "",
+            "## Gran Rastreo web público (RAD)",
+            f"- Fecha UTC: **{r.get('fecha_utc', 'sin dato')}**",
+            f"- Buscadores consultados: **{', '.join(r.get('buscadores', []))}**",
+            f"- Consultas sectoriales: **{r.get('consultas', 0)}**",
+            f"- URLs encontradas: **{r.get('urls_encontradas', 0)}**",
+            f"- Candidatas nuevas: **{r.get('candidatas_nuevas', 0)}**",
+            "- Publicación automática: **no**",
+            "- Destino: catálogo maestro, bloque de revisión de Administración"
+          ]
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
+              f.write("\n".join(lines) + "\n")
+          PY
 
       - name: Publicar resumen de novedades y cambios
         if: success() && hashFiles('v3/osm_chiclana_cambios_semanales.json') != ''
