@@ -336,6 +336,41 @@ def self_test():
     assert page.links == [("external","https://example.org","Página web")]
     assert is_chiclana("", "", "", "", "", "https://aechiclana.org/directorio/trabajo/empresa/", True)
     assert not is_chiclana("", "", "", "", "", "https://aechiclana.org/directorio/", True)
+
+    # Prueba de integración: extracción completa con HTML controlado.
+    original_allowed, original_get = allowed, get
+    sample = """<html><head><title>Empresa de Prueba</title>
+    <meta name="description" content="Descripción de prueba del establecimiento">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"LocalBusiness","name":"Empresa de Prueba",
+    "telephone":"956123456","email":"info@empresa-prueba.es","url":"https://empresa-prueba.es",
+    "address":{"@type":"PostalAddress","streetAddress":"Calle Real 10",
+    "postalCode":"11130","addressLocality":"Chiclana de la Frontera"},
+    "openingHours":["Mo-Fr 09:00-18:00"]}
+    </script></head><body>Empresa local</body></html>"""
+    try:
+        allowed = lambda url: True
+        get = lambda url, limit=1200000: (sample, url, "text/html")
+        record = extract("https://directorio.example/empresa-prueba")
+        assert record is not None, "No se ha extraído la ficha local de prueba"
+        assert record["name"] == "Empresa de Prueba"
+        assert "Calle Real 10" in record["address"] and "11130" in record["address"]
+        assert record["phone"] == "956123456"
+        assert record["email"] == "info@empresa-prueba.es"
+        assert record["website"] == "https://empresa-prueba.es"
+        assert record["hours"] == "Mo-Fr 09:00-18:00"
+        assert record["description"] == "Descripción de prueba del establecimiento"
+
+        nonlocal_sample = """<html><head><title>Servicio nacional</title>
+        <meta name="description" content="Servicio disponible en Chiclana y toda España">
+        <script type="application/ld+json">
+        {"@type":"LocalBusiness","name":"Servicio nacional",
+        "address":{"addressLocality":"Madrid","postalCode":"28001"}}
+        </script></head><body>Servicio en Chiclana y alrededores</body></html>"""
+        get = lambda url, limit=1200000: (nonlocal_sample, url, "text/html")
+        assert extract("https://directorio.example/servicio-nacional") is None, "El filtro geográfico ha aceptado un negocio no local"
+    finally:
+        allowed, get = original_allowed, original_get
     print("RAD self-test: OK",flush=True)
 
 def main():
