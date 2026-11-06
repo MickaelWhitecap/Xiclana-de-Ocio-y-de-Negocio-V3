@@ -3,7 +3,7 @@ name: Auditoría municipal completa de OpenStreetMap
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, gran-rastreo-multifuente]
     paths:
       - ".github/workflows/auditoria-osm-municipal.yml"
       - "v3/incorporar_candidatas_osm.py"
@@ -20,7 +20,24 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # La rama de desarrollo ejecuta únicamente validaciones: nunca escribe en main.
+  validacion-rad:
+    if: github.ref == 'refs/heads/gran-rastreo-multifuente'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Comprobar sintaxis y pruebas internas RAD
+        run: |
+          python -m py_compile v3/rastreo_web_publico.py
+          python v3/rastreo_web_publico.py --self-test
+
   extraccion-y-cruce:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
