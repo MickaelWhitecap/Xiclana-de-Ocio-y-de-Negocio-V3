@@ -278,7 +278,7 @@ def extract(url, trusted_local=False):
                 addr=label.strip()
                 break
     if not addr:
-        address_match=re.search(r"(?i)\\bDirección\\s+(.+?)(?:\\s+Página web|\\s+Cómo llegar|$)",blob)
+        address_match=re.search(r"(?i)\bDirección\s+(.+?)(?:\s+Página web|\s+Cómo llegar|$)",blob)
         if address_match: addr=address_match.group(1).strip()[:240]
     hours=obj.get("openingHours") or obj.get("openingHoursSpecification") or ""
     if isinstance(hours,dict): hours=[hours]
