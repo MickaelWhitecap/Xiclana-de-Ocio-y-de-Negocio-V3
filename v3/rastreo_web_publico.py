@@ -33,6 +33,14 @@ QUERIES = [
 MAX_RESULTS_PER_QUERY = 12
 MAX_PAGES = 100
 TIMEOUT = 18
+DIRECTORY_SEEDS = [
+    "https://aechiclana.org/directorio/",
+    "https://www.chiclanaguiadempresas.com/",
+]
+TRUSTED_DIRECTORY_PATHS = {
+    "aechiclana.org": ("/directorio/trabajo/",),
+    "www.chiclanaguiadempresas.com": ("/empresas/empresa/",),
+}
 CACHE_ROBOTS = {}
 LAST_REQUEST = {}
 LOCAL_POSTCODES = {'11130', '11138', '11139'}
@@ -43,23 +51,29 @@ class Page(HTMLParser):
         self.title=False; self.title_parts=[]; self.text=[]
         self.meta={}; self.links=[]; self.jsonld=[]
         self._script=False; self._json=False; self._script_buf=[]
+        self._anchor=None; self._anchor_text=[]
     def handle_starttag(self, tag, attrs):
         a=dict(attrs)
         if tag == "title": self.title=True
         if tag == "meta" and a.get("content"):
             k=(a.get("property") or a.get("name") or "").lower()
             if k: self.meta[k]=a["content"]
-        if tag == "a" and a.get("href"): self.links.append((a.get("class",""),a["href"]))
+        if tag == "a" and a.get("href"):
+            self._anchor=(a.get("class",""),a["href"]); self._anchor_text=[]
         if tag == "script":
             self._script=True; self._json=(a.get("type","").lower()=="application/ld+json")
             self._script_buf=[]
     def handle_endtag(self, tag):
         if tag=="title": self.title=False
+        if tag=="a" and self._anchor:
+            self.links.append((self._anchor[0],self._anchor[1]," ".join(self._anchor_text).strip()))
+            self._anchor=None; self._anchor_text=[]
         if tag=="script" and self._script:
             if self._json and self._script_buf: self.jsonld.append("".join(self._script_buf))
             self._script=False; self._json=False; self._script_buf=[]
     def handle_data(self, data):
         if self.title: self.title_parts.append(data)
+        if self._anchor is not None: self._anchor_text.append(data)
         if self._script: self._script_buf.append(data)
         else: self.text.append(data)
 
@@ -202,7 +216,7 @@ def norm(value):
     value="".join(ch for ch in value if unicodedata.category(ch)!="Mn")
     return " ".join(re.findall(r"[a-z0-9]+",value))
 
-def is_chiclana(address, locality, postal, body, title, url):
+def is_chiclana(address, locality, postal, body, title, url, trusted_local=False):
     locality_n=norm(locality)
     postal=str(postal or "").strip()
     if locality_n in {"chiclana","chiclana de la frontera"} or locality_n.startswith("chiclana de la frontera "): return True
@@ -211,9 +225,12 @@ def is_chiclana(address, locality, postal, body, title, url):
     if address and "chiclana de la frontera" in norm(address): return True
     host=urllib.parse.urlparse(url).netloc.lower()
     if (host=="chiclana.es" or host.endswith(".chiclana.es")) and "chiclana" in norm(title+" "+body[:1200]): return True
+    if trusted_local and host in TRUSTED_DIRECTORY_PATHS:
+        path=urllib.parse.urlparse(url).path
+        if any(path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS[host]): return True
     return False
 
-def extract(url):
+def extract(url, trusted_local=False):
     if not allowed(url): return None
     try: body,final_url,ctype=get(url)
     except Exception: return None
@@ -259,7 +276,7 @@ def extract(url):
     if not email:
         m=re.search(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b",blob)
         if m: email=m.group(0)
-    if not is_chiclana(addr,locality,postal,blob,title,final_url): return None
+    if not is_chiclana(addr,locality,postal,blob,title,final_url,trusted_local): return None
     if len(name)>140: return None
     schema_type=obj.get("@type",[])
     schema_types=schema_type if isinstance(schema_type,list) else [schema_type]
@@ -279,6 +296,8 @@ def self_test():
     assert is_chiclana("","Chiclana de la Frontera","", "", "", "https://example.org")
     assert not is_chiclana("","", "", "Servicio en Chiclana y alrededores", "Empresa", "https://example.org")
     assert url_key("HTTPS://Example.COM/Ruta/ConMayusculas/") == "https://example.com/Ruta/ConMayusculas"
+    assert is_chiclana("", "", "", "", "", "https://aechiclana.org/directorio/trabajo/empresa/", True)
+    assert not is_chiclana("", "", "", "", "", "https://aechiclana.org/directorio/", True)
     print("RAD self-test: OK",flush=True)
 
 def main():
@@ -303,6 +322,24 @@ def main():
         if name and addr: existing_pairs.add(name+"|"+addr)
         if name: existing_name_addresses.setdefault(name,set()).add(addr)
     links=[]
+    trusted_urls=set()
+    # Fuentes locales directas: sus fichas individuales son una vía de detección
+    # independiente de los buscadores. Solo se confía en rutas de detalle conocidas.
+    for seed in DIRECTORY_SEEDS:
+        if not allowed(seed): continue
+        try:
+            seed_body,seed_final,_=get(seed,900000)
+            seed_page=Page(); seed_page.feed(seed_body)
+            seed_host=urllib.parse.urlparse(seed_final).netloc.lower()
+            for _,href,_label in seed_page.links:
+                target=urllib.parse.urljoin(seed_final,html.unescape(href))
+                parsed=urllib.parse.urlparse(target)
+                if parsed.scheme not in ("http","https") or parsed.netloc.lower()!=seed_host: continue
+                if any(parsed.path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS.get(seed_host,())):
+                    trusted_urls.add(target)
+        except Exception as exc:
+            print(f"Fuente directa no disponible ({seed}): {exc}",flush=True)
+    links.extend(sorted(trusted_urls))
     for q in QUERIES:
         for engine in (search_ddg,search_bing):
             try: links.extend(engine(q))
@@ -310,7 +347,8 @@ def main():
     links=list(dict.fromkeys(links))[:MAX_PAGES]
     added=[]; seen_pairs=set(); seen_urls=set(); seen_unlocated_names=set()
     for url in links:
-        record=extract(url)
+        trusted_local=urllib.parse.urlparse(url).netloc.lower() in TRUSTED_DIRECTORY_PATHS and any(urllib.parse.urlparse(url).path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS[urllib.parse.urlparse(url).netloc.lower()])
+        record=extract(url,trusted_local=trusted_local)
         if not record: continue
         name_key=norm(record["name"]); addr_key=norm(record["address"])
         pair=name_key+"|"+addr_key if addr_key else ""
@@ -324,7 +362,7 @@ def main():
             seen_unlocated_names.add(name_key)
         seen_urls.add(u_key)
         if pair: seen_pairs.add(pair)
-        digest=hashlib.sha256((name_key+"|"+addr_key+"|"+u).encode()).hexdigest()[:16]
+        digest=hashlib.sha256((name_key+"|"+addr_key+"|"+u_key).encode()).hexdigest()[:16]
         fields_present=["nombre"]+[k for k,v in [
             ("direccion",record["address"]),("telefono",record["phone"]),("correo",record["email"]),
             ("web",record["website"]),("horario",record["hours"]),("descripcion",record["description"])
@@ -346,7 +384,7 @@ def main():
     data.setdefault("candidatas_revision",[]).extend(added)
     data["total_candidatas_revision"]=len(data["candidatas_revision"])
     data["rad_ultima_ejecucion"]={"fecha_utc":datetime.now(timezone.utc).isoformat(),
-       "buscadores":["DuckDuckGo HTML","Bing RSS"],"consultas":len(QUERIES),
+       "buscadores":["DuckDuckGo HTML","Bing RSS"],"fuentes_directas":DIRECTORY_SEEDS,"consultas":len(QUERIES),
        "urls_encontradas":len(links),"candidatas_nuevas":len(added),
        "publicacion_automatica":False}
     MASTER.write_text(json.dumps(data,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
