@@ -184,6 +184,16 @@ def classify(text):
         if any(w in s for w in words): return result
     return ("negocio","Servicios y negocios")
 
+def url_key(value):
+    """Clave de deduplicación: host normalizado, ruta y consulta conservadas."""
+    parsed = urllib.parse.urlsplit(str(value or "").strip())
+    if parsed.scheme.lower() not in ("http", "https") or not parsed.netloc:
+        return str(value or "").strip().rstrip("/")
+    host = parsed.netloc.lower()
+    path = parsed.path.rstrip("/")
+    return urllib.parse.urlunsplit((parsed.scheme.lower(), host, path, parsed.query, ""))
+
+
 def norm(value):
     import unicodedata
     value=unicodedata.normalize("NFD",str(value or "").casefold())
@@ -226,7 +236,7 @@ def extract(url):
         addr=", ".join(x for x in [textval(address.get("streetAddress")),postal,locality] if x)
     phone=textval(obj.get("telephone"))
     email=textval(obj.get("email"))
-    website=textval(obj.get("url")) or final_url
+    website=textval(obj.get("url"))
     hours=obj.get("openingHours") or obj.get("openingHoursSpecification") or ""
     if isinstance(hours,dict): hours=[hours]
     if isinstance(hours,list):
@@ -266,6 +276,7 @@ def self_test():
     assert is_chiclana("Calle Real 1, 11130, Chiclana","", "11130", "", "", "https://example.org")
     assert is_chiclana("","Chiclana de la Frontera","", "", "", "https://example.org")
     assert not is_chiclana("","", "", "Servicio en Chiclana y alrededores", "Empresa", "https://example.org")
+    assert url_key("HTTPS://Example.COM/Ruta/ConMayusculas/") == "https://example.com/Ruta/ConMayusculas"
     print("RAD self-test: OK",flush=True)
 
 def main():
@@ -282,7 +293,7 @@ def main():
     existing=data["items"]+data.get("candidatas_revision",[])
     existing_pairs=set()
     existing_name_addresses={}
-    urls={str(x.get("url_fuente_rastreo","")).rstrip("/").lower() for x in existing if isinstance(x,dict)}
+    urls={url_key(x.get("url_fuente_rastreo", "")) for x in existing if isinstance(x,dict)}
     for item in existing:
         if not isinstance(item,dict): continue
         name=norm(item.get("n") or item.get("nombre") or item.get("name"))
@@ -301,14 +312,15 @@ def main():
         if not record: continue
         name_key=norm(record["name"]); addr_key=norm(record["address"])
         pair=name_key+"|"+addr_key if addr_key else ""
-        u=record["source_url"].rstrip("/").lower()
-        if not name_key or u in urls or u in seen_urls: continue
+        source_url=record["source_url"]
+        u_key=url_key(source_url)
+        if not name_key or u_key in urls or u_key in seen_urls: continue
         # Sucursales con el mismo nombre y direcciones distintas se conservan.
         if pair and (pair in existing_pairs or pair in seen_pairs): continue
         if not pair:
             if name_key in seen_unlocated_names: continue
             seen_unlocated_names.add(name_key)
-        seen_urls.add(u)
+        seen_urls.add(u_key)
         if pair: seen_pairs.add(pair)
         digest=hashlib.sha256((name_key+"|"+addr_key+"|"+u).encode()).hexdigest()[:16]
         fields_present=["nombre"]+[k for k,v in [
@@ -319,8 +331,8 @@ def main():
           "id":"rad:"+digest,"n":record["name"],"t":record["type"],"c":record["category"],
           "a":record["address"],"p":record["phone"],"e":record["email"],
           "w":record["website"],"h":record["hours"],"d":record["description"],
-          "f":"Rastreo web público (RAD)","url_fuente_rastreo":u,
-          "fuentes_datos":[{"url":u,"campos":fields_present}],
+          "f":"Rastreo web público (RAD)","url_fuente_rastreo":source_url,
+          "fuentes_datos":[{"url":source_url,"campos":fields_present}],
           "estado_revision":"pendiente","fuente_estado":"Candidato detectado en fuente web pública; pendiente de validación manual",
           "fecha_deteccion_utc":datetime.now(timezone.utc).isoformat()
         }
