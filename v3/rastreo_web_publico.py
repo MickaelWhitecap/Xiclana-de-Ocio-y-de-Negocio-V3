@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parent
 MASTER = ROOT / "fichas_completas.json"
-UA = "Xiclana-RAD/1.0 (directorio local; contacto: webmaster del sitio)"
+UA = "Xiclana-RAD/1.0 (+https://mickaelwhitecap.github.io/Xiclana-de-Ocio-y-de-Negocio-V3/)"
 CITY = '"Chiclana de la Frontera"'
 QUERIES = [
     f'{CITY} tiendas comercios establecimientos',
@@ -36,10 +36,16 @@ TIMEOUT = 18
 DIRECTORY_SEEDS = [
     "https://aechiclana.org/directorio/",
     "https://www.chiclanaguiadempresas.com/",
+    "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/",
+    "https://turismo.chiclana.es/sol-y-playa/ocio-y-diversion/",
 ]
 TRUSTED_DIRECTORY_PATHS = {
     "aechiclana.org": ("/directorio/trabajo/",),
     "www.chiclanaguiadempresas.com": ("/empresas/empresa/",),
+    "turismo.chiclana.es": (
+        "/planifica-tu-viaje/alojamientos/alojamiento/",
+        "/detalle-de-recurso/",
+    ),
 }
 CACHE_ROBOTS = {}
 LAST_REQUEST = {}
@@ -288,6 +294,11 @@ def extract(url, trusted_local=False):
     if not phone:
         m=re.search(r"(?<!\d)(?:\+34[ .-]?)?(?:[6789]\d{2})[ .-]?\d{2,3}[ .-]?\d{2,3}(?!\d)",blob)
         if m: phone=m.group(0)
+    if not email:
+        for _cls,href,label in p.links:
+            if str(href).lower().startswith("mailto:"):
+                email=urllib.parse.unquote(str(href)[7:].split("?",1)[0]).strip()
+                break
     if not email:
         m=re.search(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b",blob)
         if m: email=m.group(0)
