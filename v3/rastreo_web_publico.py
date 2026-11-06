@@ -274,7 +274,7 @@ def extract(url, trusted_local=False):
                 break
     if not addr:
         for _cls,_href,label in p.links:
-            if re.search(r"(?<!\\d)(11130|11138|11139)(?!\\d)",label) and "chiclana" in norm(label):
+            if re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",label) and "chiclana" in norm(label):
                 addr=label.strip()
                 break
     hours=obj.get("openingHours") or obj.get("openingHoursSpecification") or ""
