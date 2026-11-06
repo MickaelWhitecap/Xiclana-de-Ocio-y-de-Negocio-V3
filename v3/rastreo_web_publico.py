@@ -377,12 +377,15 @@ def self_test():
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--self-test",action="store_true")
+    parser.add_argument("--catalog",type=pathlib.Path,default=MASTER,
+                        help="Catálogo JSON de entrada/salida; permite probar sobre una copia.")
     args=parser.parse_args()
     if args.self_test:
         self_test()
         return
-    if not MASTER.is_file(): raise SystemExit("No existe el catálogo maestro.")
-    data=json.loads(MASTER.read_text(encoding="utf-8"))
+    catalog_path=args.catalog
+    if not catalog_path.is_file(): raise SystemExit("No existe el catálogo indicado.")
+    data=json.loads(catalog_path.read_text(encoding="utf-8"))
     if not isinstance(data.get("items"),list) or not isinstance(data.get("candidatas_revision",[]),list):
         raise SystemExit("Estructura del catálogo no válida; se cancela sin modificar.")
     existing=data["items"]+data.get("candidatas_revision",[])
@@ -463,7 +466,7 @@ def main():
        "buscadores":["DuckDuckGo HTML","Bing RSS"],"fuentes_directas":DIRECTORY_SEEDS,"consultas":len(QUERIES),
        "urls_encontradas":len(links),"candidatas_nuevas":len(added),
        "publicacion_automatica":False}
-    MASTER.write_text(json.dumps(data,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+    catalog_path.write_text(json.dumps(data,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps(data["rad_ultima_ejecucion"],ensure_ascii=False),flush=True)
 
 if __name__=="__main__": main()
