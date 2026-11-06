@@ -277,6 +277,9 @@ def extract(url, trusted_local=False):
             if re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",label) and "chiclana" in norm(label):
                 addr=label.strip()
                 break
+    if not addr:
+        address_match=re.search(r"(?i)\\bDirección\\s+(.+?)(?:\\s+Página web|\\s+Cómo llegar|$)",blob)
+        if address_match: addr=address_match.group(1).strip()[:240]
     hours=obj.get("openingHours") or obj.get("openingHoursSpecification") or ""
     if isinstance(hours,dict): hours=[hours]
     if isinstance(hours,list):
@@ -322,6 +325,8 @@ def self_test():
     assert is_chiclana("","Chiclana de la Frontera","", "", "", "https://example.org")
     assert not is_chiclana("","", "", "Servicio en Chiclana y alrededores", "Empresa", "https://example.org")
     assert url_key("HTTPS://Example.COM/Ruta/ConMayusculas/") == "https://example.com/Ruta/ConMayusculas"
+    page=Page(); page.feed('<a class="external" href="https://example.org">Página web</a>')
+    assert page.links == [("external","https://example.org","Página web")]
     assert is_chiclana("", "", "", "", "", "https://aechiclana.org/directorio/trabajo/empresa/", True)
     assert not is_chiclana("", "", "", "", "", "https://aechiclana.org/directorio/", True)
     print("RAD self-test: OK",flush=True)
