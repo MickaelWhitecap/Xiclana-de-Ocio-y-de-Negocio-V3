@@ -283,6 +283,7 @@ def extract(url, trusted_local=False):
             if re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",label) and "chiclana" in norm(label):
                 addr=label.strip()
                 break
+    blob=" ".join(p.text)
     if not addr:
         address_match=re.search(r"(?i)\bDirección\s+(.+?)(?:\s+Página web|\s+Cómo llegar|$)",blob)
         if address_match: addr=address_match.group(1).strip()[:240]
