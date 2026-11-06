@@ -174,7 +174,13 @@ def flatten_jsonld(value):
     if isinstance(value,dict):
         typ=value.get("@type","")
         types=typ if isinstance(typ,list) else [typ]
-        known={"LocalBusiness","Organization","Store","ProfessionalService","Restaurant","FoodEstablishment","AutomotiveBusiness","HealthAndBeautyBusiness","HomeAndConstructionBusiness","LodgingBusiness","TouristInformationCenter"}
+        known={
+            "LocalBusiness","Organization","Store","ProfessionalService","Restaurant","FoodEstablishment",
+            "AutomotiveBusiness","HealthAndBeautyBusiness","HomeAndConstructionBusiness","LodgingBusiness",
+            "Hotel","BedAndBreakfast","Campground","TouristInformationCenter","TouristAttraction",
+            "SportsActivityLocation","SportsClub","BowlingAlley","MovieTheater","Museum",
+            "PerformingArtsTheater","ShoppingCenter","HealthClub","CivicStructure"
+        }
         if any(str(t).rsplit("/",1)[-1].rsplit("#",1)[-1] in known for t in types):
             out.append(value)
         for v in value.values(): out.extend(flatten_jsonld(v))
