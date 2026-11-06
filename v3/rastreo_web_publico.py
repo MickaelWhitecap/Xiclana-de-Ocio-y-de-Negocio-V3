@@ -113,6 +113,7 @@ def allowed(url):
 
 def search_ddg(query):
     url="https://html.duckduckgo.com/html/?"+urllib.parse.urlencode({"q":query})
+    if not allowed(url): return []
     body,_,_=get(url,700000)
     parser=SearchLinks()
     try: parser.feed(body)
@@ -132,6 +133,7 @@ def search_ddg(query):
 
 def search_bing(query):
     url="https://www.bing.com/search?format=rss&"+urllib.parse.urlencode({"q":query})
+    if not allowed(url): return []
     body,_,_=get(url,700000)
     try:
         import xml.etree.ElementTree as ET
@@ -192,7 +194,7 @@ def is_chiclana(address, locality, postal, body, title, url):
     locality_n=norm(locality)
     postal=str(postal or "").strip()
     if locality_n in {"chiclana","chiclana de la frontera"} or locality_n.startswith("chiclana de la frontera "): return True
-    postal_match=re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",postal)
+    postal_match=re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",postal+" "+str(address or ""))
     if postal_match: return True
     if address and "chiclana de la frontera" in norm(address): return True
     host=urllib.parse.urlparse(url).netloc.lower()
