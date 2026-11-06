@@ -32,6 +32,11 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Validar sintaxis y pruebas internas del rastreador RAD
+        run: |
+          python -m py_compile v3/rastreo_web_publico.py
+          python v3/rastreo_web_publico.py --self-test
+
       - name: Extraer todos los elementos OSM y cruzar con catálogo maestro
         run: python v3/auditar_osm_municipal.py
 
