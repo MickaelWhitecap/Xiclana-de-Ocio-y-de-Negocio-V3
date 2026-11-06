@@ -3,7 +3,7 @@
 Usa resultados públicos de buscadores y páginas públicas; respeta robots.txt,
 limita peticiones y nunca publica: añade candidatos a candidatas_revision.
 """
-import hashlib, html, json, pathlib, re, time, urllib.parse, urllib.request
+import argparse, hashlib, html, json, pathlib, re, time, urllib.error, urllib.parse, urllib.request
 import urllib.robotparser
 from html.parser import HTMLParser
 from datetime import datetime, timezone
@@ -35,18 +35,21 @@ MAX_PAGES = 100
 TIMEOUT = 18
 CACHE_ROBOTS = {}
 LAST_REQUEST = {}
+LOCAL_POSTCODES = {'11130', '11138', '11139'}
 
 class Page(HTMLParser):
     def __init__(self):
-        super().__init__(); self.title=False; self.title_parts=[]; self.text=[]
-        self.meta={}; self.links=[]; self.jsonld=[]; self._script=False; self._json=False
+        super().__init__()
+        self.title=False; self.title_parts=[]; self.text=[]
+        self.meta={}; self.links=[]; self.jsonld=[]
+        self._script=False; self._json=False; self._script_buf=[]
     def handle_starttag(self, tag, attrs):
         a=dict(attrs)
         if tag == "title": self.title=True
         if tag == "meta" and a.get("content"):
             k=(a.get("property") or a.get("name") or "").lower()
             if k: self.meta[k]=a["content"]
-        if tag == "a" and a.get("href"): self.links.append(a["href"])
+        if tag == "a" and a.get("href"): self.links.append((a.get("class",""),a["href"]))
         if tag == "script":
             self._script=True; self._json=(a.get("type","").lower()=="application/ld+json")
             self._script_buf=[]
@@ -54,11 +57,23 @@ class Page(HTMLParser):
         if tag=="title": self.title=False
         if tag=="script" and self._script:
             if self._json and self._script_buf: self.jsonld.append("".join(self._script_buf))
-            self._script=False; self._json=False
+            self._script=False; self._json=False; self._script_buf=[]
     def handle_data(self, data):
         if self.title: self.title_parts.append(data)
         if self._script: self._script_buf.append(data)
         else: self.text.append(data)
+
+class SearchLinks(HTMLParser):
+    def __init__(self):
+        super().__init__(); self.active=False; self.href=None; self.links=[]
+    def handle_starttag(self, tag, attrs):
+        if tag != "a": return
+        a=dict(attrs)
+        if "result__a" in a.get("class","").split() and a.get("href"):
+            self.active=True; self.href=a["href"]
+    def handle_endtag(self, tag):
+        if tag=="a" and self.active:
+            self.links.append(self.href); self.active=False; self.href=None
 
 def get(url, limit=1200000):
     host=urllib.parse.urlparse(url).netloc.lower()
@@ -74,29 +89,43 @@ def get(url, limit=1200000):
         return data.decode(charset,errors="replace"),r.geturl(),r.headers.get_content_type()
 
 def allowed(url):
-    p=urllib.parse.urlparse(url); origin=f"{p.scheme}://{p.netloc}"
+    """Consulta robots.txt con timeout; ante un fallo de red, no rastrea ese host."""
+    p=urllib.parse.urlparse(url)
+    if p.scheme not in ("http","https") or not p.netloc: return False
+    origin=f"{p.scheme}://{p.netloc}"
     if origin not in CACHE_ROBOTS:
         rp=urllib.robotparser.RobotFileParser()
-        try: rp.set_url(origin+"/robots.txt"); rp.read()
-        except Exception: rp=None
-        CACHE_ROBOTS[origin]=rp
-    rp=CACHE_ROBOTS[origin]
-    return True if rp is None else rp.can_fetch(UA,url)
+        robots_url=origin+"/robots.txt"
+        try:
+            req=urllib.request.Request(robots_url,headers={"User-Agent":UA})
+            with urllib.request.urlopen(req,timeout=8) as response:
+                raw=response.read(256000).decode("utf-8",errors="replace")
+            rp.set_url(robots_url); rp.parse(raw.splitlines())
+            CACHE_ROBOTS[origin]=(rp,True)
+        except urllib.error.HTTPError as exc:
+            if exc.code in (404,410):
+                rp.set_url(robots_url); rp.parse([])
+                CACHE_ROBOTS[origin]=(rp,True)
+            else: CACHE_ROBOTS[origin]=(None,False)
+        except Exception: CACHE_ROBOTS[origin]=(None,False)
+    rp,valid=CACHE_ROBOTS[origin]
+    return bool(valid and rp and rp.can_fetch(UA,url))
 
 def search_ddg(query):
     url="https://html.duckduckgo.com/html/?"+urllib.parse.urlencode({"q":query})
     body,_,_=get(url,700000)
-    p=Page(); p.feed(body)
+    parser=SearchLinks()
+    try: parser.feed(body)
+    except Exception: return []
     found=[]
-    # DDG result links are encoded redirect URLs; parse hrefs from result__a anchors.
-    for m in re.finditer(r'<a[^>]+class=["\'][^"\']*result__a[^"\']*["\'][^>]+href=["\']([^"\']+)',body,re.I):
-        href=html.unescape(m.group(1))
-        if href.startswith("//"): href="https:"+href
+    for raw in parser.links:
+        href=urllib.parse.urljoin(url,html.unescape(raw))
         u=urllib.parse.urlparse(href)
         if "duckduckgo.com" in u.netloc:
             target=urllib.parse.parse_qs(u.query).get("uddg",[""])[0]
-            if target: href=target
-        if href.startswith("http") and not any(x in urllib.parse.urlparse(href).netloc for x in ("duckduckgo.com",)):
+            if target: href=urllib.parse.unquote(target)
+        parsed=urllib.parse.urlparse(href)
+        if parsed.scheme in ("http","https") and "duckduckgo.com" not in parsed.netloc:
             found.append(href)
         if len(found)>=MAX_RESULTS_PER_QUERY: break
     return list(dict.fromkeys(found))
@@ -104,8 +133,17 @@ def search_ddg(query):
 def search_bing(query):
     url="https://www.bing.com/search?format=rss&"+urllib.parse.urlencode({"q":query})
     body,_,_=get(url,700000)
-    return list(dict.fromkeys(html.unescape(x) for x in re.findall(r"<link>(https?://.*?)</link>",body,re.I)
-                               if "bing.com" not in urllib.parse.urlparse(x).netloc))[:MAX_RESULTS_PER_QUERY]
+    try:
+        import xml.etree.ElementTree as ET
+        root=ET.fromstring(body)
+        found=[]
+        for item in root.findall(".//item"):
+            link=item.findtext("link") or ""
+            parsed=urllib.parse.urlparse(link)
+            if parsed.scheme in ("http","https") and "bing.com" not in parsed.netloc:
+                found.append(link)
+        return list(dict.fromkeys(found))[:MAX_RESULTS_PER_QUERY]
+    except Exception: return []
 
 def flatten_jsonld(value):
     out=[]
@@ -125,22 +163,39 @@ def textval(v):
     return ""
 
 def classify(text):
-    s=text.lower()
+    s=text.casefold()
     groups=[
-      (("mueble","muebles","decoración","colchón"),"Muebles y decoración"),
-      (("restaurante","bar ","cafetería","comida","pizzería"),"Restauración"),
-      (("hotel","hostal","apartamento turístico","alojamiento"),"Alojamiento"),
-      (("taller","automóvil","automocion","concesionario"),"Automoción"),
-      (("dentista","clínica","fisioterapia","veterinaria","farmacia"),"Salud"),
-      (("peluquería","estética","gimnasio"),"Belleza y deporte"),
-      (("inmobiliaria","alquiler","venta de viviendas"),"Inmobiliaria"),
-      (("abogado","asesoría","gestoría","seguros"),"Servicios profesionales"),
-      (("academia","colegio","formación","idiomas"),"Educación"),
-      (("tienda","comercio","comprar","venta"),"Comercio"),
+      (("mueble","muebles","decoración","colchón"),("negocio","Muebles y decoración")),
+      (("restaurante","bar ","cafetería","comida","pizzería"),("ocio","Restauración")),
+      (("hotel","hostal","apartamento turístico","alojamiento"),("negocio","Alojamiento")),
+      (("taller","automóvil","automocion","concesionario"),("negocio","Automoción")),
+      (("dentista","clínica","fisioterapia","veterinaria","farmacia"),("negocio","Salud")),
+      (("peluquería","estética","gimnasio"),("negocio","Belleza y deporte")),
+      (("inmobiliaria","alquiler","venta de viviendas"),("negocio","Inmobiliaria")),
+      (("abogado","asesoría","gestoría","seguros"),("negocio","Servicios profesionales")),
+      (("academia","colegio","formación","idiomas"),("negocio","Educación")),
+      (("tienda","comercio","comprar","venta"),("negocio","Comercio")),
+      (("museo","teatro","cine","parque","ocio","actividad turística"),("ocio","Ocio y cultura")),
     ]
-    for words,cat in groups:
-        if any(w in s for w in words): return cat
-    return "Servicios y negocios"
+    for words,result in groups:
+        if any(w in s for w in words): return result
+    return ("negocio","Servicios y negocios")
+
+def norm(value):
+    import unicodedata
+    value=unicodedata.normalize("NFD",str(value or "").casefold())
+    value="".join(ch for ch in value if unicodedata.category(ch)!="Mn")
+    return " ".join(re.findall(r"[a-z0-9]+",value))
+
+def is_chiclana(address, locality, postal, body, title, url):
+    locality_n=norm(locality)
+    postal=str(postal or "").strip()
+    if locality_n in {"chiclana","chiclana de la frontera"}: return True
+    if postal in LOCAL_POSTCODES: return True
+    if address and "chiclana de la frontera" in norm(address): return True
+    host=urllib.parse.urlparse(url).netloc.lower()
+    if host.endswith(".chiclana.es") and "chiclana" in norm(title+" "+body[:1200]): return True
+    return False
 
 def extract(url):
     if not allowed(url): return None
@@ -160,9 +215,11 @@ def extract(url):
     name=textval(obj.get("name")) or title
     if not name: return None
     address=obj.get("address") or {}
-    if isinstance(address,str): addr=address
+    if isinstance(address,str): addr=address; locality=""; postal=""
     else:
-        addr=", ".join(x for x in [textval(address.get("streetAddress")),textval(address.get("postalCode")),textval(address.get("addressLocality"))] if x)
+        locality=textval(address.get("addressLocality"))
+        postal=textval(address.get("postalCode"))
+        addr=", ".join(x for x in [textval(address.get("streetAddress")),postal,locality] if x)
     phone=textval(obj.get("telephone"))
     email=textval(obj.get("email"))
     website=textval(obj.get("url")) or final_url
@@ -175,45 +232,79 @@ def extract(url):
     if not email:
         m=re.search(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b",blob)
         if m: email=m.group(0)
-    if "chiclana" not in (addr+" "+desc+" "+blob[:5000]).lower() and not any(x in final_url.lower() for x in (".chiclana","chiclana")):
-        return None
+    if not is_chiclana(addr,locality,postal,blob,title,final_url): return None
     if len(name)>140: return None
-    return {"name":name,"address":addr,"phone":phone,"email":email,"website":website,
+    tipo,categoria=classify(name+" "+desc+" "+blob[:1500])
+    return {"name":name,"type":tipo,"address":addr,"phone":phone,"email":email,"website":website,
             "hours":str(hours)[:500],"description":desc[:700],"source_url":final_url,
-            "category":classify(name+" "+desc+" "+blob[:1500])}
+            "category":categoria}
+
+def self_test():
+    assert classify("Restaurante y cafetería") == ("ocio","Restauración")
+    assert classify("Tienda de muebles") == ("negocio","Muebles y decoración")
+    assert is_chiclana("Calle Real 1, 11130, Chiclana","", "11130", "", "", "https://example.org")
+    assert is_chiclana("","Chiclana de la Frontera","", "", "", "https://example.org")
+    assert not is_chiclana("","", "", "Servicio en Chiclana y alrededores", "Empresa", "https://example.org")
+    print("RAD self-test: OK",flush=True)
 
 def main():
+    parser=argparse.ArgumentParser()
+    parser.add_argument("--self-test",action="store_true")
+    args=parser.parse_args()
+    if args.self_test:
+        self_test()
+        return
     if not MASTER.is_file(): raise SystemExit("No existe el catálogo maestro.")
     data=json.loads(MASTER.read_text(encoding="utf-8"))
     if not isinstance(data.get("items"),list) or not isinstance(data.get("candidatas_revision",[]),list):
         raise SystemExit("Estructura del catálogo no válida; se cancela sin modificar.")
     existing=data["items"]+data.get("candidatas_revision",[])
-    names={re.sub(r"[^a-z0-9]","",str(x.get("n","")).lower()) for x in existing if isinstance(x,dict)}
+    existing_pairs=set()
+    existing_name_addresses={}
     urls={str(x.get("url_fuente_rastreo","")).rstrip("/").lower() for x in existing if isinstance(x,dict)}
+    for item in existing:
+        if not isinstance(item,dict): continue
+        name=norm(item.get("n") or item.get("nombre") or item.get("name"))
+        addr=norm(item.get("a") or item.get("direccion") or item.get("address"))
+        if name and addr: existing_pairs.add(name+"|"+addr)
+        if name: existing_name_addresses.setdefault(name,set()).add(addr)
     links=[]
     for q in QUERIES:
         for engine in (search_ddg,search_bing):
             try: links.extend(engine(q))
             except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
     links=list(dict.fromkeys(links))[:MAX_PAGES]
-    added=[]; seen=set()
+    added=[]; seen_pairs=set(); seen_urls=set()
     for url in links:
         record=extract(url)
         if not record: continue
-        key=re.sub(r"[^a-z0-9]","",record["name"].lower())
+        name_key=norm(record["name"]); addr_key=norm(record["address"])
+        pair=name_key+"|"+addr_key if addr_key else ""
         u=record["source_url"].rstrip("/").lower()
-        if not key or key in names or key in seen or u in urls: continue
-        seen.add(key)
-        digest=hashlib.sha256((key+"|"+u).encode()).hexdigest()[:16]
-        added.append({
-          "id":"rad:"+digest,"n":record["name"],"t":"negocio","c":record["category"],
+        if not name_key or u in urls or u in seen_urls: continue
+        # Sucursales con el mismo nombre y direcciones distintas se conservan.
+        if pair and (pair in existing_pairs or pair in seen_pairs): continue
+        seen_urls.add(u)
+        if pair: seen_pairs.add(pair)
+        digest=hashlib.sha256((name_key+"|"+addr_key+"|"+u).encode()).hexdigest()[:16]
+        fields_present=["nombre"]+[k for k,v in [
+            ("direccion",record["address"]),("telefono",record["phone"]),("correo",record["email"]),
+            ("web",record["website"]),("horario",record["hours"]),("descripcion",record["description"])
+        ] if v]
+        candidate={
+          "id":"rad:"+digest,"n":record["name"],"t":record["type"],"c":record["category"],
           "a":record["address"],"p":record["phone"],"e":record["email"],
           "w":record["website"],"h":record["hours"],"d":record["description"],
           "f":"Rastreo web público (RAD)","url_fuente_rastreo":u,
-          "fuentes_datos":[{"url":u,"campos":["nombre","direccion","telefono","correo","web","horario","descripcion"]}],
+          "fuentes_datos":[{"url":u,"campos":fields_present}],
           "estado_revision":"pendiente","fuente_estado":"Candidato detectado en fuente web pública; pendiente de validación manual",
           "fecha_deteccion_utc":datetime.now(timezone.utc).isoformat()
-        })
+        }
+        if not addr_key:
+            candidate["nota_revision"]="No se ha encontrado una dirección postal municipal inequívoca; comprobar ubicación antes de aprobar."
+        if name_key in existing_name_addresses and addr_key and addr_key not in existing_name_addresses[name_key]:
+            candidate["nota_revision"]="Mismo nombre que otra ficha, pero dirección distinta; comprobar si es otra sucursal."
+        added.append(candidate)
     data.setdefault("candidatas_revision",[]).extend(added)
     data["total_candidatas_revision"]=len(data["candidatas_revision"])
     data["rad_ultima_ejecucion"]={"fecha_utc":datetime.now(timezone.utc).isoformat(),
