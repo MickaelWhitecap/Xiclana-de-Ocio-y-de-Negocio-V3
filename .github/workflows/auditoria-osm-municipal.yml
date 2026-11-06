@@ -36,6 +36,45 @@ jobs:
           python -m py_compile v3/rastreo_web_publico.py
           python v3/rastreo_web_publico.py --self-test
 
+  # Ejecución real manual en la rama de desarrollo, aislada del catálogo publicado.
+  prueba-rad-real:
+    if: github.ref == 'refs/heads/gran-rastreo-multifuente' && github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Preparar copia aislada del catálogo
+        run: cp v3/fichas_completas.json "$RUNNER_TEMP/fichas_completas_rad.json"
+      - name: Ejecutar rastreo real sin modificar el catálogo del repositorio
+        run: python v3/rastreo_web_publico.py --catalog "$RUNNER_TEMP/fichas_completas_rad.json"
+      - name: Generar informe de candidatas detectadas
+        run: |
+          python - <<'PY'
+          import json, os
+          original=json.load(open("v3/fichas_completas.json",encoding="utf-8"))
+          path=os.path.join(os.environ["RUNNER_TEMP"],"fichas_completas_rad.json")
+          result=json.load(open(path,encoding="utf-8"))
+          old={x.get("id") for x in original.get("candidatas_revision",[]) if isinstance(x,dict)}
+          candidates=[x for x in result.get("candidatas_revision",[]) if isinstance(x,dict) and x.get("id") not in old and str(x.get("id","")).startswith("rad:")]
+          report={"rad_ultima_ejecucion":result.get("rad_ultima_ejecucion",{}),"candidatas_nuevas":candidates,
+                  "nota":"Prueba aislada en rama de desarrollo. Ninguna candidata se ha publicado ni incorporado al catálogo principal."}
+          with open("rad_prueba_resultado.json","w",encoding="utf-8") as f:
+              json.dump(report,f,ensure_ascii=False,indent=2)
+          print(json.dumps({"resumen":report["rad_ultima_ejecucion"],"candidatas_en_informe":len(candidates)},ensure_ascii=False))
+          PY
+      - name: Publicar informe como artefacto de revisión
+        uses: actions/upload-artifact@v4
+        with:
+          name: rad-prueba-real-chiclana-${{ github.run_id }}
+          path: rad_prueba_resultado.json
+          if-no-files-found: error
+          retention-days: 14
+
   extraccion-y-cruce:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
