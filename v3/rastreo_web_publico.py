@@ -326,6 +326,7 @@ def extract(url, trusted_local=False):
             "category":categoria}
 
 def self_test():
+    global allowed, get
     assert classify("Restaurante y cafetería") == ("ocio","Restauración")
     assert classify("Tienda de muebles") == ("negocio","Muebles y decoración")
     assert is_chiclana("Calle Real 1, 11130, Chiclana","", "11130", "", "", "https://example.org")
