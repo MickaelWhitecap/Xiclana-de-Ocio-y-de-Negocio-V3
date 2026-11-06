@@ -138,6 +138,7 @@ jobs:
             "## Gran Rastreo web público (RAD)",
             f"- Fecha UTC: **{r.get('fecha_utc', 'sin dato')}**",
             f"- Buscadores consultados: **{', '.join(r.get('buscadores', []))}**",
+            f"- Fuentes directas: **{', '.join(r.get('fuentes_directas', []))}**",
             f"- Consultas sectoriales: **{r.get('consultas', 0)}**",
             f"- URLs encontradas: **{r.get('urls_encontradas', 0)}**",
             f"- Candidatas nuevas: **{r.get('candidatas_nuevas', 0)}**",
