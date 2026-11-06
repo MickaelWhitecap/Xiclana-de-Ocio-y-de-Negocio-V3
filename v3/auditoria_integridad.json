@@ -1,5 +1,5 @@
 {
-  "fecha": "2026-11-05",
+  "fecha": "2026-11-06",
   "categorias_catalogo": {
     "total_distintas_tipo_categoria": 116,
     "distribucion": [
@@ -618,7 +618,7 @@
   "total_registros_historicos": 1327,
   "total_items_publicables": 1122,
   "total_items_marcados_borrados": 205,
-  "total_candidatas_revision": 116,
+  "total_candidatas_revision": 23,
   "candidatos_automaticos_heredados_en_items": 0,
   "ids_automaticos_heredados": [],
   "ids_automaticos_nuevos_no_aprobados": [],
