@@ -256,6 +256,21 @@ def extract(url, trusted_local=False):
     phone=textval(obj.get("telephone"))
     email=textval(obj.get("email"))
     website=textval(obj.get("url"))
+    # En fichas de directorios, el enlace externo rotulado como web oficial
+    # es más fiable que cualquier enlace genérico (mapas o redes sociales).
+    if not website:
+        for _cls,href,label in p.links:
+            target=urllib.parse.urljoin(final_url,html.unescape(href))
+            host=urllib.parse.urlparse(target).netloc.lower()
+            label_n=norm(label)
+            if host and host != urllib.parse.urlparse(final_url).netloc.lower() and any(k in label_n for k in ("sitio web","web oficial","website","pagina web")):
+                website=target
+                break
+    if not addr:
+        for _cls,_href,label in p.links:
+            if re.search(r"(?<!\\d)(11130|11138|11139)(?!\\d)",label) and "chiclana" in norm(label):
+                addr=label.strip()
+                break
     hours=obj.get("openingHours") or obj.get("openingHoursSpecification") or ""
     if isinstance(hours,dict): hours=[hours]
     if isinstance(hours,list):
@@ -331,12 +346,14 @@ def main():
             seed_body,seed_final,_=get(seed,900000)
             seed_page=Page(); seed_page.feed(seed_body)
             seed_host=urllib.parse.urlparse(seed_final).netloc.lower()
+            seed_count=0
             for _,href,_label in seed_page.links:
                 target=urllib.parse.urljoin(seed_final,html.unescape(href))
                 parsed=urllib.parse.urlparse(target)
                 if parsed.scheme not in ("http","https") or parsed.netloc.lower()!=seed_host: continue
                 if any(parsed.path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS.get(seed_host,())):
-                    trusted_urls.add(target)
+                    trusted_urls.add(target); seed_count+=1
+                    if seed_count>=40: break
         except Exception as exc:
             print(f"Fuente directa no disponible ({seed}): {exc}",flush=True)
     links.extend(sorted(trusted_urls))
