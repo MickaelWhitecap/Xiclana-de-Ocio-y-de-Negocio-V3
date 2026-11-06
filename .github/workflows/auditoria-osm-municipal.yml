@@ -3,11 +3,12 @@ name: Auditoría municipal completa de OpenStreetMap
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, gran-rastreo-multifuente]
     paths:
       - ".github/workflows/auditoria-osm-municipal.yml"
       - "v3/incorporar_candidatas_osm.py"
       - "v3/proponer_direcciones_osm.py"
+      - "v3/rastreo_web_publico.py"
   schedule:
     - cron: "30 4 * * 1"
 
@@ -19,7 +20,63 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # La rama de desarrollo ejecuta únicamente validaciones: nunca escribe en main.
+  validacion-rad:
+    if: github.ref == 'refs/heads/gran-rastreo-multifuente'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Comprobar sintaxis y pruebas internas RAD
+        run: |
+          python -m py_compile v3/rastreo_web_publico.py
+          python v3/rastreo_web_publico.py --self-test
+
+  # Ejecución real manual en la rama de desarrollo, aislada del catálogo publicado.
+  prueba-rad-real:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Preparar copia aislada del catálogo
+        run: cp v3/fichas_completas.json "$RUNNER_TEMP/fichas_completas_rad.json"
+      - name: Ejecutar rastreo real sin modificar el catálogo del repositorio
+        run: python v3/rastreo_web_publico.py --catalog "$RUNNER_TEMP/fichas_completas_rad.json"
+      - name: Generar informe de candidatas detectadas
+        run: |
+          python - <<'PY'
+          import json, os
+          original=json.load(open("v3/fichas_completas.json",encoding="utf-8"))
+          path=os.path.join(os.environ["RUNNER_TEMP"],"fichas_completas_rad.json")
+          result=json.load(open(path,encoding="utf-8"))
+          old={x.get("id") for x in original.get("candidatas_revision",[]) if isinstance(x,dict)}
+          candidates=[x for x in result.get("candidatas_revision",[]) if isinstance(x,dict) and x.get("id") not in old and str(x.get("id","")).startswith("rad:")]
+          report={"rad_ultima_ejecucion":result.get("rad_ultima_ejecucion",{}),"candidatas_nuevas":candidates,
+                  "nota":"Prueba aislada en rama de desarrollo. Ninguna candidata se ha publicado ni incorporado al catálogo principal."}
+          with open("rad_prueba_resultado.json","w",encoding="utf-8") as f:
+              json.dump(report,f,ensure_ascii=False,indent=2)
+          print(json.dumps({"resumen":report["rad_ultima_ejecucion"],"candidatas_en_informe":len(candidates)},ensure_ascii=False))
+          PY
+      - name: Publicar informe como artefacto de revisión
+        uses: actions/upload-artifact@v4
+        with:
+          name: rad-prueba-real-chiclana-${{ github.run_id }}
+          path: rad_prueba_resultado.json
+          if-no-files-found: error
+          retention-days: 14
+
   extraccion-y-cruce:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -30,6 +87,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Validar sintaxis y pruebas internas del rastreador RAD
+        run: |
+          python -m py_compile v3/rastreo_web_publico.py
+          python v3/rastreo_web_publico.py --self-test
 
       - name: Extraer todos los elementos OSM y cruzar con catálogo maestro
         run: python v3/auditar_osm_municipal.py
@@ -46,16 +108,20 @@ jobs:
         if: success()
         run: python v3/incorporar_candidatas_osm.py
 
-      - name: Guardar propuestas OSM pendientes para Administración
+      - name: Rastrear fuentes web públicas y preparar candidatas RAD
+        if: success()
+        run: python v3/rastreo_web_publico.py
+
+      - name: Guardar propuestas OSM y RAD pendientes para Administración
         if: success()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add v3/fichas_completas.json
           if git diff --cached --quiet; then
-            echo "No hay cambios en los ficheros de propuestas OSM."
+            echo "No hay cambios en las propuestas OSM/RAD del catálogo maestro."
           else
-            git commit -m "Actualizar propuestas OSM pendientes de revisión"
+            git commit -m "Actualizar propuestas OSM y RAD pendientes de revisión"
             for attempt in 1 2 3; do
               git fetch origin main
               git rebase origin/main
@@ -79,7 +145,7 @@ jobs:
           d=json.load(open("v3/osm_chiclana_cruce_catalogo.json", encoding="utf-8"))
           e=d["extraccion"]; c=d["cruce"]
           lines=[
-            "## Auditoría municipal OSM — Chiclana",
+            "## Auditoría municipal OSM + rastreo web público RAD — Chiclana",
             f"- Elementos recuperados: **{e['total_elementos']}**",
             f"- Nodos / vías / relaciones: **{e['por_tipo']}**",
             f"- Elementos con etiquetas: **{e['elementos_con_etiquetas']}**",
@@ -90,7 +156,7 @@ jobs:
             f"- Coincidencias solo por nombre (sin confirmar): **{c['coincidencia_nombre_sin_confirmacion_espacial']}**",
             f"- Posibles fichas nuevas sin incorporar: **{c['elementos_osm_con_nombre_sin_ficha_candidata']}**",
             "",
-            "La extracción y el cruce no modifican ni publican fichas del catálogo maestro."
+            "Las propuestas detectadas quedan pendientes de validación manual; no se publican automáticamente."
           ]
           open(__import__("os").environ["GITHUB_STEP_SUMMARY"],"w",encoding="utf-8").write("\n".join(lines))
           PY
@@ -98,6 +164,29 @@ jobs:
             echo "## Auditoría OSM no completada" >> "$GITHUB_STEP_SUMMARY"
             echo "No se generó el informe. Consultar los registros de Overpass." >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      - name: Publicar resumen del Gran Rastreo RAD
+        if: success() && hashFiles('v3/fichas_completas.json') != ''
+        run: |
+          python - <<'PY'
+          import json, os
+          d=json.load(open("v3/fichas_completas.json", encoding="utf-8"))
+          r=d.get("rad_ultima_ejecucion", {})
+          lines=[
+            "",
+            "## Gran Rastreo web público (RAD)",
+            f"- Fecha UTC: **{r.get('fecha_utc', 'sin dato')}**",
+            f"- Buscadores consultados: **{', '.join(r.get('buscadores', []))}**",
+            f"- Fuentes directas: **{', '.join(r.get('fuentes_directas', []))}**",
+            f"- Consultas sectoriales: **{r.get('consultas', 0)}**",
+            f"- URLs encontradas: **{r.get('urls_encontradas', 0)}**",
+            f"- Candidatas nuevas: **{r.get('candidatas_nuevas', 0)}**",
+            "- Publicación automática: **no**",
+            "- Destino: catálogo maestro, bloque de revisión de Administración"
+          ]
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
+              f.write("\n".join(lines) + "\n")
+          PY
 
       - name: Publicar resumen de novedades y cambios
         if: success() && hashFiles('v3/osm_chiclana_cambios_semanales.json') != ''
