@@ -100,10 +100,12 @@ def allowed(url):
             req=urllib.request.Request(robots_url,headers={"User-Agent":UA})
             with urllib.request.urlopen(req,timeout=8) as response:
                 raw=response.read(256000).decode("utf-8",errors="replace")
+            LAST_REQUEST[p.netloc.lower()]=time.time()
             rp.set_url(robots_url); rp.parse(raw.splitlines())
             CACHE_ROBOTS[origin]=(rp,True)
         except urllib.error.HTTPError as exc:
             if exc.code in (404,410):
+                LAST_REQUEST[p.netloc.lower()]=time.time()
                 rp.set_url(robots_url); rp.parse([])
                 CACHE_ROBOTS[origin]=(rp,True)
             else: CACHE_ROBOTS[origin]=(None,False)
