@@ -191,8 +191,9 @@ def norm(value):
 def is_chiclana(address, locality, postal, body, title, url):
     locality_n=norm(locality)
     postal=str(postal or "").strip()
-    if locality_n in {"chiclana","chiclana de la frontera"}: return True
-    if postal in LOCAL_POSTCODES: return True
+    if locality_n in {"chiclana","chiclana de la frontera"} or locality_n.startswith("chiclana de la frontera "): return True
+    postal_match=re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",postal)
+    if postal_match: return True
     if address and "chiclana de la frontera" in norm(address): return True
     host=urllib.parse.urlparse(url).netloc.lower()
     if (host=="chiclana.es" or host.endswith(".chiclana.es")) and "chiclana" in norm(title+" "+body[:1200]): return True
@@ -225,6 +226,7 @@ def extract(url):
     email=textval(obj.get("email"))
     website=textval(obj.get("url")) or final_url
     hours=obj.get("openingHours") or obj.get("openingHoursSpecification") or ""
+    if isinstance(hours,dict): hours=[hours]
     if isinstance(hours,list):
         parts=[]
         for entry in hours:
@@ -245,7 +247,13 @@ def extract(url):
         if m: email=m.group(0)
     if not is_chiclana(addr,locality,postal,blob,title,final_url): return None
     if len(name)>140: return None
-    tipo,categoria=classify(name+" "+desc+" "+blob[:1500])
+    schema_type=obj.get("@type",[])
+    schema_types=schema_type if isinstance(schema_type,list) else [schema_type]
+    schema_types=" ".join(str(x).rsplit("/",1)[-1].rsplit("#",1)[-1] for x in schema_types)
+    if any(x in schema_types for x in ("Restaurant","FoodEstablishment")):
+        tipo,categoria="ocio","Restauración"
+    else:
+        tipo,categoria=classify(name+" "+desc+" "+blob[:1500])
     return {"name":name,"type":tipo,"address":addr,"phone":phone,"email":email,"website":website,
             "hours":str(hours)[:500],"description":desc[:700],"source_url":final_url,
             "category":categoria}
@@ -285,7 +293,7 @@ def main():
             try: links.extend(engine(q))
             except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
     links=list(dict.fromkeys(links))[:MAX_PAGES]
-    added=[]; seen_pairs=set(); seen_urls=set()
+    added=[]; seen_pairs=set(); seen_urls=set(); seen_unlocated_names=set()
     for url in links:
         record=extract(url)
         if not record: continue
@@ -295,6 +303,9 @@ def main():
         if not name_key or u in urls or u in seen_urls: continue
         # Sucursales con el mismo nombre y direcciones distintas se conservan.
         if pair and (pair in existing_pairs or pair in seen_pairs): continue
+        if not pair:
+            if name_key in seen_unlocated_names: continue
+            seen_unlocated_names.add(name_key)
         seen_urls.add(u)
         if pair: seen_pairs.add(pair)
         digest=hashlib.sha256((name_key+"|"+addr_key+"|"+u).encode()).hexdigest()[:16]
