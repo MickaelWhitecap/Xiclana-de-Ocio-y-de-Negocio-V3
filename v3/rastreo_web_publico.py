@@ -288,7 +288,7 @@ def clean_address(value, locality="", postal=""):
 def clean_description(value, business_name=""):
     """Limpia metadatos SEO y evita descripciones genéricas o cruzadas."""
     raw=html.unescape(str(value or ""))
-    raw=re.sub(r"(?is)<(script|style).*?>.*?</\\1>", " ", raw)
+    raw=re.sub(r"(?is)<(script|style).*?>.*?</\1>", " ", raw)
     raw=re.sub(r"<[^>]*>", " ", raw)
     raw=re.sub(r"[\t\r\n]+", " ", raw)
     raw=" ".join(raw.split()).strip(" |·-–—")
@@ -543,7 +543,7 @@ def self_test():
     assert clean_address("Chiclana de la Frontera") == ""
     assert clean_address("11130") == ""
     assert clean_description("Directorio de empresas de Chiclana | La Guía de Chiclana") == ""
-    assert clean_description("Bar PimPam, tapas y paella", "La Guía de Chiclana") == ""
+    assert clean_description("Bar PimPam ofrece tapas caseras y platos tradicionales en un ambiente familiar", "La Guía de Chiclana") == ""
     assert is_directory_email("info@chiclanaguiadempresas.com","https://www.chiclanaguiadempresas.com/empresas/empresa/bar")
     assert not is_directory_email("contacto@empresa.es","https://www.chiclanaguiadempresas.com/empresas/empresa/bar")
     wrong={"@type":"Organization","name":"Directorio general","url":"https://portal.example/"}
