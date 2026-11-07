@@ -221,7 +221,30 @@ def clean_business_name(value):
     ]
     for pattern in patterns:
         name=re.sub(pattern,"",name,flags=re.I).strip(" |·-–—")
+    # Los buscadores suelen concatenar categorías y localidad al nombre real.
+    # Recorta únicamente colas inequívocas, nunca palabras interiores del nombre.
+    name=re.sub(
+        r"(?i)(?:\\s+(?:restaurantes?|bares?|cafeter[ií]as?|tiendas?|empresas?|"
+        r"directorios?|gu[ií]as?|hoteles?|alojamientos?|servicios|negocios|"
+        r"chiclana(?:\\s+de\\s+la\\s+frontera)?)){2,}.*$",
+        "", name
+    ).strip(" |·-–—")
     return name
+
+
+def valid_business_name(value):
+    name=" ".join(str(value or "").split())
+    words=re.findall(r"[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9&'’-]+",name)
+    if len(name)<3 or len(name)>80 or len(words)>8:
+        return False
+    n=norm(name)
+    if n in {"chiclana","chiclana de la frontera","empresas de chiclana","directorio de empresas"}:
+        return False
+    # Evita titulares genéricos y nombres que siguen siendo una lista SEO.
+    seo={"directorio","empresas","restaurantes","bares","tiendas","negocios","chiclana"}
+    if sum(1 for w in n.split() if w in seo)>=2:
+        return False
+    return True
 
 
 def is_directory_email(value, page_url):
@@ -327,7 +350,7 @@ def extract(url, trusted_local=False):
     # Prioriza el nombre estructurado de la ficha; el H1 puede contener SEO del portal.
     raw_name=textval(obj.get("name")) or (p.headings[0] if p.headings else "") or title
     name=clean_business_name(raw_name)
-    if not name: return None
+    if not name or not valid_business_name(name): return None
     address=obj.get("address") or {}
     if isinstance(address,str): addr=address; locality=""; postal=""
     else:
@@ -406,9 +429,16 @@ def extract(url, trusted_local=False):
     # Una localidad aislada no constituye una dirección postal verificable.
     if norm(addr) in {"chiclana","chiclana de la frontera"}: addr=""
     if not is_chiclana(addr,locality,postal,blob,title,final_url,trusted_local): return None
-    if len(name)>100: return None
-    # Sin dirección, teléfono, correo ni web no hay información accionable.
-    if not any((addr,phone,email,website)): return None
+    # Una localidad o un código postal aislados no identifican dónde está el negocio.
+    # Exigimos una vía/dirección concreta, además de una referencia municipal.
+    address_detail=norm(addr)
+    address_detail=re.sub(r"\\b(11130|11138|11139|chiclana|de|la|frontera)\\b"," ",address_detail)
+    address_detail=" ".join(address_detail.split())
+    if len(address_detail)<4: return None
+    if not re.search(r"(?<!\\d)(11130|11138|11139)(?!\\d)",addr) and "chiclana" not in norm(addr):
+        return None
+    # Una dirección válida sin ningún canal de contacto tampoco es candidata accionable.
+    if not any((phone,email,website)): return None
     schema_type=obj.get("@type",[])
     schema_types=schema_type if isinstance(schema_type,list) else [schema_type]
     schema_types=" ".join(str(x).rsplit("/",1)[-1].rsplit("#",1)[-1] for x in schema_types)
@@ -438,6 +468,10 @@ def self_test():
     assert normalize_phone("+34 610 306 074") == "610306074"
     assert clean_business_name("Bar Cafetería Y Bar PimPam Cervecería Bares Pim Pam tapas comer paella") == "Bar Cafetería Y Bar PimPam"
     assert clean_business_name("Talleres Gómez") == "Talleres Gómez"
+    assert clean_business_name("Casa Bernardo Marisquería Marisquerías Restaurantes Restaurantes Chiclana") == "Casa Bernardo Marisquería"
+    assert valid_business_name("Casa Bernardo Marisquería")
+    assert not valid_business_name("Restaurantes Bares Empresas Chiclana")
+    assert not valid_business_name("Empresa de servicios en Chiclana Restaurantes Bares")
     assert is_directory_email("info@chiclanaguiadempresas.com","https://www.chiclanaguiadempresas.com/empresas/empresa/bar")
     assert not is_directory_email("contacto@empresa.es","https://www.chiclanaguiadempresas.com/empresas/empresa/bar")
     wrong={"@type":"Organization","name":"Directorio general","url":"https://portal.example/"}
