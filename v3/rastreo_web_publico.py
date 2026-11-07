@@ -224,9 +224,9 @@ def clean_business_name(value):
     # Los buscadores suelen concatenar categorías y localidad al nombre real.
     # Recorta únicamente colas inequívocas, nunca palabras interiores del nombre.
     name=re.sub(
-        r"(?i)(?:\\s+(?:restaurantes?|bares?|cafeter[ií]as?|tiendas?|empresas?|"
+        r"(?i)(?:\s+(?:restaurantes?|bares?|cafeter[ií]as?|marisquer[ií]as|tiendas?|empresas?|"
         r"directorios?|gu[ií]as?|hoteles?|alojamientos?|servicios|negocios|"
-        r"chiclana(?:\\s+de\\s+la\\s+frontera)?)){2,}.*$",
+        r"chiclana(?:\s+de\s+la\s+frontera)?)){2,}.*$",
         "", name
     ).strip(" |·-–—")
     return name
@@ -432,10 +432,10 @@ def extract(url, trusted_local=False):
     # Una localidad o un código postal aislados no identifican dónde está el negocio.
     # Exigimos una vía/dirección concreta, además de una referencia municipal.
     address_detail=norm(addr)
-    address_detail=re.sub(r"\\b(11130|11138|11139|chiclana|de|la|frontera)\\b"," ",address_detail)
+    address_detail=re.sub(r"\b(11130|11138|11139|chiclana|de|la|frontera)\b"," ",address_detail)
     address_detail=" ".join(address_detail.split())
     if len(address_detail)<4: return None
-    if not re.search(r"(?<!\\d)(11130|11138|11139)(?!\\d)",addr) and "chiclana" not in norm(addr):
+    if not re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",addr) and "chiclana" not in norm(addr):
         return None
     # Una dirección válida sin ningún canal de contacto tampoco es candidata accionable.
     if not any((phone,email,website)): return None
