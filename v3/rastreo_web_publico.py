@@ -214,10 +214,10 @@ def clean_business_name(value):
     """Elimina colas SEO evidentes sin recortar nombres comerciales normales."""
     name=" ".join(str(value or "").replace(" "," ").split()).strip(" |·-–—")
     patterns=[
-        r"\s+cervecer[ií]a\\s+bares?\\b.*$",
-        r"\\s+bares?\\s+(?:de\\s+)?(?:chiclana|tapas|comer|paella)\\b.*$",
-        r"\\s+(?:tapas\\s+comer|comer\\s+paella|paella\\s+y\\s+tapas)\\b.*$",
-        r"\\s*[|·–—]\\s*(?:bares?|restaurantes?|cafeter[ií]as?|empresas?|directorio)\\b.*$",
+        r"[ ]+cervecer[ií]a[ ]+bares?([ ]|$).*$",
+        r"[ ]+bares?[ ]+(?:de[ ]+)?(?:chiclana|tapas|comer|paella)([ ]|$).*$",
+        r"[ ]+(?:tapas[ ]+comer|comer[ ]+paella|paella[ ]+y[ ]+tapas)([ ]|$).*$",
+        r"[ ]*[|·–—][ ]*(?:bares?|restaurantes?|cafeter[ií]as?|empresas?|directorio)([ ]|$).*$",
     ]
     for pattern in patterns:
         name=re.sub(pattern,"",name,flags=re.I).strip(" |·-–—")
@@ -407,9 +407,6 @@ def extract(url, trusted_local=False):
     if norm(addr) in {"chiclana","chiclana de la frontera"}: addr=""
     if not is_chiclana(addr,locality,postal,blob,title,final_url,trusted_local): return None
     if len(name)>100: return None
-    # Sin dirección, teléfono, correo ni web no hay información accionable:
-    # no incorporar el mero nombre como candidata nueva.
-    if not any((addr,phone,email,website)): return None
     # Sin dirección, teléfono, correo ni web no hay información accionable.
     if not any((addr,phone,email,website)): return None
     schema_type=obj.get("@type",[])
