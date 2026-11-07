@@ -20,8 +20,8 @@ jobs:
   auditar:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - uses: actions/setup-node@v4
@@ -50,7 +50,7 @@ jobs:
         run: python v3/auditar_catalogo.py
       - name: Guardar catálogo e informes generados para revisión
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: auditoria-catalogo-v3
           path: |
