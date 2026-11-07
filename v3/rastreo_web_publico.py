@@ -55,12 +55,15 @@ class Page(HTMLParser):
     def __init__(self):
         super().__init__()
         self.title=False; self.title_parts=[]; self.text=[]
-        self.meta={}; self.links=[]; self.jsonld=[]
+        self.meta={}; self.links=[]; self.jsonld=[]; self.headings=[]
+        self._heading_tag=None; self._heading_buf=[]
         self._script=False; self._json=False; self._script_buf=[]
         self._anchor=None; self._anchor_text=[]
     def handle_starttag(self, tag, attrs):
         a=dict(attrs)
         if tag == "title": self.title=True
+        if tag in ("h1","h2","h3"):
+            self._heading_tag=tag; self._heading_buf=[]
         if tag == "meta" and a.get("content"):
             k=(a.get("property") or a.get("name") or "").lower()
             if k: self.meta[k]=a["content"]
@@ -71,6 +74,10 @@ class Page(HTMLParser):
             self._script_buf=[]
     def handle_endtag(self, tag):
         if tag=="title": self.title=False
+        if tag in ("h1","h2","h3") and self._heading_tag==tag:
+            heading=" ".join(" ".join(self._heading_buf).split())
+            if heading: self.headings.append(heading)
+            self._heading_tag=None; self._heading_buf=[]
         if tag=="a" and self._anchor:
             self.links.append((self._anchor[0],self._anchor[1]," ".join(self._anchor_text).strip()))
             self._anchor=None; self._anchor_text=[]
@@ -79,6 +86,7 @@ class Page(HTMLParser):
             self._script=False; self._json=False; self._script_buf=[]
     def handle_data(self, data):
         if self.title: self.title_parts.append(data)
+        if self._heading_tag: self._heading_buf.append(data)
         if self._anchor is not None: self._anchor_text.append(data)
         if self._script: self._script_buf.append(data)
         else: self.text.append(data)
@@ -193,6 +201,41 @@ def textval(v):
     if isinstance(v,dict): return textval(v.get("name") or v.get("streetAddress") or "")
     return ""
 
+
+def normalize_phone(value):
+    """Devuelve solo teléfonos españoles completos de nueve cifras."""
+    digits=re.sub(r"\\D","",str(value or "").strip())
+    if digits.startswith("34") and len(digits)==11: digits=digits[2:]
+    if len(digits)==9 and digits[0] in "6789": return digits
+    return ""
+
+
+def choose_schema_entity(candidates, page_url, headings=(), title=""):
+    """Evita usar el primer JSON-LD global cuando pertenece a otra ficha."""
+    page=url_key(page_url)
+    page_host=urllib.parse.urlparse(page_url).netloc.lower()
+    heading_keys={norm(x) for x in list(headings)+[title] if norm(x)}
+    scored=[]
+    for obj in candidates:
+        if not isinstance(obj,dict): continue
+        name=textval(obj.get("name"))
+        if not name: continue
+        urls=[]
+        for key in ("url","@id","mainEntityOfPage"):
+            value=obj.get(key)
+            if isinstance(value,dict): value=value.get("@id") or value.get("url") or ""
+            if isinstance(value,str) and value.strip(): urls.append(value.strip())
+        exact=any(url_key(urllib.parse.urljoin(page_url,u))==page for u in urls)
+        same_host=any(urllib.parse.urlparse(urllib.parse.urljoin(page_url,u)).netloc.lower()==page_host for u in urls)
+        score=(100 if exact else 0)+(15 if norm(name) in heading_keys else 0)
+        score+=sum(bool(obj.get(k)) for k in ("telephone","email","address","openingHours","description"))
+        if exact or len(candidates)==1 or (same_host and norm(name) in heading_keys):
+            scored.append((score,obj))
+    if not scored: return {}
+    scored.sort(key=lambda x:x[0],reverse=True)
+    return scored[0][1]
+
+
 def classify(text):
     s=text.casefold()
     groups=[
@@ -256,8 +299,9 @@ def extract(url, trusted_local=False):
     for raw in p.jsonld:
         try: candidates.extend(flatten_jsonld(json.loads(raw)))
         except Exception: pass
-    obj=candidates[0] if candidates else {}
-    name=textval(obj.get("name")) or title
+    obj=choose_schema_entity(candidates,final_url,p.headings,title)
+    # El H1 identifica la ficha individual; el <title> puede ser el nombre del portal.
+    name=(p.headings[0] if p.headings else "") or textval(obj.get("name")) or title
     if not name: return None
     address=obj.get("address") or {}
     if isinstance(address,str): addr=address; locality=""; postal=""
@@ -265,9 +309,11 @@ def extract(url, trusted_local=False):
         locality=textval(address.get("addressLocality"))
         postal=textval(address.get("postalCode"))
         addr=", ".join(x for x in [textval(address.get("streetAddress")),postal,locality] if x)
-    phone=textval(obj.get("telephone"))
+    phone=normalize_phone(textval(obj.get("telephone")))
     email=textval(obj.get("email"))
     website=textval(obj.get("url"))
+    if website and urllib.parse.urlparse(urllib.parse.urljoin(final_url,website)).netloc.lower()==urllib.parse.urlparse(final_url).netloc.lower():
+        website=""
     # En fichas de directorios, el enlace externo rotulado como web oficial
     # es más fiable que cualquier enlace genérico (mapas o redes sociales).
     if not website:
@@ -302,16 +348,30 @@ def extract(url, trusted_local=False):
         hours="; ".join(parts)
     blob=" ".join(p.text)
     if not phone:
-        m=re.search(r"(?<!\d)(?:\+34[ .-]?)?(?:[6789]\d{2})[ .-]?\d{2,3}[ .-]?\d{2,3}(?!\d)",blob)
-        if m: phone=m.group(0)
+        tel_values=[]
+        for _cls,href,_label in p.links:
+            if str(href).lower().startswith("tel:"):
+                value=normalize_phone(urllib.parse.unquote(str(href)[4:].split("?",1)[0]))
+                if value: tel_values.append(value)
+        tel_values=list(dict.fromkeys(tel_values))
+        if len(tel_values)==1: phone=tel_values[0]
+    if not phone:
+        # Solo aceptar números completos de nueve cifras; descarta teléfonos truncados.
+        matches=re.findall(r"(?<!\\d)(?:\\+34[ .-]?)?([6789](?:[ .-]?\\d){8})(?!\\d)",blob)
+        valid=list(dict.fromkeys(normalize_phone(x) for x in matches if normalize_phone(x)))
+        if len(valid)==1: phone=valid[0]
     if not email:
-        for _cls,href,label in p.links:
+        mailto_values=[]
+        for _cls,href,_label in p.links:
             if str(href).lower().startswith("mailto:"):
-                email=urllib.parse.unquote(str(href)[7:].split("?",1)[0]).strip()
-                break
+                value=urllib.parse.unquote(str(href)[7:].split("?",1)[0]).strip()
+                if re.fullmatch(r"(?i)[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}",value):
+                    mailto_values.append(value)
+        mailto_values=list(dict.fromkeys(mailto_values))
+        if len(mailto_values)==1: email=mailto_values[0]
     if not email:
-        m=re.search(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b",blob)
-        if m: email=m.group(0)
+        email_values=list(dict.fromkeys(re.findall(r"(?i)\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b",blob)))
+        if len(email_values)==1: email=email_values[0]
     if not is_chiclana(addr,locality,postal,blob,title,final_url,trusted_local): return None
     if len(name)>140: return None
     schema_type=obj.get("@type",[])
@@ -333,8 +393,18 @@ def self_test():
     assert is_chiclana("","Chiclana de la Frontera","", "", "", "https://example.org")
     assert not is_chiclana("","", "", "Servicio en Chiclana y alrededores", "Empresa", "https://example.org")
     assert url_key("HTTPS://Example.COM/Ruta/ConMayusculas/") == "https://example.com/Ruta/ConMayusculas"
-    page=Page(); page.feed('<a class="external" href="https://example.org">Página web</a>')
+    page=Page(); page.feed('<h1>Empresa local</h1><a class="external" href="https://example.org">Página web</a>')
     assert page.links == [("external","https://example.org","Página web")]
+    assert page.headings == ["Empresa local"]
+    assert normalize_phone("856 10 20") == ""
+    assert normalize_phone("956 40 16") == ""
+    assert normalize_phone("956 402615") == ""
+    assert normalize_phone("956 402 615") == "956402615"
+    assert normalize_phone("+34 610 306 074") == "610306074"
+    wrong={"@type":"Organization","name":"Directorio general","url":"https://portal.example/"}
+    right={"@type":"LocalBusiness","name":"Empresa concreta","url":"https://portal.example/ficha/empresa"}
+    assert choose_schema_entity([wrong,right],"https://portal.example/ficha/empresa") is right
+    assert choose_schema_entity([wrong,right],"https://portal.example/ficha/otra") == {}
     assert is_chiclana("", "", "", "", "", "https://aechiclana.org/directorio/trabajo/empresa/", True)
     assert not is_chiclana("", "", "", "", "", "https://aechiclana.org/directorio/", True)
 
