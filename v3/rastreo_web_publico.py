@@ -214,6 +214,7 @@ def clean_business_name(value):
     """Elimina colas SEO evidentes sin recortar nombres comerciales normales."""
     name=" ".join(str(value or "").replace(" "," ").split()).strip(" |·-–—")
     patterns=[
+        r"(?i)[ ]+(?:[-–—|·][ ]*)?(?:AE[ ]+Chiclana|Asociaci[oó]n[ ]+de[ ]+Empresas[ ]+de?[ ]+Chiclana)(?:[ ]+de[ ]+la[ ]+Frontera)?[ ]*$",
         r"[ ]+cervecer[ií]a[ ]+bares?([ ]|$).*$",
         r"[ ]+bares?[ ]+(?:de[ ]+)?(?:chiclana|tapas|comer|paella)([ ]|$).*$",
         r"[ ]+(?:tapas[ ]+comer|comer[ ]+paella|paella[ ]+y[ ]+tapas)([ ]|$).*$",
@@ -244,7 +245,69 @@ def valid_business_name(value):
     seo={"directorio","empresas","restaurantes","bares","tiendas","negocios","chiclana"}
     if sum(1 for w in n.split() if w in seo)>=2:
         return False
+    generic_names={
+        "la guia de chiclana","guia de chiclana","guia de empresas de chiclana",
+        "directorio de empresas","directorio de empresas de chiclana",
+        "asociacion de empresas de chiclana","turismo chiclana",
+        "ayuntamiento de chiclana","empresas de chiclana",
+    }
+    if n in generic_names or n.startswith(("directorio de ","guia de empresas","portal de empresas")):
+        return False
     return True
+
+
+def clean_address(value, locality="", postal=""):
+    """Normaliza direcciones y descarta localidades/códigos postales sin vía concreta."""
+    raw=html.unescape(re.sub(r"<[^>]*>", " ", str(value or "")))
+    raw=re.sub(r"(?i)^\s*(?:direcci[oó]n|address)\s*[:\-]?\s*", "", raw)
+    raw=re.split(r"(?i)\s+(?:tel[eé]fono|tel\.?|p[aá]gina web|c[oó]mo llegar|correo|email|horario)\s*[:\-]?", raw, maxsplit=1)[0]
+    raw=re.sub(r"[\t\r\n]+", " ", raw)
+    raw=re.sub(r"\s*,\s*", ", ", raw)
+    raw=" ".join(raw.split()).strip(" ,;|·-–—")
+    locality=" ".join(str(locality or "").split()).strip(" ,")
+    postal=str(postal or "").strip()
+    if norm(raw) in {"chiclana","chiclana de la frontera"} or re.fullmatch(r"(?:11130|11138|11139)", raw):
+        raw=""
+    # Una dirección debe identificar una vía, plaza, carretera, polígono o recinto concreto.
+    has_detail=bool(re.search(
+        r"(?i)\b(?:calle|c\.?|avenida|avda?\.?|plaza|pza\.?|paseo|carretera|ctra\.?|"
+        r"camino|traves[ií]a|ronda|urbanizaci[oó]n|urb\.?|pol[ií]gono|pol\.?|"
+        r"parque empresarial|centro comercial|edificio|edif\.?|bulevar|glorieta)\b", raw
+    )) or bool(re.search(r"\b\d{1,4}\b", raw))
+    if not raw or not has_detail:
+        return ""
+    parts=[raw]
+    if postal and not re.search(r"(?<!\d)(11130|11138|11139)(?!\d)", raw):
+        parts.append(postal)
+    if locality and "chiclana" in norm(locality) and "chiclana" not in norm(raw):
+        parts.append(locality)
+    result=", ".join(dict.fromkeys(x for x in parts if x))
+    return result[:240]
+
+
+def clean_description(value, business_name=""):
+    """Limpia metadatos SEO y evita descripciones genéricas o cruzadas."""
+    raw=html.unescape(str(value or ""))
+    raw=re.sub(r"(?is)<(script|style).*?>.*?</\\1>", " ", raw)
+    raw=re.sub(r"<[^>]*>", " ", raw)
+    raw=re.sub(r"[\t\r\n]+", " ", raw)
+    raw=" ".join(raw.split()).strip(" |·-–—")
+    raw=re.sub(
+        r"(?i)\s*[|–—]\s*(?:directorio de empresas|gu[ií]a de empresas|empresas de chiclana|"
+        r"la gu[ií]a de chiclana|portal comercial).*$", "", raw
+    ).strip(" |·-–—")
+    n=norm(raw)
+    generic_phrases=(
+        "directorio de empresas","guia de empresas","portal de empresas",
+        "listado de negocios","busca empresas","encuentra empresas",
+        "la guia de chiclana","empresas de chiclana",
+    )
+    if len(raw)<35 or any(x in n for x in generic_phrases):
+        return ""
+    # Evita que una ficha herede una descripción que identifica claramente otro negocio.
+    if "pimpan" in n and "pimpan" not in norm(business_name):
+        return ""
+    return raw[:700]
 
 
 def is_directory_email(value, page_url):
@@ -351,6 +414,7 @@ def extract(url, trusted_local=False):
     raw_name=textval(obj.get("name")) or (p.headings[0] if p.headings else "") or title
     name=clean_business_name(raw_name)
     if not name or not valid_business_name(name): return None
+    desc=clean_description(textval(obj.get("description")) or desc, name)
     address=obj.get("address") or {}
     if isinstance(address,str): addr=address; locality=""; postal=""
     else:
@@ -383,6 +447,7 @@ def extract(url, trusted_local=False):
         if address_match: addr=address_match.group(1).strip()[:240]
     # No conservar direcciones que no acrediten Chiclana: una página de directorio
     # puede incluir la sede de otra ciudad o datos globales de la propia guía.
+    addr=clean_address(addr,locality,postal)
     if addr and not re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",addr) and "chiclana" not in norm(addr):
         addr=""
     hours=obj.get("openingHours") or obj.get("openingHoursSpecification") or ""
@@ -472,6 +537,13 @@ def self_test():
     assert valid_business_name("Casa Bernardo Marisquería")
     assert not valid_business_name("Restaurantes Bares Empresas Chiclana")
     assert not valid_business_name("Empresa de servicios en Chiclana Restaurantes Bares")
+    assert not valid_business_name("La Guía de Chiclana")
+    assert clean_business_name("Rodamientos Chiclana – AE Chiclana") == "Rodamientos Chiclana"
+    assert clean_address("Dirección: Calle Real 10, 11130, Chiclana de la Frontera") == "Calle Real 10, 11130, Chiclana de la Frontera"
+    assert clean_address("Chiclana de la Frontera") == ""
+    assert clean_address("11130") == ""
+    assert clean_description("Directorio de empresas de Chiclana | La Guía de Chiclana") == ""
+    assert clean_description("Bar PimPam, tapas y paella", "La Guía de Chiclana") == ""
     assert is_directory_email("info@chiclanaguiadempresas.com","https://www.chiclanaguiadempresas.com/empresas/empresa/bar")
     assert not is_directory_email("contacto@empresa.es","https://www.chiclanaguiadempresas.com/empresas/empresa/bar")
     wrong={"@type":"Organization","name":"Directorio general","url":"https://portal.example/"}
