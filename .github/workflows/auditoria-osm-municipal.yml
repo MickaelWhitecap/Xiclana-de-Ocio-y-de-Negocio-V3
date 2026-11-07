@@ -37,14 +37,14 @@ jobs:
       contents: read
     steps:
       - name: Descargar catálogo maestro de main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Descargar código RAD de la rama de desarrollo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: gran-rastreo-multifuente
           path: rad-source
       - name: Preparar Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Ejecutar pruebas internas del rastreador RAD
@@ -69,7 +69,7 @@ jobs:
           print(json.dumps({"resumen":report["rad_ultima_ejecucion"],"candidatas_en_informe":len(candidates)},ensure_ascii=False))
           PY
       - name: Publicar informe de prueba como artefacto
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: rad-prueba-real-chiclana-${{ github.run_id }}
           path: rad_prueba_resultado.json
@@ -82,10 +82,10 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Descargar repositorio
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Preparar Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -204,7 +204,7 @@ jobs:
 
       - name: Guardar extracción completa, auditoría y diferencias
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: auditoria-osm-chiclana-${{ github.run_id }}
           path: |
