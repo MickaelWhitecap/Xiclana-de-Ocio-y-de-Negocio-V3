@@ -204,7 +204,7 @@ def textval(v):
 
 def normalize_phone(value):
     """Devuelve solo teléfonos españoles completos de nueve cifras."""
-    digits=re.sub(r"\\D","",str(value or "").strip())
+    digits=re.sub(r"\D","",str(value or "").strip())
     if digits.startswith("34") and len(digits)==11: digits=digits[2:]
     if len(digits)==9 and digits[0] in "6789": return digits
     return ""
@@ -357,7 +357,7 @@ def extract(url, trusted_local=False):
         if len(tel_values)==1: phone=tel_values[0]
     if not phone:
         # Solo aceptar números completos de nueve cifras; descarta teléfonos truncados.
-        matches=re.findall(r"(?<!\\d)(?:\\+34[ .-]?)?([6789](?:[ .-]?\\d){8})(?!\\d)",blob)
+        matches=re.findall(r"(?<!\d)(?:\+34[ .-]?)?([6789](?:[ .-]?\d){8})(?!\d)",blob)
         valid=list(dict.fromkeys(normalize_phone(x) for x in matches if normalize_phone(x)))
         if len(valid)==1: phone=valid[0]
     if not email:
@@ -365,12 +365,12 @@ def extract(url, trusted_local=False):
         for _cls,href,_label in p.links:
             if str(href).lower().startswith("mailto:"):
                 value=urllib.parse.unquote(str(href)[7:].split("?",1)[0]).strip()
-                if re.fullmatch(r"(?i)[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}",value):
+                if re.fullmatch(r"(?i)[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}",value):
                     mailto_values.append(value)
         mailto_values=list(dict.fromkeys(mailto_values))
         if len(mailto_values)==1: email=mailto_values[0]
     if not email:
-        email_values=list(dict.fromkeys(re.findall(r"(?i)\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b",blob)))
+        email_values=list(dict.fromkeys(re.findall(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b",blob)))
         if len(email_values)==1: email=email_values[0]
     if not is_chiclana(addr,locality,postal,blob,title,final_url,trusted_local): return None
     if len(name)>140: return None
