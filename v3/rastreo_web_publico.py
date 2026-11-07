@@ -305,7 +305,7 @@ def clean_description(value, business_name=""):
     if len(raw)<35 or any(x in n for x in generic_phrases):
         return ""
     # Evita que una ficha herede una descripción que identifica claramente otro negocio.
-    if "pimpan" in n and "pimpan" not in norm(business_name):
+    if "pimpam" in n and "pimpam" not in norm(business_name):
         return ""
     return raw[:700]
 
