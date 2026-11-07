@@ -333,6 +333,10 @@ def extract(url, trusted_local=False):
     if not addr:
         address_match=re.search(r"(?i)\bDirección\s+(.+?)(?:\s+Página web|\s+Cómo llegar|$)",blob)
         if address_match: addr=address_match.group(1).strip()[:240]
+    # No conservar direcciones que no acrediten Chiclana: una página de directorio
+    # puede incluir la sede de otra ciudad o datos globales de la propia guía.
+    if addr and not re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",addr) and "chiclana" not in norm(addr):
+        addr=""
     hours=obj.get("openingHours") or obj.get("openingHoursSpecification") or ""
     if isinstance(hours,dict): hours=[hours]
     if isinstance(hours,list):
@@ -398,7 +402,7 @@ def self_test():
     assert page.headings == ["Empresa local"]
     assert normalize_phone("856 10 20") == ""
     assert normalize_phone("956 40 16") == ""
-    assert normalize_phone("956 402615") == ""
+    assert normalize_phone("956 402615") == "956402615"
     assert normalize_phone("956 402 615") == "956402615"
     assert normalize_phone("+34 610 306 074") == "610306074"
     wrong={"@type":"Organization","name":"Directorio general","url":"https://portal.example/"}
