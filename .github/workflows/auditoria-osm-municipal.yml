@@ -47,6 +47,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Ejecutar pruebas internas del rastreador RAD
+        run: python rad-source/v3/rastreo_web_publico.py --self-test
       - name: Preparar copia aislada del catálogo
         run: cp v3/fichas_completas.json "$RUNNER_TEMP/fichas_completas_rad.json"
       - name: Ejecutar rastreo real sin modificar el catálogo maestro
