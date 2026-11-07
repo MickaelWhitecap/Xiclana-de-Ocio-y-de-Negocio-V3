@@ -210,6 +210,30 @@ def normalize_phone(value):
     return ""
 
 
+def clean_business_name(value):
+    """Elimina colas SEO evidentes sin recortar nombres comerciales normales."""
+    name=" ".join(str(value or "").replace("\\u00a0"," ").split()).strip(" |·-–—")
+    patterns=[
+        r"\\s+cervecer[ií]a\\s+bares?\\b.*$",
+        r"\\s+bares?\\s+(?:de\\s+)?(?:chiclana|tapas|comer|paella)\\b.*$",
+        r"\\s+(?:tapas\\s+comer|comer\\s+paella|paella\\s+y\\s+tapas)\\b.*$",
+        r"\\s*[|·–—]\\s*(?:bares?|restaurantes?|cafeter[ií]as?|empresas?|directorio)\\b.*$",
+    ]
+    for pattern in patterns:
+        name=re.sub(pattern,"",name,flags=re.I).strip(" |·-–—")
+    return name
+
+
+def is_directory_email(value, page_url):
+    """Rechaza correos del propio portal/directorio, no del establecimiento."""
+    email=str(value or "").strip().lower()
+    if not email or "@" not in email: return False
+    domain=email.rsplit("@",1)[-1].rstrip(".")
+    source_host=(urllib.parse.urlparse(page_url).hostname or "").lower()
+    blocked={"chiclanaguiadempresas.com","www.chiclanaguiadempresas.com"}
+    return domain in blocked or domain==source_host or domain.removeprefix("www.")==source_host.removeprefix("www.")
+
+
 def choose_schema_entity(candidates, page_url, headings=(), title=""):
     """Evita usar el primer JSON-LD global cuando pertenece a otra ficha."""
     page=url_key(page_url)
@@ -300,8 +324,9 @@ def extract(url, trusted_local=False):
         try: candidates.extend(flatten_jsonld(json.loads(raw)))
         except Exception: pass
     obj=choose_schema_entity(candidates,final_url,p.headings,title)
-    # El H1 identifica la ficha individual; el <title> puede ser el nombre del portal.
-    name=(p.headings[0] if p.headings else "") or textval(obj.get("name")) or title
+    # Prioriza el nombre estructurado de la ficha; el H1 puede contener SEO del portal.
+    raw_name=textval(obj.get("name")) or (p.headings[0] if p.headings else "") or title
+    name=clean_business_name(raw_name)
     if not name: return None
     address=obj.get("address") or {}
     if isinstance(address,str): addr=address; locality=""; postal=""
@@ -377,7 +402,10 @@ def extract(url, trusted_local=False):
         email_values=list(dict.fromkeys(re.findall(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b",blob)))
         if len(email_values)==1: email=email_values[0]
     if not is_chiclana(addr,locality,postal,blob,title,final_url,trusted_local): return None
-    if len(name)>140: return None
+    if len(name)>100: return None
+    # Sin dirección, teléfono, correo ni web no hay información accionable:
+    # no incorporar el mero nombre como candidata nueva.
+    if not any((addr,phone,email,website)): return None
     schema_type=obj.get("@type",[])
     schema_types=schema_type if isinstance(schema_type,list) else [schema_type]
     schema_types=" ".join(str(x).rsplit("/",1)[-1].rsplit("#",1)[-1] for x in schema_types)
@@ -405,6 +433,10 @@ def self_test():
     assert normalize_phone("956 402615") == "956402615"
     assert normalize_phone("956 402 615") == "956402615"
     assert normalize_phone("+34 610 306 074") == "610306074"
+    assert clean_business_name("Bar Cafetería Y Bar PimPam Cervecería Bares Pim Pam tapas comer paella") == "Bar Cafetería Y Bar PimPam"
+    assert clean_business_name("Talleres Gómez") == "Talleres Gómez"
+    assert is_directory_email("info@chiclanaguiadempresas.com","https://www.chiclanaguiadempresas.com/empresas/empresa/bar")
+    assert not is_directory_email("contacto@empresa.es","https://www.chiclanaguiadempresas.com/empresas/empresa/bar")
     wrong={"@type":"Organization","name":"Directorio general","url":"https://portal.example/"}
     right={"@type":"LocalBusiness","name":"Empresa concreta","url":"https://portal.example/ficha/empresa"}
     assert choose_schema_entity([wrong,right],"https://portal.example/ficha/empresa") is right
