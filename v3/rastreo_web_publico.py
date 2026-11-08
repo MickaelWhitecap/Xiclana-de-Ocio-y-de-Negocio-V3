@@ -57,13 +57,16 @@ class Page(HTMLParser):
         self.title=False; self.title_parts=[]; self.text=[]
         self.meta={}; self.links=[]; self.jsonld=[]; self.headings=[]
         self._heading_tag=None; self._heading_buf=[]
+        self._paragraph=False; self._paragraph_buf=[]; self.paragraphs=[]
         self._script=False; self._json=False; self._script_buf=[]
         self._anchor=None; self._anchor_text=[]
     def handle_starttag(self, tag, attrs):
         a=dict(attrs)
         if tag == "title": self.title=True
-        if tag in ("h1","h2","h3"):
+        if tag in ("h1","h2","h3","h4","h5"):
             self._heading_tag=tag; self._heading_buf=[]
+        if tag == "p":
+            self._paragraph=True; self._paragraph_buf=[]
         if tag == "meta" and a.get("content"):
             k=(a.get("property") or a.get("name") or "").lower()
             if k: self.meta[k]=a["content"]
@@ -74,10 +77,14 @@ class Page(HTMLParser):
             self._script_buf=[]
     def handle_endtag(self, tag):
         if tag=="title": self.title=False
-        if tag in ("h1","h2","h3") and self._heading_tag==tag:
+        if tag in ("h1","h2","h3","h4","h5") and self._heading_tag==tag:
             heading=" ".join(" ".join(self._heading_buf).split())
             if heading: self.headings.append(heading)
             self._heading_tag=None; self._heading_buf=[]
+        if tag == "p" and self._paragraph:
+            paragraph=" ".join(" ".join(self._paragraph_buf).split())
+            if paragraph: self.paragraphs.append(paragraph)
+            self._paragraph=False; self._paragraph_buf=[]
         if tag=="a" and self._anchor:
             self.links.append((self._anchor[0],self._anchor[1]," ".join(self._anchor_text).strip()))
             self._anchor=None; self._anchor_text=[]
@@ -87,6 +94,7 @@ class Page(HTMLParser):
     def handle_data(self, data):
         if self.title: self.title_parts.append(data)
         if self._heading_tag: self._heading_buf.append(data)
+        if self._paragraph: self._paragraph_buf.append(data)
         if self._anchor is not None: self._anchor_text.append(data)
         if self._script: self._script_buf.append(data)
         else: self.text.append(data)
