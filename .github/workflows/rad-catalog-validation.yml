@@ -4,6 +4,8 @@ on:
     branches:
       - gran-rastreo-multifuente
     paths:
+      - 'v3/rastreo_web_publico.py'
+      - '.github/workflows/rad-self-test.yml'
       - '.github/workflows/rad-catalog-validation.yml'
   workflow_dispatch:
 jobs:
@@ -47,7 +49,11 @@ jobs:
             'candidatas_revision_antes':len(before),
             'rad':d.get('rad_ultima_ejecucion',{}),
             'candidatas_nuevas':[
-              {k:x.get(k) for k in ('n','a','p','w','url_fuente_rastreo','estado_revision','nota_revision')}
+              {k:x.get(k) for k in (
+                'n','t','c','a','p','e','w','h','d',
+                'url_fuente_rastreo','fuentes_datos','estado_revision',
+                'nota_revision','fecha_deteccion_utc'
+              )}
               for x in added
             ]
           }
@@ -61,6 +67,8 @@ jobs:
             'publicacion_automatica':report['rad'].get('publicacion_automatica')
           },ensure_ascii=False))
           assert report['rad'].get('publicacion_automatica') is False, 'El RAD no debe publicar automáticamente'
+          assert all(x.get('estado_revision') == 'pendiente' for x in added), 'Se ha detectado una candidata que no está pendiente'
+          assert all(x.get('url_fuente_rastreo') for x in added), 'Hay candidatas sin URL de procedencia'
           PY
       - name: Guardar informe de validación
         uses: actions/upload-artifact@v4
