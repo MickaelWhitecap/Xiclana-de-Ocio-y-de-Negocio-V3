@@ -654,7 +654,7 @@ def self_test():
     orphan={"@type":"LocalBusiness","name":"Empresa sin vínculo"}
     assert choose_schema_entity([orphan],"https://portal.example/ficha/empresa") == {}
     # La coincidencia exacta del encabezado solo basta si el enlace pertenece al host.
-    same_host={"@type":"LocalBusiness","name":"Empresa concreta","url":"/ficha/empresa"}
+    same_host={"@type":"LocalBusiness","name":"Empresa concreta","url":"/otra-ruta"}
     assert choose_schema_entity([same_host],"https://portal.example/ficha/empresa",["Empresa concreta"]) is same_host
     unrelated={"@type":"LocalBusiness","name":"Otra empresa","url":"/ficha/otra"}
     assert choose_schema_entity([unrelated],"https://portal.example/ficha/empresa",["Empresa concreta"]) == {}
