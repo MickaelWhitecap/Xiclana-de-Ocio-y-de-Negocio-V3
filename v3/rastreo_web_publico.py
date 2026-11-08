@@ -508,13 +508,13 @@ def compare_catalog_record(candidate, existing):
         return None
     new_addr=norm(record_value(candidate,"a","direccion","address"))
     old_addr=norm(record_value(existing,"a","direccion","address"))
-    new_phone=normalize_phone(record_value(candidate,"p","telefono","phone"))
-    old_phone=normalize_phone(record_value(existing,"p","telefono","phone"))
+    new_phones=set(extract_phones(record_value(candidate,"p","telefono","phone")))
+    old_phones=set(extract_phones(record_value(existing,"p","telefono","phone")))
     new_web=url_key(record_value(candidate,"w","web","website"))
     old_web=url_key(record_value(existing,"w","web","website"))
     same_address=bool(new_addr and old_addr and new_addr==old_addr)
     different_addresses=bool(new_addr and old_addr and new_addr!=old_addr)
-    same_contact=bool((new_phone and old_phone and new_phone==old_phone) or
+    same_contact=bool((new_phones and old_phones and new_phones.intersection(old_phones)) or
                       (new_web and old_web and new_web==old_web))
     exact_name=norm(new_name)==norm(old_name)
     if exact_name and same_address:
@@ -787,6 +787,10 @@ def self_test():
         {"n":"Casa Bernardo","a":"Calle Real 10","p":"956123456"},
         {"n":"Casa Bernarda","a":"Avenida Diputación 20","p":"956999999"}
     ) is None
+    assert compare_catalog_record(
+        {"n":"Bodegas Primitivo Collantes","a":"Calle Real 10","p":"956400150 / 956531722"},
+        {"n":"Bodegas Primitivo Collantes S.A.","a":"Avenida Diputación 20","p":"956531722 / 956400150"}
+    )["kind"] in ("duplicate","possible")
 
     # Prueba de integración: extracción completa con HTML controlado.
     original_allowed, original_get = allowed, get
