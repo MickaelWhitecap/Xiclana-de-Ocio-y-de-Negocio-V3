@@ -274,7 +274,7 @@ def clean_address(value, locality="", postal=""):
         raw
     )
     raw=re.sub(r"\s*,\s*", ", ", raw)
-    raw=re.sub(r",\s*,+", ", ", raw).strip(" ,")
+    raw=" ".join(re.sub(r",\s*,+", ", ", raw).split()).strip(" ,")
     if norm(locality) == "chiclana de la frontera" and "chiclana" in norm(raw) and "chiclana de la frontera" not in norm(raw):
         raw=re.sub(r"(?i)\bchiclana\b", locality, raw)
     if norm(raw) in {"chiclana","chiclana de la frontera"} or re.fullmatch(r"(?:11130|11138|11139)", raw):
