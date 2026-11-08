@@ -381,6 +381,87 @@ def norm(value):
     value="".join(ch for ch in value if unicodedata.category(ch)!="Mn")
     return " ".join(re.findall(r"[a-z0-9]+",value))
 
+
+def name_similarity(left, right):
+    """Similitud conservadora de nombres comerciales, ignorando sufijos societarios."""
+    import difflib
+    ignored={"sl","sll","sa","slu","sc","coop","sociedad","limitada","anonima"}
+    a_tokens=[x for x in norm(left).split() if x not in ignored]
+    b_tokens=[x for x in norm(right).split() if x not in ignored]
+    if not a_tokens or not b_tokens:
+        return 0.0
+    a=" ".join(a_tokens); b=" ".join(b_tokens)
+    if a == b:
+        return 1.0
+    seq=difflib.SequenceMatcher(None,a,b).ratio()
+    aset=set(a_tokens); bset=set(b_tokens)
+    union=len(aset|bset)
+    token=(len(aset&bset)/union) if union else 0.0
+    containment=(len(aset&bset)/min(len(aset),len(bset))) if min(len(aset),len(bset)) else 0.0
+    # La coincidencia de una sola palabra genérica no basta.
+    if min(len(aset),len(bset)) == 1 and aset != bset:
+        containment=0.0
+    return max(seq, token, containment*0.94)
+
+
+def record_value(record, *keys):
+    for key in keys:
+        value=record.get(key)
+        if value:
+            return str(value).strip()
+    return ""
+
+
+def compare_catalog_record(candidate, existing):
+    """Clasifica una coincidencia; nunca confunde por sí sola sucursales distintas."""
+    new_name=record_value(candidate,"n","nombre","name")
+    old_name=record_value(existing,"n","nombre","name")
+    score=name_similarity(new_name,old_name)
+    if score < 0.86:
+        return None
+    new_addr=norm(record_value(candidate,"a","direccion","address"))
+    old_addr=norm(record_value(existing,"a","direccion","address"))
+    new_phone=normalize_phone(record_value(candidate,"p","telefono","phone"))
+    old_phone=normalize_phone(record_value(existing,"p","telefono","phone"))
+    new_web=url_key(record_value(candidate,"w","web","website"))
+    old_web=url_key(record_value(existing,"w","web","website"))
+    same_address=bool(new_addr and old_addr and new_addr==old_addr)
+    different_addresses=bool(new_addr and old_addr and new_addr!=old_addr)
+    same_contact=bool((new_phone and old_phone and new_phone==old_phone) or
+                      (new_web and old_web and new_web==old_web))
+    exact_name=norm(new_name)==norm(old_name)
+    if exact_name and same_address:
+        return {"kind":"duplicate","reason":"mismo nombre y dirección","score":score}
+    if score >= 0.88 and (same_address or same_contact):
+        return {"kind":"duplicate","reason":"nombre coincidente y misma dirección o contacto","score":score}
+    if exact_name and not new_addr:
+        return {"kind":"possible","reason":"mismo nombre; candidata sin dirección para distinguir sucursal","score":score}
+    if score >= 0.93 and (not new_addr or not old_addr):
+        return {"kind":"possible","reason":"nombre casi idéntico y falta dirección en uno de los registros","score":score}
+    if score >= 0.90 and not different_addresses:
+        return {"kind":"possible","reason":"nombre muy similar; revisar posible variante o duplicado","score":score}
+    if exact_name and different_addresses:
+        return {"kind":"branch","reason":"mismo nombre con direcciones distintas; posible sucursal","score":score}
+    return None
+
+
+def find_catalog_match(candidate, records):
+    best=None
+    for old in records:
+        if not isinstance(old,dict):
+            continue
+        match=compare_catalog_record(candidate,old)
+        if not match:
+            continue
+        match["record"]=old
+        priority={"duplicate":3,"possible":2,"branch":1}.get(match["kind"],0)
+        if best is None or priority > best["_priority"] or (priority==best["_priority"] and match["score"]>best["score"]):
+            best={**match,"_priority":priority}
+    if best:
+        best.pop("_priority",None)
+    return best
+
+
 def is_chiclana(address, locality, postal, body, title, url, trusted_local=False):
     locality_n=norm(locality)
     postal=str(postal or "").strip()
@@ -553,6 +634,32 @@ def self_test():
     assert is_chiclana("", "", "", "", "", "https://aechiclana.org/directorio/trabajo/empresa/", True)
     assert not is_chiclana("", "", "", "", "", "https://aechiclana.org/directorio/", True)
 
+    # Deduplicación por nombre, dirección y contacto, sin bloquear sucursales reales.
+    assert compare_catalog_record(
+        {"n":"Casa Bernardo Marisquería","a":"Calle Real 10","p":"956123456"},
+        {"n":"Casa Bernardo Marisquería","a":"Calle Real 10","p":"956123456"}
+    )["kind"] == "duplicate"
+    assert compare_catalog_record(
+        {"n":"Casa Bernardo Marisquería","a":"Calle Real 10","p":"956123456"},
+        {"n":"Casa Bernardo Marisquería S.L.","a":"Calle Real 10","p":"956999999"}
+    )["kind"] == "duplicate"
+    assert compare_catalog_record(
+        {"n":"Casa Bernardo Marisquería","a":"Calle Real 10","p":"956123456"},
+        {"n":"Casa Bernardo Marisquería","a":"Avenida Diputación 20","p":"956999999"}
+    )["kind"] == "branch"
+    assert compare_catalog_record(
+        {"n":"Rodamientos Chiclana","a":"Calle Real 10","p":"956123456"},
+        {"n":"Rodamientos Chiclana S.L.","a":"Calle Real 10","p":"956999999"}
+    )["kind"] == "duplicate"
+    assert compare_catalog_record(
+        {"n":"Educa Dog Adiestramiento Canino","a":"Calle Real 10","p":"956123456"},
+        {"n":"Adiestramiento Canino Educa Dog","a":"Calle Real 10","p":"956999999"}
+    )["kind"] == "duplicate"
+    assert compare_catalog_record(
+        {"n":"Casa Bernardo","a":"Calle Real 10","p":"956123456"},
+        {"n":"Casa Bernarda","a":"Calle Real 10","p":"956999999"}
+    ) is None
+
     # Prueba de integración: extracción completa con HTML controlado.
     original_allowed, original_get = allowed, get
     sample = """<html><head><title>Empresa de Prueba</title>
@@ -640,6 +747,7 @@ def main():
             except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
     links=list(dict.fromkeys(links))[:MAX_PAGES]
     added=[]; seen_pairs=set(); seen_urls=set(); seen_unlocated_names=set()
+    coincidencias=[]; registros_conocidos=existing[:]
     for url in links:
         trusted_local=urllib.parse.urlparse(url).netloc.lower() in TRUSTED_DIRECTORY_PATHS and any(urllib.parse.urlparse(url).path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS[urllib.parse.urlparse(url).netloc.lower()])
         record=extract(url,trusted_local=trusted_local)
@@ -649,13 +757,38 @@ def main():
         source_url=record["source_url"]
         u_key=url_key(source_url)
         if not name_key or u_key in urls or u_key in seen_urls: continue
-        # Sucursales con el mismo nombre y direcciones distintas se conservan.
-        if pair and (pair in existing_pairs or pair in seen_pairs): continue
-        if not pair:
-            if name_key in seen_unlocated_names: continue
-            seen_unlocated_names.add(name_key)
+        if pair and pair in seen_pairs: continue
+        if not pair and name_key in seen_unlocated_names: continue
+        candidate={
+          "n":record["name"],"a":record["address"],"p":record["phone"],
+          "w":record["website"],"url_fuente_rastreo":source_url
+        }
+        match=find_catalog_match(candidate,registros_conocidos)
+        if match and match["kind"] in ("duplicate","possible"):
+            old=match["record"]
+            coincidencias.append({
+                "nombre_detectado":record["name"],
+                "nombre_catalogo":record_value(old,"n","nombre","name"),
+                "tipo":match["kind"],"motivo":match["reason"],
+                "similitud":round(match["score"],3),"url_detectada":source_url
+            })
+            seen_urls.add(u_key)
+            continue
+        # También se comparan entre sí las candidatas del mismo rastreo.
+        run_match=find_catalog_match(candidate,added)
+        if run_match and run_match["kind"] in ("duplicate","possible"):
+            old=run_match["record"]
+            coincidencias.append({
+                "nombre_detectado":record["name"],
+                "nombre_catalogo":record_value(old,"n","nombre","name"),
+                "tipo":"posible_duplicado_en_rastreo","motivo":run_match["reason"],
+                "similitud":round(run_match["score"],3),"url_detectada":source_url
+            })
+            seen_urls.add(u_key)
+            continue
         seen_urls.add(u_key)
         if pair: seen_pairs.add(pair)
+        if not pair: seen_unlocated_names.add(name_key)
         digest=hashlib.sha256((name_key+"|"+addr_key+"|"+u_key).encode()).hexdigest()[:16]
         fields_present=["nombre"]+[k for k,v in [
             ("direccion",record["address"]),("telefono",record["phone"]),("correo",record["email"]),
@@ -670,16 +803,17 @@ def main():
           "estado_revision":"pendiente","fuente_estado":"Candidato detectado en fuente web pública; pendiente de validación manual",
           "fecha_deteccion_utc":datetime.now(timezone.utc).isoformat()
         }
-        if not addr_key:
-            candidate["nota_revision"]="No se ha encontrado una dirección postal municipal inequívoca; comprobar ubicación antes de aprobar."
-        if name_key in existing_name_addresses and addr_key and addr_key not in existing_name_addresses[name_key]:
-            candidate["nota_revision"]="Mismo nombre que otra ficha, pero dirección distinta; comprobar si es otra sucursal."
+        if match and match["kind"]=="branch":
+            candidate["nota_revision"]="Mismo nombre que otra ficha, pero dirección distinta; posible sucursal. Validar manualmente antes de aprobar."
         added.append(candidate)
+        registros_conocidos.append(candidate)
     data.setdefault("candidatas_revision",[]).extend(added)
     data["total_candidatas_revision"]=len(data["candidatas_revision"])
     data["rad_ultima_ejecucion"]={"fecha_utc":datetime.now(timezone.utc).isoformat(),
        "buscadores":["DuckDuckGo HTML","Bing RSS"],"fuentes_directas":DIRECTORY_SEEDS,"consultas":len(QUERIES),
        "urls_encontradas":len(links),"candidatas_nuevas":len(added),
+       "coincidencias_catalogo":len(coincidencias),
+       "detalle_coincidencias":coincidencias[:100],
        "publicacion_automatica":False}
     catalog_path.write_text(json.dumps(data,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps(data["rad_ultima_ejecucion"],ensure_ascii=False),flush=True)
