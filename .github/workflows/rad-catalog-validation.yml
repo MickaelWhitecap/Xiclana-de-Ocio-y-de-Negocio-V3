@@ -17,10 +17,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Crear copia aislada y verificar catálogo
+      - name: Obtener catálogo vigente de main en copia aislada
         run: |
-          test -s v3/fichas_completas.json
-          cp v3/fichas_completas.json /tmp/fichas_completas_rad_validacion.json
+          git fetch origin main --depth=1
+          git show FETCH_HEAD:v3/fichas_completas.json > /tmp/fichas_completas_rad_validacion.json
+          test -s /tmp/fichas_completas_rad_validacion.json
           python - <<'PY'
           import json
           p='/tmp/fichas_completas_rad_validacion.json'
@@ -29,7 +30,7 @@ jobs:
           assert len(d['items']) >= 1200, f"Catálogo inesperadamente pequeño: {len(d['items'])}"
           open('/tmp/rad_catalogo_base.txt','w').write(str(len(d['items'])))
           open('/tmp/rad_ids_antes.json','w').write(json.dumps([x.get('id') for x in d.get('candidatas_revision',[]) if isinstance(x,dict)]))
-          print(f"Catálogo de validación: {len(d['items'])} fichas; {len(d.get('candidatas_revision',[]))} candidatas previas.")
+          print(f"Catálogo vigente de main: {len(d['items'])} fichas; {len(d.get('candidatas_revision',[]))} candidatas previas.")
           PY
       - name: Ejecutar RAD real sobre la copia
         run: python v3/rastreo_web_publico.py --catalog /tmp/fichas_completas_rad_validacion.json
