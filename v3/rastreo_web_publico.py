@@ -219,6 +219,9 @@ def clean_business_name(value):
         r"[ ]+bares?[ ]+(?:de[ ]+)?(?:chiclana|tapas|comer|paella)([ ]|$).*$",
         r"[ ]+(?:tapas[ ]+comer|comer[ ]+paella|paella[ ]+y[ ]+tapas)([ ]|$).*$",
         r"[ ]*[|·–—][ ]*(?:bares?|restaurantes?|cafeter[ií]as?|empresas?|directorio)([ ]|$).*$",
+        r"(?i)\s+(?:odontopediatr[ií]a|ortodoncia|dentistas?|relojer[ií]as?|joyer[ií]as?|"
+        r"golosinas|chocolates?|frutos secos|caramelos?)(?:\s+(?:odontopediatr[ií]a|ortodoncia|"
+        r"dentistas?|relojer[ií]as?|joyer[ií]as?|golosinas|chocolates?|caramelos?))*$",
     ]
     for pattern in patterns:
         name=re.sub(pattern,"",name,flags=re.I).strip(" |·-–—")
@@ -393,14 +396,16 @@ def classify(text):
         return ("negocio","Inmobiliaria")
     groups=[
       (("mueble","muebles","decoración","colchón"),("negocio","Muebles y decoración")),
-      (("restaurante","bar ","cafetería","comida","pizzería"),("ocio","Restauración")),
+      (("restaurante","bar ","cafetería","comida","pizzería","marisquería","sushi","asador","taberna","mesón","chiringuito"),("ocio","Restauración")),
       (("hotel","hostal","apartamento turístico","alojamiento"),("negocio","Alojamiento")),
-      (("taller","automóvil","automocion","concesionario"),("negocio","Automoción")),
+      (("taller mecánico","taller de coches","taller de vehículos","taller de motos","automóvil","automocion","concesionario","vehículo","vehiculos","neumático"),("negocio","Automoción")),
       (("dentista","clínica","fisioterapia","veterinaria","farmacia"),("negocio","Salud")),
       (("peluquería","estética","gimnasio"),("negocio","Belleza y deporte")),
       (("inmobiliaria","venta de viviendas"),("negocio","Inmobiliaria")),
       (("abogado","asesoría","gestoría","seguros"),("negocio","Servicios profesionales")),
       (("academia","colegio","formación","idiomas"),("negocio","Educación")),
+      (("joyería","joyeria","relojería","relojeria"),("negocio","Joyería y relojería")),
+      (("frutos secos","golosinas","chocolate","alimentación","supermercado","panadería","carnicería","charcutería","pescadería"),("negocio","Alimentación")),
       (("tienda","comercio","comprar","venta"),("negocio","Comercio")),
       (("museo","teatro","cine","parque temático","ocio","actividad turística"),("ocio","Ocio y cultura")),
     ]
@@ -646,6 +651,13 @@ def self_test():
     assert classify("Alquiler de maquinaria para construcción") != ("negocio","Inmobiliaria")
     assert classify("Alquiler de vehículos y herramientas") != ("negocio","Inmobiliaria")
     assert classify("Construcción, reformas y parques infantiles") == ("negocio","Servicios y negocios")
+    assert classify("Marisquería Casa Bernardo") == ("ocio","Restauración")
+    assert classify("Joyería Puente Chico, taller propio y soldaduras láser") == ("negocio","Joyería y relojería")
+    assert classify("Frutos secos, golosinas y chocolate") == ("negocio","Alimentación")
+    assert classify("Taller Autox, mecánica y adaptaciones de vehículos") == ("negocio","Automoción")
+    assert clean_business_name("Ávila Bobillo Clínica Dental Odontopediatría Ortodoncia Dentista") == "Ávila Bobillo Clínica Dental"
+    assert clean_business_name("Joyería Puente Chico Relojería Joyerías") == "Joyería Puente Chico"
+    assert clean_business_name("Frutos Secos TERE golosinas chocolate") == "Frutos Secos TERE"
     assert is_chiclana("Calle Real 1, 11130, Chiclana","", "11130", "", "", "https://example.org")
     assert is_chiclana("","Chiclana de la Frontera","", "", "", "https://example.org")
     assert not is_chiclana("","", "", "Servicio en Chiclana y alrededores", "Empresa", "https://example.org")
