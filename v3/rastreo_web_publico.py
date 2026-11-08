@@ -247,6 +247,8 @@ def clean_business_name(value):
         r"(?i)\s+(?:odontopediatr[ií]a|ortodoncia|dentistas?|relojer[ií]as?|joyer[ií]as?|"
         r"golosinas|chocolates?|frutos secos|caramelos?)(?:\s+(?:odontopediatr[ií]a|ortodoncia|"
         r"dentistas?|relojer[ií]as?|joyer[ií]as?|golosinas|chocolates?|caramelos?))*$",
+        r"(?i)\s+(?:maquinaria de jardiner[ií]a|ferreter[ií]a|suministros?|pellets?)(?:[, ]+"
+        r"(?:maquinaria de jardiner[ií]a|ferreter[ií]a|suministros?|pellets?))*$",
     ]
     for pattern in patterns:
         name=re.sub(pattern,"",name,flags=re.I).strip(" |·-–—")
@@ -292,6 +294,8 @@ def clean_address(value, locality="", postal=""):
     raw=re.sub(r"[\t\r\n]+", " ", raw)
     raw=re.sub(r"\s*,\s*", ", ", raw)
     raw=" ".join(raw.split()).strip(" ,;|·-–—")
+    raw=re.sub(r"(?i)\bchiclana\s+de\s+la\s+fra\.?\b", "Chiclana de la Frontera", raw)
+    raw=re.sub(r"(?i)\bchiclana\s+fra\.?\b", "Chiclana de la Frontera", raw)
     locality=" ".join(str(locality or "").split()).strip(" ,")
     postal=str(postal or "").strip()
     if postal not in LOCAL_POSTCODES:
@@ -303,6 +307,9 @@ def clean_address(value, locality="", postal=""):
     )
     raw=re.sub(r"\s*,\s*", ", ", raw)
     raw=" ".join(re.sub(r",\s*,+", ", ", raw).split()).strip(" ,")
+    raw=re.sub(r"(?i)(chiclana de la frontera)(?:[, ]+\1)+", r"\1", raw)
+    raw=re.sub(r"(?i)(11130|11138|11139)(?:[, ]+\1)+", r"\1", raw)
+    raw=" ".join(raw.split()).strip(" ,")
     if norm(locality) == "chiclana de la frontera" and "chiclana" in norm(raw) and "chiclana de la frontera" not in norm(raw):
         raw=re.sub(r"(?i)\bchiclana\b", locality, raw)
     if norm(raw) in {"chiclana","chiclana de la frontera"} or re.fullmatch(r"(?:11130|11138|11139)", raw):
@@ -422,6 +429,7 @@ def classify(text):
     groups=[
       (("mueble","muebles","decoración","colchón"),("negocio","Muebles y decoración")),
       (("restaurante","bar ","cafetería","comida","pizzería","marisquería","sushi","asador","taberna","mesón","chiringuito"),("ocio","Restauración")),
+      (("ocio y animación","eventos tematizados","animación sociocultural","animación infantil"),("ocio","Ocio y animación")),
       (("hotel","hostal","apartamento turístico","alojamiento"),("negocio","Alojamiento")),
       (("taller mecánico","taller de coches","taller de vehículos","taller de motos","automóvil","automocion","concesionario","vehículo","vehiculos","neumático"),("negocio","Automoción")),
       (("dentista","clínica","fisioterapia","veterinaria","farmacia"),("negocio","Salud")),
@@ -569,13 +577,16 @@ def extract(url, trusted_local=False):
     name=clean_business_name(raw_name)
     if not name or not valid_business_name(name): return None
     desc=clean_description(textval(obj.get("description")) or desc, name)
+    if not desc:
+        # Recupera texto descriptivo cuando no hay meta description ni JSON-LD.
+        desc=next((clean_description(x,name) for x in p.paragraphs if clean_description(x,name)), "")
     address=obj.get("address") or {}
     if isinstance(address,str): addr=address; locality=""; postal=""
     else:
         locality=textval(address.get("addressLocality"))
         postal=textval(address.get("postalCode"))
         addr=", ".join(x for x in [textval(address.get("streetAddress")),postal,locality] if x)
-    phone=normalize_phone(textval(obj.get("telephone")))
+    phone=" / ".join(extract_phones(obj.get("telephone") or ""))
     email=textval(obj.get("email"))
     website=clean_website(textval(obj.get("url")),final_url)
     # En fichas de directorios, el enlace externo rotulado como web oficial
