@@ -585,7 +585,9 @@ def extract(url, trusted_local=False):
     desc=clean_description(textval(obj.get("description")) or desc, name)
     if not desc:
         # Recupera texto descriptivo cuando no hay meta description ni JSON-LD.
-        desc=next((clean_description(x,name) for x in p.paragraphs if clean_description(x,name)), "")
+        # Algunas fichas de AE Chiclana maquetan la descripción como encabezados h4.
+        description_blocks=p.paragraphs + p.headings[1:]
+        desc=next((clean_description(x,name) for x in description_blocks if clean_description(x,name)), "")
     address=obj.get("address") or {}
     if isinstance(address,str): addr=address; locality=""; postal=""
     else:
