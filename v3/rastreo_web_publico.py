@@ -203,11 +203,28 @@ def textval(v):
 
 
 def normalize_phone(value):
-    """Devuelve solo teléfonos españoles completos de nueve cifras."""
+    """Devuelve solo un teléfono español completo de nueve cifras."""
     digits=re.sub(r"\D","",str(value or "").strip())
     if digits.startswith("34") and len(digits)==11: digits=digits[2:]
     if len(digits)==9 and digits[0] in "6789": return digits
     return ""
+
+
+def extract_phones(value):
+    """Extrae varios teléfonos españoles, incluso cuando el HTML los concatena."""
+    raw=str(value or "")
+    found=[]
+    for match in re.findall(r"(?<!\d)(?:\+34[ .-]?)?([6789](?:[ .-]?\d){8})(?!\d)",raw):
+        phone=normalize_phone(match)
+        if phone: found.append(phone)
+    digits_only=re.sub(r"\D","",raw)
+    for run in re.findall(r"(?<!\d)([6789]\d{17,26})(?!\d)",digits_only):
+        if len(run) % 9 == 0:
+            found.extend(run[i:i+9] for i in range(0,len(run),9))
+    for part in re.split(r"[/;,|]",raw):
+        phone=normalize_phone(part)
+        if phone: found.append(phone)
+    return list(dict.fromkeys(x for x in found if len(x)==9 and x[0] in "6789"))
 
 
 def clean_business_name(value):
