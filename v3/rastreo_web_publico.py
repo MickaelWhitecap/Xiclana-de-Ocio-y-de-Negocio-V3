@@ -657,7 +657,7 @@ def self_test():
     )["kind"] == "duplicate"
     assert compare_catalog_record(
         {"n":"Casa Bernardo","a":"Calle Real 10","p":"956123456"},
-        {"n":"Casa Bernarda","a":"Calle Real 10","p":"956999999"}
+        {"n":"Casa Bernarda","a":"Avenida Diputación 20","p":"956999999"}
     ) is None
 
     # Prueba de integración: extracción completa con HTML controlado.
