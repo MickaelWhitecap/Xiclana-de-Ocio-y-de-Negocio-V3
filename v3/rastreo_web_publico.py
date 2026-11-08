@@ -691,10 +691,13 @@ def self_test():
     assert classify("Marisquería Casa Bernardo") == ("ocio","Restauración")
     assert classify("Joyería Puente Chico, taller propio y soldaduras láser") == ("negocio","Joyería y relojería")
     assert classify("Frutos secos, golosinas y chocolate") == ("negocio","Alimentación")
+    assert classify("Energía Solar Placas solares. Instalación y mantenimiento de energía solar") == ("negocio","Servicios y negocios")
+    assert classify("TEMATIC EVENTOS TEMATIZADOS, S.L. Ocio y animación") == ("ocio","Ocio y animación")
     assert classify("Taller Autox, mecánica y adaptaciones de vehículos") == ("negocio","Automoción")
     assert clean_business_name("Ávila Bobillo Clínica Dental Odontopediatría Ortodoncia Dentista") == "Ávila Bobillo Clínica Dental"
     assert clean_business_name("Joyería Puente Chico Relojería Joyerías") == "Joyería Puente Chico"
     assert clean_business_name("Frutos Secos TERE golosinas chocolate") == "Frutos Secos TERE"
+    assert clean_business_name("Agrojardín Reina Maquinaria de jardinería, Ferretería, Suministros, Pellets") == "Agrojardín Reina"
     assert is_chiclana("Calle Real 1, 11130, Chiclana","", "11130", "", "", "https://example.org")
     assert is_chiclana("","Chiclana de la Frontera","", "", "", "https://example.org")
     assert not is_chiclana("","", "", "Servicio en Chiclana y alrededores", "Empresa", "https://example.org")
@@ -707,6 +710,9 @@ def self_test():
     assert normalize_phone("956 402615") == "956402615"
     assert normalize_phone("956 402 615") == "956402615"
     assert normalize_phone("+34 610 306 074") == "610306074"
+    assert extract_phones("616 914 930956 406 170") == ["616914930","956406170"]
+    assert extract_phones("956400150 / 956531722") == ["956400150","956531722"]
+    assert extract_phones("661 082 081626 828 032") == ["661082081","626828032"]
     assert clean_business_name("Bar Cafetería Y Bar PimPam Cervecería Bares Pim Pam tapas comer paella") == "Bar Cafetería Y Bar PimPam"
     assert clean_business_name("Talleres Gómez") == "Talleres Gómez"
     assert clean_business_name("Casa Bernardo Marisquería Marisquerías Restaurantes Restaurantes Chiclana") == "Casa Bernardo Marisquería"
@@ -718,6 +724,8 @@ def self_test():
     assert clean_address("Dirección: Calle Real 10, 11130, Chiclana de la Frontera") == "Calle Real 10, 11130, Chiclana de la Frontera"
     assert clean_address("Chiclana de la Frontera") == ""
     assert clean_address("11130") == ""
+    assert clean_address("Avda. Fernando de Magallanes 36, 11130 Chiclana de la Fra., 11130 Chiclana de la Fra.") == "Avda. Fernando de Magallanes 36, 11130, Chiclana de la Frontera"
+    assert clean_address("Calle Real 10, 11130, Chiclana de la Frontera, 11130, Chiclana de la Frontera") == "Calle Real 10, 11130, Chiclana de la Frontera"
     assert clean_description("Directorio de empresas de Chiclana | La Guía de Chiclana") == ""
     assert clean_website("http://info@pedenetti.com/","https://directorio.example/ficha") == ""
     assert clean_website("https://empresa.es/","https://directorio.example/ficha") == "https://empresa.es/"
@@ -790,6 +798,19 @@ def self_test():
         assert record["website"] == "https://empresa-prueba.es"
         assert record["hours"] == "Mo-Fr 09:00-18:00"
         assert record["description"] == "Descripción de prueba del establecimiento"
+
+        multi_phone_sample = """<html><head><title>Agrojardín Reina</title>
+        <meta name="description" content="Maquinaria de jardinería y suministros profesionales para el campo">
+        </head><body><h1>Agrojardín Reina Maquinaria de jardinería, Ferretería, Suministros, Pellets</h1>
+        <p>Especialistas en maquinaria de jardinería, ferretería y suministros para profesionales.</p>
+        <p>Teléfonos: 616 914 930956 406 170</p><p>Camino del Molino 12, 11130 Chiclana de la Frontera</p>
+        <a href="https://agrojardinreina.es/">agrojardinreina.es</a></body></html>"""
+        get = lambda url, limit=1200000: (multi_phone_sample, url, "text/html")
+        multi = extract("https://directorio.example/agrojardin")
+        assert multi is not None, "No se ha extraído la ficha con teléfonos concatenados"
+        assert multi["phone"] == "616914930 / 956406170", multi["phone"]
+        assert multi["name"] == "Agrojardín Reina", multi["name"]
+        assert multi["website"] == "https://agrojardinreina.es/", multi["website"]
 
         nonlocal_sample = """<html><head><title>Servicio nacional</title>
         <meta name="description" content="Servicio disponible en Chiclana y toda España">
