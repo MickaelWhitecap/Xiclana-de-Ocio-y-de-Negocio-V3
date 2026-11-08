@@ -1,0 +1,69 @@
+name: RAD - validación contra catálogo real
+on:
+  push:
+    branches:
+      - gran-rastreo-multifuente
+    paths:
+      - '.github/workflows/rad-catalog-validation.yml'
+  workflow_dispatch:
+jobs:
+  validate-real-catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Descargar rama de pruebas
+        uses: actions/checkout@v4
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Crear copia aislada y verificar catálogo
+        run: |
+          test -s v3/fichas_completas.json
+          cp v3/fichas_completas.json /tmp/fichas_completas_rad_validacion.json
+          python - <<'PY'
+          import json
+          p='/tmp/fichas_completas_rad_validacion.json'
+          d=json.load(open(p,encoding='utf-8'))
+          assert isinstance(d.get('items'),list), 'El catálogo no contiene items'
+          assert len(d['items']) >= 1200, f"Catálogo inesperadamente pequeño: {len(d['items'])}"
+          open('/tmp/rad_catalogo_base.txt','w').write(str(len(d['items'])))
+          open('/tmp/rad_ids_antes.json','w').write(json.dumps([x.get('id') for x in d.get('candidatas_revision',[]) if isinstance(x,dict)]))
+          print(f"Catálogo de validación: {len(d['items'])} fichas; {len(d.get('candidatas_revision',[]))} candidatas previas.")
+          PY
+      - name: Ejecutar RAD real sobre la copia
+        run: python v3/rastreo_web_publico.py --catalog /tmp/fichas_completas_rad_validacion.json
+      - name: Generar informe sin incluir el catálogo completo
+        run: |
+          python - <<'PY'
+          import json
+          p='/tmp/fichas_completas_rad_validacion.json'
+          d=json.load(open(p,encoding='utf-8'))
+          before=set(json.load(open('/tmp/rad_ids_antes.json',encoding='utf-8')))
+          added=[x for x in d.get('candidatas_revision',[]) if isinstance(x,dict) and x.get('id','').startswith('rad:') and x.get('id') not in before]
+          report={
+            'fichas_catalogo':len(d.get('items',[])),
+            'candidatas_revision_antes':len(before),
+            'rad':d.get('rad_ultima_ejecucion',{}),
+            'candidatas_nuevas':[
+              {k:x.get(k) for k in ('n','a','p','w','url_fuente_rastreo','estado_revision','nota_revision')}
+              for x in added
+            ]
+          }
+          with open('rad-validacion-catalogo.json','w',encoding='utf-8') as f:
+            json.dump(report,f,ensure_ascii=False,indent=2)
+          print(json.dumps({
+            'fichas_catalogo':report['fichas_catalogo'],
+            'candidatas_nuevas':len(added),
+            'coincidencias_catalogo':report['rad'].get('coincidencias_catalogo'),
+            'urls_encontradas':report['rad'].get('urls_encontradas'),
+            'publicacion_automatica':report['rad'].get('publicacion_automatica')
+          },ensure_ascii=False))
+          assert report['rad'].get('publicacion_automatica') is False, 'El RAD no debe publicar automáticamente'
+          PY
+      - name: Guardar informe de validación
+        uses: actions/upload-artifact@v4
+        with:
+          name: rad-validacion-catalogo-${{ github.run_id }}
+          path: rad-validacion-catalogo.json
+          if-no-files-found: error
