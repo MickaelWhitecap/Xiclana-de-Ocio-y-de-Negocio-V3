@@ -339,7 +339,11 @@ def choose_schema_entity(candidates, page_url, headings=(), title=""):
         same_host=any(urllib.parse.urlparse(urllib.parse.urljoin(page_url,u)).netloc.lower()==page_host for u in urls)
         score=(100 if exact else 0)+(15 if norm(name) in heading_keys else 0)
         score+=sum(bool(obj.get(k)) for k in ("telephone","email","address","openingHours","description"))
-        if exact or len(candidates)==1 or (same_host and norm(name) in heading_keys):
+        # Una entidad JSON-LD sin vínculo con esta página no se acepta,
+        # aunque sea la única del documento. Solo vale URL exacta o URL del
+        # mismo host acompañada de coincidencia exacta con un encabezado.
+        heading_match=norm(name) in heading_keys
+        if exact or (same_host and heading_match):
             scored.append((score,obj))
     if not scored: return {}
     scored.sort(key=lambda x:x[0],reverse=True)
@@ -348,6 +352,18 @@ def choose_schema_entity(candidates, page_url, headings=(), title=""):
 
 def classify(text):
     s=text.casefold()
+    s_norm=norm(text)
+    # "Alquiler" por sí solo no identifica una inmobiliaria: puede referirse
+    # a maquinaria, vehículos, herramientas o equipos.
+    real_estate_terms=(
+        "inmobiliaria","inmobiliarias","alquiler de vivienda","alquiler de viviendas",
+        "alquiler de piso","alquiler de pisos","alquiler de casa","alquiler de casas",
+        "alquiler vacacional","alquiler de local","alquiler de locales",
+        "venta de vivienda","venta de viviendas","venta de inmueble","venta de inmuebles",
+        "compra venta de inmuebles",
+    )
+    if any(term in s_norm for term in real_estate_terms):
+        return ("negocio","Inmobiliaria")
     groups=[
       (("mueble","muebles","decoración","colchón"),("negocio","Muebles y decoración")),
       (("restaurante","bar ","cafetería","comida","pizzería"),("ocio","Restauración")),
@@ -355,7 +371,7 @@ def classify(text):
       (("taller","automóvil","automocion","concesionario"),("negocio","Automoción")),
       (("dentista","clínica","fisioterapia","veterinaria","farmacia"),("negocio","Salud")),
       (("peluquería","estética","gimnasio"),("negocio","Belleza y deporte")),
-      (("inmobiliaria","alquiler","venta de viviendas"),("negocio","Inmobiliaria")),
+      (("inmobiliaria","venta de viviendas"),("negocio","Inmobiliaria")),
       (("abogado","asesoría","gestoría","seguros"),("negocio","Servicios profesionales")),
       (("academia","colegio","formación","idiomas"),("negocio","Educación")),
       (("tienda","comercio","comprar","venta"),("negocio","Comercio")),
@@ -600,6 +616,9 @@ def self_test():
     global allowed, get
     assert classify("Restaurante y cafetería") == ("ocio","Restauración")
     assert classify("Tienda de muebles") == ("negocio","Muebles y decoración")
+    assert classify("Alquiler de viviendas en Chiclana") == ("negocio","Inmobiliaria")
+    assert classify("Alquiler de maquinaria para construcción") != ("negocio","Inmobiliaria")
+    assert classify("Alquiler de vehículos y herramientas") != ("negocio","Inmobiliaria")
     assert is_chiclana("Calle Real 1, 11130, Chiclana","", "11130", "", "", "https://example.org")
     assert is_chiclana("","Chiclana de la Frontera","", "", "", "https://example.org")
     assert not is_chiclana("","", "", "Servicio en Chiclana y alrededores", "Empresa", "https://example.org")
@@ -631,6 +650,14 @@ def self_test():
     right={"@type":"LocalBusiness","name":"Empresa concreta","url":"https://portal.example/ficha/empresa"}
     assert choose_schema_entity([wrong,right],"https://portal.example/ficha/empresa") is right
     assert choose_schema_entity([wrong,right],"https://portal.example/ficha/otra") == {}
+    # Una entidad única sin URL no debe atribuirse automáticamente a la página.
+    orphan={"@type":"LocalBusiness","name":"Empresa sin vínculo"}
+    assert choose_schema_entity([orphan],"https://portal.example/ficha/empresa") == {}
+    # La coincidencia exacta del encabezado solo basta si el enlace pertenece al host.
+    same_host={"@type":"LocalBusiness","name":"Empresa concreta","url":"/ficha/empresa"}
+    assert choose_schema_entity([same_host],"https://portal.example/ficha/empresa",["Empresa concreta"]) is same_host
+    unrelated={"@type":"LocalBusiness","name":"Otra empresa","url":"/ficha/otra"}
+    assert choose_schema_entity([unrelated],"https://portal.example/ficha/empresa",["Empresa concreta"]) == {}
     assert is_chiclana("", "", "", "", "", "https://aechiclana.org/directorio/trabajo/empresa/", True)
     assert not is_chiclana("", "", "", "", "", "https://aechiclana.org/directorio/", True)
 
