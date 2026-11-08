@@ -266,6 +266,8 @@ def clean_address(value, locality="", postal=""):
     raw=" ".join(raw.split()).strip(" ,;|·-–—")
     locality=" ".join(str(locality or "").split()).strip(" ,")
     postal=str(postal or "").strip()
+    if postal not in LOCAL_POSTCODES:
+        postal=""
     if norm(raw) in {"chiclana","chiclana de la frontera"} or re.fullmatch(r"(?:11130|11138|11139)", raw):
         raw=""
     # Una dirección debe identificar una vía, plaza, carretera, polígono o recinto concreto.
@@ -318,6 +320,22 @@ def is_directory_email(value, page_url):
     source_host=(urllib.parse.urlparse(page_url).hostname or "").lower()
     blocked={"chiclanaguiadempresas.com","www.chiclanaguiadempresas.com"}
     return domain in blocked or domain==source_host or domain.removeprefix("www.")==source_host.removeprefix("www.")
+
+
+def clean_website(value, page_url):
+    """Acepta solo URL web HTTP(S) con host válido; no correos disfrazados de URL."""
+    raw=str(value or "").strip()
+    if not raw:
+        return ""
+    target=urllib.parse.urljoin(page_url,raw)
+    parsed=urllib.parse.urlsplit(target)
+    host=(parsed.hostname or "").lower()
+    source_host=(urllib.parse.urlsplit(page_url).hostname or "").lower()
+    if parsed.scheme.lower() not in ("http","https") or not host or "@" in parsed.netloc:
+        return ""
+    if "." not in host or host==source_host or host.removeprefix("www.")==source_host.removeprefix("www."):
+        return ""
+    return urllib.parse.urlunsplit((parsed.scheme.lower(),parsed.netloc,parsed.path,parsed.query,""))
 
 
 def choose_schema_entity(candidates, page_url, headings=(), title=""):
@@ -375,7 +393,7 @@ def classify(text):
       (("abogado","asesoría","gestoría","seguros"),("negocio","Servicios profesionales")),
       (("academia","colegio","formación","idiomas"),("negocio","Educación")),
       (("tienda","comercio","comprar","venta"),("negocio","Comercio")),
-      (("museo","teatro","cine","parque","ocio","actividad turística"),("ocio","Ocio y cultura")),
+      (("museo","teatro","cine","parque temático","ocio","actividad turística"),("ocio","Ocio y cultura")),
     ]
     for words,result in groups:
         if any(w in s for w in words): return result
@@ -520,9 +538,7 @@ def extract(url, trusted_local=False):
         addr=", ".join(x for x in [textval(address.get("streetAddress")),postal,locality] if x)
     phone=normalize_phone(textval(obj.get("telephone")))
     email=textval(obj.get("email"))
-    website=textval(obj.get("url"))
-    if website and urllib.parse.urlparse(urllib.parse.urljoin(final_url,website)).netloc.lower()==urllib.parse.urlparse(final_url).netloc.lower():
-        website=""
+    website=clean_website(textval(obj.get("url")),final_url)
     # En fichas de directorios, el enlace externo rotulado como web oficial
     # es más fiable que cualquier enlace genérico (mapas o redes sociales).
     if not website:
@@ -531,8 +547,9 @@ def extract(url, trusted_local=False):
             host=urllib.parse.urlparse(target).netloc.lower()
             label_n=norm(label)
             if host and host != urllib.parse.urlparse(final_url).netloc.lower() and any(k in label_n for k in ("sitio web","web oficial","website","pagina web")):
-                website=target
-                break
+                website=clean_website(target,final_url)
+                if website:
+                    break
     if not addr:
         for _cls,_href,label in p.links:
             if re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",label) and "chiclana" in norm(label):
@@ -619,6 +636,7 @@ def self_test():
     assert classify("Alquiler de viviendas en Chiclana") == ("negocio","Inmobiliaria")
     assert classify("Alquiler de maquinaria para construcción") != ("negocio","Inmobiliaria")
     assert classify("Alquiler de vehículos y herramientas") != ("negocio","Inmobiliaria")
+    assert classify("Construcción, reformas y parques infantiles") == ("negocio","Servicios y negocios")
     assert is_chiclana("Calle Real 1, 11130, Chiclana","", "11130", "", "", "https://example.org")
     assert is_chiclana("","Chiclana de la Frontera","", "", "", "https://example.org")
     assert not is_chiclana("","", "", "Servicio en Chiclana y alrededores", "Empresa", "https://example.org")
@@ -643,6 +661,9 @@ def self_test():
     assert clean_address("Chiclana de la Frontera") == ""
     assert clean_address("11130") == ""
     assert clean_description("Directorio de empresas de Chiclana | La Guía de Chiclana") == ""
+    assert clean_website("http://info@pedenetti.com/","https://directorio.example/ficha") == ""
+    assert clean_website("https://empresa.es/","https://directorio.example/ficha") == "https://empresa.es/"
+    assert clean_address("Avenida Bahía 23, 11100, Chiclana","Chiclana de la Frontera","11100") == "Avenida Bahía 23, Chiclana de la Frontera"
     assert clean_description("Bar PimPam ofrece tapas caseras y platos tradicionales en un ambiente familiar", "La Guía de Chiclana") == ""
     assert is_directory_email("info@chiclanaguiadempresas.com","https://www.chiclanaguiadempresas.com/empresas/empresa/bar")
     assert not is_directory_email("contacto@empresa.es","https://www.chiclanaguiadempresas.com/empresas/empresa/bar")
@@ -693,6 +714,7 @@ def self_test():
     <meta name="description" content="Descripción de prueba del establecimiento">
     <script type="application/ld+json">
     {"@context":"https://schema.org","@type":"LocalBusiness","name":"Empresa de Prueba",
+    "@id":"https://directorio.example/empresa-prueba#empresa",
     "telephone":"956123456","email":"info@empresa-prueba.es","url":"https://empresa-prueba.es",
     "address":{"@type":"PostalAddress","streetAddress":"Calle Real 10",
     "postalCode":"11130","addressLocality":"Chiclana de la Frontera"},
