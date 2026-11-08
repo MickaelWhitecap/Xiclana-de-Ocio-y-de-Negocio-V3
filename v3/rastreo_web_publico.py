@@ -222,13 +222,18 @@ def extract_phones(value):
     """Extrae varios teléfonos españoles, incluso cuando el HTML los concatena."""
     raw=str(value or "")
     found=[]
-    for match in re.findall(r"(?<!\d)(?:\+34[ .-]?)?([6789](?:[ .-]?\d){8})(?!\d)",raw):
-        phone=normalize_phone(match)
+    joined_spans=[]
+    # Captura secuencias de 18 dígitos aunque cada teléfono lleve espacios.
+    for match in re.finditer(r"(?<!\d)([6789](?:[ .-]?\d){17})(?!\d)",raw):
+        digits=re.sub(r"\D","",match.group(1))
+        if len(digits)==18:
+            found.extend((digits[:9],digits[9:]))
+            joined_spans.append(match.span(1))
+    for match in re.finditer(r"(?<!\d)(?:\+34[ .-]?)?([6789](?:[ .-]?\d){8})(?!\d)",raw):
+        if any(start <= match.start(1) and match.end(1) <= end for start,end in joined_spans):
+            continue
+        phone=normalize_phone(match.group(1))
         if phone: found.append(phone)
-    digits_only=re.sub(r"\D","",raw)
-    for run in re.findall(r"(?<!\d)([6789]\d{17,26})(?!\d)",digits_only):
-        if len(run) % 9 == 0:
-            found.extend(run[i:i+9] for i in range(0,len(run),9))
     for part in re.split(r"[/;,|]",raw):
         phone=normalize_phone(part)
         if phone: found.append(phone)
