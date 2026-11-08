@@ -617,8 +617,14 @@ def extract(url, trusted_local=False):
                 break
     blob=" ".join(p.text)
     if not addr:
-        address_match=re.search(r"(?i)\bDirección\s+(.+?)(?:\s+Página web|\s+Cómo llegar|$)",blob)
+        address_match=re.search(r"(?i)\bDirección\s*[:：]?\s*(.+?)(?:\s+Página web|\s+Cómo llegar|$)",blob)
         if address_match: addr=address_match.group(1).strip()[:240]
+    if not addr:
+        # Algunas fichas presentan la dirección como párrafo independiente.
+        addr=next((x for x in p.paragraphs
+                   if re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",x)
+                   and "chiclana" in norm(x)
+                   and re.search(r"(?i)\b(calle|avenida|avda|camino|paseo|pol[ií]gono|carretera|plaza)\b",x)), "")
     # No conservar direcciones que no acrediten Chiclana: una página de directorio
     # puede incluir la sede de otra ciudad o datos globales de la propia guía.
     addr=clean_address(addr,locality,postal)
