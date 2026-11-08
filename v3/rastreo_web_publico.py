@@ -309,6 +309,7 @@ def clean_address(value, locality="", postal=""):
     raw=" ".join(re.sub(r",\s*,+", ", ", raw).split()).strip(" ,")
     raw=re.sub(r"(?i)(chiclana de la frontera)(?:[, ]+\1)+", r"\1", raw)
     raw=re.sub(r"(?i)(11130|11138|11139)(?:[, ]+\1)+", r"\1", raw)
+    raw=", ".join(dict.fromkeys(part.strip() for part in raw.split(",") if part.strip()))
     raw=" ".join(raw.split()).strip(" ,")
     if norm(locality) == "chiclana de la frontera" and "chiclana" in norm(raw) and "chiclana de la frontera" not in norm(raw):
         raw=re.sub(r"(?i)\bchiclana\b", locality, raw)
