@@ -294,8 +294,8 @@ def clean_address(value, locality="", postal=""):
     raw=re.sub(r"[\t\r\n]+", " ", raw)
     raw=re.sub(r"\s*,\s*", ", ", raw)
     raw=" ".join(raw.split()).strip(" ,;|·-–—")
-    raw=re.sub(r"(?i)\bchiclana\s+de\s+la\s+fra\.?\b", "Chiclana de la Frontera", raw)
-    raw=re.sub(r"(?i)\bchiclana\s+fra\.?\b", "Chiclana de la Frontera", raw)
+    raw=re.sub(r"(?i)\bchiclana\s+de\s+la\s+fra\.?(?=\W|$)", "Chiclana de la Frontera", raw)
+    raw=re.sub(r"(?i)\bchiclana\s+fra\.?(?=\W|$)", "Chiclana de la Frontera", raw)
     locality=" ".join(str(locality or "").split()).strip(" ,")
     postal=str(postal or "").strip()
     if postal not in LOCAL_POSTCODES:
@@ -596,7 +596,11 @@ def extract(url, trusted_local=False):
             target=urllib.parse.urljoin(final_url,html.unescape(href))
             host=urllib.parse.urlparse(target).netloc.lower()
             label_n=norm(label)
-            if host and host != urllib.parse.urlparse(final_url).netloc.lower() and any(k in label_n for k in ("sitio web","web oficial","website","pagina web")):
+            host_label=re.sub(r"^www\.", "", host)
+            label_host=re.sub(r"^www\.", "", str(label or "").strip().lower()).rstrip("/")
+            explicit_web=any(k in label_n for k in ("sitio web","web oficial","website","pagina web"))
+            domain_label=bool(re.fullmatch(r"[a-z0-9.-]+\.[a-z]{2,}",label_host)) and label_host==host_label
+            if host and host != urllib.parse.urlparse(final_url).netloc.lower() and (explicit_web or domain_label):
                 website=clean_website(target,final_url)
                 if website:
                     break
@@ -632,15 +636,10 @@ def extract(url, trusted_local=False):
         tel_values=[]
         for _cls,href,_label in p.links:
             if str(href).lower().startswith("tel:"):
-                value=normalize_phone(urllib.parse.unquote(str(href)[4:].split("?",1)[0]))
-                if value: tel_values.append(value)
-        tel_values=list(dict.fromkeys(tel_values))
-        if len(tel_values)==1: phone=tel_values[0]
+                tel_values.extend(extract_phones(urllib.parse.unquote(str(href)[4:].split("?",1)[0])))
+        phone=" / ".join(dict.fromkeys(tel_values))
     if not phone:
-        # Solo aceptar números completos de nueve cifras; descarta teléfonos truncados.
-        matches=re.findall(r"(?<!\d)(?:\+34[ .-]?)?([6789](?:[ .-]?\d){8})(?!\d)",blob)
-        valid=list(dict.fromkeys(normalize_phone(x) for x in matches if normalize_phone(x)))
-        if len(valid)==1: phone=valid[0]
+        phone=" / ".join(extract_phones(blob))
     if not email:
         mailto_values=[]
         for _cls,href,_label in p.links:
@@ -674,7 +673,9 @@ def extract(url, trusted_local=False):
     if any(x in schema_types for x in ("Restaurant","FoodEstablishment")):
         tipo,categoria="ocio","Restauración"
     else:
-        tipo,categoria=classify(name+" "+desc+" "+blob[:1500])
+        # No usar menús ni pies de página del portal para decidir la actividad.
+        category_hints=" ".join(p.headings[:8])
+        tipo,categoria=classify(" ".join((name,desc,title,schema_types,category_hints)))
     return {"name":name,"type":tipo,"address":addr,"phone":phone,"email":email,"website":website,
             "hours":str(hours)[:500],"description":desc[:700],"source_url":final_url,
             "category":categoria}
