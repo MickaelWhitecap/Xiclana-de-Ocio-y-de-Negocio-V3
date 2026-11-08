@@ -268,9 +268,13 @@ def clean_address(value, locality="", postal=""):
     postal=str(postal or "").strip()
     if postal not in LOCAL_POSTCODES:
         postal=""
-        raw=re.sub(r"(?<!\d)\d{5}(?!\d)", "", raw)
-        raw=re.sub(r"\s*,\s*", ", ", raw)
-        raw=re.sub(r",\s*,+", ", ", raw).strip(" ,")
+    raw=re.sub(
+        r"(?<!\d)\d{5}(?!\d)",
+        lambda match: match.group(0) if match.group(0) in LOCAL_POSTCODES else "",
+        raw
+    )
+    raw=re.sub(r"\s*,\s*", ", ", raw)
+    raw=re.sub(r",\s*,+", ", ", raw).strip(" ,")
     if norm(raw) in {"chiclana","chiclana de la frontera"} or re.fullmatch(r"(?:11130|11138|11139)", raw):
         raw=""
     # Una dirección debe identificar una vía, plaza, carretera, polígono o recinto concreto.
