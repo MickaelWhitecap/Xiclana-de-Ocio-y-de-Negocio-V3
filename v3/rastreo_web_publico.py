@@ -730,7 +730,7 @@ def self_test():
     assert clean_address("Dirección: Calle Real 10, 11130, Chiclana de la Frontera") == "Calle Real 10, 11130, Chiclana de la Frontera"
     assert clean_address("Chiclana de la Frontera") == ""
     assert clean_address("11130") == ""
-    assert clean_address("Avda. Fernando de Magallanes 36, 11130 Chiclana de la Fra., 11130 Chiclana de la Fra.") == "Avda. Fernando de Magallanes 36, 11130, Chiclana de la Frontera"
+    assert clean_address("Avda. Fernando de Magallanes 36, 11130 Chiclana de la Fra., 11130 Chiclana de la Fra.") == "Avda. Fernando de Magallanes 36, 11130 Chiclana de la Frontera"
     assert clean_address("Calle Real 10, 11130, Chiclana de la Frontera, 11130, Chiclana de la Frontera") == "Calle Real 10, 11130, Chiclana de la Frontera"
     assert clean_description("Directorio de empresas de Chiclana | La Guía de Chiclana") == ""
     assert clean_website("http://info@pedenetti.com/","https://directorio.example/ficha") == ""
