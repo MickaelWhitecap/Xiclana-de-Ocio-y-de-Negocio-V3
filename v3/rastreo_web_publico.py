@@ -257,9 +257,17 @@ def clean_business_name(value):
         # En algunos directorios el nombre comercial se concatena con una lista SEO de productos.
         r"(?i)\s+(?:mobiliario|sof[aá]s?|colchones|muebles|decoraci[oó]n)(?:\s+"
         r"(?:mobiliario|sof[aá]s?|colchones|muebles|decoraci[oó]n))*$",
+        r"(?i)\s+(?:carpinter[ií]as?|pesca|accesorios|na[uú]ticos|casas|prefabricadas|"
+        r"m[oó]dulos|[oó]pticas?|aud[ií]fonos)(?:\s+(?:carpinter[ií]as?|pesca|accesorios|"
+        r"na[uú]ticos|casas|prefabricadas|m[oó]dulos|[oó]pticas?|aud[ií]fonos))*$",
     ]
     for pattern in patterns:
         name=re.sub(pattern,"",name,flags=re.I).strip(" |·-–—")
+    # «Trabajo vertical» aparece como descriptor SEO insertado dentro del nombre.
+    name=re.sub(r"(?i)\btrabajo\s+vertical\b"," ",name)
+    name=" ".join(name.split()).strip(" |·-–—")
+    if norm(name)=="opticos general":
+        name="General Óptica"
     # Los buscadores suelen concatenar categorías y localidad al nombre real.
     # Recorta únicamente colas inequívocas, nunca palabras interiores del nombre.
     name=re.sub(
@@ -463,13 +471,13 @@ def classify(text):
       (("ocio y animación","eventos tematizados","animación sociocultural","animación infantil"),("ocio","Ocio y animación")),
       (("hotel","hostal","apartamento turístico","alojamiento"),("negocio","Alojamiento")),
       (("taller mecánico","taller de coches","taller de vehículos","taller de motos","automóvil","automocion","concesionario","vehículo","vehiculos","neumático"),("negocio","Automoción")),
-      (("dentista","clínica","fisioterapia","veterinaria","veterinario","centro veterinario","farmacia","mascotas"),("negocio","Salud")),
+      (("dentista","clínica","fisioterapia","veterinaria","veterinario","centro veterinario","farmacia","mascotas","óptica","optica","óptico","optico","optometrista","audífonos","audiología"),("negocio","Salud")),
       (("peluquería","estética","gimnasio"),("negocio","Belleza y deporte")),
       (("inmobiliaria","venta de viviendas"),("negocio","Inmobiliaria")),
       (("abogado","asesoría","gestoría","seguros"),("negocio","Servicios profesionales")),
       (("academia","colegio","formación","idiomas"),("negocio","Educación")),
       (("joyería","joyeria","relojería","relojeria"),("negocio","Joyería y relojería")),
-      (("mueble","muebles","decoración","colchón"),("negocio","Muebles y decoración")),
+      (("mueble","muebles","mobiliario","decoración","colchón"),("negocio","Muebles y decoración")),
       (("tienda","comercio","comprar","venta"),("negocio","Comercio")),
       (("museo","teatro","cine","parque temático","ocio","actividad turística"),("ocio","Ocio y cultura")),
     ]
@@ -741,6 +749,13 @@ def self_test():
     assert clean_business_name("Frutos Secos TERE golosinas chocolate") == "Frutos Secos TERE"
     assert clean_business_name("Agrojardín Reina Maquinaria de jardinería, Ferretería, Suministros, Pellets") == "Agrojardín Reina"
     assert clean_business_name("NATTEX MOBILIARIO SOFÁS SOFÁ COLCHONES MUEBLES DECORACIÓN") == "NATTEX"
+    assert clean_business_name("Carpintería Somoan carpinterías") == "Carpintería Somoan"
+    assert clean_business_name("Cebos Vivos la Corvina Pesca Accesorios náuticos") == "Cebos Vivos la Corvina"
+    assert clean_business_name("DIGAVASA Casas prefabricadas Módulos") == "DIGAVASA"
+    assert clean_business_name("Ópticos General Ópticas Audífonos") == "General Óptica"
+    assert clean_business_name("PINTURAS Y REVESTIMIENTOS Trabajo vertical CAMACHO RAMOS") == "PINTURAS Y REVESTIMIENTOS CAMACHO RAMOS"
+    assert classify("General Óptica, ópticos y audífonos") == ("negocio","Salud")
+    assert classify("Fábrica de mobiliario de cocinas") == ("negocio","Muebles y decoración")
     assert is_chiclana("Calle Real 1, 11130, Chiclana","", "11130", "", "", "https://example.org")
     assert is_chiclana("","Chiclana de la Frontera","", "", "", "https://example.org")
     assert not is_chiclana("","", "", "Servicio en Chiclana y alrededores", "Empresa", "https://example.org")
@@ -987,6 +1002,8 @@ def main():
         }
         if match and match["kind"]=="branch":
             candidate["nota_revision"]="Mismo nombre que otra ficha, pero dirección distinta; posible sucursal. Validar manualmente antes de aprobar."
+        if "apartado postal" in norm(record["address"]) or "apartado de correos" in norm(record["address"]):
+            candidate["nota_revision"]="La fuente mezcla una dirección con un apartado postal; confirmar la ubicación física antes de aprobar."
         added.append(candidate)
         registros_conocidos.append(candidate)
     data.setdefault("candidatas_revision",[]).extend(added)
