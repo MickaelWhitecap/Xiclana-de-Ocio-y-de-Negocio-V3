@@ -314,7 +314,17 @@ def clean_address(value, locality="", postal=""):
     raw=" ".join(re.sub(r",\s*,+", ", ", raw).split()).strip(" ,")
     raw=re.sub(r"(?i)(chiclana de la frontera)(?:[, ]+\1)+", r"\1", raw)
     raw=re.sub(r"(?i)(11130|11138|11139)(?:[, ]+\1)+", r"\1", raw)
-    raw=", ".join(dict.fromkeys(part.strip() for part in raw.split(",") if part.strip()))
+    parts=[part.strip() for part in raw.split(",") if part.strip()]
+    normalized_parts=[]
+    for part in parts:
+        pnorm=norm(part)
+        if pnorm in {"chiclana", "chiclana de la frontera"} and any("chiclana" in norm(x) for x in parts if x != part):
+            continue
+        if pnorm in LOCAL_POSTCODES and any(re.search(r"(?<!\\d)"+re.escape(part)+r"(?!\\d)",x) for x in parts if x != part):
+            continue
+        if pnorm not in {norm(x) for x in normalized_parts}:
+            normalized_parts.append(part)
+    raw=", ".join(normalized_parts)
     raw=" ".join(raw.split()).strip(" ,")
     if norm(locality) == "chiclana de la frontera" and "chiclana" in norm(raw) and "chiclana de la frontera" not in norm(raw):
         raw=re.sub(r"(?i)\bchiclana\b", locality, raw)
@@ -355,6 +365,8 @@ def clean_description(value, business_name=""):
         "la guia de chiclana","empresas de chiclana",
     )
     if len(raw)<35 or any(x in n for x in generic_phrases):
+        return ""
+    if re.match(r"(?i)^(?:aviso legal|pol[ií]tica de privacidad|pol[ií]tica de cookies)\\b",raw):
         return ""
     # Evita que una ficha herede una descripción que identifica claramente otro negocio.
     if "pimpam" in n and "pimpam" not in norm(business_name):
@@ -433,7 +445,8 @@ def classify(text):
     if any(term in s_norm for term in real_estate_terms):
         return ("negocio","Inmobiliaria")
     groups=[
-      (("mueble","muebles","decoración","colchón"),("negocio","Muebles y decoración")),
+      (("mudanzas","transportes","transporte","mensajería","logística","logistica"),("negocio","Servicios y negocios")),
+      (("golosinas","frutos secos","chocolate","alimentación","supermercado","panadería","carnicería","charcutería","pescadería"),("negocio","Alimentación")),
       (("restaurante","bar ","cafetería","comida","pizzería","marisquería","sushi","asador","taberna","mesón","chiringuito"),("ocio","Restauración")),
       (("ocio y animación","eventos tematizados","animación sociocultural","animación infantil"),("ocio","Ocio y animación")),
       (("hotel","hostal","apartamento turístico","alojamiento"),("negocio","Alojamiento")),
@@ -444,7 +457,7 @@ def classify(text):
       (("abogado","asesoría","gestoría","seguros"),("negocio","Servicios profesionales")),
       (("academia","colegio","formación","idiomas"),("negocio","Educación")),
       (("joyería","joyeria","relojería","relojeria"),("negocio","Joyería y relojería")),
-      (("frutos secos","golosinas","chocolate","alimentación","supermercado","panadería","carnicería","charcutería","pescadería"),("negocio","Alimentación")),
+      (("mueble","muebles","decoración","colchón"),("negocio","Muebles y decoración")),
       (("tienda","comercio","comprar","venta"),("negocio","Comercio")),
       (("museo","teatro","cine","parque temático","ocio","actividad turística"),("ocio","Ocio y cultura")),
     ]
@@ -688,8 +701,8 @@ def extract(url, trusted_local=False):
         tipo,categoria="ocio","Restauración"
     else:
         # No usar menús ni pies de página del portal para decidir la actividad.
-        category_hints=" ".join(p.headings[:8])
-        tipo,categoria=classify(" ".join((name,desc,title,schema_types,category_hints)))
+        # Los encabezados y el título pueden contener categorías del menú global.
+        tipo,categoria=classify(" ".join((name,desc,schema_types)))
     return {"name":name,"type":tipo,"address":addr,"phone":phone,"email":email,"website":website,
             "hours":str(hours)[:500],"description":desc[:700],"source_url":final_url,
             "category":categoria}
@@ -698,6 +711,9 @@ def self_test():
     global allowed, get
     assert classify("Restaurante y cafetería") == ("ocio","Restauración")
     assert classify("Tienda de muebles") == ("negocio","Muebles y decoración")
+    assert classify("TopGea Topografía. Especialistas en el sector topográfico e ingeniería técnica") == ("negocio","Servicios y negocios")
+    assert classify("Eventos Piolín Golosinas y Globos. La decoración perfecta que su evento necesita") == ("negocio","Alimentación")
+    assert classify("Mudanzas y Transportes Crespo. Transportes de muebles y guardamuebles") == ("negocio","Servicios y negocios")
     assert classify("Alquiler de viviendas en Chiclana") == ("negocio","Inmobiliaria")
     assert classify("Alquiler de maquinaria para construcción") != ("negocio","Inmobiliaria")
     assert classify("Alquiler de vehículos y herramientas") != ("negocio","Inmobiliaria")
@@ -741,6 +757,7 @@ def self_test():
     assert clean_address("Avda. Fernando de Magallanes 36, 11130 Chiclana de la Fra., 11130 Chiclana de la Fra.") == "Avda. Fernando de Magallanes 36, 11130 Chiclana de la Frontera"
     assert clean_address("Calle Real 10, 11130, Chiclana de la Frontera, 11130, Chiclana de la Frontera") == "Calle Real 10, 11130, Chiclana de la Frontera"
     assert clean_description("Directorio de empresas de Chiclana | La Guía de Chiclana") == ""
+    assert clean_description("Aviso legal | Política de privacidad | Política de cookies") == ""
     assert clean_website("http://info@pedenetti.com/","https://directorio.example/ficha") == ""
     assert clean_website("https://empresa.es/","https://directorio.example/ficha") == "https://empresa.es/"
     assert clean_address("Avenida Bahía 23, 11100, Chiclana","Chiclana de la Frontera","11100") == "Avenida Bahía 23, Chiclana de la Frontera"
