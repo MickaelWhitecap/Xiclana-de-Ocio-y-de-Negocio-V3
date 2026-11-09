@@ -264,7 +264,10 @@ def extract_contact_phones(page):
         footer_locations=list(re.finditer(
             r"(?i)chiclana de la frontera,\s*c[aá]diz,\s*espa[nñ]a",before_email
         ))
-        if len(footer_locations)>=2:
+        if footer_locations:
+            # La dirección comercial puede no incluir la provincia («... España»),
+            # mientras que el bloque común del directorio sí muestra «Chiclana de
+            # la Frontera, Cádiz, España». Basta esa marca de pie para cortar.
             tail=before_email[:footer_locations[-1].start()]
         else:
             tail=before_email
@@ -865,6 +868,19 @@ def self_test():
     directory_page=Page()
     directory_page.feed("<html><body><p>Información de contacto</p><p>Calle Real 10, Chiclana de la Frontera, Cádiz, España</p><p>956 123 456</p><p>Chiclana de la Frontera, Cádiz, España</p><p>685 51 66 19</p><p>info@chiclanaguiadempresas.com</p><p>Síguenos en Instagram</p></body></html>")
     assert extract_contact_phones(directory_page) == ["956123456"]
+    # Formato real de La Guía: dirección comercial sin «Cádiz», seguida
+    # del pie común con el teléfono general y el correo del directorio.
+    directory_page_short_address=Page()
+    directory_page_short_address.feed("""<html><body>
+    <p>Información de contacto</p>
+    <p>Avenida de los Descubrimientos 94, Chiclana de la Frontera, España</p>
+    <p>856 179 926672 104 197</p>
+    <p>interioreschiclana@gmail.com</p>
+    <p>Chiclana de la Frontera, Cádiz, España</p>
+    <p>685 51 66 19</p>
+    <p>info@chiclanaguiadempresas.com</p>
+    <p>Síguenos en Instagram</p></body></html>""")
+    assert extract_contact_phones(directory_page_short_address) == ["856179926","672104197"]
     assert clean_business_name("Atrípiko Restaurante cocina fusión latina Restaurantes") == "Atrípiko-Gastro Bar"
     assert classify("Atrípiko-Gastro Bar, restaurante de cocina fusión latina") == ("ocio","Restauración")
     assert compare_catalog_record(
