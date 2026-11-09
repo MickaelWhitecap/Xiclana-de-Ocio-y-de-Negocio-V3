@@ -506,7 +506,7 @@ def classify(text):
       (("restaurante","cafeteria","comida","pizzeria","marisqueria","sushi","asador","taberna","meson","chiringuito"),("ocio","Restauración")),
       (("ocio y animacion","eventos tematizados","animacion sociocultural","animacion infantil"),("ocio","Ocio y animación")),
       (("hotel","hostal","apartamento turistico","alojamiento"),("negocio","Alojamiento")),
-      (("taller mecanico","taller de coches","taller de vehiculos","taller de motos","automovil","automocion","concesionario","neumatico"),("negocio","Automoción")),
+      (("taller mecanico","taller de coches","taller de vehiculos","taller de motos","mecanica","reparacion de vehiculos","adaptaciones de vehiculos","automovil","automocion","concesionario","neumatico"),("negocio","Automoción")),
       (("dentista","clinica","fisioterapia","veterinaria","veterinario","centro veterinario","farmacia","mascotas","optica","optico","optometrista","audifonos","audiologia"),("negocio","Salud")),
       (("peluqueria","estetica","gimnasio"),("negocio","Belleza y deporte")),
       (("academia","colegio","formacion","idiomas"),("negocio","Educación")),
