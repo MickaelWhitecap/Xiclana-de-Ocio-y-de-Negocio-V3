@@ -941,7 +941,7 @@ def candidate_review_notes(record):
     }
     if len(tokens)>=5 and not any(token in business_markers for token in tokens):
         notes.append("Nombre largo sin indicador comercial claro; comprobar si identifica a una persona o contiene texto SEO.")
-    if re.search(r"\\bfriogorificos\\b",name_norm):
+    if "friogorificos" in tokens:
         notes.append("Posible error ortográfico en el nombre; comprobar la denominación en la fuente original.")
     stems=[re.sub(r"(es|s)$","",token) for token in tokens if len(token)>4]
     if len(stems)!=len(set(stems)):
