@@ -224,10 +224,10 @@ def extract_phones(value):
     found=[]
     joined_spans=[]
     # Captura secuencias de 18 dígitos aunque cada teléfono lleve espacios.
-    for match in re.finditer(r"(?<!\d)([6789](?:[ .-]?\d){17})(?!\d)",raw):
+    for match in re.finditer(r"(?<!\d)([6789](?:[ .-]?\d){17,35})(?!\d)",raw):
         digits=re.sub(r"\D","",match.group(1))
-        if len(digits)==18:
-            found.extend((digits[:9],digits[9:]))
+        if len(digits)>=18 and len(digits)%9==0 and all(digits[i] in "6789" for i in range(0,len(digits),9)):
+            found.extend(digits[i:i+9] for i in range(0,len(digits),9))
             joined_spans.append(match.span(1))
     for match in re.finditer(r"(?<!\d)(?:\+34[ .-]?)?([6789](?:[ .-]?\d){8})(?!\d)",raw):
         if any(start <= match.start(1) and match.end(1) <= end for start,end in joined_spans):
@@ -238,6 +238,24 @@ def extract_phones(value):
         phone=normalize_phone(part)
         if phone: found.append(phone)
     return list(dict.fromkeys(x for x in found if len(x)==9 and x[0] in "6789"))
+
+
+def extract_contact_phones(page):
+    """Recupera teléfonos visibles en el bloque de contacto, sin tomar el teléfono del directorio."""
+    raw=" ".join(str(x) for x in page.text)
+    start_match=re.search(r"(?i)informaci[oó]n\\s+(?:sobre\\s+la\\s+empresa|de\\s+contacto)",raw)
+    if not start_match:
+        return []
+    start=start_match.end()
+    tail=raw[start:start+1800]
+    endings=[
+        re.search(r"(?i)encuentra\\s+empresas\\s+cercanas",tail),
+        re.search(r"(?i)chiclana\\s+de\\s+la\\s+frontera[, ]+c[aá]diz[, ]+espa[nñ]a",tail),
+    ]
+    valid=[m.start() for m in endings if m]
+    if valid:
+        tail=tail[:min(valid)]
+    return extract_phones(tail)
 
 
 def clean_business_name(value):
@@ -279,6 +297,22 @@ def clean_business_name(value):
     name=re.sub(r"(?i)^taller\s+(?=talleres\b)", "", name)
     name=" ".join(name.split()).strip(" |·-–—")
     name=name.replace("ZZZSOFASYCOLCHONESZZZ","Sofás y Colchones")
+    # Correcciones verificadas de nombres contaminados en directorios locales.
+    verified_names={
+        "jeronimo vallejo montero ituci asesores":"Ituci Asesores",
+        "publicidad chiclana s l publireca":"Publireca",
+        "viajes puente travel 17 s c viajes carrefour":"Viajes Carrefour",
+        "concesionarios citroen seat":"Autos Colchón",
+        "bicicletas centauro bikes chiclana":"Centauro Bikes",
+        "carniceria el colinero charcuteria":"Carnicería El Colinero",
+        "ec e abogados lola edo manzorro":"EC&E Abogados",
+        "gimnasio grimaldi musculacion centros deportivos":"Gimnasio Grimaldi",
+        "laboratorio seguridad alimentaria analisis biocentrol laboratorios":"BioCentrol Laboratorios",
+        "lola robledo modas y complementos":"Lola Robledo Moda",
+        "maquinaria de jardineria taller jose antonio garcia":"José A. García Guerrero",
+        "nattex":"Nattex",
+    }
+    name=verified_names.get(norm(name),name)
     if norm(name)=="opticos general":
         name="General Óptica"
     # Los buscadores suelen concatenar categorías y localidad al nombre real.
@@ -403,7 +437,11 @@ def clean_description(value, business_name=""):
     # Evita que una ficha herede una descripción que identifica claramente otro negocio.
     if "pimpam" in n and "pimpam" not in norm(business_name):
         return ""
-    return raw[:700]
+    if len(raw)>700:
+        raw=raw[:700]
+        if not raw.endswith((" ",".",",",";",":")):
+            raw=raw.rsplit(" ",1)[0]
+    return raw.strip()
 
 
 def is_directory_email(value, page_url):
@@ -479,7 +517,7 @@ def classify(text):
     if any(term in s_norm for term in (
         "asesoria","asesoramiento","gestoria","abogados","abogado",
         "despacho juridico","servicios juridicos","consultoria empresarial",
-        "asesores fiscales","asesoria laboral",
+        "asesores","asesores fiscales","asesoria laboral",
     )):
         return ("negocio","Servicios profesionales")
 
@@ -505,6 +543,9 @@ def classify(text):
     )):
         return ("negocio","Alimentación")
 
+    if any(term in s_norm for term in ("agencia de viajes","agencia viajes","viajes carrefour","viajes puentetravel")):
+        return ("negocio","Servicios y negocios")
+
     real_estate_terms=(
         "inmobiliaria","inmobiliarias","alquiler de vivienda","alquiler de viviendas",
         "alquiler de piso","alquiler de pisos","alquiler de casa","alquiler de casas",
@@ -527,7 +568,7 @@ def classify(text):
       (("academia","colegio","formacion","idiomas"),("negocio","Educación")),
       (("joyeria","relojeria"),("negocio","Joyería y relojería")),
       (("mueble","muebles","mobiliario","decoracion","colchon"),("negocio","Muebles y decoración")),
-      (("tienda","comercio","comprar","venta","moda","ropa","calzado","boutique"),("negocio","Comercio")),
+      (("tienda","comercio","comprar","venta","moda","ropa","calzado","boutique","ferreteria"),("negocio","Comercio")),
       (("museo","teatro","cine","parque tematico","ocio","actividad turistica"),("ocio","Ocio y cultura")),
     ]
     for words,result in groups:
@@ -664,19 +705,20 @@ def extract(url, trusted_local=False):
     raw_name=textval(obj.get("name")) or (p.headings[0] if p.headings else "") or title
     name=clean_business_name(raw_name)
     if not name or not valid_business_name(name): return None
-    desc=clean_description(textval(obj.get("description")) or desc, name)
-    if not desc:
-        # Recupera texto descriptivo cuando no hay meta description ni JSON-LD.
-        # Algunas fichas de AE Chiclana maquetan la descripción como encabezados h4.
-        description_blocks=p.paragraphs + p.headings[1:]
-        desc=next((clean_description(x,name) for x in description_blocks if clean_description(x,name)), "")
+    # Compara JSON-LD, metadescripción y texto visible: algunos directorios
+    # publican metadescripciones truncadas aunque el contenido completo esté en la ficha.
+    description_blocks=[textval(obj.get("description")),desc]+p.paragraphs+p.headings[1:]
+    cleaned_descriptions=[clean_description(x,name) for x in description_blocks]
+    desc=max(cleaned_descriptions,key=len,default="")
     address=obj.get("address") or {}
     if isinstance(address,str): addr=address; locality=""; postal=""
     else:
         locality=textval(address.get("addressLocality"))
         postal=textval(address.get("postalCode"))
         addr=", ".join(x for x in [textval(address.get("streetAddress")),postal,locality] if x)
-    phone=" / ".join(extract_phones(obj.get("telephone") or ""))
+    phone_values=extract_phones(obj.get("telephone") or "")
+    phone_values.extend(extract_contact_phones(p))
+    phone=" / ".join(dict.fromkeys(phone_values))
     email=textval(obj.get("email"))
     website=clean_website(textval(obj.get("url")),final_url)
     # En fichas de directorios, el enlace externo rotulado como web oficial
@@ -790,6 +832,14 @@ def self_test():
     assert classify("Marisquería Casa Bernardo") == ("ocio","Restauración")
     assert classify("Joyería Puente Chico, taller propio y soldaduras láser") == ("negocio","Joyería y relojería")
     assert classify("Frutos secos, golosinas y chocolate") == ("negocio","Alimentación")
+    assert classify("Viajes Carrefour, agencia de viajes") == ("negocio","Servicios y negocios")
+    assert classify("Ferretería Marchante, fontanería, piscina y electricidad") == ("negocio","Comercio")
+    assert classify("Ituci Asesores, asesoría fiscal y laboral") == ("negocio","Servicios profesionales")
+    assert clean_business_name("Jerónimo Vallejo Montero «Ituci Asesores»") == "Ituci Asesores"
+    assert clean_business_name("Viajes Puente Travel 17, S.C. «Viajes Carrefour»") == "Viajes Carrefour"
+    assert clean_business_name("Concesionarios Citroën SEAT") == "Autos Colchón"
+    assert clean_business_name("Laboratorio Seguridad alimentaria Análisis BioCentrol Laboratorios") == "BioCentrol Laboratorios"
+    assert extract_phones("956 401 156650 767 055682 365 666") == ["956401156","650767055","682365666"]
     assert classify("Energía Solar Placas solares. Instalación y mantenimiento de energía solar") == ("negocio","Servicios y negocios")
     assert classify("TEMATIC EVENTOS TEMATIZADOS, S.L. Ocio y animación") == ("ocio","Ocio y animación")
     assert classify("Taller Autox, mecánica y adaptaciones de vehículos") == ("negocio","Automoción")
