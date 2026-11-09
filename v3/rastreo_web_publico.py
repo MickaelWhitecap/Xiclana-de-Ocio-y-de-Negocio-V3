@@ -858,6 +858,26 @@ def self_test():
         {"n":"Bodegas Primitivo Collantes S.A.","a":"Avenida Diputación 20","p":"956531722 / 956400150"}
     )["kind"] in ("duplicate","possible")
 
+    # Las señales de baja calidad se muestran para revisión, nunca se publican automáticamente.
+    noisy=candidate_review_notes({
+        "name":"Mª Augusta Marín Aguilar Galindo",
+        "address":"Centro Comercial Novo Sancti Petri, 11139 Chiclana",
+        "phone":"915781701"
+    })
+    assert any("persona" in x for x in noisy)
+    assert any("prefijo geográfico" in x for x in noisy)
+    assert candidate_review_notes({
+        "name":"Ofipapel Chiclana",
+        "address":"Calle Real 1, 11130 Chiclana",
+        "phone":"956402615"
+    }) == []
+    assert any("error ortográfico" in x for x in candidate_review_notes({
+        "name":"Friogoríficos Puerto Mar","address":"Polígono Pelagatos","phone":"956404012"
+    }))
+    assert any("repetición" in x for x in candidate_review_notes({
+        "name":"Taller Autox Pertsolutions Talleres","address":"Avenida Bahía 23","phone":"605060859"
+    }))
+
     # Prueba de integración: extracción completa con HTML controlado.
     original_allowed, original_get = allowed, get
     sample = """<html><head><title>Empresa de Prueba</title>
@@ -907,6 +927,35 @@ def self_test():
     finally:
         allowed, get = original_allowed, original_get
     print("RAD self-test: OK",flush=True)
+
+def candidate_review_notes(record):
+    """Detecta señales de extracción dudosa; nunca publica ni descarta automáticamente."""
+    notes=[]
+    name=str(record.get("name") or record.get("n") or "").strip()
+    name_norm=norm(name)
+    tokens=name_norm.split()
+    business_markers={
+        "sl","sll","sa","slu","coop","clinica","taller","restaurante","bar","hotel",
+        "tienda","ferreteria","abogados","asesores","asesoria","suministros","recambios",
+        "inmobiliaria","farmacia","peluqueria","fisioterapia","construcciones","transportes"
+    }
+    if len(tokens)>=5 and not any(token in business_markers for token in tokens):
+        notes.append("Nombre largo sin indicador comercial claro; comprobar si identifica a una persona o contiene texto SEO.")
+    if re.search(r"(?i)\\bfriogorificos\\b",name):
+        notes.append("Posible error ortográfico en el nombre; comprobar la denominación en la fuente original.")
+    stems=[re.sub(r"(es|s)$","",token) for token in tokens if len(token)>4]
+    if len(stems)!=len(set(stems)):
+        notes.append("Posible repetición de descriptor en el nombre comercial.")
+    address=str(record.get("address") or record.get("a") or "")
+    address_tokens=norm(address).split()
+    if any(a==b for a,b in zip(address_tokens,address_tokens[1:])):
+        notes.append("La dirección contiene palabras repetidas consecutivas; verificar la extracción.")
+    for phone in extract_phones(record.get("phone") or record.get("p") or ""):
+        if phone[0] in "89" and not phone.startswith(("856","956")):
+            notes.append("El teléfono fijo no presenta prefijo geográfico de Cádiz; confirmar que corresponde al establecimiento de Chiclana.")
+            break
+    return notes
+
 
 def main():
     parser=argparse.ArgumentParser()
@@ -1015,10 +1064,13 @@ def main():
           "estado_revision":"pendiente","fuente_estado":"Candidato detectado en fuente web pública; pendiente de validación manual",
           "fecha_deteccion_utc":datetime.now(timezone.utc).isoformat()
         }
+        review_notes=candidate_review_notes(record)
         if match and match["kind"]=="branch":
-            candidate["nota_revision"]="Mismo nombre que otra ficha, pero dirección distinta; posible sucursal. Validar manualmente antes de aprobar."
+            review_notes.append("Mismo nombre que otra ficha, pero dirección distinta; posible sucursal. Validar manualmente antes de aprobar.")
         if "apartado postal" in norm(record["address"]) or "apartado de correos" in norm(record["address"]):
-            candidate["nota_revision"]="La fuente mezcla una dirección con un apartado postal; confirmar la ubicación física antes de aprobar."
+            review_notes.append("La fuente mezcla una dirección con un apartado postal; confirmar la ubicación física antes de aprobar.")
+        if review_notes:
+            candidate["nota_revision"]=" ".join(dict.fromkeys(review_notes))
         added.append(candidate)
         registros_conocidos.append(candidate)
     data.setdefault("candidatas_revision",[]).extend(added)
