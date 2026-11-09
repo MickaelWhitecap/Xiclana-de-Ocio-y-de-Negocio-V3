@@ -249,20 +249,26 @@ def clean_business_name(value):
         r"[ ]+bares?[ ]+(?:de[ ]+)?(?:chiclana|tapas|comer|paella)([ ]|$).*$",
         r"[ ]+(?:tapas[ ]+comer|comer[ ]+paella|paella[ ]+y[ ]+tapas)([ ]|$).*$",
         r"[ ]*[|·–—][ ]*(?:bares?|restaurantes?|cafeter[ií]as?|empresas?|directorio)([ ]|$).*$",
-        r"(?i)\s+(?:odontopediatr[ií]a|ortodoncia|dentistas?|relojer[ií]as?|joyer[ií]as?|"
-        r"golosinas|chocolates?|frutos secos|caramelos?)(?:\s+(?:odontopediatr[ií]a|ortodoncia|"
+        r"(?i)[\s,]+(?:odontopediatr[ií]a|ortodoncia|dentistas?|relojer[ií]as?|joyer[ií]as?|"
+        r"golosinas|chocolates?|frutos secos|caramelos?)(?:[\s,]+(?:odontopediatr[ií]a|ortodoncia|"
         r"dentistas?|relojer[ií]as?|joyer[ií]as?|golosinas|chocolates?|caramelos?))*$",
         r"(?i)\s+(?:maquinaria de jardiner[ií]a|ferreter[ií]a|suministros?|pellets?)(?:[, ]+"
         r"(?:maquinaria de jardiner[ií]a|ferreter[ií]a|suministros?|pellets?))*$",
+        # Cola SEO habitual en fichas de asesorías; se exige la secuencia completa
+        # para no borrar palabras que puedan formar parte del nombre comercial.
+        r"(?i)[\\s,]+asesor[ií]a[\\s,]+gestor[ií]a[\\s,]+empresas[\\s,]+consultor[ií]a(?:[\\s,]+integral)?$",
         # En algunos directorios el nombre comercial se concatena con una lista SEO de productos.
-        r"(?i)\s+(?:mobiliario|sof[aá]s?|colchones|muebles|decoraci[oó]n)(?:\s+"
-        r"(?:mobiliario|sof[aá]s?|colchones|muebles|decoraci[oó]n))*$",
+        r"(?i)[\s,]+(?:mobiliario|sof[aá]s?|colchones|muebles|butacas|decoraci[oó]n)(?:[\s,]+"
+        r"(?:mobiliario|sof[aá]s?|colchones|muebles|butacas|decoraci[oó]n))*$",
         r"(?i)\s+(?:carpinter[ií]as?|pesca|accesorios|n[aá]uticos|casas|prefabricadas|"
         r"m[oó]dulos|[oó]pticas?|aud[ií]fonos)(?:\s+(?:carpinter[ií]as?|pesca|accesorios|"
         r"n[aá]uticos|casas|prefabricadas|m[oó]dulos|[oó]pticas?|aud[ií]fonos))*$",
     ]
     for pattern in patterns:
         name=re.sub(pattern,"",name,flags=re.I).strip(" |·-–—")
+    # «Construcción» es un descriptor insertado en el nombre de esta ficha concreta.
+    # Conserva «Reformas» y la marca COYREMAR, eliminando solo el término intermedio.
+    name=re.sub(r"(?i)\b(reformas)\s+construcci[oó]n\s+(coyremar)\b",r"\1 \2",name)
     # «Trabajo vertical» aparece como descriptor SEO insertado dentro del nombre.
     name=re.sub(r"(?i)\btrabajo\s+vertical\b"," ",name)
     name=" ".join(name.split()).strip(" |·-–—")
@@ -745,6 +751,11 @@ def self_test():
     assert classify("TEMATIC EVENTOS TEMATIZADOS, S.L. Ocio y animación") == ("ocio","Ocio y animación")
     assert classify("Taller Autox, mecánica y adaptaciones de vehículos") == ("negocio","Automoción")
     assert clean_business_name("Ávila Bobillo Clínica Dental Odontopediatría Ortodoncia Dentista") == "Ávila Bobillo Clínica Dental"
+    assert clean_business_name("Ávila Bobillo Clínica Dental, Odontopediatría, Ortodoncia, Dentista") == "Ávila Bobillo Clínica Dental"
+    assert clean_business_name("Guerrero & Asesores Asesoría Gestoría Empresas Consultoría integral") == "Guerrero & Asesores"
+    assert clean_business_name("Guerrero & Asesores, Asesoría, Gestoría, Empresas, Consultoría integral") == "Guerrero & Asesores"
+    assert clean_business_name("Interiores Sofás y Colchones sofá muebles butacas") == "Interiores Sofás y Colchones"
+    assert clean_business_name("Reformas Construcción COYREMAR") == "Reformas COYREMAR"
     assert clean_business_name("Joyería Puente Chico Relojería Joyerías") == "Joyería Puente Chico"
     assert clean_business_name("Frutos Secos TERE golosinas chocolate") == "Frutos Secos TERE"
     assert clean_business_name("Agrojardín Reina Maquinaria de jardinería, Ferretería, Suministros, Pellets") == "Agrojardín Reina"
