@@ -257,9 +257,9 @@ def clean_business_name(value):
         # En algunos directorios el nombre comercial se concatena con una lista SEO de productos.
         r"(?i)\s+(?:mobiliario|sof[aá]s?|colchones|muebles|decoraci[oó]n)(?:\s+"
         r"(?:mobiliario|sof[aá]s?|colchones|muebles|decoraci[oó]n))*$",
-        r"(?i)\s+(?:carpinter[ií]as?|pesca|accesorios|na[uú]ticos|casas|prefabricadas|"
+        r"(?i)\s+(?:carpinter[ií]as?|pesca|accesorios|n[aá]uticos|casas|prefabricadas|"
         r"m[oó]dulos|[oó]pticas?|aud[ií]fonos)(?:\s+(?:carpinter[ií]as?|pesca|accesorios|"
-        r"na[uú]ticos|casas|prefabricadas|m[oó]dulos|[oó]pticas?|aud[ií]fonos))*$",
+        r"n[aá]uticos|casas|prefabricadas|m[oó]dulos|[oó]pticas?|aud[ií]fonos))*$",
     ]
     for pattern in patterns:
         name=re.sub(pattern,"",name,flags=re.I).strip(" |·-–—")
