@@ -483,6 +483,15 @@ def classify(text):
     )):
         return ("negocio","Servicios profesionales")
 
+    # La hidráulica y neumática industrial no deben clasificarse como automoción
+    # por la mera presencia de la palabra «neumáticos» o «reparación».
+    if any(term in s_norm for term in (
+        "sistemas hidraulicos","sistemas neumaticos","hidraulica industrial",
+        "componentes hidraulicos","bombas hidraulicas","cilindros hidraulicos",
+        "mantenimiento hidraulico","reparacion de sistemas hidraulicos",
+    )):
+        return ("negocio","Servicios y negocios")
+
     # Alimentación incluye industria, fabricación y distribución alimentaria,
     # no solo comercios minoristas.
     if any(term in s_norm for term in (
