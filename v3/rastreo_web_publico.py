@@ -243,14 +243,14 @@ def extract_phones(value):
 def extract_contact_phones(page):
     """Recupera teléfonos visibles en el bloque de contacto, sin tomar el teléfono del directorio."""
     raw=" ".join(str(x) for x in page.text)
-    start_match=re.search(r"(?i)informaci[oó]n\\s+(?:sobre\\s+la\\s+empresa|de\\s+contacto)",raw)
+    start_match=re.search(r"(?i)informaci[oó]n\s+(?:sobre\s+la\s+empresa|de\s+contacto)",raw)
     if not start_match:
         return []
     start=start_match.end()
     tail=raw[start:start+1800]
     endings=[
-        re.search(r"(?i)encuentra\\s+empresas\\s+cercanas",tail),
-        re.search(r"(?i)chiclana\\s+de\\s+la\\s+frontera[, ]+c[aá]diz[, ]+espa[nñ]a",tail),
+        re.search(r"(?i)encuentra\s+empresas\s+cercanas",tail),
+        re.search(r"(?i)s[ií]guenos\s+en\s+(?:instagram|facebook)",tail),
     ]
     valid=[m.start() for m in endings if m]
     if valid:
@@ -840,6 +840,9 @@ def self_test():
     assert clean_business_name("Concesionarios Citroën SEAT") == "Autos Colchón"
     assert clean_business_name("Laboratorio Seguridad alimentaria Análisis BioCentrol Laboratorios") == "BioCentrol Laboratorios"
     assert extract_phones("956 401 156650 767 055682 365 666") == ["956401156","650767055","682365666"]
+    contact_page=Page()
+    contact_page.feed("<html><body><p>Información de contacto</p><p>Av. del Torno, 5, Chiclana de la Frontera, Cádiz, España</p><p>613 571 762956 112 418</p><p>centauro@example.es</p><p>Síguenos en Instagram</p><p>685 51 66 19</p></body></html>")
+    assert extract_contact_phones(contact_page) == ["613571762","956112418"]
     assert classify("Energía Solar Placas solares. Instalación y mantenimiento de energía solar") == ("negocio","Servicios y negocios")
     assert classify("TEMATIC EVENTOS TEMATIZADOS, S.L. Ocio y animación") == ("ocio","Ocio y animación")
     assert classify("Taller Autox, mecánica y adaptaciones de vehículos") == ("negocio","Automoción")
