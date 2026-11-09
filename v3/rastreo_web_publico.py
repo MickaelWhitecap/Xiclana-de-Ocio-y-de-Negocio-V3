@@ -460,10 +460,36 @@ def choose_schema_entity(candidates, page_url, headings=(), title=""):
 
 
 def classify(text):
-    s=text.casefold()
-    s_norm=norm(text)
-    # "Alquiler" por sí solo no identifica una inmobiliaria: puede referirse
-    # a maquinaria, vehículos, herramientas o equipos.
+    """Clasifica por actividad principal; las menciones accesorias no deben dominar."""
+    s=str(text or "").casefold()
+    s_norm=norm(s)
+
+    # Actividades explícitas de prestación de servicios: tienen prioridad sobre
+    # menciones incidentales a vehículos, alojamientos, eventos o comercios.
+    if any(term in s_norm for term in (
+        "limpieza profesional","servicios de limpieza","empresa de limpieza",
+        "limpiezas","limpieza de comunidades","limpieza de oficinas",
+        "limpieza de apartamentos","limpieza industrial",
+    )):
+        return ("negocio","Servicios y negocios")
+
+    if any(term in s_norm for term in (
+        "asesoria","asesoramiento","gestoria","abogados","abogado",
+        "despacho juridico","servicios juridicos","consultoria empresarial",
+        "asesores fiscales","asesoria laboral",
+    )):
+        return ("negocio","Servicios profesionales")
+
+    # Alimentación incluye industria, fabricación y distribución alimentaria,
+    # no solo comercios minoristas.
+    if any(term in s_norm for term in (
+        "frigorifico","frigorificos","industria alimentaria","alimentacion",
+        "productos alimenticios","distribucion alimentaria","congelados",
+        "carniceria","charcuteria","pescaderia","panaderia","supermercado",
+        "frutos secos","golosinas","chocolate",
+    )):
+        return ("negocio","Alimentación")
+
     real_estate_terms=(
         "inmobiliaria","inmobiliarias","alquiler de vivienda","alquiler de viviendas",
         "alquiler de piso","alquiler de pisos","alquiler de casa","alquiler de casas",
@@ -473,26 +499,24 @@ def classify(text):
     )
     if any(term in s_norm for term in real_estate_terms):
         return ("negocio","Inmobiliaria")
+
     groups=[
-      (("inoxidables","metalurgia","metalúrgica","metalurgica","acero inoxidable","calderería","caldereria","carpintería metálica","carpinteria metalica","soldadura industrial"),("negocio","Servicios y negocios")),
-      (("mudanzas","transportes","transporte","mensajería","logística","logistica"),("negocio","Servicios y negocios")),
-      (("golosinas","frutos secos","chocolate","alimentación","supermercado","panadería","carnicería","charcutería","pescadería"),("negocio","Alimentación")),
-      (("restaurante","bar ","cafetería","comida","pizzería","marisquería","sushi","asador","taberna","mesón","chiringuito"),("ocio","Restauración")),
-      (("ocio y animación","eventos tematizados","animación sociocultural","animación infantil"),("ocio","Ocio y animación")),
-      (("hotel","hostal","apartamento turístico","alojamiento"),("negocio","Alojamiento")),
-      (("taller mecánico","taller de coches","taller de vehículos","taller de motos","automóvil","automocion","concesionario","vehículo","vehiculos","neumático"),("negocio","Automoción")),
-      (("dentista","clínica","fisioterapia","veterinaria","veterinario","centro veterinario","farmacia","mascotas","óptica","optica","óptico","optico","optometrista","audífonos","audiología"),("negocio","Salud")),
-      (("peluquería","estética","gimnasio"),("negocio","Belleza y deporte")),
-      (("inmobiliaria","venta de viviendas"),("negocio","Inmobiliaria")),
-      (("abogado","asesoría","gestoría","seguros"),("negocio","Servicios profesionales")),
-      (("academia","colegio","formación","idiomas"),("negocio","Educación")),
-      (("joyería","joyeria","relojería","relojeria"),("negocio","Joyería y relojería")),
-      (("mueble","muebles","mobiliario","decoración","colchón"),("negocio","Muebles y decoración")),
-      (("tienda","comercio","comprar","venta"),("negocio","Comercio")),
-      (("museo","teatro","cine","parque temático","ocio","actividad turística"),("ocio","Ocio y cultura")),
+      (("inoxidables","metalurgia","metalurgica","acero inoxidable","caldereria","carpinteria metalica","soldadura industrial"),("negocio","Servicios y negocios")),
+      (("mudanzas","transportes","transporte","mensajeria","logistica"),("negocio","Servicios y negocios")),
+      (("restaurante","cafeteria","comida","pizzeria","marisqueria","sushi","asador","taberna","meson","chiringuito"),("ocio","Restauración")),
+      (("ocio y animacion","eventos tematizados","animacion sociocultural","animacion infantil"),("ocio","Ocio y animación")),
+      (("hotel","hostal","apartamento turistico","alojamiento"),("negocio","Alojamiento")),
+      (("taller mecanico","taller de coches","taller de vehiculos","taller de motos","automovil","automocion","concesionario","neumatico"),("negocio","Automoción")),
+      (("dentista","clinica","fisioterapia","veterinaria","veterinario","centro veterinario","farmacia","mascotas","optica","optico","optometrista","audifonos","audiologia"),("negocio","Salud")),
+      (("peluqueria","estetica","gimnasio"),("negocio","Belleza y deporte")),
+      (("academia","colegio","formacion","idiomas"),("negocio","Educación")),
+      (("joyeria","relojeria"),("negocio","Joyería y relojería")),
+      (("mueble","muebles","mobiliario","decoracion","colchon"),("negocio","Muebles y decoración")),
+      (("tienda","comercio","comprar","venta","moda","ropa","calzado","boutique"),("negocio","Comercio")),
+      (("museo","teatro","cine","parque tematico","ocio","actividad turistica"),("ocio","Ocio y cultura")),
     ]
     for words,result in groups:
-        if any(w in s for w in words): return result
+        if any(w in s_norm for w in words): return result
     return ("negocio","Servicios y negocios")
 
 def url_key(value):
@@ -806,6 +830,10 @@ def self_test():
     assert clean_description("Síguenos en redes sociales o descarga nuestra App", "Sebastián Moreno Irisarri") == ""
     assert clean_description('Empresa dedicada a construcciones, reformas y parques infantiles. SERVICIOS <img src="https://ejemplo.es/imagen.jpg" <p', "Pavimentos Coyremar") == "Empresa dedicada a construcciones, reformas y parques infantiles. SERVICIOS"
     assert classify("Veterinario VeterCosta Peluquería canina") == ("negocio","Salud")
+    assert classify("Frigoríficos Costa Sur. Elaboración y distribución de alimentos frescos y congelados") == ("negocio","Alimentación")
+    assert classify("Asesoría RV Gestoría & Abogados. Transferencias de vehículos") == ("negocio","Servicios profesionales")
+    assert classify("JR Limpiezas y Servicios. Limpieza profesional de apartamentos turísticos") == ("negocio","Servicios y negocios")
+    assert classify("Lola Robledo. Tienda de moda y ropa") == ("negocio","Comercio")
     assert classify("Inoxidables Chiclana, S.L.") == ("negocio","Servicios y negocios")
     assert clean_website("http://info@pedenetti.com/","https://directorio.example/ficha") == ""
     assert clean_website("https://empresa.es/","https://directorio.example/ficha") == "https://empresa.es/"
