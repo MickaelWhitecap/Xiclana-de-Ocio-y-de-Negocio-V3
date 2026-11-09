@@ -256,7 +256,7 @@ def clean_business_name(value):
         r"(?:maquinaria de jardiner[ií]a|ferreter[ií]a|suministros?|pellets?))*$",
         # Cola SEO habitual en fichas de asesorías; se exige la secuencia completa
         # para no borrar palabras que puedan formar parte del nombre comercial.
-        r"(?i)[\\s,]+asesor[ií]a[\\s,]+gestor[ií]a[\\s,]+empresas[\\s,]+consultor[ií]a(?:[\\s,]+integral)?$",
+        r"(?i)[\s,]+asesor[ií]a[\s,]+gestor[ií]a[\s,]+empresas[\s,]+consultor[ií]a(?:[\s,]+integral)?$",
         # En algunos directorios el nombre comercial se concatena con una lista SEO de productos.
         r"(?i)[\s,]+(?:mobiliario|sof[aá]s?|colchones|muebles|butacas|decoraci[oó]n)(?:[\s,]+"
         r"(?:mobiliario|sof[aá]s?|colchones|muebles|butacas|decoraci[oó]n))*$",
