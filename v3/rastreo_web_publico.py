@@ -352,6 +352,8 @@ def clean_description(value, business_name=""):
     raw=html.unescape(str(value or ""))
     raw=re.sub(r"(?is)<(script|style).*?>.*?</\1>", " ", raw)
     raw=re.sub(r"<[^>]*>", " ", raw)
+    # Algunas fuentes devuelven fragmentos HTML truncados (p. ej. "<p").
+    raw=re.sub(r"<[^>]*$", " ", raw)
     raw=re.sub(r"[\t\r\n]+", " ", raw)
     raw=" ".join(raw.split()).strip(" |·-–—")
     raw=re.sub(
@@ -368,6 +370,9 @@ def clean_description(value, business_name=""):
         "chiclana de la frontera cadiz",
     )
     if len(raw)<35 or any(x in n for x in generic_phrases):
+        return ""
+    # No considerar descripción comercial una llamada a seguir redes o descargar una app.
+    if re.search(r"(?i)^(?:síguenos|siguenos|sígueme|siguenos en redes|síguenos en redes|descarga nuestra app|descarga nuestra aplicación)", raw):
         return ""
     if re.match(r"(?i)^(?:aviso legal|pol[ií]tica de privacidad|pol[ií]tica de cookies)\b",raw):
         return ""
@@ -455,7 +460,7 @@ def classify(text):
       (("ocio y animación","eventos tematizados","animación sociocultural","animación infantil"),("ocio","Ocio y animación")),
       (("hotel","hostal","apartamento turístico","alojamiento"),("negocio","Alojamiento")),
       (("taller mecánico","taller de coches","taller de vehículos","taller de motos","automóvil","automocion","concesionario","vehículo","vehiculos","neumático"),("negocio","Automoción")),
-      (("dentista","clínica","fisioterapia","veterinaria","farmacia"),("negocio","Salud")),
+      (("dentista","clínica","fisioterapia","veterinaria","veterinario","centro veterinario","farmacia","mascotas"),("negocio","Salud")),
       (("peluquería","estética","gimnasio"),("negocio","Belleza y deporte")),
       (("inmobiliaria","venta de viviendas"),("negocio","Inmobiliaria")),
       (("abogado","asesoría","gestoría","seguros"),("negocio","Servicios profesionales")),
@@ -764,6 +769,9 @@ def self_test():
     assert clean_description("Aviso legal | Política de privacidad | Política de cookies") == ""
     assert clean_description("Información sobre la empresa Ver dirección", "Gestión 10 Asesoría") == ""
     assert clean_description("Chiclana de la Frontera, Cádiz, España", "Lola Robledo Modas y Complementos") == ""
+    assert clean_description("Síguenos en redes sociales o descarga nuestra App", "Sebastián Moreno Irisarri") == ""
+    assert clean_description('Empresa dedicada a construcciones, reformas y parques infantiles. SERVICIOS <img src="https://ejemplo.es/imagen.jpg" <p', "Pavimentos Coyremar") == "Empresa dedicada a construcciones, reformas y parques infantiles. SERVICIOS"
+    assert classify("Veterinario VeterCosta Peluquería canina") == ("negocio","Salud")
     assert classify("Inoxidables Chiclana, S.L.") == ("negocio","Servicios y negocios")
     assert clean_website("http://info@pedenetti.com/","https://directorio.example/ficha") == ""
     assert clean_website("https://empresa.es/","https://directorio.example/ficha") == "https://empresa.es/"
