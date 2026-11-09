@@ -255,6 +255,19 @@ def extract_contact_phones(page):
     valid=[m.start() for m in endings if m]
     if valid:
         tail=tail[:min(valid)]
+    # La Guía de Chiclana repite su teléfono general en el pie de cada ficha.
+    # Ese bloque aparece tras una segunda etiqueta de ubicación y antes del
+    # correo corporativo; se excluye para no atribuirlo al establecimiento.
+    directory_email=re.search(r"(?i)\\binfo@chiclanaguiadempresas\\.com\\b",tail)
+    if directory_email:
+        before_email=tail[:directory_email.start()]
+        footer_locations=list(re.finditer(
+            r"(?i)chiclana de la frontera,\\s*c[aá]diz,\\s*espa[nñ]a",before_email
+        ))
+        if len(footer_locations)>=2:
+            tail=before_email[:footer_locations[-1].start()]
+        else:
+            tail=before_email
     return extract_phones(tail)
 
 
@@ -311,6 +324,7 @@ def clean_business_name(value):
         "lola robledo modas y complementos":"Lola Robledo Moda",
         "maquinaria de jardineria taller jose antonio garcia":"José A. García Guerrero",
         "nattex":"NATTEX",
+        "atripiko restaurante cocina fusion latina restaurantes":"Atrípiko-Gastro Bar",
     }
     name=verified_names.get(norm(name),name)
     if norm(name)=="opticos general":
@@ -545,6 +559,10 @@ def classify(text):
 
     if any(term in s_norm for term in ("agencia de viajes","agencia viajes","viajes carrefour","viajes puentetravel")):
         return ("negocio","Servicios y negocios")
+
+    # Atrípiko es restauración aunque una fuente lo describa genéricamente.
+    if "atripiko" in s_norm:
+        return ("ocio","Restauración")
 
     real_estate_terms=(
         "inmobiliaria","inmobiliarias","alquiler de vivienda","alquiler de viviendas",
@@ -843,6 +861,16 @@ def self_test():
     contact_page=Page()
     contact_page.feed("<html><body><p>Información de contacto</p><p>Av. del Torno, 5, Chiclana de la Frontera, Cádiz, España</p><p>613 571 762956 112 418</p><p>centauro@example.es</p><p>Síguenos en Instagram</p><p>685 51 66 19</p></body></html>")
     assert extract_contact_phones(contact_page) == ["613571762","956112418"]
+    # Reproduce el pie real de La Guía: su teléfono general no es del negocio.
+    directory_page=Page()
+    directory_page.feed("<html><body><p>Información de contacto</p><p>Calle Real 10, Chiclana de la Frontera, Cádiz, España</p><p>956 123 456</p><p>Chiclana de la Frontera, Cádiz, España</p><p>685 51 66 19</p><p>info@chiclanaguiadempresas.com</p><p>Síguenos en Instagram</p></body></html>")
+    assert extract_contact_phones(directory_page) == ["956123456"]
+    assert clean_business_name("Atrípiko Restaurante cocina fusión latina Restaurantes") == "Atrípiko-Gastro Bar"
+    assert classify("Atrípiko-Gastro Bar, restaurante de cocina fusión latina") == ("ocio","Restauración")
+    assert compare_catalog_record(
+        {"n":"Atrípiko-Gastro Bar","a":"Av. de los Pescadores 1, 11139 Chiclana","p":"956406355"},
+        {"n":"Atrípiko-Gastro Bar","a":"Avenida de los Pescadores 1, 11130 Chiclana","p":"956406355"}
+    )["kind"] == "duplicate"
     assert classify("Energía Solar Placas solares. Instalación y mantenimiento de energía solar") == ("negocio","Servicios y negocios")
     assert classify("TEMATIC EVENTOS TEMATIZADOS, S.L. Ocio y animación") == ("ocio","Ocio y animación")
     assert classify("Taller Autox, mecánica y adaptaciones de vehículos") == ("negocio","Automoción")
