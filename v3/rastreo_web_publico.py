@@ -263,6 +263,8 @@ def clean_business_name(value):
         # En algunos directorios el nombre comercial se concatena con una lista SEO de productos.
         r"(?i)[\s,]+(?:mobiliario|sof[aá]s?|colchones|muebles|butacas|decoraci[oó]n)(?:[\s,]+"
         r"(?:mobiliario|sof[aá]s?|colchones|muebles|butacas|decoraci[oó]n))*$",
+        r"(?i)\s+(?:punto de venta\s+.+?\s+concesionario)$",
+        r"(?i)\s+(?:mec[aá]nico|mec[aá]nica|autom[oó]vil)(?:\s+(?:mec[aá]nico|mec[aá]nica|autom[oó]vil))*$",
         r"(?i)\s+(?:carpinter[ií]as?|pesca|accesorios|n[aá]uticos|casas|prefabricadas|"
         r"m[oó]dulos|[oó]pticas?|aud[ií]fonos)(?:\s+(?:carpinter[ií]as?|pesca|accesorios|"
         r"n[aá]uticos|casas|prefabricadas|m[oó]dulos|[oó]pticas?|aud[ií]fonos))*$",
@@ -274,6 +276,7 @@ def clean_business_name(value):
     name=re.sub(r"(?i)\b(reformas)\s+construcci[oó]n\s+(coyremar)\b",r"\1 \2",name)
     # «Trabajo vertical» aparece como descriptor SEO insertado dentro del nombre.
     name=re.sub(r"(?i)\btrabajo\s+vertical\b"," ",name)
+    name=re.sub(r"(?i)^taller\s+(?=talleres\b)", "", name)
     name=" ".join(name.split()).strip(" |·-–—")
     name=name.replace("ZZZSOFASYCOLCHONESZZZ","Sofás y Colchones")
     if norm(name)=="opticos general":
@@ -483,6 +486,9 @@ def classify(text):
     # Alimentación incluye industria, fabricación y distribución alimentaria,
     # no solo comercios minoristas.
     if any(term in s_norm for term in (
+        "comercio al por mayor de cafe","comercio al por mayor de café",
+        "cafe te cacao y especias","café té cacao y especias",
+        "distribucion mayorista de alimentos","mayorista de alimentacion",
         "frigorifico","frigorificos","industria alimentaria","alimentacion",
         "productos alimenticios","distribucion alimentaria","congelados",
         "carniceria","charcuteria","pescaderia","panaderia","supermercado",
@@ -506,7 +512,7 @@ def classify(text):
       (("restaurante","cafeteria","comida","pizzeria","marisqueria","sushi","asador","taberna","meson","chiringuito"),("ocio","Restauración")),
       (("ocio y animacion","eventos tematizados","animacion sociocultural","animacion infantil"),("ocio","Ocio y animación")),
       (("hotel","hostal","apartamento turistico","alojamiento"),("negocio","Alojamiento")),
-      (("taller mecanico","taller de coches","taller de vehiculos","taller de motos","mecanica","reparacion de vehiculos","adaptaciones de vehiculos","automovil","automocion","concesionario","neumatico"),("negocio","Automoción")),
+      (("taller mecanico","taller de coches","taller de vehiculos","taller de motos","mecanica","reparacion de vehiculos","adaptaciones de vehiculos","automovil","automocion","concesionario","taller de neumaticos","venta de neumaticos","neumaticos"),("negocio","Automoción")),
       (("dentista","clinica","fisioterapia","veterinaria","veterinario","centro veterinario","farmacia","mascotas","optica","optico","optometrista","audifonos","audiologia"),("negocio","Salud")),
       (("peluqueria","estetica","gimnasio"),("negocio","Belleza y deporte")),
       (("academia","colegio","formacion","idiomas"),("negocio","Educación")),
@@ -792,6 +798,8 @@ def self_test():
     assert clean_business_name("Cebos Vivos la Corvina Pesca Accesorios náuticos") == "Cebos Vivos la Corvina"
     assert clean_business_name("DIGAVASA Casas prefabricadas Módulos") == "DIGAVASA"
     assert clean_business_name("Ópticos General Ópticas Audífonos") == "General Óptica"
+    assert clean_business_name("Motos Mondiña Punto de venta YAMAHA Concesionario") == "Motos Mondiña"
+    assert clean_business_name("Taller Talleres Miguel Catalán mecánico mecánica automóvil") == "Talleres Miguel Catalán"
     assert clean_business_name("PINTURAS Y REVESTIMIENTOS Trabajo vertical CAMACHO RAMOS") == "PINTURAS Y REVESTIMIENTOS CAMACHO RAMOS"
     assert classify("General Óptica, ópticos y audífonos") == ("negocio","Salud")
     assert classify("Fábrica de mobiliario de cocinas") == ("negocio","Muebles y decoración")
@@ -834,6 +842,9 @@ def self_test():
     assert classify("Asesoría RV Gestoría & Abogados. Transferencias de vehículos") == ("negocio","Servicios profesionales")
     assert classify("JR Limpiezas y Servicios. Limpieza profesional de apartamentos turísticos") == ("negocio","Servicios y negocios")
     assert classify("Lola Robledo. Tienda de moda y ropa") == ("negocio","Comercio")
+    assert classify("Hidráulica Cabral. Diseño, fabricación, mantenimiento y reparación de sistemas hidráulicos y neumáticos") == ("negocio","Servicios y negocios")
+    assert classify("Nova Delta. Comercio al por mayor de café, té, cacao y especias") == ("negocio","Alimentación")
+    assert classify("Taller de neumáticos y mecánica del automóvil") == ("negocio","Automoción")
     assert classify("Inoxidables Chiclana, S.L.") == ("negocio","Servicios y negocios")
     assert clean_website("http://info@pedenetti.com/","https://directorio.example/ficha") == ""
     assert clean_website("https://empresa.es/","https://directorio.example/ficha") == "https://empresa.es/"
@@ -905,6 +916,9 @@ def self_test():
     assert any("repetición" in x for x in candidate_review_notes({
         "name":"Taller Autox Pertsolutions Talleres","address":"Avenida Bahía 23","phone":"605060859"
     }))
+    assert not any("Nombre largo" in x for x in candidate_review_notes({
+        "name":"COMPLEJO INTERNACIONAL DEL ESPACIO, S.L.","address":"Calle Ugaldenea 74","phone":"610638863"
+    }))
 
     # Prueba de integración: extracción completa con HTML controlado.
     original_allowed, original_get = allowed, get
@@ -967,7 +981,8 @@ def candidate_review_notes(record):
         "tienda","ferreteria","abogados","asesores","asesoria","suministros","recambios",
         "inmobiliaria","farmacia","peluqueria","fisioterapia","construcciones","transportes"
     }
-    if len(tokens)>=5 and not any(token in business_markers for token in tokens):
+    legal_entity=bool(re.search(r"(?i)(?:,?\s*)(?:s\.?\s*l\.?\s*u?\.?|s\.?\s*a\.?|sociedad limitada|sociedad anonima)\s*$",name))
+    if len(tokens)>=5 and not legal_entity and not any(token in business_markers for token in tokens):
         notes.append("Nombre largo sin indicador comercial claro; comprobar si identifica a una persona o contiene texto SEO.")
     if "friogorificos" in tokens:
         notes.append("Posible error ortográfico en el nombre; comprobar la denominación en la fuente original.")
