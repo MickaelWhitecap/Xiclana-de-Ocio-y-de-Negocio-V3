@@ -310,7 +310,7 @@ def clean_business_name(value):
         "laboratorio seguridad alimentaria analisis biocentrol laboratorios":"BioCentrol Laboratorios",
         "lola robledo modas y complementos":"Lola Robledo Moda",
         "maquinaria de jardineria taller jose antonio garcia":"José A. García Guerrero",
-        "nattex":"Nattex",
+        "nattex":"NATTEX",
     }
     name=verified_names.get(norm(name),name)
     if norm(name)=="opticos general":
