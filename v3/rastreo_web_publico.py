@@ -254,6 +254,9 @@ def clean_business_name(value):
         r"dentistas?|relojer[ií]as?|joyer[ií]as?|golosinas|chocolates?|caramelos?))*$",
         r"(?i)\s+(?:maquinaria de jardiner[ií]a|ferreter[ií]a|suministros?|pellets?)(?:[, ]+"
         r"(?:maquinaria de jardiner[ií]a|ferreter[ií]a|suministros?|pellets?))*$",
+        # En algunos directorios el nombre comercial se concatena con una lista SEO de productos.
+        r"(?i)\s+(?:mobiliario|sof[aá]s?|colchones|muebles|decoraci[oó]n)(?:\s+"
+        r"(?:mobiliario|sof[aá]s?|colchones|muebles|decoraci[oó]n))*$",
     ]
     for pattern in patterns:
         name=re.sub(pattern,"",name,flags=re.I).strip(" |·-–—")
@@ -737,6 +740,7 @@ def self_test():
     assert clean_business_name("Joyería Puente Chico Relojería Joyerías") == "Joyería Puente Chico"
     assert clean_business_name("Frutos Secos TERE golosinas chocolate") == "Frutos Secos TERE"
     assert clean_business_name("Agrojardín Reina Maquinaria de jardinería, Ferretería, Suministros, Pellets") == "Agrojardín Reina"
+    assert clean_business_name("NATTEX MOBILIARIO SOFÁS SOFÁ COLCHONES MUEBLES DECORACIÓN") == "NATTEX"
     assert is_chiclana("Calle Real 1, 11130, Chiclana","", "11130", "", "", "https://example.org")
     assert is_chiclana("","Chiclana de la Frontera","", "", "", "https://example.org")
     assert not is_chiclana("","", "", "Servicio en Chiclana y alrededores", "Empresa", "https://example.org")
