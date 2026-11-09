@@ -243,6 +243,9 @@ def extract_phones(value):
 def clean_business_name(value):
     """Elimina colas SEO evidentes sin recortar nombres comerciales normales."""
     name=" ".join(str(value or "").replace(" "," ").split()).strip(" |·-–—")
+    # «Sofás y Colchones» forma parte del nombre comercial de Interiores;
+    # se protege frente a la limpieza de términos SEO repetidos al final.
+    name=re.sub(r"(?i)sof[aá]s\\s+y\\s+colchones", "ZZZSOFASYCOLCHONESZZZ", name)
     patterns=[
         r"(?i)[ ]+(?:[-–—|·][ ]*)?(?:AE[ ]+Chiclana|Asociaci[oó]n[ ]+de[ ]+Empresas[ ]+de?[ ]+Chiclana)(?:[ ]+de[ ]+la[ ]+Frontera)?[ ]*$",
         r"[ ]+cervecer[ií]a[ ]+bares?([ ]|$).*$",
@@ -272,6 +275,7 @@ def clean_business_name(value):
     # «Trabajo vertical» aparece como descriptor SEO insertado dentro del nombre.
     name=re.sub(r"(?i)\btrabajo\s+vertical\b"," ",name)
     name=" ".join(name.split()).strip(" |·-–—")
+    name=name.replace("ZZZSOFASYCOLCHONESZZZ","Sofás y Colchones")
     if norm(name)=="opticos general":
         name="General Óptica"
     # Los buscadores suelen concatenar categorías y localidad al nombre real.
