@@ -363,6 +363,9 @@ def clean_description(value, business_name=""):
         "directorio de empresas","guia de empresas","portal de empresas",
         "listado de negocios","busca empresas","encuentra empresas",
         "la guia de chiclana","empresas de chiclana",
+        "informacion sobre la empresa ver direccion",
+        "chiclana de la frontera cadiz espana",
+        "chiclana de la frontera cadiz",
     )
     if len(raw)<35 or any(x in n for x in generic_phrases):
         return ""
@@ -445,6 +448,7 @@ def classify(text):
     if any(term in s_norm for term in real_estate_terms):
         return ("negocio","Inmobiliaria")
     groups=[
+      (("inoxidables","metalurgia","metalúrgica","metalurgica","acero inoxidable","calderería","caldereria","carpintería metálica","carpinteria metalica","soldadura industrial"),("negocio","Servicios y negocios")),
       (("mudanzas","transportes","transporte","mensajería","logística","logistica"),("negocio","Servicios y negocios")),
       (("golosinas","frutos secos","chocolate","alimentación","supermercado","panadería","carnicería","charcutería","pescadería"),("negocio","Alimentación")),
       (("restaurante","bar ","cafetería","comida","pizzería","marisquería","sushi","asador","taberna","mesón","chiringuito"),("ocio","Restauración")),
@@ -758,6 +762,9 @@ def self_test():
     assert clean_address("Calle Real 10, 11130, Chiclana de la Frontera, 11130, Chiclana de la Frontera") == "Calle Real 10, 11130, Chiclana de la Frontera"
     assert clean_description("Directorio de empresas de Chiclana | La Guía de Chiclana") == ""
     assert clean_description("Aviso legal | Política de privacidad | Política de cookies") == ""
+    assert clean_description("Información sobre la empresa Ver dirección", "Gestión 10 Asesoría") == ""
+    assert clean_description("Chiclana de la Frontera, Cádiz, España", "Lola Robledo Modas y Complementos") == ""
+    assert classify("Inoxidables Chiclana, S.L.") == ("negocio","Servicios y negocios")
     assert clean_website("http://info@pedenetti.com/","https://directorio.example/ficha") == ""
     assert clean_website("https://empresa.es/","https://directorio.example/ficha") == "https://empresa.es/"
     assert clean_address("Avenida Bahía 23, 11100, Chiclana","Chiclana de la Frontera","11100") == "Avenida Bahía 23, Chiclana de la Frontera"
