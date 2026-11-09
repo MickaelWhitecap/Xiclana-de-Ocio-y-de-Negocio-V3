@@ -258,11 +258,11 @@ def extract_contact_phones(page):
     # La Guía de Chiclana repite su teléfono general en el pie de cada ficha.
     # Ese bloque aparece tras una segunda etiqueta de ubicación y antes del
     # correo corporativo; se excluye para no atribuirlo al establecimiento.
-    directory_email=re.search(r"(?i)\\binfo@chiclanaguiadempresas\\.com\\b",tail)
+    directory_email=re.search(r"(?i)\binfo@chiclanaguiadempresas\.com\b",tail)
     if directory_email:
         before_email=tail[:directory_email.start()]
         footer_locations=list(re.finditer(
-            r"(?i)chiclana de la frontera,\\s*c[aá]diz,\\s*espa[nñ]a",before_email
+            r"(?i)chiclana de la frontera,\s*c[aá]diz,\s*espa[nñ]a",before_email
         ))
         if len(footer_locations)>=2:
             tail=before_email[:footer_locations[-1].start()]
