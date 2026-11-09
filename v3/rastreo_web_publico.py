@@ -320,7 +320,7 @@ def clean_address(value, locality="", postal=""):
         pnorm=norm(part)
         if pnorm in {"chiclana", "chiclana de la frontera"} and any("chiclana" in norm(x) for x in parts if x != part):
             continue
-        if pnorm in LOCAL_POSTCODES and any(re.search(r"(?<!\d)+re.escape(part)+r"(?!\d),x) for x in parts if x != part):
+        if pnorm in LOCAL_POSTCODES and any(re.search(r"(?<!\d)"+re.escape(part)+r"(?!\d)",x) for x in parts if x != part):
             continue
         if pnorm not in {norm(x) for x in normalized_parts}:
             normalized_parts.append(part)
