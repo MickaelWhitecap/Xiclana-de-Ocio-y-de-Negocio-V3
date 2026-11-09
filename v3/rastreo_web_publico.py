@@ -245,7 +245,7 @@ def clean_business_name(value):
     name=" ".join(str(value or "").replace(" "," ").split()).strip(" |·-–—")
     # «Sofás y Colchones» forma parte del nombre comercial de Interiores;
     # se protege frente a la limpieza de términos SEO repetidos al final.
-    name=re.sub(r"(?i)sof[aá]s\\s+y\\s+colchones", "ZZZSOFASYCOLCHONESZZZ", name)
+    name=re.sub(r"(?i)sof[aá]s\s+y\s+colchones", "ZZZSOFASYCOLCHONESZZZ", name)
     patterns=[
         r"(?i)[ ]+(?:[-–—|·][ ]*)?(?:AE[ ]+Chiclana|Asociaci[oó]n[ ]+de[ ]+Empresas[ ]+de?[ ]+Chiclana)(?:[ ]+de[ ]+la[ ]+Frontera)?[ ]*$",
         r"[ ]+cervecer[ií]a[ ]+bares?([ ]|$).*$",
