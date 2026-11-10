@@ -1428,6 +1428,8 @@ def self_test():
         {"n":"Bodegas Primitivo Collantes S.A.","a":"Avenida Diputación 20","p":"956531722 / 956400150"}
     )["kind"] in ("duplicate","possible")
     assert is_pagination_link("https://www.cylex.es/chiclana-de-la-frontera/restaurantes/?p=2","2","www.cylex.es")
+    assert is_qdq_profile_url("https://www.qdq.com/construccion-y-promocion-leal-macias-sl-1223591")
+    assert not is_qdq_profile_url("https://www.qdq.com/a/asesorias-fiscales-y-laborales/cadiz/chiclana-de-la-frontera")
     assert is_pagination_link("https://www.cylex.es/chiclana-de-la-frontera/tiendas-2.html","2","www.cylex.es")
     assert not is_pagination_link("https://www.cylex.es/chiclana-de-la-frontera/azabache-14038263.html","Azabache","www.cylex.es")
     enrichment={"n":"Empresa de prueba","p":"956111111","e":"","w":"","h":"","d":"","a":""}
@@ -1599,6 +1601,12 @@ def candidate_review_notes(record):
     return notes
 
 
+def is_qdq_profile_url(target):
+    """Los perfiles QDQ usan slugs con ID numérico y no incluyen municipio en la URL."""
+    parsed=urllib.parse.urlsplit(target)
+    return parsed.netloc.lower()=="www.qdq.com" and bool(re.search(r"-\d+$",parsed.path))
+
+
 def is_pagination_link(target, label, host):
     """Identifica enlaces numerados de paginación, no fichas individuales."""
     if not str(label or "").strip().isdigit():
@@ -1672,7 +1680,9 @@ def main():
                     if is_pagination_link(target,label,final_host):
                         if target not in seed_pages_seen: seed_queue.append(target)
                         continue
-                    if any(parsed.path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS.get(final_host,())):
+                    if is_qdq_profile_url(target) or any(parsed.path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS.get(final_host,())):
+                        # QDQ mezcla resultados de municipios próximos; se descubren sus perfiles,
+                        # pero la extracción posterior exige dirección postal de Chiclana.
                         trusted_urls.add(target)
                         seed_count+=1
                         if seed_count>=seed_limit: break
