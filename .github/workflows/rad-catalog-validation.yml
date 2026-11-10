@@ -10,7 +10,7 @@ on:
       - '.github/workflows/prueba-rad-real.yml'
       - '.github/workflows/rad-enrich-catalog.yml'
   push:
-    branches: [main]
+    branches: [main, rad-fuentes-enriquecimiento-global]
     paths:
       - 'v3/rastreo_web_publico.py'
       - '.github/workflows/rad-self-test.yml'
