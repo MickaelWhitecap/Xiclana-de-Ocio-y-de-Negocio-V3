@@ -1237,6 +1237,16 @@ def self_test():
         assert address_only is not None, "No se ha extraído la dirección de una ficha local"
         assert "Mayorazgo" in address_only["address"] and "11130" in address_only["address"]
 
+        cylex_sample = """<html><head><title>Negocio Cylex de Prueba</title></head><body>
+        <h1>Negocio Cylex de Prueba</h1><p>Dirección: Calle Real 10, 11130 Chiclana de la Frontera</p>
+        <p>Teléfono 956 123 456</p><h2>Horario de apertura</h2>
+        <p>lunes 10:00 - 13:00 martes 10:00 - 13:00 miércoles 10:00 - 13:00</p>
+        <h2>Opiniones</h2></body></html>"""
+        get = lambda url, limit=1200000: (cylex_sample, url, "text/html")
+        cylex_record = extract("https://www.cylex.es/chiclana-de-la-frontera/negocio-prueba-12345678.html", trusted_local=True)
+        assert cylex_record is not None and cylex_record["phone"] == "956123456"
+        assert "10:00" in cylex_record["hours"], "No se ha extraído el horario visible de Cylex"
+
         nonlocal_sample = """<html><head><title>Servicio nacional</title>
         <meta name="description" content="Servicio disponible en Chiclana y toda España">
         <script type="application/ld+json">
