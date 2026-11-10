@@ -6,6 +6,7 @@ on:
       - "Auditoría municipal completa de OpenStreetMap"
       - "Recuperar propuestas de direcciones OSM"
       - "RAD - enriquecimiento del catálogo global"
+      - "Integrar candidatas RAD al catálogo global"
     types:
       - completed
   push:
