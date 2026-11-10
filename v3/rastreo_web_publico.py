@@ -32,7 +32,7 @@ QUERIES = [
     f'{CITY} site:actualidadsur.es/pueblos/chiclana-de-la-frontera',
 ]
 MAX_RESULTS_PER_QUERY = 12
-MAX_PAGES = 1800
+MAX_PAGES = 2000
 TIMEOUT = 18
 DIRECTORY_SEEDS = [
     "https://aechiclana.org/directorio/",
@@ -839,6 +839,13 @@ def extract(url, trusted_local=False):
     if addr and not re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",addr) and "chiclana" not in norm(addr):
         addr=""
     hours=obj.get("openingHours") or obj.get("openingHoursSpecification") or ""
+    if not hours and "cylex.es" in urllib.parse.urlparse(final_url).netloc.lower():
+        hours_match=re.search(
+            r"(?is)horario de apertura\\s*(.{0,900}?)(?:correo electr[oó]nico|opiniones|descripci[oó]n|$)",
+            blob
+        )
+        if hours_match and re.search(r"\\b\\d{1,2}[:.]\\d{2}\\b",hours_match.group(1)):
+            hours=" ".join(hours_match.group(1).split())[:500]
     if isinstance(hours,dict): hours=[hours]
     if isinstance(hours,list):
         parts=[]
