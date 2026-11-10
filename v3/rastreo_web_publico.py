@@ -46,6 +46,7 @@ DIRECTORY_SEEDS = [
     "https://www.cylex.es/chiclana-de-la-frontera/belleza.html",
     "https://www.cylex.es/chiclana-de-la-frontera/comercio.html",
     "https://www.paginasamarillas.es/a/establecimientos/cadiz/chiclana-de-la-frontera/",
+    "https://www.busqueda-local.es/comercio-de-materiales-de-construccion-en-medina-sidonia",
     "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/",
     "https://turismo.chiclana.es/sol-y-playa/ocio-y-diversion/",
 ]
@@ -71,6 +72,8 @@ DIRECT_DETAIL_URLS = [
     "https://inverairfactory.com/contacto/",
     "https://destaco.es/empresa/cualtis-chiclana-de-la-frontera",
     "https://www.tripadvisor.es/Restaurant_Review-g187433-d13398058-Reviews-Jero_s_Burguer-Chiclana_de_la_Frontera_Costa_de_la_Luz_Province_of_Cadiz_Andaluc.html",
+    "https://www.busqueda-local.es/chiclana-de-la-frontera/consmar-aY2RUu.html",
+    "https://carta.menu/restaurants/chiclana-de-la-frontera/jeros-burger",
 ]
 TRUSTED_DIRECTORY_PATHS = {
     "aechiclana.org": ("/directorio/trabajo/",),
@@ -80,6 +83,8 @@ TRUSTED_DIRECTORY_PATHS = {
     "www.cylex.es": ("/chiclana-de-la-frontera/",),
     "www.paginasamarillas.es": ("/f/chiclana-de-la-frontera/",),
     "destaco.es": ("/empresa/cualtis-chiclana-de-la-frontera",),
+    "www.busqueda-local.es": ("/chiclana-de-la-frontera/",),
+    "carta.menu": ("/restaurants/chiclana-de-la-frontera/",),
     "turismo.chiclana.es": (
         "/planifica-tu-viaje/alojamientos/alojamiento/",
         "/detalle-de-recurso/",
@@ -380,6 +385,7 @@ def clean_business_name(value):
         "rocio panes rodriguez agente en seguros allianz":"Rocío Panés Rodríguez",
         "alba ferreteria herrajes para la madera":"Ferretería Alba",
         "belizon y rodriguez s l":"Belizón y Rodríguez",
+        "consmar chiclana s l":"Consmar",
         "belizon y rodriguez lineas de autobuses transporte urbano e interurbano chiclana":"Belizón y Rodríguez",
         "cualtis s l unipersonal":"Cualtis",
         "inverair factory chiclana":"Inverair Factory",
