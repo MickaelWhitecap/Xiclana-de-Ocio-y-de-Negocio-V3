@@ -31,12 +31,13 @@ QUERIES = [
     f'{CITY} asociación comerciantes empresas socios',
 ]
 MAX_RESULTS_PER_QUERY = 12
-MAX_PAGES = 260
+MAX_PAGES = 700
 TIMEOUT = 18
 DIRECTORY_SEEDS = [
     "https://aechiclana.org/directorio/",
     "https://www.chiclanaguiadempresas.com/empresas/",
     "https://www.cadizturismo.com/es/listado-de-empresas/alojamientos/chiclana-de-la-frontera/todas-las-empresas",
+    "https://chiclana-de-la-frontera.todociudad.es/",
     "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/",
     "https://turismo.chiclana.es/sol-y-playa/ocio-y-diversion/",
 ]
@@ -44,6 +45,7 @@ TRUSTED_DIRECTORY_PATHS = {
     "aechiclana.org": ("/directorio/trabajo/",),
     "www.chiclanaguiadempresas.com": ("/empresas/empresa/",),
     "www.cadizturismo.com": ("/es/empresa/",),
+    "chiclana-de-la-frontera.todociudad.es": ("/negocio/",),
     "turismo.chiclana.es": (
         "/planifica-tu-viaje/alojamientos/alojamiento/",
         "/detalle-de-recurso/",
@@ -874,7 +876,7 @@ def extract(url, trusted_local=False):
     if not trusted_local and not re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",addr) and "chiclana" not in norm(addr):
         return None
     # Una dirección válida sin ningún canal de contacto tampoco es candidata accionable.
-    if not any((phone,email,website)): return None
+    if not any((phone,email,website)) and not (trusted_local and addr): return None
     schema_type=obj.get("@type",[])
     schema_types=schema_type if isinstance(schema_type,list) else [schema_type]
     schema_types=" ".join(str(x).rsplit("/",1)[-1].rsplit("#",1)[-1] for x in schema_types)
@@ -1299,7 +1301,8 @@ def main():
                 if parsed.scheme not in ("http","https") or parsed.netloc.lower()!=seed_host: continue
                 if any(parsed.path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS.get(seed_host,())):
                     trusted_urls.add(target); seed_count+=1
-                    if seed_count>=160: break
+                    seed_limit=450 if "chiclanaguiadempresas" in seed_host else 160
+                    if seed_count>=seed_limit: break
         except Exception as exc:
             print(f"Fuente directa no disponible ({seed}): {exc}",flush=True)
     links.extend(sorted(trusted_urls))
@@ -1362,6 +1365,11 @@ def main():
                 "tipo":match["kind"],"motivo":match["reason"],
                 "similitud":round(match["score"],3),"url_detectada":source_url
             })
+            seen_urls.add(u_key)
+            continue
+        # Los directorios locales sin teléfono/web solo pueden completar una ficha
+        # existente; no generan candidatas nuevas sin un canal de contacto.
+        if not any((record["phone"],record["email"],record["website"])):
             seen_urls.add(u_key)
             continue
         # También se comparan entre sí las candidatas del mismo rastreo.
