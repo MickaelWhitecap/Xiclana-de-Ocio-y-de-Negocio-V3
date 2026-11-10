@@ -1688,7 +1688,7 @@ def main():
     # independiente de los buscadores. Solo se confía en rutas de detalle conocidas.
     for seed in DIRECTORY_SEEDS:
         seed_host=urllib.parse.urlparse(seed).netloc.lower()
-        seed_limit=450 if any(x in seed_host for x in ("chiclanaguiadempresas","cylex.es","paginasamarillas.es")) else 160
+        seed_limit=450 if any(x in seed_host for x in ("chiclanaguiadempresas","cylex.es","paginasamarillas.es","qdq.com","tripadvisor.es")) else 160
         seed_queue=[seed]
         seed_pages_seen=set()
         seed_count=0
