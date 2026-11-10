@@ -31,17 +31,19 @@ QUERIES = [
     f'{CITY} asociación comerciantes empresas socios',
 ]
 MAX_RESULTS_PER_QUERY = 12
-MAX_PAGES = 140
+MAX_PAGES = 260
 TIMEOUT = 18
 DIRECTORY_SEEDS = [
     "https://aechiclana.org/directorio/",
-    "https://www.chiclanaguiadempresas.com/",
+    "https://www.chiclanaguiadempresas.com/empresas/",
+    "https://www.cadizturismo.com/es/listado-de-empresas/alojamientos/chiclana-de-la-frontera/todas-las-empresas",
     "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/",
     "https://turismo.chiclana.es/sol-y-playa/ocio-y-diversion/",
 ]
 TRUSTED_DIRECTORY_PATHS = {
     "aechiclana.org": ("/directorio/trabajo/",),
     "www.chiclanaguiadempresas.com": ("/empresas/empresa/",),
+    "www.cadizturismo.com": ("/es/empresa/",),
     "turismo.chiclana.es": (
         "/planifica-tu-viaje/alojamientos/alojamiento/",
         "/detalle-de-recurso/",
@@ -868,8 +870,8 @@ def extract(url, trusted_local=False):
     address_detail=norm(addr)
     address_detail=re.sub(r"\b(11130|11138|11139|chiclana|de|la|frontera)\b"," ",address_detail)
     address_detail=" ".join(address_detail.split())
-    if len(address_detail)<4: return None
-    if not re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",addr) and "chiclana" not in norm(addr):
+    if len(address_detail)<4 and not trusted_local: return None
+    if not trusted_local and not re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",addr) and "chiclana" not in norm(addr):
         return None
     # Una dirección válida sin ningún canal de contacto tampoco es candidata accionable.
     if not any((phone,email,website)): return None
@@ -885,6 +887,53 @@ def extract(url, trusted_local=False):
     return {"name":name,"type":tipo,"address":addr,"phone":phone,"email":email,"website":website,
             "hours":str(hours)[:500],"description":desc[:700],"source_url":final_url,
             "category":categoria}
+
+def merge_existing_record(existing, record, source_url):
+    """Enriquece una ficha existente sin sobrescribir datos ya guardados."""
+    changed=[]
+    conflicts=[]
+    mapping=(("a","address"),("h","hours"),("d","description"),("t","type"),("c","category"))
+    for key,source_key in mapping:
+        incoming=str(record.get(source_key) or "").strip()
+        if incoming and not str(existing.get(key) or "").strip():
+            existing[key]=incoming
+            changed.append(key)
+    incoming_phones=extract_phones(record.get("phone") or "")
+    old_phone=str(existing.get("p") or "").strip()
+    old_phones=extract_phones(old_phone)
+    additions=[x for x in incoming_phones if x not in old_phones]
+    if additions:
+        existing["p"]=" / ".join(([old_phone] if old_phone else [])+additions)
+        changed.append("p")
+    incoming_email=str(record.get("email") or "").strip()
+    old_email=str(existing.get("e") or "").strip()
+    if incoming_email and incoming_email.casefold() not in old_email.casefold():
+        if not old_email:
+            existing["e"]=incoming_email
+            changed.append("e")
+        else:
+            existing["e"]=old_email+" / "+incoming_email
+            changed.append("e")
+    incoming_web=str(record.get("website") or "").strip()
+    old_web=str(existing.get("w") or "").strip()
+    if incoming_web and not old_web:
+        existing["w"]=incoming_web
+        changed.append("w")
+    elif incoming_web and url_key(incoming_web)!=url_key(old_web):
+        alternatives=existing.setdefault("web_alternativas",[])
+        if incoming_web not in alternatives:
+            alternatives.append(incoming_web)
+            changed.append("web_alternativas")
+            conflicts.append("La fuente aporta una web distinta; se conserva la web principal.")
+    if changed:
+        sources=existing.setdefault("fuentes_datos",[])
+        if not isinstance(sources,list):
+            sources=[]
+            existing["fuentes_datos"]=sources
+        if not any(isinstance(x,dict) and url_key(x.get("url",""))==url_key(source_url) for x in sources):
+            sources.append({"url":source_url,"campos":changed})
+    return changed,conflicts
+
 
 def self_test():
     global allowed, get
@@ -1075,6 +1124,17 @@ def self_test():
         {"n":"Bodegas Primitivo Collantes","a":"Calle Real 10","p":"956400150 / 956531722"},
         {"n":"Bodegas Primitivo Collantes S.A.","a":"Avenida Diputación 20","p":"956531722 / 956400150"}
     )["kind"] in ("duplicate","possible")
+    enrichment={"n":"Empresa de prueba","p":"956111111","e":"","w":"","h":"","d":"","a":""}
+    changed,conflicts=merge_existing_record(enrichment,{
+        "address":"Calle Real 10, 11130 Chiclana","phone":"956222222",
+        "email":"info@empresa.es","website":"https://empresa.es",
+        "hours":"L-V 09:00-18:00","description":"Descripción comercial de prueba"
+    },"https://directorio.example/empresa")
+    assert "p" in changed and enrichment["p"]=="956111111 / 956222222"
+    assert enrichment["e"]=="info@empresa.es" and enrichment["w"]=="https://empresa.es"
+    assert enrichment["a"]=="Calle Real 10, 11130 Chiclana"
+    assert len(enrichment["fuentes_datos"])==1
+    assert merge_existing_record(enrichment,{"phone":"956222222"},"https://directorio.example/empresa")[0]==[]
 
     # Las señales de baja calidad se muestran para revisión, nunca se publican automáticamente.
     noisy=candidate_review_notes({
@@ -1196,7 +1256,16 @@ def main():
     existing=data["items"]+data.get("candidatas_revision",[])
     existing_pairs=set()
     existing_name_addresses={}
-    urls={url_key(x.get("url_fuente_rastreo", "")) for x in existing if isinstance(x,dict)}
+    urls=set()
+    for x in existing:
+        if not isinstance(x,dict): continue
+        source_url=x.get("url_fuente_rastreo","")
+        if source_url: urls.add(url_key(source_url))
+        sources=x.get("fuentes_datos",[])
+        if isinstance(sources,list):
+            for source in sources:
+                if isinstance(source,dict) and source.get("url"):
+                    urls.add(url_key(source["url"]))
     for item in existing:
         if not isinstance(item,dict): continue
         name=norm(item.get("n") or item.get("nombre") or item.get("name"))
@@ -1220,7 +1289,7 @@ def main():
                 if parsed.scheme not in ("http","https") or parsed.netloc.lower()!=seed_host: continue
                 if any(parsed.path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS.get(seed_host,())):
                     trusted_urls.add(target); seed_count+=1
-                    if seed_count>=20: break
+                    if seed_count>=160: break
         except Exception as exc:
             print(f"Fuente directa no disponible ({seed}): {exc}",flush=True)
     links.extend(sorted(trusted_urls))
@@ -1231,6 +1300,7 @@ def main():
     links=list(dict.fromkeys(links))[:MAX_PAGES]
     added=[]; seen_pairs=set(); seen_urls=set(); seen_unlocated_names=set()
     coincidencias=[]; registros_conocidos=existing[:]
+    fichas_enriquecidas=set(); campos_actualizados=0; conflictos_web=0
     for url in links:
         trusted_local=urllib.parse.urlparse(url).netloc.lower() in TRUSTED_DIRECTORY_PATHS and any(urllib.parse.urlparse(url).path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS[urllib.parse.urlparse(url).netloc.lower()])
         record=extract(url,trusted_local=trusted_local)
@@ -1249,6 +1319,33 @@ def main():
         match=find_catalog_match(candidate,registros_conocidos)
         if match and match["kind"] in ("duplicate","possible"):
             old=match["record"]
+            exact_name=norm(record["name"])==norm(record_value(old,"n","nombre","name"))
+            exact_name_matches=sum(
+                1 for x in registros_conocidos
+                if isinstance(x,dict) and norm(record["name"])==norm(record_value(x,"n","nombre","name"))
+            )
+            safe_to_enrich=(match["kind"]=="duplicate" or (trusted_local and exact_name and exact_name_matches==1))
+            if safe_to_enrich:
+                changed,conflicts=merge_existing_record(old,record,source_url)
+                if changed:
+                    fichas_enriquecidas.add(str(old.get("id") or record_value(old,"n","nombre","name")))
+                    campos_actualizados+=len(changed)
+                    conflictos_web+=len(conflicts)
+                    coincidencias.append({
+                        "nombre_detectado":record["name"],
+                        "nombre_catalogo":record_value(old,"n","nombre","name"),
+                        "tipo":"ficha_enriquecida","campos":changed,
+                        "url_detectada":source_url
+                    })
+                else:
+                    coincidencias.append({
+                        "nombre_detectado":record["name"],
+                        "nombre_catalogo":record_value(old,"n","nombre","name"),
+                        "tipo":match["kind"],"motivo":"Coincidencia confirmada; no había campos vacíos que completar.",
+                        "url_detectada":source_url
+                    })
+                seen_urls.add(u_key)
+                continue
             coincidencias.append({
                 "nombre_detectado":record["name"],
                 "nombre_catalogo":record_value(old,"n","nombre","name"),
@@ -1300,6 +1397,8 @@ def main():
     data["rad_ultima_ejecucion"]={"fecha_utc":datetime.now(timezone.utc).isoformat(),
        "buscadores":["DuckDuckGo HTML","Bing RSS"],"fuentes_directas":DIRECTORY_SEEDS,"consultas":len(QUERIES),
        "urls_encontradas":len(links),"candidatas_nuevas":len(added),
+       "fichas_enriquecidas":len(fichas_enriquecidas),"campos_actualizados":campos_actualizados,
+       "conflictos_web_no_sobrescritos":conflictos_web,
        "coincidencias_catalogo":len(coincidencias),
        "detalle_coincidencias":coincidencias[:100],
        "publicacion_automatica":False}
