@@ -1,0 +1,28 @@
+name: RAD - pruebas de deduplicación
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'v3/rastreo_web_publico.py'
+      - '.github/workflows/rad-self-test.yml'
+  push:
+    branches:
+      - rad-integracion-limpia
+    paths:
+      - 'v3/rastreo_web_publico.py'
+      - '.github/workflows/rad-self-test.yml'
+  workflow_dispatch:
+jobs:
+  self-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Ejecutar pruebas RAD sin tocar el catálogo
+        run: python v3/rastreo_web_publico.py --self-test
