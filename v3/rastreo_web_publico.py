@@ -46,9 +46,12 @@ DIRECTORY_SEEDS = [
     "https://www.cylex.es/chiclana-de-la-frontera/belleza.html",
     "https://www.cylex.es/chiclana-de-la-frontera/comercio.html",
     "https://www.paginasamarillas.es/a/establecimientos/cadiz/chiclana-de-la-frontera/",
-    "https://www.busqueda-local.es/comercio-de-materiales-de-construccion-en-medina-sidonia",
     "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/",
+    "https://turismo.chiclana.es/gastronomia/restaurantes/",
+    "https://turismo.chiclana.es/sol-y-playa/chiringuitos/",
     "https://turismo.chiclana.es/sol-y-playa/ocio-y-diversion/",
+    "https://turismo.chiclana.es/deportes/",
+    "https://turismo.chiclana.es/arte-y-cultura/",
 ]
 DIRECT_DETAIL_URLS = [
     "https://aechiclana.org/directorio/trabajo/alba-ferreteria-herrajes-para-la-madera/",
