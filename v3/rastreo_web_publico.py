@@ -29,6 +29,7 @@ QUERIES = [
     f'{CITY} empresas polígonos industriales directorio comercial',
     f'{CITY} directorio empresas guía comercial negocios',
     f'{CITY} asociación comerciantes empresas socios',
+    f'{CITY} site:actualidadsur.es/pueblos/chiclana-de-la-frontera',
 ]
 MAX_RESULTS_PER_QUERY = 12
 MAX_PAGES = 1800
