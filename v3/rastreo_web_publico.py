@@ -1209,6 +1209,14 @@ def self_test():
         assert trusted["phone"] == "956123456" and trusted["website"] == "https://hotel-local.example/"
         assert trusted["address"] == "", "No se debe inventar una dirección que la fuente no facilita"
 
+        address_only_sample = """<html><head><title>Comercio Local de Prueba</title></head>
+        <body><h1>Comercio Local de Prueba</h1>
+        <p>Dirección Av. del Mayorazgo, 37, 11130 Chiclana de la Frontera, Cádiz, Spain</p></body></html>"""
+        get = lambda url, limit=1200000: (address_only_sample, url, "text/html")
+        address_only = extract("https://chiclana-de-la-frontera.todociudad.es/negocio/test-id", trusted_local=True)
+        assert address_only is not None, "No se ha extraído la dirección de una ficha local"
+        assert "Mayorazgo" in address_only["address"] and "11130" in address_only["address"]
+
         nonlocal_sample = """<html><head><title>Servicio nacional</title>
         <meta name="description" content="Servicio disponible en Chiclana y toda España">
         <script type="application/ld+json">
