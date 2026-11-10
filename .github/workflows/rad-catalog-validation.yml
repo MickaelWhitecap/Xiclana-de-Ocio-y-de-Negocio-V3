@@ -1,5 +1,13 @@
 name: RAD - validación contra catálogo real
 on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'v3/rastreo_web_publico.py'
+      - '.github/workflows/rad-self-test.yml'
+      - '.github/workflows/rad-catalog-validation.yml'
   push:
     branches:
       - rad-integracion-limpia
