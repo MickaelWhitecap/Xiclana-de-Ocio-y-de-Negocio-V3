@@ -1,7 +1,7 @@
 {
   "fecha": "2026-11-10",
   "categorias_catalogo": {
-    "total_distintas_tipo_categoria": 116,
+    "total_distintas_tipo_categoria": 125,
     "distribucion": [
       {
         "tipo": "negocio",
@@ -20,8 +20,13 @@
       },
       {
         "tipo": "negocio",
+        "categoria": "Alimentación",
+        "fichas": 12
+      },
+      {
+        "tipo": "negocio",
         "categoria": "Alojamiento",
-        "fichas": 2
+        "fichas": 5
       },
       {
         "tipo": "negocio",
@@ -40,6 +45,11 @@
       },
       {
         "tipo": "negocio",
+        "categoria": "Automoción",
+        "fichas": 3
+      },
+      {
+        "tipo": "negocio",
         "categoria": "Balneario y spa",
         "fichas": 1
       },
@@ -52,6 +62,11 @@
         "tipo": "negocio",
         "categoria": "Bazar",
         "fichas": 7
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Belleza y deporte",
+        "fichas": 6
       },
       {
         "tipo": "negocio",
@@ -101,7 +116,7 @@
       {
         "tipo": "negocio",
         "categoria": "Comercio",
-        "fichas": 60
+        "fichas": 81
       },
       {
         "tipo": "negocio",
@@ -146,7 +161,7 @@
       {
         "tipo": "negocio",
         "categoria": "Educación",
-        "fichas": 6
+        "fichas": 13
       },
       {
         "tipo": "negocio",
@@ -221,7 +236,7 @@
       {
         "tipo": "negocio",
         "categoria": "Inmobiliaria",
-        "fichas": 6
+        "fichas": 15
       },
       {
         "tipo": "negocio",
@@ -232,6 +247,11 @@
         "tipo": "negocio",
         "categoria": "Joyería",
         "fichas": 6
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Joyería y relojería",
+        "fichas": 4
       },
       {
         "tipo": "negocio",
@@ -267,6 +287,11 @@
         "tipo": "negocio",
         "categoria": "Muebles",
         "fichas": 4
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Muebles y decoración",
+        "fichas": 20
       },
       {
         "tipo": "negocio",
@@ -331,7 +356,7 @@
       {
         "tipo": "negocio",
         "categoria": "Salud",
-        "fichas": 6
+        "fichas": 28
       },
       {
         "tipo": "negocio",
@@ -345,6 +370,11 @@
       },
       {
         "tipo": "negocio",
+        "categoria": "Servicios profesionales",
+        "fichas": 25
+      },
+      {
+        "tipo": "negocio",
         "categoria": "Servicios públicos",
         "fichas": 1
       },
@@ -352,6 +382,11 @@
         "tipo": "negocio",
         "categoria": "Servicios sociales",
         "fichas": 2
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Servicios y negocios",
+        "fichas": 152
       },
       {
         "tipo": "negocio",
@@ -535,6 +570,11 @@
       },
       {
         "tipo": "ocio",
+        "categoria": "Ocio y cultura",
+        "fichas": 4
+      },
+      {
+        "tipo": "ocio",
         "categoria": "Oficina de turismo",
         "fichas": 3
       },
@@ -567,6 +607,11 @@
         "tipo": "ocio",
         "categoria": "Plaza / paseo",
         "fichas": 1
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Restauración",
+        "fichas": 34
       },
       {
         "tipo": "ocio",
@@ -603,29 +648,29 @@
     ],
     "distribucion": {
       "4": 6,
-      "5": 6,
-      "6": 581,
-      "7": 292,
-      "8": 66,
-      "9": 81,
+      "5": 7,
+      "6": 611,
+      "7": 410,
+      "8": 150,
+      "9": 170,
       "10": 53,
       "11": 21,
       "12": 16
     },
-    "fichas_con_algun_medio_de_contacto": 275,
-    "fichas_con_email": 132
+    "fichas_con_algun_medio_de_contacto": 597,
+    "fichas_con_email": 338
   },
-  "total_registros_historicos": 1327,
-  "total_items_publicables": 1122,
+  "total_registros_historicos": 1649,
+  "total_items_publicables": 1444,
   "total_items_marcados_borrados": 205,
-  "total_candidatas_revision": 345,
+  "total_candidatas_revision": 23,
   "candidatos_automaticos_heredados_en_items": 0,
   "ids_automaticos_heredados": [],
   "ids_automaticos_nuevos_no_aprobados": [],
   "registros_invalidos_o_ids_repetidos": [],
   "fichas_sin_nombre_categoria_o_tipo_valido": [],
   "calidad_de_campos_opcionales": {
-    "fichas_sin_direccion": 600,
+    "fichas_sin_direccion": 642,
     "correos_invalidos": [
       {
         "id": "osm:node:9550529384",
@@ -650,9 +695,9 @@
     "nota": "Control informativo: no modifica fichas ni bloquea la publicación por campos opcionales."
   },
   "direcciones_pendientes": {
-    "total_sin_direccion": 600,
+    "total_sin_direccion": 642,
     "con_coordenadas_validas": 593,
-    "sin_coordenadas_validas": 7,
+    "sin_coordenadas_validas": 49,
     "distribucion_por_tipo_y_categoria": [
       {
         "tipo": "ocio",
@@ -669,6 +714,13 @@
         "sin_coordenadas": 0
       },
       {
+        "tipo": "negocio",
+        "categoria": "Comercio",
+        "total": 39,
+        "con_coordenadas": 37,
+        "sin_coordenadas": 2
+      },
+      {
         "tipo": "ocio",
         "categoria": "Parque",
         "total": 39,
@@ -677,17 +729,17 @@
       },
       {
         "tipo": "negocio",
-        "categoria": "Comercio",
-        "total": 37,
-        "con_coordenadas": 37,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "negocio",
         "categoria": "Ropa",
         "total": 29,
         "con_coordenadas": 29,
         "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Servicios y negocios",
+        "total": 26,
+        "con_coordenadas": 0,
+        "sin_coordenadas": 26
       },
       {
         "tipo": "negocio",
@@ -810,6 +862,13 @@
       },
       {
         "tipo": "negocio",
+        "categoria": "Educación",
+        "total": 6,
+        "con_coordenadas": 5,
+        "sin_coordenadas": 1
+      },
+      {
+        "tipo": "negocio",
         "categoria": "Farmacia",
         "total": 6,
         "con_coordenadas": 6,
@@ -873,10 +932,10 @@
       },
       {
         "tipo": "negocio",
-        "categoria": "Educación",
+        "categoria": "Inmobiliaria",
         "total": 5,
-        "con_coordenadas": 5,
-        "sin_coordenadas": 0
+        "con_coordenadas": 3,
+        "sin_coordenadas": 2
       },
       {
         "tipo": "negocio",
@@ -985,13 +1044,6 @@
       },
       {
         "tipo": "negocio",
-        "categoria": "Inmobiliaria",
-        "total": 3,
-        "con_coordenadas": 3,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "negocio",
         "categoria": "Lavandería",
         "total": 3,
         "con_coordenadas": 3,
@@ -1047,6 +1099,20 @@
         "sin_coordenadas": 0
       },
       {
+        "tipo": "ocio",
+        "categoria": "Ocio y cultura",
+        "total": 3,
+        "con_coordenadas": 0,
+        "sin_coordenadas": 3
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Restauración",
+        "total": 3,
+        "con_coordenadas": 0,
+        "sin_coordenadas": 3
+      },
+      {
         "tipo": "negocio",
         "categoria": "Abogado",
         "total": 2,
@@ -1059,6 +1125,13 @@
         "total": 2,
         "con_coordenadas": 2,
         "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Alojamiento",
+        "total": 2,
+        "con_coordenadas": 1,
+        "sin_coordenadas": 1
       },
       {
         "tipo": "negocio",
@@ -1104,10 +1177,24 @@
       },
       {
         "tipo": "negocio",
+        "categoria": "Muebles y decoración",
+        "total": 2,
+        "con_coordenadas": 0,
+        "sin_coordenadas": 2
+      },
+      {
+        "tipo": "negocio",
         "categoria": "Salud",
         "total": 2,
         "con_coordenadas": 2,
         "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Servicios profesionales",
+        "total": 2,
+        "con_coordenadas": 0,
+        "sin_coordenadas": 2
       },
       {
         "tipo": "negocio",
@@ -1135,13 +1222,6 @@
         "categoria": "Golf",
         "total": 2,
         "con_coordenadas": 2,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "negocio",
-        "categoria": "Alojamiento",
-        "total": 1,
-        "con_coordenadas": 1,
         "sin_coordenadas": 0
       },
       {
