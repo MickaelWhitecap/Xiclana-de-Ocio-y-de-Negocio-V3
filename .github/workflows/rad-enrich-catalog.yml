@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: rad-enriquecimiento-catalogo-global
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   enrich-global-catalog:
