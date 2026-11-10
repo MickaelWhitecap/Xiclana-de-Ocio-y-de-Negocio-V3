@@ -1106,40 +1106,68 @@ def openrta_rows(payload):
 
 
 def fetch_openrta_records():
-    """Consulta el registro oficial diario de turismo; si falla, RAD continúa con el resto."""
+    """Consulta OpenRTA; usa el API solo si robots lo permite y, si no, prueba el recurso de descarga oficial."""
     endpoint="https://datos.juntadeandalucia.es/api/v0/openrta/search"
-    if not allowed(endpoint):
-        print("OpenRTA omitido: robots.txt no autoriza la consulta.",flush=True)
-        return []
     payload={
         "municipalities":"CHICLANA DE LA FRONTERA","provinces":"CÁDIZ",
         "order_by":"data.ID","mode":"ASC","format":"json","size":5000
     }
+    if allowed(endpoint):
+        try:
+            host=urllib.parse.urlparse(endpoint).netloc.lower()
+            wait=1.0-(time.time()-LAST_REQUEST.get(host,0))
+            if wait>0: time.sleep(wait)
+            request=urllib.request.Request(
+                endpoint,data=json.dumps(payload,ensure_ascii=False).encode("utf-8"),
+                headers={"User-Agent":UA,"Accept":"application/json","Content-Type":"application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(request,timeout=60) as response:
+                final_url=response.geturl()
+                if urllib.parse.urlparse(final_url).netloc.lower()!=host:
+                    raise ValueError("El API OpenRTA redirigió fuera de su dominio oficial.")
+                raw=response.read(50_000_001)
+                LAST_REQUEST[host]=time.time()
+            if len(raw)>50_000_000: raise ValueError("Respuesta OpenRTA superior a 50 MB; se omite por seguridad.")
+            payload_data=json.loads(raw.decode("utf-8-sig",errors="replace"))
+            rows=openrta_rows(payload_data)
+            records=[record for record in (normalize_openrta_record(row) for row in rows) if record]
+            if records:
+                unique={r["source_url"]:r for r in records}
+                records=list(unique.values())
+                print(f"OpenRTA API: {len(records)} registros turísticos de Chiclana válidos, de {len(rows)} recibidos; licencia CC BY 4.0.",flush=True)
+                return records
+        except Exception as exc:
+            print(f"OpenRTA API no disponible; se probará el recurso de descarga oficial: {exc}",flush=True)
+    else:
+        print("OpenRTA API de búsqueda no autorizada por robots.txt; se comprobará el recurso de descarga oficial.",flush=True)
+
+    download_url="https://www.juntadeandalucia.es/ssdigitales/festa/download-pro/dataset-openrta.json"
+    if not allowed(download_url):
+        print("OpenRTA omitido: robots.txt tampoco autoriza el recurso oficial de descarga.",flush=True)
+        return []
     try:
-        host=urllib.parse.urlparse(endpoint).netloc.lower()
+        class RobotsCheckedRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self,req,fp,code,msg,headers,newurl):
+                target=urllib.parse.urljoin(req.full_url,newurl)
+                if not allowed(target):
+                    raise PermissionError("Redirección OpenRTA bloqueada por robots.txt: "+target)
+                return super().redirect_request(req,fp,code,msg,headers,target)
+        host=urllib.parse.urlparse(download_url).netloc.lower()
         wait=1.0-(time.time()-LAST_REQUEST.get(host,0))
         if wait>0: time.sleep(wait)
-        request=urllib.request.Request(
-            endpoint,data=json.dumps(payload,ensure_ascii=False).encode("utf-8"),
-            headers={"User-Agent":UA,"Accept":"application/json","Content-Type":"application/json"},
-            method="POST"
-        )
-        with urllib.request.urlopen(request,timeout=60) as response:
-            final_url=response.geturl()
-            if urllib.parse.urlparse(final_url).netloc.lower()!=host:
-                raise ValueError("El API OpenRTA redirigió fuera de su dominio oficial.")
-            raw=response.read(50_000_001)
+        opener=urllib.request.build_opener(RobotsCheckedRedirect())
+        request=urllib.request.Request(download_url,headers={"User-Agent":UA,"Accept":"application/json"})
+        with opener.open(request,timeout=90) as response:
+            raw=response.read(100_000_001)
             LAST_REQUEST[host]=time.time()
-        if len(raw)>50_000_000: raise ValueError("Respuesta OpenRTA superior a 50 MB; se omite por seguridad.")
-        payload_data=json.loads(raw.decode("utf-8",errors="replace"))
+        if len(raw)>100_000_000: raise ValueError("Dataset OpenRTA superior a 100 MB; se omite por seguridad.")
+        payload_data=json.loads(raw.decode("utf-8-sig",errors="replace"))
         rows=openrta_rows(payload_data)
-        records=[]
-        for row in rows:
-            record=normalize_openrta_record(row)
-            if record: records.append(record)
+        records=[record for record in (normalize_openrta_record(row) for row in rows) if record]
         unique={r["source_url"]:r for r in records}
         records=list(unique.values())
-        print(f"OpenRTA: {len(records)} registros turísticos de Chiclana válidos, de {len(rows)} recibidos; licencia CC BY 4.0.",flush=True)
+        print(f"OpenRTA descarga oficial: {len(records)} registros turísticos de Chiclana válidos, de {len(rows)} recibidos; licencia CC BY 4.0.",flush=True)
         return records
     except Exception as exc:
         print(f"OpenRTA no disponible; continúa el rastreo web: {exc}",flush=True)
