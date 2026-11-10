@@ -1197,6 +1197,16 @@ def self_test():
         assert multi["name"] == "Agrojardín Reina", multi["name"]
         assert multi["website"] == "https://agrojardinreina.es/", multi["website"]
 
+        trusted_contact_sample = """<html><head><title>Hotel Local de Prueba</title></head>
+        <body><h1>Hotel Local de Prueba</h1><p>956 123 456</p>
+        <a href="https://hotel-local.example/">hotel-local.example</a></body></html>"""
+        get = lambda url, limit=1200000: (trusted_contact_sample, url, "text/html")
+        trusted = extract("https://www.cadizturismo.com/es/empresa/hotel-local", trusted_local=True)
+        assert trusted is not None, "No se ha aceptado la ficha local de directorio oficial sin calle"
+        assert trusted["name"] == "Hotel Local de Prueba"
+        assert trusted["phone"] == "956123456" and trusted["website"] == "https://hotel-local.example/"
+        assert trusted["address"] == "", "No se debe inventar una dirección que la fuente no facilita"
+
         nonlocal_sample = """<html><head><title>Servicio nacional</title>
         <meta name="description" content="Servicio disponible en Chiclana y toda España">
         <script type="application/ld+json">
