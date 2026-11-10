@@ -94,6 +94,12 @@ jobs:
           git commit -m "Enriquecer catálogo global con fuentes RAD"
           git fetch origin main
           git rebase origin/main
+          size=$(wc -c < v3/fichas_completas.json)
+          echo "Tamaño del catálogo maestro tras RAD: $size bytes"
+          if [ "$size" -ge 100000000 ]; then
+            echo "::error::El catálogo supera el límite de 100 MB de GitHub; se cancela la integración sin modificar main."
+            exit 1
+          fi
           git push origin HEAD:main
       - name: Guardar informe RAD
         if: always()
