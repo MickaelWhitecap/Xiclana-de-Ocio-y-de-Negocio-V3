@@ -1001,11 +1001,156 @@ def extract(url, trusted_local=False):
             "hours":str(hours)[:500],"description":desc[:700],"source_url":final_url,
             "category":categoria}
 
+def rta_text(value):
+    if isinstance(value,list):
+        return " / ".join(x for x in (rta_text(v) for v in value) if x)
+    if isinstance(value,dict):
+        return rta_text(value.get("name") or value.get("value") or value.get("label") or value.get("description") or "")
+    return str(value or "").strip()
+
+
+def rta_key(value):
+    return re.sub(r"[^a-z0-9]+","_",norm(value)).strip("_")
+
+
+def normalize_openrta_record(row):
+    """Convierte un registro OpenRTA en ficha RAD; excluye viviendas turísticas privadas."""
+    if not isinstance(row,dict): return None
+    if isinstance(row.get("attributes"),dict):
+        row={**row,**row["attributes"]}
+    fields={rta_key(k):v for k,v in row.items()}
+    def val(*keys):
+        for key in keys:
+            value=rta_text(fields.get(rta_key(key)))
+            if value: return value
+        return ""
+    name=clean_business_name(val("name","commercial_name","denomination","trade_name"))
+    if not name or not valid_business_name(name): return None
+    municipality=val("municipalities","municipality","guide_municipality")
+    province=val("provinces","province","guide_province")
+    if norm(municipality)!="chiclana de la frontera" or norm(province)!="cadiz": return None
+    object_type=val("object_type","objects_type")
+    object_type_id=val("object_type_id","objects_type_id")
+    holder=val("holder","titular")
+    is_tourist_home=("vivienda con fines turisticos" in norm(object_type) or object_type_id=="3032")
+    if is_tourist_home:
+        holder_key=norm(holder)
+        corporate=bool(re.search(r"\b(sl|s l|slu|s l u|sa|s a|sau|s a u|scoop|s coop|sociedad limitada|sociedad anonima|cooperativa)\b",holder_key))
+        if not corporate: return None
+    postal=val("postal_code","guide_postal_code")
+    address=val("establishment_address","address")
+    if not address:
+        road_parts=[val("road_type"),val("road_name"),val("portal"),val("km"),val("km_num"),
+                    val("domicile_complement"),val("floor"),val("door")]
+        address=" ".join(x for x in road_parts if x)
+    if postal and postal not in address: address=(address+", "+postal).strip(", ")
+    if municipality and norm(municipality) not in norm(address): address=(address+", "+municipality).strip(", ")
+    address=clean_address(address,municipality,postal)
+    address_detail=norm(address)
+    address_detail=re.sub(r"\b(11130|11138|11139|chiclana|de|la|frontera)\b"," ",address_detail)
+    if len(" ".join(address_detail.split()))<4: return None
+    phones=[]
+    for key in ("phone","mobile","guide_phone","guide_mobile"):
+        value=val(key)
+        if value: phones.extend(extract_phones(value))
+    phone=" / ".join(sanitize_contact_phones(name," / ".join(dict.fromkeys(phones))))
+    email=val("email","guide_email")
+    website=clean_website(val("url","website"),"https://datos.juntadeandalucia.es/")
+    description=clean_description(val("description"),name)
+    group=val("group")
+    categories=val("categories","category")
+    activity=norm(" ".join((object_type,group,categories)))
+    if any(x in activity for x in ("restauracion","restaurante","catering")):
+        tipo,categoria="ocio","Restauración"
+    elif any(x in activity for x in ("hotel","camping","hostal","albergue","pension","apartamento","vivienda con fines turisticos")):
+        tipo,categoria="ocio","Alojamiento"
+    elif any(x in activity for x in ("turismo activo","agencia de viajes","oficina de turismo","ocio entretenimiento")):
+        tipo,categoria="ocio","Servicios turísticos"
+    else:
+        tipo,categoria=classify(" ".join((name,object_type,group,categories,description)))
+    bid=val("id","bid")
+    registration_code=val("registration_code")
+    if not bid.isdigit(): return None
+    return {
+        "name":name,"type":tipo,"category":categoria,"address":address,
+        "phone":phone,"email":email,"website":website,"hours":"",
+        "description":description,"source_url":f"https://datos.juntadeandalucia.es/api/v0/openrta/{bid}",
+        "registration_code":registration_code,"source_license":"CC BY 4.0"
+    }
+
+
+def openrta_rows(payload):
+    """Localiza la lista de registros en las variantes de respuesta del API."""
+    def walk(value,depth=0):
+        if depth>7: return []
+        if isinstance(value,list):
+            dicts=[x for x in value if isinstance(x,dict)]
+            if dicts and any(any(k in x for k in ("name","Name","registration_code","registrationCode","id","ID")) for x in dicts):
+                return dicts
+            for item in value:
+                found=walk(item,depth+1)
+                if found: return found
+        elif isinstance(value,dict):
+            for key in ("data","results","records","items","result","establecimientos","content"):
+                if key in value:
+                    found=walk(value[key],depth+1)
+                    if found: return found
+            dict_values=[v for v in value.values() if isinstance(v,dict)]
+            if dict_values and any(any(k in x for k in ("name","Name","registration_code","registrationCode","id","ID")) for x in dict_values):
+                return dict_values
+            for item in value.values():
+                found=walk(item,depth+1)
+                if found: return found
+        return []
+    return walk(payload)
+
+
+def fetch_openrta_records():
+    """Consulta el registro oficial diario de turismo; si falla, RAD continúa con el resto."""
+    endpoint="https://datos.juntadeandalucia.es/api/v0/openrta/search"
+    if not allowed(endpoint):
+        print("OpenRTA omitido: robots.txt no autoriza la consulta.",flush=True)
+        return []
+    payload={
+        "municipalities":"CHICLANA DE LA FRONTERA","provinces":"CÁDIZ",
+        "order_by":"data.ID","mode":"ASC","format":"json","size":5000
+    }
+    try:
+        host=urllib.parse.urlparse(endpoint).netloc.lower()
+        wait=1.0-(time.time()-LAST_REQUEST.get(host,0))
+        if wait>0: time.sleep(wait)
+        request=urllib.request.Request(
+            endpoint,data=json.dumps(payload,ensure_ascii=False).encode("utf-8"),
+            headers={"User-Agent":UA,"Accept":"application/json","Content-Type":"application/json"},
+            method="POST"
+        )
+        with urllib.request.urlopen(request,timeout=60) as response:
+            final_url=response.geturl()
+            if urllib.parse.urlparse(final_url).netloc.lower()!=host:
+                raise ValueError("El API OpenRTA redirigió fuera de su dominio oficial.")
+            raw=response.read(50_000_001)
+            LAST_REQUEST[host]=time.time()
+        if len(raw)>50_000_000: raise ValueError("Respuesta OpenRTA superior a 50 MB; se omite por seguridad.")
+        payload_data=json.loads(raw.decode("utf-8",errors="replace"))
+        rows=openrta_rows(payload_data)
+        records=[]
+        for row in rows:
+            record=normalize_openrta_record(row)
+            if record: records.append(record)
+        unique={r["source_url"]:r for r in records}
+        records=list(unique.values())
+        print(f"OpenRTA: {len(records)} registros turísticos de Chiclana válidos, de {len(rows)} recibidos; licencia CC BY 4.0.",flush=True)
+        return records
+    except Exception as exc:
+        print(f"OpenRTA no disponible; continúa el rastreo web: {exc}",flush=True)
+        return []
+
+
 def merge_existing_record(existing, record, source_url):
     """Enriquece una ficha existente sin sobrescribir datos ya guardados."""
     changed=[]
     conflicts=[]
-    mapping=(("a","address"),("h","hours"),("d","description"),("t","type"),("c","category"))
+    mapping=(("a","address"),("h","hours"),("d","description"),("t","type"),("c","category"),("rta_registro","registration_code"))
     for key,source_key in mapping:
         incoming=str(record.get(source_key) or "").strip()
         # AEChiclana publica para Ferretería Alba una dirección que contradice
@@ -1063,7 +1208,10 @@ def merge_existing_record(existing, record, source_url):
             sources=[]
             existing["fuentes_datos"]=sources
         if not any(isinstance(x,dict) and url_key(x.get("url",""))==url_key(source_url) for x in sources):
-            sources.append({"url":source_url,"campos":changed})
+            source_info={"url":source_url,"campos":changed}
+            if "datos.juntadeandalucia.es" in source_url:
+                source_info["licencia"]="CC BY 4.0"
+            sources.append(source_info)
     return changed,conflicts
 
 
@@ -1110,6 +1258,19 @@ def self_test():
     assert extract_phones("956 401 156650 767 055682 365 666") == ["956401156","650767055","682365666"]
     assert sanitize_contact_phones("TopGea Topografía","856652307 / 856243221 / 671495283") == ["856243221","671495283"]
     assert sanitize_contact_phones("Cristalería Carlos Moreno","607429633 / 956536136 / 956536241") == ["607429633","956536136"]
+    rta_sample=normalize_openrta_record({
+        "id":12345,"name":"Hotel de Prueba","object_type":"Establecimiento hotelero",
+        "object_type_id":"3000","municipalities":"CHICLANA DE LA FRONTERA","provinces":"CÁDIZ",
+        "establishment_address":"Calle Real 10","postal_code":"11130","phone":"956123456",
+        "registration_code":"H/CA/12345","group":"Hotel","categories":"4 Estrellas"
+    })
+    assert rta_sample and rta_sample["name"]=="Hotel de Prueba"
+    assert rta_sample["category"]=="Alojamiento" and rta_sample["registration_code"]=="H/CA/12345"
+    assert normalize_openrta_record({
+        "id":12346,"name":"Vivienda Turística Particular","object_type":"Vivienda con fines turísticos",
+        "object_type_id":"3032","holder":"Juan Pérez","municipalities":"CHICLANA DE LA FRONTERA",
+        "provinces":"CÁDIZ","establishment_address":"Calle Real 10","postal_code":"11130"
+    }) is None
     contact_page=Page()
     contact_page.feed("<html><body><p>Información de contacto</p><p>Av. del Torno, 5, Chiclana de la Frontera, Cádiz, España</p><p>613 571 762956 112 418</p><p>centauro@example.es</p><p>Síguenos en Instagram</p><p>685 51 66 19</p></body></html>")
     assert extract_contact_phones(contact_page) == ["613571762","956112418"]
@@ -1433,6 +1594,8 @@ def candidate_review_notes(record):
         if phone[0] in "89" and not phone.startswith(("856","956")):
             notes.append("El teléfono fijo no presenta prefijo geográfico de Cádiz; confirmar que corresponde al establecimiento de Chiclana.")
             break
+    if record.get("registration_code") and not any(record.get(k) for k in ("phone","email","website")):
+        notes.append("Registro turístico oficial sin teléfono, correo ni web publicados; validar el canal de contacto antes de aprobar.")
     return notes
 
 
@@ -1521,12 +1684,19 @@ def main():
             try: links.extend(engine(q))
             except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
     links=list(dict.fromkeys(links))[:MAX_PAGES]
+    openrta_records=fetch_openrta_records()
     added=[]; seen_pairs=set(); seen_urls=set(); seen_unlocated_names=set()
     coincidencias=[]; registros_conocidos=existing[:]
     fichas_enriquecidas=set(); campos_actualizados=0; conflictos_no_sobrescritos=0
-    for url in links:
-        trusted_local=urllib.parse.urlparse(url).netloc.lower() in TRUSTED_DIRECTORY_PATHS and any(urllib.parse.urlparse(url).path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS[urllib.parse.urlparse(url).netloc.lower()])
-        record=extract(url,trusted_local=trusted_local)
+    for source in links+openrta_records:
+        if isinstance(source,dict):
+            record=source
+            url=record["source_url"]
+            trusted_local=True
+        else:
+            url=source
+            trusted_local=urllib.parse.urlparse(url).netloc.lower() in TRUSTED_DIRECTORY_PATHS and any(urllib.parse.urlparse(url).path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS[urllib.parse.urlparse(url).netloc.lower()])
+            record=extract(url,trusted_local=trusted_local)
         if not record: continue
         name_key=norm(record["name"]); addr_key=norm(record["address"])
         pair=name_key+"|"+addr_key if addr_key else ""
@@ -1579,7 +1749,7 @@ def main():
             continue
         # Los directorios locales sin teléfono/web solo pueden completar una ficha
         # existente; no generan candidatas nuevas sin un canal de contacto.
-        if not any((record["phone"],record["email"],record["website"])):
+        if not any((record["phone"],record["email"],record["website"])) and not record.get("registration_code"):
             seen_urls.add(u_key)
             continue
         # También se comparan entre sí las candidatas del mismo rastreo.
@@ -1602,15 +1772,17 @@ def main():
             ("direccion",record["address"]),("telefono",record["phone"]),("correo",record["email"]),
             ("web",record["website"]),("horario",record["hours"]),("descripcion",record["description"])
         ] if v]
+        if record.get("registration_code"): fields_present.append("registro_turismo")
         candidate={
           "id":"rad:"+digest,"n":record["name"],"t":record["type"],"c":record["category"],
           "a":record["address"],"p":record["phone"],"e":record["email"],
           "w":record["website"],"h":record["hours"],"d":record["description"],
           "f":"Rastreo web público (RAD)","url_fuente_rastreo":source_url,
-          "fuentes_datos":[{"url":source_url,"campos":fields_present}],
+          "fuentes_datos":[{"url":source_url,"campos":fields_present,**({"licencia":"CC BY 4.0"} if record.get("source_license") else {})}],
           "estado_revision":"pendiente","fuente_estado":"Candidato detectado en fuente web pública; pendiente de validación manual",
           "fecha_deteccion_utc":datetime.now(timezone.utc).isoformat()
         }
+        if record.get("registration_code"): candidate["rta_registro"]=record["registration_code"]
         review_notes=candidate_review_notes(record)
         if match and match["kind"]=="branch":
             review_notes.append("Mismo nombre que otra ficha, pero dirección distinta; posible sucursal. Validar manualmente antes de aprobar.")
@@ -1625,6 +1797,8 @@ def main():
     data["rad_ultima_ejecucion"]={"fecha_utc":datetime.now(timezone.utc).isoformat(),
        "buscadores":["DuckDuckGo HTML","Bing RSS"],"fuentes_directas":DIRECTORY_SEEDS,
        "fuentes_detalle_directo":DIRECT_DETAIL_URLS,"consultas":len(QUERIES),
+       "fuente_registro_oficial":{"nombre":"OpenRTA - Junta de Andalucía","url":"https://datos.juntadeandalucia.es/api/v0/openrta/search","licencia":"CC BY 4.0"},
+       "openrta_registros_validos":len(openrta_records),
        "urls_encontradas":len(links),"candidatas_nuevas":len(added),
        "fichas_enriquecidas":len(fichas_enriquecidas),"campos_actualizados":campos_actualizados,
        "conflictos_datos_no_sobrescritos":conflictos_no_sobrescritos,
