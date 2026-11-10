@@ -973,6 +973,7 @@ def merge_existing_record(existing, record, source_url):
                 conflicts.append("La fuente aporta una dirección alternativa; se conserva la principal.")
             continue
         if key=="d" and "informa.es" in source_url:
+            conflicts.append("Se omite la descripción registral de Informa; no es texto comercial.")
             continue
         if incoming and not old_value:
             existing[key]=incoming
