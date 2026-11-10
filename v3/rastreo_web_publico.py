@@ -331,6 +331,9 @@ def clean_business_name(value):
         "almacen de maderas molduras serrano carpinteria carpinteros":"Molduras Serrano",
         "tatuaje tattoo nono tattoo studio":"Ñoño Tattoo Studio",
         "viajes mms chiclana agencia":"Viajes MMS Chiclana",
+        "dualopticos opticas opticos lentillas":"Dualópticos",
+        "peluqueria barber shop sanchez peluquero":"Barber Shop Sánchez",
+        "telefonia mundophone fibra telefonia movil telefonos":"MundoPhone",
         "bar cerveceria d los oliva bares":"Bar Cervecería D´Los Oliva",
         "centros deportivos amigos del aerobic pilates body combat":"Amigos del Aerobic",
         "peluqueria gernis salon de belleza cosmetica peluquerias":"Peluquería Gernis",
@@ -379,6 +382,8 @@ def clean_address(value, locality="", postal=""):
     """Normaliza direcciones y descarta localidades/códigos postales sin vía concreta."""
     raw=html.unescape(re.sub(r"<[^>]*>", " ", str(value or "")))
     raw=re.sub(r"(?i)^\s*(?:direcci[oó]n|address)\s*[:\-]?\s*", "", raw)
+    # Descarta coordenadas GPS y altitud añadidas al final de una dirección.
+    raw=re.sub(r",?\s*\d{1,2}[º°]\s*\d{1,2}['′]\s*\d{1,2}(?:[\.,]\d+)?[\"″]?\s*[NSEW]?(?:\s+\d{1,4}\s*m)?\)?\s*$", "", raw, flags=re.I)
     raw=re.split(r"(?i)\s+(?:tel[eé]fono|tel\.?|p[aá]gina web|c[oó]mo llegar|correo|email|horario)\s*[:\-]?", raw, maxsplit=1)[0]
     raw=re.sub(r"[\t\r\n]+", " ", raw)
     raw=re.sub(r"\s*,\s*", ", ", raw)
@@ -451,7 +456,9 @@ def clean_description(value, business_name=""):
     if re.search(r"(?i)\b(?:lunes|martes|miercoles|miércoles|jueves|viernes|sabado|sábado|domingo)\b",raw) and re.search(r"\b\d{1,2}[:.]\d{2}\b",raw):
         return ""
     # Una frase cortada en una preposición/conector no es texto publicable.
-    if re.search(r"(?i)\b(?:de|del|para|con|en|por|y|o|a|que|como|hasta|desde)$",raw):
+    if raw.endswith((",", ";", ":")):
+        return ""
+    if re.search(r"(?i)\b(?:de|del|para|con|en|por|y|o|a|que|como|hasta|desde|asesoramie|asesoramien|asesoramient|especializ|distribuci|instalaci|mantenimien|reparaci|comercializ)$",raw):
         return ""
     n=norm(raw)
     generic_phrases=(
@@ -906,8 +913,13 @@ def self_test():
     assert clean_business_name("Almacén de maderas Molduras Serrano Carpintería Carpinteros") == "Molduras Serrano"
     assert clean_business_name("Tatuaje Tattoo Ñoño Tattoo Studio") == "Ñoño Tattoo Studio"
     assert clean_business_name("Viajes MMS Chiclana Agencia") == "Viajes MMS Chiclana"
+    assert clean_business_name("Dualópticos Ópticas Ópticos Lentillas") == "Dualópticos"
+    assert clean_business_name("Peluquería Barber SHOP Sanchez peluquero") == "Barber Shop Sánchez"
+    assert clean_business_name("Telefonía MundoPhone Fibra Telefonía móvil Teléfonos") == "MundoPhone"
     assert clean_description("Lunes a Jueves de: 09.30 a 14.00h y 18:00 a 20:00 UN VIAJE SIEMPRE ES LA MEJOR OPCIÓN", "Viajes MMS Chiclana") == ""
     assert clean_description("Pinturas, Barnices y suministros. Disponemos de sistema tintométrico para todo tipo de", "Pinturas Hermanos Vicario") == ""
+    assert clean_description("Nuestro objetivo es ofrecer a nuestros clientes la mejor atención en todos los sentidos: asesoramie", "Dualópticos") == ""
+    assert clean_description("Somos una tienda online pero el respaldo en tiendas físicas,", "MundoPhone") == ""
     assert clean_business_name("Bar Cervecería D´Los Oliva Bares") == "Bar Cervecería D´Los Oliva"
     assert clean_business_name("Centros deportivos Amigos del Aerobic pilates Body Combat") == "Amigos del Aerobic"
     assert clean_business_name("Peluquería Gernis Salón de belleza cosmética peluquerías") == "Peluquería Gernis"
@@ -988,6 +1000,7 @@ def self_test():
     assert clean_business_name("Rodamientos Chiclana – AE Chiclana") == "Rodamientos Chiclana"
     assert clean_address("Dirección: Calle Real 10, 11130, Chiclana de la Frontera") == "Calle Real 10, 11130, Chiclana de la Frontera"
     assert clean_address("Chiclana de la Frontera") == ""
+    assert clean_address("Ctra. de la Barrosa, 36º23'14'' 6º11'10''W) 28 m") == "Ctra. de la Barrosa"
     assert clean_address("11130") == ""
     assert clean_address("Avda. Fernando de Magallanes 36, 11130 Chiclana de la Fra., 11130 Chiclana de la Fra.") == "Avda. Fernando de Magallanes 36, 11130 Chiclana de la Frontera"
     assert clean_address("Calle Real 10, 11130, Chiclana de la Frontera, 11130, Chiclana de la Frontera") == "Calle Real 10, 11130, Chiclana de la Frontera"
