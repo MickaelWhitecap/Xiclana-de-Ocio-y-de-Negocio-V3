@@ -7,7 +7,7 @@ on:
       - 'v3/rastreo_web_publico.py'
       - '.github/workflows/rad-self-test.yml'
   push:
-    branches: [main]
+    branches: [main, rad-fuentes-enriquecimiento-global]
     paths:
       - 'v3/rastreo_web_publico.py'
       - '.github/workflows/rad-self-test.yml'
