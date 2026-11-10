@@ -1,0 +1,69 @@
+name: RAD - inventario de candidatas pendientes
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'v3/rastreo_web_publico.py'
+      - '.github/workflows/rad-pending-review.yml'
+  push:
+    branches: [main, rad-fuentes-enriquecimiento-global]
+    paths:
+      - 'v3/rastreo_web_publico.py'
+      - '.github/workflows/rad-pending-review.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  pending-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar catálogo y código RAD
+        uses: actions/checkout@v4
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Generar inventario de candidatas RAD pendientes
+        run: |
+          python - <<'PY'
+          import importlib.util, json
+          from pathlib import Path
+          spec=importlib.util.spec_from_file_location("rad","v3/rastreo_web_publico.py")
+          rad=importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(rad)
+          data=json.loads(Path("v3/fichas_completas.json").read_text(encoding="utf-8"))
+          pending=[]
+          for item in data.get("candidatas_revision",[]):
+              if not isinstance(item,dict) or not str(item.get("id","")).startswith("rad:"):
+                  continue
+              pending.append({
+                  "id":item.get("id"),"nombre":item.get("n"),"tipo":item.get("t"),
+                  "categoria":item.get("c"),"direccion":item.get("a"),"telefono":item.get("p"),
+                  "correo":item.get("e"),"web":item.get("w"),"horario":item.get("h"),
+                  "descripcion":item.get("d"),"estado_revision":item.get("estado_revision"),
+                  "url_fuente_rastreo":item.get("url_fuente_rastreo"),
+                  "fuentes_datos":item.get("fuentes_datos"),
+                  "notas_calidad":rad.candidate_review_notes(item)
+              })
+          report={"fichas_publicadas":len(data.get("items",[])),
+                  "candidatas_revision_rad":len(pending),"candidatas":pending}
+          Path("rad-pendientes-revision.json").write_text(
+              json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps({"fichas_publicadas":report["fichas_publicadas"],
+                            "candidatas_revision_rad":len(pending),
+                            "sin_url_fuente":sum(not x.get("url_fuente_rastreo") for x in pending),
+                            "no_pendientes":sum(x.get("estado_revision")!="pendiente" for x in pending)},
+                           ensure_ascii=False))
+          assert all(x.get("estado_revision")=="pendiente" for x in pending), "Hay candidatas RAD que no están pendientes"
+          assert all(x.get("url_fuente_rastreo") for x in pending), "Hay candidatas RAD sin procedencia"
+          PY
+      - name: Guardar inventario para revisión
+        uses: actions/upload-artifact@v4
+        with:
+          name: rad-pendientes-revision-${{ github.run_id }}
+          path: rad-pendientes-revision.json
+          if-no-files-found: error
+          retention-days: 30
