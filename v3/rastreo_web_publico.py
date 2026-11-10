@@ -393,6 +393,7 @@ def clean_business_name(value):
         "maquinaria de jardineria taller jose antonio garcia":"José A. García Guerrero",
         "nattex":"NATTEX",
         "media estudio hosteleria":"MediaEstudio",
+        "avila bobillo centro dental infantil":"Ávila Bobillo Clínica Dental",
         "clinica del pie monica marin podologia podologo podologa":"Clínica del Pie Mónica Marín",
         "atripiko restaurante cocina fusion latina restaurantes":"Atrípiko-Gastro Bar",
         "almacen de maderas molduras serrano carpinteria carpinteros":"Molduras Serrano",
@@ -1184,6 +1185,7 @@ def self_test():
     assert classify("Nova Delta. Comercio al por mayor de café, té, cacao y especias") == ("negocio","Alimentación")
     assert classify("Taller de neumáticos y mecánica del automóvil") == ("negocio","Automoción")
     assert clean_business_name("Media Estudio Hostelería") == "MediaEstudio"
+    assert clean_business_name("Ávila Bobillo Centro Dental Infantil") == "Ávila Bobillo Clínica Dental"
     assert classify("MediaEstudio. Software para hoteles, restaurantes y hostelería") == ("negocio","Servicios y negocios")
     assert clean_business_name("Clínica del pie Mónica Marín Podología Podólogo Podóloga") == "Clínica del Pie Mónica Marín"
     assert classify("Clínica del Pie Mónica Marín. Podología y estudio biomecánico de la pisada") == ("negocio","Salud")
