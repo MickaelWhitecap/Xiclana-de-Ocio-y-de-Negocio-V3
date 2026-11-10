@@ -1467,6 +1467,9 @@ def self_test():
     assert [urllib.parse.urlparse(x).netloc for x in balanced] == [
         "turismo.chiclana.es","www.cylex.es","www.qdq.com","www.cylex.es"
     ]
+    compact_sample=serialize_catalog({"items":[{"n":"Prueba"}]})
+    assert json.loads(compact_sample)=={"items":[{"n":"Prueba"}]}
+    assert "\\n  " not in compact_sample
     assert is_pagination_link("https://www.cylex.es/chiclana-de-la-frontera/tiendas-2.html","2","www.cylex.es")
     assert not is_pagination_link("https://www.cylex.es/chiclana-de-la-frontera/azabache-14038263.html","Azabache","www.cylex.es")
     enrichment={"n":"Empresa de prueba","p":"956111111","e":"","w":"","h":"","d":"","a":""}
@@ -1687,6 +1690,10 @@ def is_pagination_link(target, label, host):
     return bool(match and int(match.group(1))<=1000)
 
 
+def serialize_catalog(data):
+    """Serializa el catálogo maestro en JSON compacto para respetar el límite de 100 MB de GitHub."""
+    return json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\\n"
+
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--self-test",action="store_true")
@@ -1881,7 +1888,7 @@ def main():
        "coincidencias_catalogo":len(coincidencias),
        "detalle_coincidencias":coincidencias[:100],
        "publicacion_automatica":False}
-    catalog_path.write_text(json.dumps(data,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+    catalog_path.write_text(serialize_catalog(data),encoding="utf-8")
     print(json.dumps(data["rad_ultima_ejecucion"],ensure_ascii=False),flush=True)
 
 if __name__=="__main__": main()
