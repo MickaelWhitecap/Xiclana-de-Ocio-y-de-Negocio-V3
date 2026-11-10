@@ -49,6 +49,28 @@ DIRECTORY_SEEDS = [
     "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/",
     "https://turismo.chiclana.es/sol-y-playa/ocio-y-diversion/",
 ]
+DIRECT_DETAIL_URLS = [
+    "https://aechiclana.org/directorio/trabajo/alba-ferreteria-herrajes-para-la-madera/",
+    "https://aechiclana.org/directorio/trabajo/autoservicio-la-nueva-suerte/",
+    "https://aechiclana.org/directorio/trabajo/belizon-y-rodriguez-s-l/",
+    "https://aechiclana.org/directorio/trabajo/consmar-chiclana-s-l/",
+    "https://aechiclana.org/directorio/trabajo/cualtis-s-l-unipersonal/",
+    "https://aechiclana.org/directorio/trabajo/inverair-factory-chiclana/",
+    "https://aechiclana.org/directorio/trabajo/jeros-burguer/",
+    "https://aechiclana.org/directorio/trabajo/m-j-suazo-lopez/",
+    "https://aechiclana.org/directorio/trabajo/mochila-s-l-alquileres-de-maquinaria/",
+    "https://aechiclana.org/directorio/trabajo/transportes-clemente/",
+    "https://www.cylex.es/chiclana-de-la-frontera/alquileres-de-maquinarias-mochila-s-l--11726122.html",
+    "https://www.cylex.es/chiclana-de-la-frontera/autobuses-beliz%C3%B3n-y-rodr%C3%ADguez-s-l--11272584.html",
+    "https://www.paginasamarillas.es/f/chiclana-de-la-frontera/alquileres-de-maquinarias-mochila-s-l-_013439948_000000001.html",
+    "https://www.paginasamarillas.es/f/chiclana-de-la-frontera/ferreteria-alba_223740978_000000001.html",
+    "https://www.alquilermochila.com/contacto/",
+    "https://novobus.es/index.php?op=contactar",
+    "https://www.suazoservice.com/contacto/",
+    "https://inverairfactory.com/contacto/",
+    "https://destaco.es/empresa/cualtis-chiclana-de-la-frontera",
+    "https://www.tripadvisor.es/Restaurant_Review-g187433-d13398058-Reviews-Jero_s_Burguer-Chiclana_de_la_Frontera_Costa_de_la_Luz_Province_of_Cadiz_Andaluc.html",
+]
 TRUSTED_DIRECTORY_PATHS = {
     "aechiclana.org": ("/directorio/trabajo/",),
     "www.chiclanaguiadempresas.com": ("/empresas/empresa/",),
@@ -56,6 +78,7 @@ TRUSTED_DIRECTORY_PATHS = {
     "chiclana-de-la-frontera.todociudad.es": ("/negocio/",),
     "www.cylex.es": ("/chiclana-de-la-frontera/",),
     "www.paginasamarillas.es": ("/f/chiclana-de-la-frontera/",),
+    "destaco.es": ("/empresa/cualtis-chiclana-de-la-frontera",),
     "turismo.chiclana.es": (
         "/planifica-tu-viaje/alojamientos/alojamiento/",
         "/detalle-de-recurso/",
@@ -1347,7 +1370,7 @@ def main():
         addr=norm(item.get("a") or item.get("direccion") or item.get("address"))
         if name and addr: existing_pairs.add(name+"|"+addr)
         if name: existing_name_addresses.setdefault(name,set()).add(addr)
-    links=[]
+    links=list(DIRECT_DETAIL_URLS)
     trusted_urls=set()
     # Fuentes locales directas: sus fichas individuales son una vía de detección
     # independiente de los buscadores. Solo se confía en rutas de detalle conocidas.
@@ -1411,7 +1434,7 @@ def main():
                 1 for x in registros_conocidos
                 if isinstance(x,dict) and norm(record["name"])==norm(record_value(x,"n","nombre","name"))
             )
-            safe_to_enrich=(match["kind"]=="duplicate" or (trusted_local and exact_name and exact_name_matches==1))
+            safe_to_enrich=(match["kind"]=="duplicate" or (exact_name and exact_name_matches==1 and (trusted_local or bool(record["address"]))))
             if safe_to_enrich:
                 changed,conflicts=merge_existing_record(old,record,source_url)
                 if changed:
@@ -1487,7 +1510,8 @@ def main():
     data.setdefault("candidatas_revision",[]).extend(added)
     data["total_candidatas_revision"]=len(data["candidatas_revision"])
     data["rad_ultima_ejecucion"]={"fecha_utc":datetime.now(timezone.utc).isoformat(),
-       "buscadores":["DuckDuckGo HTML","Bing RSS"],"fuentes_directas":DIRECTORY_SEEDS,"consultas":len(QUERIES),
+       "buscadores":["DuckDuckGo HTML","Bing RSS"],"fuentes_directas":DIRECTORY_SEEDS,
+       "fuentes_detalle_directo":DIRECT_DETAIL_URLS,"consultas":len(QUERIES),
        "urls_encontradas":len(links),"candidatas_nuevas":len(added),
        "fichas_enriquecidas":len(fichas_enriquecidas),"campos_actualizados":campos_actualizados,
        "conflictos_datos_no_sobrescritos":conflictos_no_sobrescritos,
