@@ -954,6 +954,9 @@ def merge_existing_record(existing, record, source_url):
         if key=="a" and norm(record_value(existing,"n","nombre","name"))=="ferreteria alba" and "aechiclana.org" in source_url:
             if incoming: conflicts.append("Dirección de AEChiclana discrepante; se espera una fuente independiente.")
             continue
+        if norm(record_value(existing,"n","nombre","name"))=="cualtis" and "destaco.es" in source_url and key in ("t","c","d"):
+            conflicts.append("Destaco clasifica Cualtis como clínica dental; no se importa esa categoría ni descripción.")
+            continue
         if incoming and not str(existing.get(key) or "").strip():
             existing[key]=incoming
             changed.append(key)
@@ -1206,6 +1209,13 @@ def self_test():
     },"https://aechiclana.org/directorio/trabajo/alba")
     assert alba["a"]=="", "No se debe incorporar la dirección discrepante de AEChiclana"
     assert alba["p"]=="956209585" and conflicts, "Se conserva el teléfono y se señala la dirección discrepante"
+    cualtis={"n":"Cualtis","a":"","p":"","t":"","c":"","d":""}
+    changed,conflicts=merge_existing_record(cualtis,{
+        "address":"C/ Gerbera, 2, Local 4","phone":"956497738",
+        "type":"ocio","category":"Clínicas dentales","description":"Clínica dental"
+    },"https://destaco.es/empresa/cualtis-chiclana-de-la-frontera")
+    assert cualtis["a"]=="C/ Gerbera, 2, Local 4" and cualtis["p"]=="956497738"
+    assert not cualtis.get("c") and not cualtis.get("d") and conflicts
 
     # Las señales de baja calidad se muestran para revisión, nunca se publican automáticamente.
     noisy=candidate_review_notes({
