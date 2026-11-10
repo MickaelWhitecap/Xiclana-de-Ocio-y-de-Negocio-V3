@@ -1458,6 +1458,18 @@ def self_test():
     assert is_pagination_link("https://www.cylex.es/chiclana-de-la-frontera/restaurantes/?p=2","2","www.cylex.es")
     assert is_qdq_profile_url("https://www.qdq.com/construccion-y-promocion-leal-macias-sl-1223591")
     assert not is_qdq_profile_url("https://www.qdq.com/a/asesorias-fiscales-y-laborales/cadiz/chiclana-de-la-frontera")
+    balanced=balance_urls_by_host([
+        "https://www.cylex.es/chiclana-de-la-frontera/b.html",
+        "https://www.qdq.com/perfil-12345",
+        "https://turismo.chiclana.es/detalle-de-recurso/1",
+        "https://www.cylex.es/chiclana-de-la-frontera/a.html"
+    ])
+    assert [urllib.parse.urlparse(x).netloc for x in balanced] == [
+        "turismo.chiclana.es","www.cylex.es","www.qdq.com","www.cylex.es"
+    ]
+    compact_sample=serialize_catalog({"items":[{"n":"Prueba"}]})
+    assert json.loads(compact_sample)=={"items":[{"n":"Prueba"}]}
+    assert "\n  " not in compact_sample
     assert is_pagination_link("https://www.cylex.es/chiclana-de-la-frontera/tiendas-2.html","2","www.cylex.es")
     assert not is_pagination_link("https://www.cylex.es/chiclana-de-la-frontera/azabache-14038263.html","Azabache","www.cylex.es")
     enrichment={"n":"Empresa de prueba","p":"956111111","e":"","w":"","h":"","d":"","a":""}
@@ -1635,6 +1647,35 @@ def is_qdq_profile_url(target):
     return parsed.netloc.lower()=="www.qdq.com" and bool(re.search(r"-\d+$",parsed.path))
 
 
+def balance_urls_by_host(urls):
+    """Reparte el límite global entre fuentes para que un directorio no monopolice el rastreo."""
+    priority={
+        "turismo.chiclana.es":0,
+        "aechiclana.org":1,
+        "www.cadizturismo.com":2,
+        "www.chiclanaguiadempresas.com":3,
+        "www.cylex.es":4,
+        "www.paginasamarillas.es":5,
+        "www.qdq.com":6,
+        "www.tripadvisor.es":7,
+        "chiclana-de-la-frontera.todociudad.es":8
+    }
+    groups={}
+    for url in sorted(set(urls)):
+        host=urllib.parse.urlparse(url).netloc.lower()
+        groups.setdefault(host,[]).append(url)
+    hosts=sorted(groups,key=lambda host:(priority.get(host,99),host))
+    out=[]
+    while True:
+        added=False
+        for host in hosts:
+            if groups[host]:
+                out.append(groups[host].pop(0))
+                added=True
+        if not added: break
+    return out
+
+
 def is_pagination_link(target, label, host):
     """Identifica enlaces numerados de paginación, no fichas individuales."""
     if not str(label or "").strip().isdigit():
@@ -1648,6 +1689,10 @@ def is_pagination_link(target, label, host):
     match=re.search(r"-(\d+)\.html$",parsed.path,re.I)
     return bool(match and int(match.group(1))<=1000)
 
+
+def serialize_catalog(data):
+    """Serializa el catálogo maestro en JSON compacto para respetar el límite de 100 MB de GitHub."""
+    return json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n"
 
 def main():
     parser=argparse.ArgumentParser()
@@ -1716,7 +1761,7 @@ def main():
                         if seed_count>=seed_limit: break
         except Exception as exc:
             print(f"Fuente directa no disponible ({seed}): {exc}",flush=True)
-    links.extend(sorted(trusted_urls))
+    links.extend(balance_urls_by_host(trusted_urls))
     for q in QUERIES:
         for engine in (search_ddg,search_bing):
             try: links.extend(engine(q))
@@ -1843,7 +1888,7 @@ def main():
        "coincidencias_catalogo":len(coincidencias),
        "detalle_coincidencias":coincidencias[:100],
        "publicacion_automatica":False}
-    catalog_path.write_text(json.dumps(data,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+    catalog_path.write_text(serialize_catalog(data),encoding="utf-8")
     print(json.dumps(data["rad_ultima_ejecucion"],ensure_ascii=False),flush=True)
 
 if __name__=="__main__": main()
