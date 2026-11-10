@@ -2,8 +2,6 @@ name: Prueba real RAD — Chiclana
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "37 6 * * 1"
 
 permissions:
   contents: read
