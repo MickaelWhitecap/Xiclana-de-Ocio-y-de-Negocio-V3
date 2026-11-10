@@ -1604,7 +1604,7 @@ def candidate_review_notes(record):
 def is_qdq_profile_url(target):
     """Los perfiles QDQ usan slugs con ID numérico y no incluyen municipio en la URL."""
     parsed=urllib.parse.urlsplit(target)
-    return parsed.netloc.lower()=="www.qdq.com" and bool(re.search(r"-\\d+$",parsed.path))
+    return parsed.netloc.lower()=="www.qdq.com" and bool(re.search(r"-\d+$",parsed.path))
 
 
 def is_pagination_link(target, label, host):
