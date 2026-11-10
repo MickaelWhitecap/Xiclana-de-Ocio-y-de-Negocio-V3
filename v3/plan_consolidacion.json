@@ -1,5 +1,5 @@
 {
-  "fecha": "2026-11-09",
+  "fecha": "2026-11-10",
   "total_grupos": 0,
   "regla": "Plan no destructivo: elegir ficha maestra, completar campos vacíos, conservar conflictos para decisión y migrar referencias de Supabase antes de retirar IDs.",
   "grupos": []
