@@ -19,6 +19,10 @@ on:
   schedule:
     - cron: "27 6 * * *"
   workflow_dispatch:
+concurrency:
+  group: rad-catalog-validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate-real-catalog:
     runs-on: ubuntu-latest
