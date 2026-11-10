@@ -604,29 +604,45 @@
     "distribucion": {
       "4": 6,
       "5": 6,
-      "6": 591,
-      "7": 293,
-      "8": 69,
+      "6": 581,
+      "7": 292,
+      "8": 66,
       "9": 81,
-      "10": 44,
-      "11": 18,
-      "12": 14
+      "10": 53,
+      "11": 21,
+      "12": 16
     },
-    "fichas_con_algun_medio_de_contacto": 265,
-    "fichas_con_email": 126
+    "fichas_con_algun_medio_de_contacto": 275,
+    "fichas_con_email": 132
   },
   "total_registros_historicos": 1327,
   "total_items_publicables": 1122,
   "total_items_marcados_borrados": 205,
-  "total_candidatas_revision": 23,
+  "total_candidatas_revision": 345,
   "candidatos_automaticos_heredados_en_items": 0,
   "ids_automaticos_heredados": [],
   "ids_automaticos_nuevos_no_aprobados": [],
   "registros_invalidos_o_ids_repetidos": [],
   "fichas_sin_nombre_categoria_o_tipo_valido": [],
   "calidad_de_campos_opcionales": {
-    "fichas_sin_direccion": 610,
-    "correos_invalidos": [],
+    "fichas_sin_direccion": 600,
+    "correos_invalidos": [
+      {
+        "id": "osm:node:9550529384",
+        "nombre": "A Pedales",
+        "valor": "franfajardobike@gmail.com / info@bicicletasapedales.com"
+      },
+      {
+        "id": "oficial:2516b08b42d46103e7b6",
+        "nombre": "Club de Tenis \"La Barrosa\"",
+        "valor": "info@clublabarrosa.com / direccion@clublabarrosa.com"
+      },
+      {
+        "id": "oficial:27d23432c0f85e9c7fdd",
+        "nombre": "Hospital Viamed Bahía de Cádiz",
+        "valor": "tmu@viamedbahiadecadiz.com / recepcion.bahia@viamedsalud.com"
+      }
+    ],
     "urls_colocadas_en_campo_email": [],
     "telefonos_sospechosos": [],
     "urls_invalidas": [],
@@ -634,22 +650,22 @@
     "nota": "Control informativo: no modifica fichas ni bloquea la publicación por campos opcionales."
   },
   "direcciones_pendientes": {
-    "total_sin_direccion": 610,
-    "con_coordenadas_validas": 603,
+    "total_sin_direccion": 600,
+    "con_coordenadas_validas": 593,
     "sin_coordenadas_validas": 7,
     "distribucion_por_tipo_y_categoria": [
       {
         "tipo": "ocio",
         "categoria": "Bar",
-        "total": 59,
-        "con_coordenadas": 59,
+        "total": 58,
+        "con_coordenadas": 58,
         "sin_coordenadas": 0
       },
       {
         "tipo": "ocio",
         "categoria": "Restaurante",
-        "total": 49,
-        "con_coordenadas": 49,
+        "total": 48,
+        "con_coordenadas": 48,
         "sin_coordenadas": 0
       },
       {
@@ -710,13 +726,6 @@
       },
       {
         "tipo": "negocio",
-        "categoria": "Banco",
-        "total": 13,
-        "con_coordenadas": 13,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "negocio",
         "categoria": "Tienda de barrio",
         "total": 12,
         "con_coordenadas": 12,
@@ -730,10 +739,17 @@
         "sin_coordenadas": 0
       },
       {
-        "tipo": "ocio",
-        "categoria": "Comida rápida",
+        "tipo": "negocio",
+        "categoria": "Banco",
         "total": 11,
         "con_coordenadas": 11,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "ocio",
+        "categoria": "Comida rápida",
+        "total": 10,
+        "con_coordenadas": 10,
         "sin_coordenadas": 0
       },
       {
@@ -759,16 +775,16 @@
       },
       {
         "tipo": "negocio",
-        "categoria": "Oficina",
+        "categoria": "Taller mecánico",
         "total": 8,
         "con_coordenadas": 8,
         "sin_coordenadas": 0
       },
       {
         "tipo": "negocio",
-        "categoria": "Taller mecánico",
-        "total": 8,
-        "con_coordenadas": 8,
+        "categoria": "Oficina",
+        "total": 7,
+        "con_coordenadas": 7,
         "sin_coordenadas": 0
       },
       {
@@ -802,20 +818,6 @@
       {
         "tipo": "negocio",
         "categoria": "Joyería",
-        "total": 6,
-        "con_coordenadas": 6,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "negocio",
-        "categoria": "Veterinario",
-        "total": 6,
-        "con_coordenadas": 6,
-        "sin_coordenadas": 0
-      },
-      {
-        "tipo": "negocio",
-        "categoria": "Óptica",
         "total": 6,
         "con_coordenadas": 6,
         "sin_coordenadas": 0
@@ -871,14 +873,14 @@
       },
       {
         "tipo": "negocio",
-        "categoria": "Dentista",
+        "categoria": "Educación",
         "total": 5,
         "con_coordenadas": 5,
         "sin_coordenadas": 0
       },
       {
         "tipo": "negocio",
-        "categoria": "Educación",
+        "categoria": "Óptica",
         "total": 5,
         "con_coordenadas": 5,
         "sin_coordenadas": 0
@@ -888,6 +890,13 @@
         "categoria": "Información turística",
         "total": 5,
         "con_coordenadas": 5,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Dentista",
+        "total": 4,
+        "con_coordenadas": 4,
         "sin_coordenadas": 0
       },
       {
@@ -907,6 +916,13 @@
       {
         "tipo": "negocio",
         "categoria": "Gasolinera",
+        "total": 4,
+        "con_coordenadas": 4,
+        "sin_coordenadas": 0
+      },
+      {
+        "tipo": "negocio",
+        "categoria": "Veterinario",
         "total": 4,
         "con_coordenadas": 4,
         "sin_coordenadas": 0
