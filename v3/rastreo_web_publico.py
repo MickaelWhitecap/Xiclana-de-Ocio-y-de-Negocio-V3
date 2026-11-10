@@ -78,6 +78,24 @@ DIRECT_DETAIL_URLS = [
     "https://www.tripadvisor.es/Restaurant_Review-g187433-d13398058-Reviews-Jero_s_Burguer-Chiclana_de_la_Frontera_Costa_de_la_Luz_Province_of_Cadiz_Andaluc.html",
     "https://www.busqueda-local.es/chiclana-de-la-frontera/consmar-aY2RUu.html",
     "https://carta.menu/restaurants/chiclana-de-la-frontera/jeros-burger",
+    "https://aechiclana.org/directorio/trabajo/mar-capote/",
+    "https://aechiclana.org/directorio/trabajo/topgea-topografia/",
+    "https://aechiclana.org/directorio/trabajo/mediaestudio/",
+    "https://www.topgea.es/",
+    "https://www.mediaestudio.com/",
+    "https://finmohogar.com/contacto",
+    "https://atripiko.es/",
+    "https://avilabobilloclinicadental.es/",
+    "https://www.cylex.es/chiclana-de-la-frontera/%C3%A1vila-bobillo-centro-dental-infantil-12961082.html",
+    "https://www.chiclanaguiadempresas.com/empresas/empresa/clinica-del-pie-monica-marin-podologia-podologo-podologa/",
+    "https://www.chiclanaguiadempresas.com/empresas/empresa/cristaleria-carlos-moreno-cristalerias/",
+    "https://www.chiclanaguiadempresas.com/empresas/empresa/encastre-cocinas-electrodomesticos/",
+    "https://www.chiclanaguiadempresas.com/empresas/empresa/francisco-javier-guerra-agente-seguros-allianz/",
+    "https://www.chiclanaguiadempresas.com/empresas/empresa/inmobiliaria-finmohogar/",
+    "https://www.chiclanaguiadempresas.com/empresas/empresa/media-estudio-hosteleria/",
+    "https://www.chiclanaguiadempresas.com/empresas/empresa/nattex-mobiliario-sofas-sofa-colchones-muebles-decoracion/",
+    "https://www.cylex.es/chiclana-de-la-frontera/sof%C3%A1s-colchones-muebles-nattex-chiclana-13885929.html",
+    "https://www.cylex.es/chiclana-de-la-frontera/vidrier%C3%ADas-y-cristaler%C3%ADas/",
 ]
 TRUSTED_DIRECTORY_PATHS = {
     "aechiclana.org": ("/directorio/trabajo/",),
@@ -265,6 +283,20 @@ def normalize_phone(value):
     return ""
 
 
+def sanitize_contact_phones(name, value):
+    """Excluye números que las fuentes identifican como erróneos o fax."""
+    phones=extract_phones(value)
+    name_key=norm(name)
+    if "topgea" in name_key:
+        # La ficha AE publica 856652307, pero el colegio profesional confirma
+        # 856243221/671495283; se descarta el número discrepante.
+        phones=[x for x in phones if x != "856652307"]
+    if "cristaleria carlos moreno" in name_key:
+        # 956536241 está identificado como fax, no como teléfono de atención.
+        phones=[x for x in phones if x != "956536241"]
+    return list(dict.fromkeys(phones))
+
+
 def extract_phones(value):
     """Extrae varios teléfonos españoles, incluso cuando el HTML los concatena."""
     raw=str(value or "")
@@ -374,6 +406,9 @@ def clean_business_name(value):
         "lola robledo modas y complementos":"Lola Robledo Moda",
         "maquinaria de jardineria taller jose antonio garcia":"José A. García Guerrero",
         "nattex":"NATTEX",
+        "media estudio hosteleria":"MediaEstudio",
+        "avila bobillo centro dental infantil":"Ávila Bobillo Clínica Dental",
+        "clinica del pie monica marin podologia podologo podologa":"Clínica del Pie Mónica Marín",
         "atripiko restaurante cocina fusion latina restaurantes":"Atrípiko-Gastro Bar",
         "almacen de maderas molduras serrano carpinteria carpinteros":"Molduras Serrano",
         "tatuaje tattoo nono tattoo studio":"Ñoño Tattoo Studio",
@@ -647,6 +682,13 @@ def classify(text):
     if any(term in s_norm for term in ("agencia de viajes","agencia viajes","viajes carrefour","viajes puentetravel")):
         return ("negocio","Servicios y negocios")
 
+    # Correcciones de actividad contrastadas con la ficha oficial del negocio.
+    # MediaEstudio desarrolla software y soporte para empresas/hostelería, no restaura.
+    if "mediaestudio" in s_norm:
+        return ("negocio","Servicios y negocios")
+    # La biomecánica de la pisada no es mecánica de automoción.
+    if "monica marin" in s_norm and "podolog" in s_norm:
+        return ("negocio","Salud")
     # Atrípiko es restauración aunque una fuente lo describa genéricamente.
     if "atripiko" in s_norm:
         return ("ocio","Restauración")
@@ -689,7 +731,7 @@ def classify(text):
       (("restaurante","cafeteria","comida","pizzeria","marisqueria","sushi","asador","taberna","meson","chiringuito","cerveceria","bar "),("ocio","Restauración")),
       (("ocio y animacion","eventos tematizados","animacion sociocultural","animacion infantil"),("ocio","Ocio y animación")),
       (("hotel","hostal","apartamento turistico","alojamiento"),("negocio","Alojamiento")),
-      (("taller mecanico","taller de coches","taller de vehiculos","taller de motos","mecanica","reparacion de vehiculos","adaptaciones de vehiculos","automovil","automocion","concesionario","taller de neumaticos","venta de neumaticos","neumaticos"),("negocio","Automoción")),
+      (("taller mecanico","taller de coches","taller de vehiculos","taller de motos","mecanica del automovil","mecanica de vehiculos","mecanica de motos","mecanica automotriz","reparacion de vehiculos","adaptaciones de vehiculos","automovil","automocion","concesionario","taller de neumaticos","venta de neumaticos","neumaticos"),("negocio","Automoción")),
       (("dentista","clinica","fisioterapia","veterinaria","veterinario","centro veterinario","farmacia","mascotas","optica","optico","optometrista","audifonos","audiologia"),("negocio","Salud")),
       (("peluqueria","estetica","gimnasio","centro deportivo","centros deportivos","aerobic","pilates","body combat","actividades deportivas"),("negocio","Belleza y deporte")),
       (("academia","colegio","formacion","idiomas"),("negocio","Educación")),
@@ -912,6 +954,7 @@ def extract(url, trusted_local=False):
         phone=" / ".join(dict.fromkeys(tel_values))
     if not phone:
         phone=" / ".join(extract_phones(blob))
+    phone=" / ".join(sanitize_contact_phones(name,phone))
     if not email:
         mailto_values=[]
         for _cls,href,_label in p.links:
@@ -1059,6 +1102,8 @@ def self_test():
     assert clean_business_name("Concesionarios Citroën SEAT") == "Autos Colchón"
     assert clean_business_name("Laboratorio Seguridad alimentaria Análisis BioCentrol Laboratorios") == "BioCentrol Laboratorios"
     assert extract_phones("956 401 156650 767 055682 365 666") == ["956401156","650767055","682365666"]
+    assert sanitize_contact_phones("TopGea Topografía","856652307 / 856243221 / 671495283") == ["856243221","671495283"]
+    assert sanitize_contact_phones("Cristalería Carlos Moreno","607429633 / 956536136 / 956536241") == ["607429633","956536136"]
     contact_page=Page()
     contact_page.feed("<html><body><p>Información de contacto</p><p>Av. del Torno, 5, Chiclana de la Frontera, Cádiz, España</p><p>613 571 762956 112 418</p><p>centauro@example.es</p><p>Síguenos en Instagram</p><p>685 51 66 19</p></body></html>")
     assert extract_contact_phones(contact_page) == ["613571762","956112418"]
@@ -1156,6 +1201,11 @@ def self_test():
     assert classify("Hidráulica Cabral. Diseño, fabricación, mantenimiento y reparación de sistemas hidráulicos y neumáticos") == ("negocio","Servicios y negocios")
     assert classify("Nova Delta. Comercio al por mayor de café, té, cacao y especias") == ("negocio","Alimentación")
     assert classify("Taller de neumáticos y mecánica del automóvil") == ("negocio","Automoción")
+    assert clean_business_name("Media Estudio Hostelería") == "MediaEstudio"
+    assert clean_business_name("Ávila Bobillo Centro Dental Infantil") == "Ávila Bobillo Clínica Dental"
+    assert classify("MediaEstudio. Software para hoteles, restaurantes y hostelería") == ("negocio","Servicios y negocios")
+    assert clean_business_name("Clínica del pie Mónica Marín Podología Podólogo Podóloga") == "Clínica del Pie Mónica Marín"
+    assert classify("Clínica del Pie Mónica Marín. Podología y estudio biomecánico de la pisada") == ("negocio","Salud")
     assert classify("Inoxidables Chiclana, S.L.") == ("negocio","Servicios y negocios")
     assert clean_website("http://info@pedenetti.com/","https://directorio.example/ficha") == ""
     assert clean_website("https://empresa.es/","https://directorio.example/ficha") == "https://empresa.es/"
