@@ -283,6 +283,20 @@ def normalize_phone(value):
     return ""
 
 
+def sanitize_contact_phones(name, value):
+    """Excluye números que las fuentes identifican como erróneos o fax."""
+    phones=extract_phones(value)
+    name_key=norm(name)
+    if "topgea" in name_key:
+        # La ficha AE publica 856652307, pero el colegio profesional confirma
+        # 856243221/671495283; se descarta el número discrepante.
+        phones=[x for x in phones if x != "856652307"]
+    if "cristaleria carlos moreno" in name_key:
+        # 956536241 está identificado como fax, no como teléfono de atención.
+        phones=[x for x in phones if x != "956536241"]
+    return list(dict.fromkeys(phones))
+
+
 def extract_phones(value):
     """Extrae varios teléfonos españoles, incluso cuando el HTML los concatena."""
     raw=str(value or "")
@@ -940,6 +954,7 @@ def extract(url, trusted_local=False):
         phone=" / ".join(dict.fromkeys(tel_values))
     if not phone:
         phone=" / ".join(extract_phones(blob))
+    phone=" / ".join(sanitize_contact_phones(name,phone))
     if not email:
         mailto_values=[]
         for _cls,href,_label in p.links:
@@ -1087,6 +1102,8 @@ def self_test():
     assert clean_business_name("Concesionarios Citroën SEAT") == "Autos Colchón"
     assert clean_business_name("Laboratorio Seguridad alimentaria Análisis BioCentrol Laboratorios") == "BioCentrol Laboratorios"
     assert extract_phones("956 401 156650 767 055682 365 666") == ["956401156","650767055","682365666"]
+    assert sanitize_contact_phones("TopGea Topografía","856652307 / 856243221 / 671495283") == ["856243221","671495283"]
+    assert sanitize_contact_phones("Cristalería Carlos Moreno","607429633 / 956536136 / 956536241") == ["607429633","956536136"]
     contact_page=Page()
     contact_page.feed("<html><body><p>Información de contacto</p><p>Av. del Torno, 5, Chiclana de la Frontera, Cádiz, España</p><p>613 571 762956 112 418</p><p>centauro@example.es</p><p>Síguenos en Instagram</p><p>685 51 66 19</p></body></html>")
     assert extract_contact_phones(contact_page) == ["613571762","956112418"]
