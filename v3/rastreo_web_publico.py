@@ -64,6 +64,7 @@ DIRECT_DETAIL_URLS = [
     "https://www.cylex.es/chiclana-de-la-frontera/autobuses-beliz%C3%B3n-y-rodr%C3%ADguez-s-l--11272584.html",
     "https://www.paginasamarillas.es/f/chiclana-de-la-frontera/alquileres-de-maquinarias-mochila-s-l-_013439948_000000001.html",
     "https://www.paginasamarillas.es/f/chiclana-de-la-frontera/ferreteria-alba_223740978_000000001.html",
+    "https://ferreteriaalba.com/7-vc-quienes-somos.html",
     "https://www.alquilermochila.com/contacto/",
     "https://novobus.es/index.php?op=contactar",
     "https://www.suazoservice.com/contacto/",
@@ -377,6 +378,16 @@ def clean_business_name(value):
         "servicio tecnico paco mateo reparacion television sonido":"Servicio Técnico Paco Mateo",
         "viveros garola agricentro ferreteria peluqueria canina veterinario":"Viveros Garola",
         "rocio panes rodriguez agente en seguros allianz":"Rocío Panés Rodríguez",
+        "alba ferreteria herrajes para la madera":"Ferretería Alba",
+        "belizon y rodriguez s l":"Belizón y Rodríguez",
+        "belizon y rodriguez lineas de autobuses transporte urbano e interurbano chiclana":"Belizón y Rodríguez",
+        "cualtis s l unipersonal":"Cualtis",
+        "inverair factory chiclana":"Inverair Factory",
+        "inverair":"Inverair Factory",
+        "m j suazo lopez":"M.J. Suazo López",
+        "mj suazo lopez":"M.J. Suazo López",
+        "mochila s l alquileres de maquinaria":"Alquileres de Maquinaria Mochila",
+        "alquileres de maquinarias mochila s l":"Alquileres de Maquinaria Mochila",
     }
     name=verified_names.get(norm(name),name)
     if norm(name)=="opticos general":
@@ -419,6 +430,7 @@ def clean_address(value, locality="", postal=""):
     """Normaliza direcciones y descarta localidades/códigos postales sin vía concreta."""
     raw=html.unescape(re.sub(r"<[^>]*>", " ", str(value or "")))
     raw=re.sub(r"(?i)^\s*(?:direcci[oó]n|address)\s*[:\-]?\s*", "", raw)
+    raw=re.sub(r"(?<!\d)(11)[ .](130|138|139)(?!\d)",r"\1\2",raw)
     # Descarta coordenadas GPS y altitud añadidas al final de una dirección.
     raw=re.sub(r"(?i),?\s*\d{1,2}[º°]\s*\d{1,2}['′]\s*\d{1,2}(?:[\.,]\d+)?(?:['′]{1,2}|[\"″])?\s*[NSEW]?(?:\s+\d{1,2}[º°]\s*\d{1,2}['′]\s*\d{1,2}(?:[\.,]\d+)?(?:['′]{1,2}|[\"″])?\s*[NSEW]?)?\s*\)?(?:\s+\d{1,4}\s*m)?\s*$", "", raw, flags=re.I)
     raw=re.split(r"(?i)\s+(?:tel[eé]fono|tel\.?|p[aá]gina web|c[oó]mo llegar|correo|email|horario)\s*[:\-]?", raw, maxsplit=1)[0]
@@ -1124,6 +1136,9 @@ def self_test():
     assert clean_website("http://info@pedenetti.com/","https://directorio.example/ficha") == ""
     assert clean_website("https://empresa.es/","https://directorio.example/ficha") == "https://empresa.es/"
     assert clean_address("Avenida Bahía 23, 11100, Chiclana","Chiclana de la Frontera","11100") == "Avenida Bahía 23, Chiclana de la Frontera"
+    assert "11130" in clean_address("Callejón de la Rosa, nº 2 11.130 Chiclana de la Fra. (Cádiz)")
+    assert clean_business_name("INVERAIR FACTORY CHICLANA") == "Inverair Factory"
+    assert clean_business_name("M.J. SUAZO LÓPEZ") == "M.J. Suazo López"
     assert clean_description("Bar PimPam ofrece tapas caseras y platos tradicionales en un ambiente familiar", "La Guía de Chiclana") == ""
     assert is_directory_email("info@chiclanaguiadempresas.com","https://www.chiclanaguiadempresas.com/empresas/empresa/bar")
     assert not is_directory_email("contacto@empresa.es","https://www.chiclanaguiadempresas.com/empresas/empresa/bar")
