@@ -437,7 +437,7 @@ def clean_description(value, business_name=""):
     ).strip(" |·-–—")
     # Los fragmentos de buscadores/directorios con puntos suspensivos o
     # etiquetas de contacto no son descripciones comerciales completas.
-    if re.search(r"(?:\\.{3,}|…|\\b(?:tel[eé]fono|tel\\.)\\s*[:：-]?)",raw,re.I):
+    if re.search(r"(?:\.{3,}|…|\b(?:tel[eé]fono|tel\.)\s*[:：-]?)",raw,re.I):
         return ""
     n=norm(raw)
     generic_phrases=(
