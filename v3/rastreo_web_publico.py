@@ -841,10 +841,10 @@ def extract(url, trusted_local=False):
     hours=obj.get("openingHours") or obj.get("openingHoursSpecification") or ""
     if not hours and "cylex.es" in urllib.parse.urlparse(final_url).netloc.lower():
         hours_match=re.search(
-            r"(?is)horario de apertura\\s*(.{0,900}?)(?:correo electr[oó]nico|opiniones|descripci[oó]n|$)",
+            r"(?is)horario de apertura\s*(.{0,900}?)(?:correo electr[oó]nico|opiniones|descripci[oó]n|$)",
             blob
         )
-        if hours_match and re.search(r"\\b\\d{1,2}[:.]\\d{2}\\b",hours_match.group(1)):
+        if hours_match and re.search(r"\b\d{1,2}[:.]\d{2}\b",hours_match.group(1)):
             hours=" ".join(hours_match.group(1).split())[:500]
     if isinstance(hours,dict): hours=[hours]
     if isinstance(hours,list):
