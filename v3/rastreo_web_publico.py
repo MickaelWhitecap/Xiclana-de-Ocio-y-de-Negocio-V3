@@ -1469,7 +1469,7 @@ def self_test():
     ]
     compact_sample=serialize_catalog({"items":[{"n":"Prueba"}]})
     assert json.loads(compact_sample)=={"items":[{"n":"Prueba"}]}
-    assert "\\n  " not in compact_sample
+    assert "\n  " not in compact_sample
     assert is_pagination_link("https://www.cylex.es/chiclana-de-la-frontera/tiendas-2.html","2","www.cylex.es")
     assert not is_pagination_link("https://www.cylex.es/chiclana-de-la-frontera/azabache-14038263.html","Azabache","www.cylex.es")
     enrichment={"n":"Empresa de prueba","p":"956111111","e":"","w":"","h":"","d":"","a":""}
@@ -1692,7 +1692,7 @@ def is_pagination_link(target, label, host):
 
 def serialize_catalog(data):
     """Serializa el catálogo maestro en JSON compacto para respetar el límite de 100 MB de GitHub."""
-    return json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\\n"
+    return json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n"
 
 def main():
     parser=argparse.ArgumentParser()
