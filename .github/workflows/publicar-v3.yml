@@ -5,6 +5,7 @@ on:
     workflows:
       - "Auditoría municipal completa de OpenStreetMap"
       - "Recuperar propuestas de direcciones OSM"
+      - "RAD - enriquecimiento del catálogo global"
     types:
       - completed
   push:
