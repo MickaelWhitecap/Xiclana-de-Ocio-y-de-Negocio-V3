@@ -1,0 +1,72 @@
+name: RAD - contraste de candidatas previas con catálogo maestro
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - '.github/workflows/rad-review-old-candidates.yml'
+  push:
+    branches: [main, rad-fuentes-enriquecimiento-global]
+    paths:
+      - '.github/workflows/rad-review-old-candidates.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  compare-old-candidates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar catálogo maestro y código RAD
+        uses: actions/checkout@v4
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Comparar las 11 candidatas de la prueba RAD anterior
+        run: |
+          python - <<'PY'
+          import importlib.util, json
+          from pathlib import Path
+          spec=importlib.util.spec_from_file_location("rad","v3/rastreo_web_publico.py")
+          rad=importlib.util.module_from_spec(spec); spec.loader.exec_module(rad)
+          data=json.loads(Path("v3/fichas_completas.json").read_text(encoding="utf-8"))
+          candidates=[
+            {"n":"ALBA FERRETERÍA «HERRAJES PARA LA MADERA» – AE Chiclana","a":"23 Avenida Bahía de Cádiz, 11130 Chiclana de la Frontera","p":"956209585","w":"http://ferreteriaalba.com/"},
+            {"n":"Autoservicio la Nueva Suerte – AE Chiclana","a":"","p":"637174154","e":"pedrohr68@outlook.es"},
+            {"n":"Belizón y Rodríguez, S.L – AE Chiclana","a":"C/Trabajadores, nº 25 P.I. PELAGATOS 11130 CHICLANA DE LA FRA. (CADIZ)","p":"956401360","e":"info@novobus.es","w":"http://www.novobus.es/"},
+            {"n":"Consmar Chiclana, S.L – AE Chiclana","a":"","p":"956531678","e":"consmar@consmarsl.com"},
+            {"n":"Cualtis, S.L Unipersonal – AE Chiclana","a":"","p":"956 49 77","e":"enriquecarmona@cualtis.com; info@cualtis.com","w":"http://cualtis.com/"},
+            {"n":"INVERAIR FACTORY CHICLANA – AE Chiclana","a":"","p":"677 48 80","e":"anaprieto@inverairfactory.com","w":"https://inverairfactory.com/"},
+            {"n":"Jero’s Burguer – AE Chiclana","a":"","p":"956 947221","e":"contacto@jerosburguer.com","w":"http://www.jerosburguer.com/"},
+            {"n":"M.J. SUAZO LÓPEZ – AE Chiclana","a":"Avenida del Comercio, 14 11130 Chiclana, Cádiz","p":"664 241 135","e":"direccion@suazoservice.com","w":"https://www.suazoservice.com/servicio-tecnico/"},
+            {"n":"Mochila, S.L Alquileres de maquinaria – AE Chiclana","a":"","p":"956 40 06","e":"mochila@alquilermochila.com","w":"http://www.alquilermochila.com/"},
+            {"n":"Transportes Clemente – AE Chiclana","a":"","p":"956 53 77","e":"administracion@transportesclemente.com; clemente@transportesclemente.com"},
+            {"n":"La Guía de Chiclana","a":"Calle El Grumete Nº1, 11130, Chiclana de la Frontera","p":"832 16.568","e":"info@chiclanaguiadempresas.com","w":"https://www.chiclanaguiadempresas.com/"}
+          ]
+          records=data.get("items",[])+data.get("candidatas_revision",[])
+          report=[]
+          for candidate in candidates:
+              match=rad.find_catalog_match(candidate,records)
+              old=match.get("record") if match else None
+              report.append({
+                "candidata":candidate["n"],
+                "resultado":match.get("kind") if match else "sin_coincidencia",
+                "motivo":match.get("reason") if match else "",
+                "similitud":round(match.get("score",0),3) if match else 0,
+                "ficha_existente":{k:old.get(k) for k in ("id","n","t","c","a","p","e","w","h","d")} if old else None
+              })
+          out={"fichas_publicadas":len(data.get("items",[])),"candidatas_contrastadas":len(report),"resultados":report}
+          Path("rad-contraste-candidatas-previas.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps({"fichas_publicadas":out["fichas_publicadas"],
+                            "coincidencias":sum(x["resultado"]!="sin_coincidencia" for x in report),
+                            "sin_coincidencia":sum(x["resultado"]=="sin_coincidencia" for x in report)},ensure_ascii=False))
+          PY
+      - name: Guardar contraste para revisión
+        uses: actions/upload-artifact@v4
+        with:
+          name: rad-contraste-candidatas-previas-${{ github.run_id }}
+          path: rad-contraste-candidatas-previas.json
+          if-no-files-found: error
+          retention-days: 30
