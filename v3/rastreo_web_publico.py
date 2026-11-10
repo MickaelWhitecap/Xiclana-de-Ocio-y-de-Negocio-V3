@@ -914,6 +914,11 @@ def merge_existing_record(existing, record, source_url):
     mapping=(("a","address"),("h","hours"),("d","description"),("t","type"),("c","category"))
     for key,source_key in mapping:
         incoming=str(record.get(source_key) or "").strip()
+        # AEChiclana publica para Ferretería Alba una dirección que contradice
+        # la web oficial y la noticia municipal; no se incorpora esa dirección.
+        if key=="a" and norm(record_value(existing,"n","nombre","name"))=="ferreteria alba" and "aechiclana.org" in source_url:
+            if incoming: conflicts.append("Dirección de AEChiclana discrepante; se espera una fuente independiente.")
+            continue
         if incoming and not str(existing.get(key) or "").strip():
             existing[key]=incoming
             changed.append(key)
@@ -1157,6 +1162,12 @@ def self_test():
     assert enrichment["a"]=="Calle Real 10, 11130 Chiclana"
     assert len(enrichment["fuentes_datos"])==1
     assert merge_existing_record(enrichment,{"phone":"956222222"},"https://directorio.example/empresa")[0]==[]
+    alba={"n":"Ferretería Alba","a":"","p":""}
+    changed,conflicts=merge_existing_record(alba,{
+        "address":"23 Avenida Bahía de Cádiz, 11130 Chiclana","phone":"956209585"
+    },"https://aechiclana.org/directorio/trabajo/alba")
+    assert alba["a"]=="", "No se debe incorporar la dirección discrepante de AEChiclana"
+    assert alba["p"]=="956209585" and conflicts, "Se conserva el teléfono y se señala la dirección discrepante"
 
     # Las señales de baja calidad se muestran para revisión, nunca se publican automáticamente.
     noisy=candidate_review_notes({
