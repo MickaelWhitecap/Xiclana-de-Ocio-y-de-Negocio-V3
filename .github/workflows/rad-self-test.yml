@@ -1,5 +1,12 @@
 name: RAD - pruebas de deduplicación
 on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'v3/rastreo_web_publico.py'
+      - '.github/workflows/rad-self-test.yml'
   push:
     branches:
       - rad-integracion-limpia
