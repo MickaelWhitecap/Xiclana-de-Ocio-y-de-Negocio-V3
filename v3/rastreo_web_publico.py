@@ -1235,11 +1235,13 @@ def self_test():
     assert not cualtis.get("c") and not cualtis.get("d") and conflicts
     consmar={"n":"Consmar","a":"Avenida Esperanza del Marquesado, 33, 11130 Chiclana","p":"956531678"}
     changed,conflicts=merge_existing_record(consmar,{
-        "address":"Avenida Esperanza del Marquesado, Km 1900, 11130 Chiclana",
-        "description":"Objeto social registral de construcción"
+        "address":"Avenida Esperanza del Marquesado, Km 1900, 11130 Chiclana"
     },"https://www.busqueda-local.es/chiclana-de-la-frontera/consmar-aY2RUu.html")
     assert consmar["a"]=="Avenida Esperanza del Marquesado, 33, 11130 Chiclana"
     assert consmar["direcciones_alternativas"][0]["direccion"].endswith("Km 1900, 11130 Chiclana")
+    changed,conflicts=merge_existing_record(consmar,{
+        "description":"Objeto social registral de construcción"
+    },"https://www.informa.es/directorio-empresas/Empresa_CONSMAR-CHICLANA.html")
     assert "Objeto social registral de construcción" not in consmar.get("d","")
     assert conflicts
 
