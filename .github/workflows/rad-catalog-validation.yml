@@ -1,27 +1,16 @@
 name: RAD - validación contra catálogo real
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened, ready_for_review]
-    paths:
-      - 'v3/rastreo_web_publico.py'
-      - '.github/workflows/rad-self-test.yml'
-      - '.github/workflows/rad-catalog-validation.yml'
-      - '.github/workflows/prueba-rad-real.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'v3/rastreo_web_publico.py'
-      - '.github/workflows/rad-self-test.yml'
-      - '.github/workflows/rad-catalog-validation.yml'
-      - '.github/workflows/prueba-rad-real.yml'
   schedule:
-    - cron: "27 6 * * *"
+    - cron: "27 3 * * *"
   workflow_dispatch:
+concurrency:
+  group: rad-catalog-validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate-real-catalog:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 90
     steps:
       - name: Descargar código de main
         uses: actions/checkout@v4
@@ -41,6 +30,7 @@ jobs:
           assert isinstance(d.get('items'),list), 'El catálogo no contiene items'
           assert len(d['items']) >= 1200, f"Catálogo inesperadamente pequeño: {len(d['items'])}"
           open('/tmp/rad_ids_antes.json','w').write(json.dumps([x.get('id') for x in d.get('candidatas_revision',[]) if isinstance(x,dict)]))
+          open('/tmp/rad_items_antes.txt','w').write(str(len(d['items'])))
           print(f"Catálogo vigente de main: {len(d['items'])} fichas; {len(d.get('candidatas_revision',[]))} candidatas previas.")
           PY
       - name: Ejecutar RAD real sobre la copia
@@ -56,6 +46,8 @@ jobs:
           rad=d.get('rad_ultima_ejecucion',{})
           report={
             'fichas_catalogo':len(d.get('items',[])),
+            'fichas_enriquecidas':rad.get('fichas_enriquecidas',0),
+            'campos_actualizados':rad.get('campos_actualizados',0),
             'candidatas_revision_antes':len(before),
             'rad':rad,
             'candidatas_nuevas':[
@@ -68,10 +60,13 @@ jobs:
           print(json.dumps({
             'fichas_catalogo':report['fichas_catalogo'],
             'candidatas_nuevas':len(added),
+            'fichas_enriquecidas':rad.get('fichas_enriquecidas',0),
+            'campos_actualizados':rad.get('campos_actualizados',0),
             'coincidencias_catalogo':rad.get('coincidencias_catalogo'),
             'urls_encontradas':rad.get('urls_encontradas'),
             'publicacion_automatica':rad.get('publicacion_automatica')
           },ensure_ascii=False))
+          assert len(d.get('items',[])) == int(open('/tmp/rad_items_antes.txt').read()), 'RAD no debe alterar el número de fichas publicadas'
           assert rad.get('publicacion_automatica') is False, 'El RAD no debe publicar automáticamente'
           assert all(x.get('estado_revision') == 'pendiente' for x in added), 'Hay una candidata nueva que no está pendiente'
           assert all(x.get('url_fuente_rastreo') for x in added), 'Hay una candidata nueva sin URL de procedencia'

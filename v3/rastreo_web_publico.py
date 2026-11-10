@@ -29,19 +29,57 @@ QUERIES = [
     f'{CITY} empresas polígonos industriales directorio comercial',
     f'{CITY} directorio empresas guía comercial negocios',
     f'{CITY} asociación comerciantes empresas socios',
+    f'{CITY} site:actualidadsur.es/pueblos/chiclana-de-la-frontera',
 ]
 MAX_RESULTS_PER_QUERY = 12
-MAX_PAGES = 140
+MAX_PAGES = 2000
 TIMEOUT = 18
 DIRECTORY_SEEDS = [
     "https://aechiclana.org/directorio/",
-    "https://www.chiclanaguiadempresas.com/",
+    "https://www.chiclanaguiadempresas.com/empresas/",
+    "https://www.cadizturismo.com/es/listado-de-empresas/alojamientos/chiclana-de-la-frontera/todas-las-empresas",
+    "https://chiclana-de-la-frontera.todociudad.es/",
+    "https://www.cylex.es/chiclana-de-la-frontera/tiendas.html",
+    "https://www.cylex.es/chiclana-de-la-frontera/restaurantes/",
+    "https://www.cylex.es/chiclana-de-la-frontera/bares/",
+    "https://www.cylex.es/chiclana-de-la-frontera/peluquer%C3%ADas/",
+    "https://www.cylex.es/chiclana-de-la-frontera/belleza.html",
+    "https://www.cylex.es/chiclana-de-la-frontera/comercio.html",
+    "https://www.paginasamarillas.es/a/establecimientos/cadiz/chiclana-de-la-frontera/",
     "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/",
     "https://turismo.chiclana.es/sol-y-playa/ocio-y-diversion/",
+]
+DIRECT_DETAIL_URLS = [
+    "https://aechiclana.org/directorio/trabajo/alba-ferreteria-herrajes-para-la-madera/",
+    "https://aechiclana.org/directorio/trabajo/autoservicio-la-nueva-suerte/",
+    "https://aechiclana.org/directorio/trabajo/belizon-y-rodriguez-s-l/",
+    "https://aechiclana.org/directorio/trabajo/consmar-chiclana-s-l/",
+    "https://aechiclana.org/directorio/trabajo/cualtis-s-l-unipersonal/",
+    "https://aechiclana.org/directorio/trabajo/inverair-factory-chiclana/",
+    "https://aechiclana.org/directorio/trabajo/jeros-burguer/",
+    "https://aechiclana.org/directorio/trabajo/m-j-suazo-lopez/",
+    "https://aechiclana.org/directorio/trabajo/mochila-s-l-alquileres-de-maquinaria/",
+    "https://aechiclana.org/directorio/trabajo/transportes-clemente/",
+    "https://www.cylex.es/chiclana-de-la-frontera/alquileres-de-maquinarias-mochila-s-l--11726122.html",
+    "https://www.cylex.es/chiclana-de-la-frontera/autobuses-beliz%C3%B3n-y-rodr%C3%ADguez-s-l--11272584.html",
+    "https://www.paginasamarillas.es/f/chiclana-de-la-frontera/alquileres-de-maquinarias-mochila-s-l-_013439948_000000001.html",
+    "https://www.paginasamarillas.es/f/chiclana-de-la-frontera/ferreteria-alba_223740978_000000001.html",
+    "https://ferreteriaalba.com/7-vc-quienes-somos.html",
+    "https://www.alquilermochila.com/contacto/",
+    "https://novobus.es/index.php?op=contactar",
+    "https://www.suazoservice.com/contacto/",
+    "https://inverairfactory.com/contacto/",
+    "https://destaco.es/empresa/cualtis-chiclana-de-la-frontera",
+    "https://www.tripadvisor.es/Restaurant_Review-g187433-d13398058-Reviews-Jero_s_Burguer-Chiclana_de_la_Frontera_Costa_de_la_Luz_Province_of_Cadiz_Andaluc.html",
 ]
 TRUSTED_DIRECTORY_PATHS = {
     "aechiclana.org": ("/directorio/trabajo/",),
     "www.chiclanaguiadempresas.com": ("/empresas/empresa/",),
+    "www.cadizturismo.com": ("/es/empresa/",),
+    "chiclana-de-la-frontera.todociudad.es": ("/negocio/",),
+    "www.cylex.es": ("/chiclana-de-la-frontera/",),
+    "www.paginasamarillas.es": ("/f/chiclana-de-la-frontera/",),
+    "destaco.es": ("/empresa/cualtis-chiclana-de-la-frontera",),
     "turismo.chiclana.es": (
         "/planifica-tu-viaje/alojamientos/alojamiento/",
         "/detalle-de-recurso/",
@@ -340,6 +378,16 @@ def clean_business_name(value):
         "servicio tecnico paco mateo reparacion television sonido":"Servicio Técnico Paco Mateo",
         "viveros garola agricentro ferreteria peluqueria canina veterinario":"Viveros Garola",
         "rocio panes rodriguez agente en seguros allianz":"Rocío Panés Rodríguez",
+        "alba ferreteria herrajes para la madera":"Ferretería Alba",
+        "belizon y rodriguez s l":"Belizón y Rodríguez",
+        "belizon y rodriguez lineas de autobuses transporte urbano e interurbano chiclana":"Belizón y Rodríguez",
+        "cualtis s l unipersonal":"Cualtis",
+        "inverair factory chiclana":"Inverair Factory",
+        "inverair":"Inverair Factory",
+        "m j suazo lopez":"M.J. Suazo López",
+        "mj suazo lopez":"M.J. Suazo López",
+        "mochila s l alquileres de maquinaria":"Alquileres de Maquinaria Mochila",
+        "alquileres de maquinarias mochila s l":"Alquileres de Maquinaria Mochila",
     }
     name=verified_names.get(norm(name),name)
     if norm(name)=="opticos general":
@@ -382,6 +430,7 @@ def clean_address(value, locality="", postal=""):
     """Normaliza direcciones y descarta localidades/códigos postales sin vía concreta."""
     raw=html.unescape(re.sub(r"<[^>]*>", " ", str(value or "")))
     raw=re.sub(r"(?i)^\s*(?:direcci[oó]n|address)\s*[:\-]?\s*", "", raw)
+    raw=re.sub(r"(?<!\d)(11)[ .](130|138|139)(?!\d)",r"\1\2",raw)
     # Descarta coordenadas GPS y altitud añadidas al final de una dirección.
     raw=re.sub(r"(?i),?\s*\d{1,2}[º°]\s*\d{1,2}['′]\s*\d{1,2}(?:[\.,]\d+)?(?:['′]{1,2}|[\"″])?\s*[NSEW]?(?:\s+\d{1,2}[º°]\s*\d{1,2}['′]\s*\d{1,2}(?:[\.,]\d+)?(?:['′]{1,2}|[\"″])?\s*[NSEW]?)?\s*\)?(?:\s+\d{1,4}\s*m)?\s*$", "", raw, flags=re.I)
     raw=re.split(r"(?i)\s+(?:tel[eé]fono|tel\.?|p[aá]gina web|c[oó]mo llegar|correo|email|horario)\s*[:\-]?", raw, maxsplit=1)[0]
@@ -825,6 +874,13 @@ def extract(url, trusted_local=False):
     if addr and not re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",addr) and "chiclana" not in norm(addr):
         addr=""
     hours=obj.get("openingHours") or obj.get("openingHoursSpecification") or ""
+    if not hours and "cylex.es" in urllib.parse.urlparse(final_url).netloc.lower():
+        hours_match=re.search(
+            r"(?is)horario de apertura\s*(.{0,900}?)(?:correo electr[oó]nico|opiniones|descripci[oó]n|$)",
+            blob
+        )
+        if hours_match and re.search(r"\b\d{1,2}[:.]\d{2}\b",hours_match.group(1)):
+            hours=" ".join(hours_match.group(1).split())[:500]
     if isinstance(hours,dict): hours=[hours]
     if isinstance(hours,list):
         parts=[]
@@ -868,11 +924,11 @@ def extract(url, trusted_local=False):
     address_detail=norm(addr)
     address_detail=re.sub(r"\b(11130|11138|11139|chiclana|de|la|frontera)\b"," ",address_detail)
     address_detail=" ".join(address_detail.split())
-    if len(address_detail)<4: return None
-    if not re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",addr) and "chiclana" not in norm(addr):
+    if len(address_detail)<4 and not trusted_local: return None
+    if not trusted_local and not re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",addr) and "chiclana" not in norm(addr):
         return None
     # Una dirección válida sin ningún canal de contacto tampoco es candidata accionable.
-    if not any((phone,email,website)): return None
+    if not any((phone,email,website)) and not (trusted_local and addr): return None
     schema_type=obj.get("@type",[])
     schema_types=schema_type if isinstance(schema_type,list) else [schema_type]
     schema_types=" ".join(str(x).rsplit("/",1)[-1].rsplit("#",1)[-1] for x in schema_types)
@@ -885,6 +941,58 @@ def extract(url, trusted_local=False):
     return {"name":name,"type":tipo,"address":addr,"phone":phone,"email":email,"website":website,
             "hours":str(hours)[:500],"description":desc[:700],"source_url":final_url,
             "category":categoria}
+
+def merge_existing_record(existing, record, source_url):
+    """Enriquece una ficha existente sin sobrescribir datos ya guardados."""
+    changed=[]
+    conflicts=[]
+    mapping=(("a","address"),("h","hours"),("d","description"),("t","type"),("c","category"))
+    for key,source_key in mapping:
+        incoming=str(record.get(source_key) or "").strip()
+        # AEChiclana publica para Ferretería Alba una dirección que contradice
+        # la web oficial y la noticia municipal; no se incorpora esa dirección.
+        if key=="a" and norm(record_value(existing,"n","nombre","name"))=="ferreteria alba" and "aechiclana.org" in source_url:
+            if incoming: conflicts.append("Dirección de AEChiclana discrepante; se espera una fuente independiente.")
+            continue
+        if incoming and not str(existing.get(key) or "").strip():
+            existing[key]=incoming
+            changed.append(key)
+    incoming_phones=extract_phones(record.get("phone") or "")
+    old_phone=str(existing.get("p") or "").strip()
+    old_phones=extract_phones(old_phone)
+    additions=[x for x in incoming_phones if x not in old_phones]
+    if additions:
+        existing["p"]=" / ".join(([old_phone] if old_phone else [])+additions)
+        changed.append("p")
+    incoming_email=str(record.get("email") or "").strip()
+    old_email=str(existing.get("e") or "").strip()
+    if incoming_email and incoming_email.casefold() not in old_email.casefold():
+        if not old_email:
+            existing["e"]=incoming_email
+            changed.append("e")
+        else:
+            existing["e"]=old_email+" / "+incoming_email
+            changed.append("e")
+    incoming_web=str(record.get("website") or "").strip()
+    old_web=str(existing.get("w") or "").strip()
+    if incoming_web and not old_web:
+        existing["w"]=incoming_web
+        changed.append("w")
+    elif incoming_web and url_key(incoming_web)!=url_key(old_web):
+        alternatives=existing.setdefault("web_alternativas",[])
+        if incoming_web not in alternatives:
+            alternatives.append(incoming_web)
+            changed.append("web_alternativas")
+            conflicts.append("La fuente aporta una web distinta; se conserva la web principal.")
+    if changed:
+        sources=existing.setdefault("fuentes_datos",[])
+        if not isinstance(sources,list):
+            sources=[]
+            existing["fuentes_datos"]=sources
+        if not any(isinstance(x,dict) and url_key(x.get("url",""))==url_key(source_url) for x in sources):
+            sources.append({"url":source_url,"campos":changed})
+    return changed,conflicts
+
 
 def self_test():
     global allowed, get
@@ -1028,6 +1136,9 @@ def self_test():
     assert clean_website("http://info@pedenetti.com/","https://directorio.example/ficha") == ""
     assert clean_website("https://empresa.es/","https://directorio.example/ficha") == "https://empresa.es/"
     assert clean_address("Avenida Bahía 23, 11100, Chiclana","Chiclana de la Frontera","11100") == "Avenida Bahía 23, Chiclana de la Frontera"
+    assert "11130" in clean_address("Callejón de la Rosa, nº 2 11.130 Chiclana de la Fra. (Cádiz)")
+    assert clean_business_name("INVERAIR FACTORY CHICLANA") == "Inverair Factory"
+    assert clean_business_name("M.J. SUAZO LÓPEZ") == "M.J. Suazo López"
     assert clean_description("Bar PimPam ofrece tapas caseras y platos tradicionales en un ambiente familiar", "La Guía de Chiclana") == ""
     assert is_directory_email("info@chiclanaguiadempresas.com","https://www.chiclanaguiadempresas.com/empresas/empresa/bar")
     assert not is_directory_email("contacto@empresa.es","https://www.chiclanaguiadempresas.com/empresas/empresa/bar")
@@ -1075,6 +1186,26 @@ def self_test():
         {"n":"Bodegas Primitivo Collantes","a":"Calle Real 10","p":"956400150 / 956531722"},
         {"n":"Bodegas Primitivo Collantes S.A.","a":"Avenida Diputación 20","p":"956531722 / 956400150"}
     )["kind"] in ("duplicate","possible")
+    assert is_pagination_link("https://www.cylex.es/chiclana-de-la-frontera/restaurantes/?p=2","2","www.cylex.es")
+    assert is_pagination_link("https://www.cylex.es/chiclana-de-la-frontera/tiendas-2.html","2","www.cylex.es")
+    assert not is_pagination_link("https://www.cylex.es/chiclana-de-la-frontera/azabache-14038263.html","Azabache","www.cylex.es")
+    enrichment={"n":"Empresa de prueba","p":"956111111","e":"","w":"","h":"","d":"","a":""}
+    changed,conflicts=merge_existing_record(enrichment,{
+        "address":"Calle Real 10, 11130 Chiclana","phone":"956222222",
+        "email":"info@empresa.es","website":"https://empresa.es",
+        "hours":"L-V 09:00-18:00","description":"Descripción comercial de prueba"
+    },"https://directorio.example/empresa")
+    assert "p" in changed and enrichment["p"]=="956111111 / 956222222"
+    assert enrichment["e"]=="info@empresa.es" and enrichment["w"]=="https://empresa.es"
+    assert enrichment["a"]=="Calle Real 10, 11130 Chiclana"
+    assert len(enrichment["fuentes_datos"])==1
+    assert merge_existing_record(enrichment,{"phone":"956222222"},"https://directorio.example/empresa")[0]==[]
+    alba={"n":"Ferretería Alba","a":"","p":""}
+    changed,conflicts=merge_existing_record(alba,{
+        "address":"23 Avenida Bahía de Cádiz, 11130 Chiclana","phone":"956209585"
+    },"https://aechiclana.org/directorio/trabajo/alba")
+    assert alba["a"]=="", "No se debe incorporar la dirección discrepante de AEChiclana"
+    assert alba["p"]=="956209585" and conflicts, "Se conserva el teléfono y se señala la dirección discrepante"
 
     # Las señales de baja calidad se muestran para revisión, nunca se publican automáticamente.
     noisy=candidate_review_notes({
@@ -1137,6 +1268,34 @@ def self_test():
         assert multi["name"] == "Agrojardín Reina", multi["name"]
         assert multi["website"] == "https://agrojardinreina.es/", multi["website"]
 
+        trusted_contact_sample = """<html><head><title>Hotel Local de Prueba</title></head>
+        <body><h1>Hotel Local de Prueba</h1><p>956 123 456</p>
+        <a href="https://hotel-local.example/">hotel-local.example</a></body></html>"""
+        get = lambda url, limit=1200000: (trusted_contact_sample, url, "text/html")
+        trusted = extract("https://www.cadizturismo.com/es/empresa/hotel-local", trusted_local=True)
+        assert trusted is not None, "No se ha aceptado la ficha local de directorio oficial sin calle"
+        assert trusted["name"] == "Hotel Local de Prueba"
+        assert trusted["phone"] == "956123456" and trusted["website"] == "https://hotel-local.example/"
+        assert trusted["address"] == "", "No se debe inventar una dirección que la fuente no facilita"
+
+        address_only_sample = """<html><head><title>Comercio Local de Prueba</title></head>
+        <body><h1>Comercio Local de Prueba</h1>
+        <p>Dirección Av. del Mayorazgo, 37, 11130 Chiclana de la Frontera, Cádiz, Spain</p></body></html>"""
+        get = lambda url, limit=1200000: (address_only_sample, url, "text/html")
+        address_only = extract("https://chiclana-de-la-frontera.todociudad.es/negocio/test-id", trusted_local=True)
+        assert address_only is not None, "No se ha extraído la dirección de una ficha local"
+        assert "Mayorazgo" in address_only["address"] and "11130" in address_only["address"]
+
+        cylex_sample = """<html><head><title>Negocio Cylex de Prueba</title></head><body>
+        <h1>Negocio Cylex de Prueba</h1><p>Dirección: Calle Real 10, 11130 Chiclana de la Frontera</p>
+        <p>Teléfono 956 123 456</p><h2>Horario de apertura</h2>
+        <p>lunes 10:00 - 13:00 martes 10:00 - 13:00 miércoles 10:00 - 13:00</p>
+        <h2>Opiniones</h2></body></html>"""
+        get = lambda url, limit=1200000: (cylex_sample, url, "text/html")
+        cylex_record = extract("https://www.cylex.es/chiclana-de-la-frontera/negocio-prueba-12345678.html", trusted_local=True)
+        assert cylex_record is not None and cylex_record["phone"] == "956123456"
+        assert "10:00" in cylex_record["hours"], "No se ha extraído el horario visible de Cylex"
+
         nonlocal_sample = """<html><head><title>Servicio nacional</title>
         <meta name="description" content="Servicio disponible en Chiclana y toda España">
         <script type="application/ld+json">
@@ -1179,6 +1338,20 @@ def candidate_review_notes(record):
     return notes
 
 
+def is_pagination_link(target, label, host):
+    """Identifica enlaces numerados de paginación, no fichas individuales."""
+    if not str(label or "").strip().isdigit():
+        return False
+    parsed=urllib.parse.urlsplit(target)
+    if parsed.netloc.lower()!=host.lower():
+        return False
+    query=urllib.parse.parse_qs(parsed.query)
+    if any(key.lower() in {"p","page","pagina","pag"} for key in query):
+        return True
+    match=re.search(r"-(\d+)\.html$",parsed.path,re.I)
+    return bool(match and int(match.group(1))<=1000)
+
+
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--self-test",action="store_true")
@@ -1196,31 +1369,52 @@ def main():
     existing=data["items"]+data.get("candidatas_revision",[])
     existing_pairs=set()
     existing_name_addresses={}
-    urls={url_key(x.get("url_fuente_rastreo", "")) for x in existing if isinstance(x,dict)}
+    urls=set()
+    for x in existing:
+        if not isinstance(x,dict): continue
+        source_url=x.get("url_fuente_rastreo","")
+        if source_url: urls.add(url_key(source_url))
+        sources=x.get("fuentes_datos",[])
+        if isinstance(sources,list):
+            for source in sources:
+                if isinstance(source,dict) and source.get("url"):
+                    urls.add(url_key(source["url"]))
     for item in existing:
         if not isinstance(item,dict): continue
         name=norm(item.get("n") or item.get("nombre") or item.get("name"))
         addr=norm(item.get("a") or item.get("direccion") or item.get("address"))
         if name and addr: existing_pairs.add(name+"|"+addr)
         if name: existing_name_addresses.setdefault(name,set()).add(addr)
-    links=[]
+    links=list(DIRECT_DETAIL_URLS)
     trusted_urls=set()
     # Fuentes locales directas: sus fichas individuales son una vía de detección
     # independiente de los buscadores. Solo se confía en rutas de detalle conocidas.
     for seed in DIRECTORY_SEEDS:
-        if not allowed(seed): continue
+        seed_host=urllib.parse.urlparse(seed).netloc.lower()
+        seed_limit=450 if any(x in seed_host for x in ("chiclanaguiadempresas","cylex.es","paginasamarillas.es")) else 160
+        seed_queue=[seed]
+        seed_pages_seen=set()
+        seed_count=0
         try:
-            seed_body,seed_final,_=get(seed,900000)
-            seed_page=Page(); seed_page.feed(seed_body)
-            seed_host=urllib.parse.urlparse(seed_final).netloc.lower()
-            seed_count=0
-            for _,href,_label in seed_page.links:
-                target=urllib.parse.urljoin(seed_final,html.unescape(href))
-                parsed=urllib.parse.urlparse(target)
-                if parsed.scheme not in ("http","https") or parsed.netloc.lower()!=seed_host: continue
-                if any(parsed.path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS.get(seed_host,())):
-                    trusted_urls.add(target); seed_count+=1
-                    if seed_count>=20: break
+            while seed_queue and len(seed_pages_seen)<50 and seed_count<seed_limit:
+                page_url=seed_queue.pop(0)
+                if page_url in seed_pages_seen: continue
+                seed_pages_seen.add(page_url)
+                if not allowed(page_url): continue
+                seed_body,seed_final,_=get(page_url,900000)
+                seed_page=Page(); seed_page.feed(seed_body)
+                final_host=urllib.parse.urlparse(seed_final).netloc.lower()
+                for _,href,label in seed_page.links:
+                    target=urllib.parse.urljoin(seed_final,html.unescape(href))
+                    parsed=urllib.parse.urlparse(target)
+                    if parsed.scheme not in ("http","https") or parsed.netloc.lower()!=final_host: continue
+                    if is_pagination_link(target,label,final_host):
+                        if target not in seed_pages_seen: seed_queue.append(target)
+                        continue
+                    if any(parsed.path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS.get(final_host,())):
+                        trusted_urls.add(target)
+                        seed_count+=1
+                        if seed_count>=seed_limit: break
         except Exception as exc:
             print(f"Fuente directa no disponible ({seed}): {exc}",flush=True)
     links.extend(sorted(trusted_urls))
@@ -1231,6 +1425,7 @@ def main():
     links=list(dict.fromkeys(links))[:MAX_PAGES]
     added=[]; seen_pairs=set(); seen_urls=set(); seen_unlocated_names=set()
     coincidencias=[]; registros_conocidos=existing[:]
+    fichas_enriquecidas=set(); campos_actualizados=0; conflictos_no_sobrescritos=0
     for url in links:
         trusted_local=urllib.parse.urlparse(url).netloc.lower() in TRUSTED_DIRECTORY_PATHS and any(urllib.parse.urlparse(url).path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS[urllib.parse.urlparse(url).netloc.lower()])
         record=extract(url,trusted_local=trusted_local)
@@ -1249,12 +1444,44 @@ def main():
         match=find_catalog_match(candidate,registros_conocidos)
         if match and match["kind"] in ("duplicate","possible"):
             old=match["record"]
+            exact_name=norm(record["name"])==norm(record_value(old,"n","nombre","name"))
+            exact_name_matches=sum(
+                1 for x in registros_conocidos
+                if isinstance(x,dict) and norm(record["name"])==norm(record_value(x,"n","nombre","name"))
+            )
+            safe_to_enrich=(match["kind"]=="duplicate" or (exact_name and exact_name_matches==1 and (trusted_local or bool(record["address"]))))
+            if safe_to_enrich:
+                changed,conflicts=merge_existing_record(old,record,source_url)
+                if changed:
+                    fichas_enriquecidas.add(str(old.get("id") or record_value(old,"n","nombre","name")))
+                    campos_actualizados+=len(changed)
+                    conflictos_no_sobrescritos+=len(conflicts)
+                    coincidencias.append({
+                        "nombre_detectado":record["name"],
+                        "nombre_catalogo":record_value(old,"n","nombre","name"),
+                        "tipo":"ficha_enriquecida","campos":changed,
+                        "url_detectada":source_url
+                    })
+                else:
+                    coincidencias.append({
+                        "nombre_detectado":record["name"],
+                        "nombre_catalogo":record_value(old,"n","nombre","name"),
+                        "tipo":match["kind"],"motivo":"Coincidencia confirmada; no había campos vacíos que completar.",
+                        "url_detectada":source_url
+                    })
+                seen_urls.add(u_key)
+                continue
             coincidencias.append({
                 "nombre_detectado":record["name"],
                 "nombre_catalogo":record_value(old,"n","nombre","name"),
                 "tipo":match["kind"],"motivo":match["reason"],
                 "similitud":round(match["score"],3),"url_detectada":source_url
             })
+            seen_urls.add(u_key)
+            continue
+        # Los directorios locales sin teléfono/web solo pueden completar una ficha
+        # existente; no generan candidatas nuevas sin un canal de contacto.
+        if not any((record["phone"],record["email"],record["website"])):
             seen_urls.add(u_key)
             continue
         # También se comparan entre sí las candidatas del mismo rastreo.
@@ -1298,8 +1525,11 @@ def main():
     data.setdefault("candidatas_revision",[]).extend(added)
     data["total_candidatas_revision"]=len(data["candidatas_revision"])
     data["rad_ultima_ejecucion"]={"fecha_utc":datetime.now(timezone.utc).isoformat(),
-       "buscadores":["DuckDuckGo HTML","Bing RSS"],"fuentes_directas":DIRECTORY_SEEDS,"consultas":len(QUERIES),
+       "buscadores":["DuckDuckGo HTML","Bing RSS"],"fuentes_directas":DIRECTORY_SEEDS,
+       "fuentes_detalle_directo":DIRECT_DETAIL_URLS,"consultas":len(QUERIES),
        "urls_encontradas":len(links),"candidatas_nuevas":len(added),
+       "fichas_enriquecidas":len(fichas_enriquecidas),"campos_actualizados":campos_actualizados,
+       "conflictos_datos_no_sobrescritos":conflictos_no_sobrescritos,
        "coincidencias_catalogo":len(coincidencias),
        "detalle_coincidencias":coincidencias[:100],
        "publicacion_automatica":False}
