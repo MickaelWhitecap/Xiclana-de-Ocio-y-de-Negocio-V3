@@ -1,23 +1,7 @@
 name: RAD - validación contra catálogo real
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened, ready_for_review]
-    paths:
-      - 'v3/rastreo_web_publico.py'
-      - '.github/workflows/rad-self-test.yml'
-      - '.github/workflows/rad-catalog-validation.yml'
-      - '.github/workflows/prueba-rad-real.yml'
-      - '.github/workflows/rad-enrich-catalog.yml'
-  push:
-    branches: [main, rad-fuentes-enriquecimiento-global]
-    paths:
-      - 'v3/rastreo_web_publico.py'
-      - '.github/workflows/rad-self-test.yml'
-      - '.github/workflows/rad-catalog-validation.yml'
-      - '.github/workflows/prueba-rad-real.yml'
   schedule:
-    - cron: "27 6 * * *"
+    - cron: "27 3 * * *"
   workflow_dispatch:
 concurrency:
   group: rad-catalog-validation-${{ github.event.pull_request.number || github.ref }}
