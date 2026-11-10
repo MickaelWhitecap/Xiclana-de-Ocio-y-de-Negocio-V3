@@ -300,8 +300,8 @@ def clean_business_name(value):
         r"(?i)\s+(?:punto de venta\s+.+?\s+concesionario)$",
         r"(?i)\s+(?:mec[aá]nico|mec[aá]nica|autom[oó]vil)(?:\s+(?:mec[aá]nico|mec[aá]nica|autom[oó]vil))*$",
         r"(?i)\s+(?:carpinter[ií]as?|pesca|accesorios|n[aá]uticos|casas|prefabricadas|"
-        r"m[oó]dulos|[oó]pticas?|aud[ií]fonos)(?:\s+(?:carpinter[ií]as?|pesca|accesorios|"
-        r"n[aá]uticos|casas|prefabricadas|m[oó]dulos|[oó]pticas?|aud[ií]fonos))*$",
+        r"m[oó]dulos|[oó]pticas?|[oó]pticos?|aud[ií]fonos)(?:\s+(?:carpinter[ií]as?|pesca|accesorios|"
+        r"n[aá]uticos|casas|prefabricadas|m[oó]dulos|[oó]pticas?|[oó]pticos?|aud[ií]fonos))*$",
     ]
     for pattern in patterns:
         name=re.sub(pattern,"",name,flags=re.I).strip(" |·-–—")
@@ -328,6 +328,12 @@ def clean_business_name(value):
         "maquinaria de jardineria taller jose antonio garcia":"José A. García Guerrero",
         "nattex":"NATTEX",
         "atripiko restaurante cocina fusion latina restaurantes":"Atrípiko-Gastro Bar",
+        "bar cerveceria d los oliva bares":"Bar Cervecería D´Los Oliva",
+        "centros deportivos amigos del aerobic pilates body combat":"Amigos del Aerobic",
+        "peluqueria gernis salon de belleza cosmetica peluquerias":"Peluquería Gernis",
+        "servicio tecnico paco mateo reparacion television sonido":"Servicio Técnico Paco Mateo",
+        "viveros garola agricentro ferreteria peluqueria canina veterinario":"Viveros Garola",
+        "rocio panes rodriguez agente en seguros allianz":"Rocío Panés Rodríguez",
     }
     name=verified_names.get(norm(name),name)
     if norm(name)=="opticos general":
@@ -560,7 +566,7 @@ def classify(text):
         "frigorifico","frigorificos","industria alimentaria","alimentacion",
         "productos alimenticios","distribucion alimentaria","congelados",
         "carniceria","charcuteria","pescaderia","panaderia","supermercado",
-        "frutos secos","golosinas","chocolate",
+        "frutos secos","golosinas","chocolate","bodega","bodegas","vinos","vinicola",
     )):
         return ("negocio","Alimentación")
 
@@ -590,15 +596,28 @@ def classify(text):
     )):
         return ("negocio","Servicios y negocios")
 
+    # Prioriza viveros y centros de jardinería frente a servicios accesorios.
+    if any(term in s_norm for term in (
+        "vivero","viveros","agricentro","centro de jardineria",
+        "plantas ornamentales","productos de jardineria",
+    )):
+        return ("negocio","Comercio")
+
+    if any(term in s_norm for term in (
+        "agente de seguros","agencia de seguros","correduria de seguros",
+        "seguros de vida","seguros de hogar",
+    )):
+        return ("negocio","Servicios profesionales")
+
     groups=[
       (("inoxidables","metalurgia","metalurgica","acero inoxidable","caldereria","carpinteria metalica","soldadura industrial"),("negocio","Servicios y negocios")),
       (("mudanzas","transportes","transporte","mensajeria","logistica"),("negocio","Servicios y negocios")),
-      (("restaurante","cafeteria","comida","pizzeria","marisqueria","sushi","asador","taberna","meson","chiringuito"),("ocio","Restauración")),
+      (("restaurante","cafeteria","comida","pizzeria","marisqueria","sushi","asador","taberna","meson","chiringuito","cerveceria","bar "),("ocio","Restauración")),
       (("ocio y animacion","eventos tematizados","animacion sociocultural","animacion infantil"),("ocio","Ocio y animación")),
       (("hotel","hostal","apartamento turistico","alojamiento"),("negocio","Alojamiento")),
       (("taller mecanico","taller de coches","taller de vehiculos","taller de motos","mecanica","reparacion de vehiculos","adaptaciones de vehiculos","automovil","automocion","concesionario","taller de neumaticos","venta de neumaticos","neumaticos"),("negocio","Automoción")),
       (("dentista","clinica","fisioterapia","veterinaria","veterinario","centro veterinario","farmacia","mascotas","optica","optico","optometrista","audifonos","audiologia"),("negocio","Salud")),
-      (("peluqueria","estetica","gimnasio"),("negocio","Belleza y deporte")),
+      (("peluqueria","estetica","gimnasio","centro deportivo","centros deportivos","aerobic","pilates","body combat","actividades deportivas"),("negocio","Belleza y deporte")),
       (("academia","colegio","formacion","idiomas"),("negocio","Educación")),
       (("joyeria","relojeria"),("negocio","Joyería y relojería")),
       (("mueble","muebles","mobiliario","decoracion","colchon"),("negocio","Muebles y decoración")),
@@ -864,6 +883,11 @@ def self_test():
     assert classify("Alquiler de vehículos y herramientas") != ("negocio","Inmobiliaria")
     assert classify("Construcción, reformas y parques infantiles") == ("negocio","Servicios y negocios")
     assert classify("Marisquería Casa Bernardo") == ("ocio","Restauración")
+    assert classify("Bar Cervecería D´Los Oliva") == ("ocio","Restauración")
+    assert classify("Bodegas Vélez, fabricación y venta de vinos") == ("negocio","Alimentación")
+    assert classify("Viveros Garola, agricentro, ferretería y veterinario") == ("negocio","Comercio")
+    assert classify("Centros deportivos Amigos del Aerobic, Pilates y Body Combat") == ("negocio","Belleza y deporte")
+    assert classify("Rocío Panés, agente de seguros Allianz") == ("negocio","Servicios profesionales")
     assert classify("Joyería Puente Chico, taller propio y soldaduras láser") == ("negocio","Joyería y relojería")
     assert classify("Frutos secos, golosinas y chocolate") == ("negocio","Alimentación")
     assert classify("Viajes Carrefour, agencia de viajes") == ("negocio","Servicios y negocios")
@@ -871,6 +895,10 @@ def self_test():
     assert classify("Ituci Asesores, asesoría fiscal y laboral") == ("negocio","Servicios profesionales")
     assert clean_business_name("Jerónimo Vallejo Montero «Ituci Asesores»") == "Ituci Asesores"
     assert clean_business_name("Viajes Puente Travel 17, S.C. «Viajes Carrefour»") == "Viajes Carrefour"
+    assert clean_business_name("Bar Cervecería D´Los Oliva Bares") == "Bar Cervecería D´Los Oliva"
+    assert clean_business_name("Centros deportivos Amigos del Aerobic pilates Body Combat") == "Amigos del Aerobic"
+    assert clean_business_name("Peluquería Gernis Salón de belleza cosmética peluquerías") == "Peluquería Gernis"
+    assert clean_business_name("Viveros Garola Agricentro Ferretería Peluquería canina Veterinario") == "Viveros Garola"
     assert clean_business_name("Concesionarios Citroën SEAT") == "Autos Colchón"
     assert clean_business_name("Laboratorio Seguridad alimentaria Análisis BioCentrol Laboratorios") == "BioCentrol Laboratorios"
     assert extract_phones("956 401 156650 767 055682 365 666") == ["956401156","650767055","682365666"]
