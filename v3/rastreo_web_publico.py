@@ -328,6 +328,9 @@ def clean_business_name(value):
         "maquinaria de jardineria taller jose antonio garcia":"José A. García Guerrero",
         "nattex":"NATTEX",
         "atripiko restaurante cocina fusion latina restaurantes":"Atrípiko-Gastro Bar",
+        "almacen de maderas molduras serrano carpinteria carpinteros":"Molduras Serrano",
+        "tatuaje tattoo nono tattoo studio":"Ñoño Tattoo Studio",
+        "viajes mms chiclana agencia":"Viajes MMS Chiclana",
         "bar cerveceria d los oliva bares":"Bar Cervecería D´Los Oliva",
         "centros deportivos amigos del aerobic pilates body combat":"Amigos del Aerobic",
         "peluqueria gernis salon de belleza cosmetica peluquerias":"Peluquería Gernis",
@@ -441,9 +444,14 @@ def clean_description(value, business_name=""):
         r"(?i)\s*[|–—]\s*(?:directorio de empresas|gu[ií]a de empresas|empresas de chiclana|"
         r"la gu[ií]a de chiclana|portal comercial).*$", "", raw
     ).strip(" |·-–—")
-    # Los fragmentos de buscadores/directorios con puntos suspensivos o
-    # etiquetas de contacto no son descripciones comerciales completas.
+    # Los fragmentos de buscadores/directorios con puntos suspensivos,
+    # etiquetas de contacto u horarios no son descripciones comerciales.
     if re.search(r"(?:\.{3,}|…|\b(?:tel[eé]fono|tel\.)\s*[:：-]?)",raw,re.I):
+        return ""
+    if re.search(r"(?i)\b(?:lunes|martes|miercoles|miércoles|jueves|viernes|sabado|sábado|domingo)\b",raw) and re.search(r"\b\d{1,2}[:.]\d{2}\b",raw):
+        return ""
+    # Una frase cortada en una preposición/conector no es texto publicable.
+    if re.search(r"(?i)\b(?:de|del|para|con|en|por|y|o|a|que|como|hasta|desde)$",raw):
         return ""
     n=norm(raw)
     generic_phrases=(
@@ -895,6 +903,11 @@ def self_test():
     assert classify("Ituci Asesores, asesoría fiscal y laboral") == ("negocio","Servicios profesionales")
     assert clean_business_name("Jerónimo Vallejo Montero «Ituci Asesores»") == "Ituci Asesores"
     assert clean_business_name("Viajes Puente Travel 17, S.C. «Viajes Carrefour»") == "Viajes Carrefour"
+    assert clean_business_name("Almacén de maderas Molduras Serrano Carpintería Carpinteros") == "Molduras Serrano"
+    assert clean_business_name("Tatuaje Tattoo Ñoño Tattoo Studio") == "Ñoño Tattoo Studio"
+    assert clean_business_name("Viajes MMS Chiclana Agencia") == "Viajes MMS Chiclana"
+    assert clean_description("Lunes a Jueves de: 09.30 a 14.00h y 18:00 a 20:00 UN VIAJE SIEMPRE ES LA MEJOR OPCIÓN", "Viajes MMS Chiclana") == ""
+    assert clean_description("Pinturas, Barnices y suministros. Disponemos de sistema tintométrico para todo tipo de", "Pinturas Hermanos Vicario") == ""
     assert clean_business_name("Bar Cervecería D´Los Oliva Bares") == "Bar Cervecería D´Los Oliva"
     assert clean_business_name("Centros deportivos Amigos del Aerobic pilates Body Combat") == "Amigos del Aerobic"
     assert clean_business_name("Peluquería Gernis Salón de belleza cosmética peluquerías") == "Peluquería Gernis"
