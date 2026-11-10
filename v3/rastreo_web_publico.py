@@ -78,6 +78,24 @@ DIRECT_DETAIL_URLS = [
     "https://www.tripadvisor.es/Restaurant_Review-g187433-d13398058-Reviews-Jero_s_Burguer-Chiclana_de_la_Frontera_Costa_de_la_Luz_Province_of_Cadiz_Andaluc.html",
     "https://www.busqueda-local.es/chiclana-de-la-frontera/consmar-aY2RUu.html",
     "https://carta.menu/restaurants/chiclana-de-la-frontera/jeros-burger",
+    "https://aechiclana.org/directorio/trabajo/mar-capote/",
+    "https://aechiclana.org/directorio/trabajo/topgea-topografia/",
+    "https://aechiclana.org/directorio/trabajo/mediaestudio/",
+    "https://www.topgea.es/",
+    "https://www.mediaestudio.com/",
+    "https://finmohogar.com/contacto",
+    "https://atripiko.es/",
+    "https://avilabobilloclinicadental.es/",
+    "https://www.cylex.es/chiclana-de-la-frontera/%C3%A1vila-bobillo-centro-dental-infantil-12961082.html",
+    "https://www.chiclanaguiadempresas.com/empresas/empresa/clinica-del-pie-monica-marin-podologia-podologo-podologa/",
+    "https://www.chiclanaguiadempresas.com/empresas/empresa/cristaleria-carlos-moreno-cristalerias/",
+    "https://www.chiclanaguiadempresas.com/empresas/empresa/encastre-cocinas-electrodomesticos/",
+    "https://www.chiclanaguiadempresas.com/empresas/empresa/francisco-javier-guerra-agente-seguros-allianz/",
+    "https://www.chiclanaguiadempresas.com/empresas/empresa/inmobiliaria-finmohogar/",
+    "https://www.chiclanaguiadempresas.com/empresas/empresa/media-estudio-hosteleria/",
+    "https://www.chiclanaguiadempresas.com/empresas/empresa/nattex-mobiliario-sofas-sofa-colchones-muebles-decoracion/",
+    "https://www.cylex.es/chiclana-de-la-frontera/sof%C3%A1s-colchones-muebles-nattex-chiclana-13885929.html",
+    "https://www.cylex.es/chiclana-de-la-frontera/vidrier%C3%ADas-y-cristaler%C3%ADas/",
 ]
 TRUSTED_DIRECTORY_PATHS = {
     "aechiclana.org": ("/directorio/trabajo/",),
@@ -374,6 +392,8 @@ def clean_business_name(value):
         "lola robledo modas y complementos":"Lola Robledo Moda",
         "maquinaria de jardineria taller jose antonio garcia":"José A. García Guerrero",
         "nattex":"NATTEX",
+        "media estudio hosteleria":"MediaEstudio",
+        "clinica del pie monica marin podologia podologo podologa":"Clínica del Pie Mónica Marín",
         "atripiko restaurante cocina fusion latina restaurantes":"Atrípiko-Gastro Bar",
         "almacen de maderas molduras serrano carpinteria carpinteros":"Molduras Serrano",
         "tatuaje tattoo nono tattoo studio":"Ñoño Tattoo Studio",
@@ -647,6 +667,13 @@ def classify(text):
     if any(term in s_norm for term in ("agencia de viajes","agencia viajes","viajes carrefour","viajes puentetravel")):
         return ("negocio","Servicios y negocios")
 
+    # Correcciones de actividad contrastadas con la ficha oficial del negocio.
+    # MediaEstudio desarrolla software y soporte para empresas/hostelería, no restaura.
+    if "mediaestudio" in s_norm:
+        return ("negocio","Servicios y negocios")
+    # La biomecánica de la pisada no es mecánica de automoción.
+    if "monica marin" in s_norm and "podolog" in s_norm:
+        return ("negocio","Salud")
     # Atrípiko es restauración aunque una fuente lo describa genéricamente.
     if "atripiko" in s_norm:
         return ("ocio","Restauración")
@@ -689,7 +716,7 @@ def classify(text):
       (("restaurante","cafeteria","comida","pizzeria","marisqueria","sushi","asador","taberna","meson","chiringuito","cerveceria","bar "),("ocio","Restauración")),
       (("ocio y animacion","eventos tematizados","animacion sociocultural","animacion infantil"),("ocio","Ocio y animación")),
       (("hotel","hostal","apartamento turistico","alojamiento"),("negocio","Alojamiento")),
-      (("taller mecanico","taller de coches","taller de vehiculos","taller de motos","mecanica","reparacion de vehiculos","adaptaciones de vehiculos","automovil","automocion","concesionario","taller de neumaticos","venta de neumaticos","neumaticos"),("negocio","Automoción")),
+      (("taller mecanico","taller de coches","taller de vehiculos","taller de motos","mecanica del automovil","mecanica de vehiculos","mecanica de motos","mecanica automotriz","reparacion de vehiculos","adaptaciones de vehiculos","automovil","automocion","concesionario","taller de neumaticos","venta de neumaticos","neumaticos"),("negocio","Automoción")),
       (("dentista","clinica","fisioterapia","veterinaria","veterinario","centro veterinario","farmacia","mascotas","optica","optico","optometrista","audifonos","audiologia"),("negocio","Salud")),
       (("peluqueria","estetica","gimnasio","centro deportivo","centros deportivos","aerobic","pilates","body combat","actividades deportivas"),("negocio","Belleza y deporte")),
       (("academia","colegio","formacion","idiomas"),("negocio","Educación")),
@@ -1156,6 +1183,10 @@ def self_test():
     assert classify("Hidráulica Cabral. Diseño, fabricación, mantenimiento y reparación de sistemas hidráulicos y neumáticos") == ("negocio","Servicios y negocios")
     assert classify("Nova Delta. Comercio al por mayor de café, té, cacao y especias") == ("negocio","Alimentación")
     assert classify("Taller de neumáticos y mecánica del automóvil") == ("negocio","Automoción")
+    assert clean_business_name("Media Estudio Hostelería") == "MediaEstudio"
+    assert classify("MediaEstudio. Software para hoteles, restaurantes y hostelería") == ("negocio","Servicios y negocios")
+    assert clean_business_name("Clínica del pie Mónica Marín Podología Podólogo Podóloga") == "Clínica del Pie Mónica Marín"
+    assert classify("Clínica del Pie Mónica Marín. Podología y estudio biomecánico de la pisada") == ("negocio","Salud")
     assert classify("Inoxidables Chiclana, S.L.") == ("negocio","Servicios y negocios")
     assert clean_website("http://info@pedenetti.com/","https://directorio.example/ficha") == ""
     assert clean_website("https://empresa.es/","https://directorio.example/ficha") == "https://empresa.es/"
