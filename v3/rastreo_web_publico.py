@@ -61,6 +61,7 @@ DIRECT_DETAIL_URLS = [
     "https://aechiclana.org/directorio/trabajo/m-j-suazo-lopez/",
     "https://aechiclana.org/directorio/trabajo/mochila-s-l-alquileres-de-maquinaria/",
     "https://aechiclana.org/directorio/trabajo/transportes-clemente/",
+    "https://www.informa.es/directorio-empresas/Empresa_CONSMAR-CHICLANA.html",
     "https://www.cylex.es/chiclana-de-la-frontera/alquileres-de-maquinarias-mochila-s-l--11726122.html",
     "https://www.cylex.es/chiclana-de-la-frontera/autobuses-beliz%C3%B3n-y-rodr%C3%ADguez-s-l--11272584.html",
     "https://www.paginasamarillas.es/f/chiclana-de-la-frontera/alquileres-de-maquinarias-mochila-s-l-_013439948_000000001.html",
@@ -963,7 +964,17 @@ def merge_existing_record(existing, record, source_url):
         if norm(record_value(existing,"n","nombre","name"))=="cualtis" and "destaco.es" in source_url and key in ("t","c","d"):
             conflicts.append("Destaco clasifica Cualtis como clínica dental; no se importa esa categoría ni descripción.")
             continue
-        if incoming and not str(existing.get(key) or "").strip():
+        old_value=str(existing.get(key) or "").strip()
+        if key=="a" and incoming and old_value and norm(incoming)!=norm(old_value):
+            alternatives=existing.setdefault("direcciones_alternativas",[])
+            if not any(isinstance(x,dict) and norm(x.get("direccion",""))==norm(incoming) for x in alternatives):
+                alternatives.append({"direccion":incoming,"url":source_url})
+                changed.append("direcciones_alternativas")
+                conflicts.append("La fuente aporta una dirección alternativa; se conserva la principal.")
+            continue
+        if key=="d" and "informa.es" in source_url:
+            continue
+        if incoming and not old_value:
             existing[key]=incoming
             changed.append(key)
     incoming_phones=extract_phones(record.get("phone") or "")
@@ -1222,6 +1233,15 @@ def self_test():
     },"https://destaco.es/empresa/cualtis-chiclana-de-la-frontera")
     assert cualtis["a"]=="C/ Gerbera, 2, Local 4" and cualtis["p"]=="956497738"
     assert not cualtis.get("c") and not cualtis.get("d") and conflicts
+    consmar={"n":"Consmar","a":"Avenida Esperanza del Marquesado, 33, 11130 Chiclana","p":"956531678"}
+    changed,conflicts=merge_existing_record(consmar,{
+        "address":"Avenida Esperanza del Marquesado, Km 1900, 11130 Chiclana",
+        "description":"Objeto social registral de construcción"
+    },"https://www.busqueda-local.es/chiclana-de-la-frontera/consmar-aY2RUu.html")
+    assert consmar["a"]=="Avenida Esperanza del Marquesado, 33, 11130 Chiclana"
+    assert consmar["direcciones_alternativas"][0]["direccion"].endswith("Km 1900, 11130 Chiclana")
+    assert "Objeto social registral de construcción" not in consmar.get("d","")
+    assert conflicts
 
     # Las señales de baja calidad se muestran para revisión, nunca se publican automáticamente.
     noisy=candidate_review_notes({
