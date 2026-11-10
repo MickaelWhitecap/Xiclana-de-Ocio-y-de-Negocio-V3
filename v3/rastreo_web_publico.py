@@ -31,13 +31,20 @@ QUERIES = [
     f'{CITY} asociación comerciantes empresas socios',
 ]
 MAX_RESULTS_PER_QUERY = 12
-MAX_PAGES = 700
+MAX_PAGES = 1800
 TIMEOUT = 18
 DIRECTORY_SEEDS = [
     "https://aechiclana.org/directorio/",
     "https://www.chiclanaguiadempresas.com/empresas/",
     "https://www.cadizturismo.com/es/listado-de-empresas/alojamientos/chiclana-de-la-frontera/todas-las-empresas",
     "https://chiclana-de-la-frontera.todociudad.es/",
+    "https://www.cylex.es/chiclana-de-la-frontera/tiendas.html",
+    "https://www.cylex.es/chiclana-de-la-frontera/restaurantes/",
+    "https://www.cylex.es/chiclana-de-la-frontera/bares/",
+    "https://www.cylex.es/chiclana-de-la-frontera/peluquer%C3%ADas/",
+    "https://www.cylex.es/chiclana-de-la-frontera/belleza.html",
+    "https://www.cylex.es/chiclana-de-la-frontera/comercio.html",
+    "https://www.paginasamarillas.es/a/establecimientos/cadiz/chiclana-de-la-frontera/",
     "https://turismo.chiclana.es/planifica-tu-viaje/alojamientos/",
     "https://turismo.chiclana.es/sol-y-playa/ocio-y-diversion/",
 ]
@@ -46,6 +53,8 @@ TRUSTED_DIRECTORY_PATHS = {
     "www.chiclanaguiadempresas.com": ("/empresas/empresa/",),
     "www.cadizturismo.com": ("/es/empresa/",),
     "chiclana-de-la-frontera.todociudad.es": ("/negocio/",),
+    "www.cylex.es": ("/chiclana-de-la-frontera/",),
+    "www.paginasamarillas.es": ("/f/chiclana-de-la-frontera/",),
     "turismo.chiclana.es": (
         "/planifica-tu-viaje/alojamientos/alojamiento/",
         "/detalle-de-recurso/",
@@ -1126,6 +1135,9 @@ def self_test():
         {"n":"Bodegas Primitivo Collantes","a":"Calle Real 10","p":"956400150 / 956531722"},
         {"n":"Bodegas Primitivo Collantes S.A.","a":"Avenida Diputación 20","p":"956531722 / 956400150"}
     )["kind"] in ("duplicate","possible")
+    assert is_pagination_link("https://www.cylex.es/chiclana-de-la-frontera/restaurantes/?p=2","2","www.cylex.es")
+    assert is_pagination_link("https://www.cylex.es/chiclana-de-la-frontera/tiendas-2.html","2","www.cylex.es")
+    assert not is_pagination_link("https://www.cylex.es/chiclana-de-la-frontera/azabache-14038263.html","Azabache","www.cylex.es")
     enrichment={"n":"Empresa de prueba","p":"956111111","e":"","w":"","h":"","d":"","a":""}
     changed,conflicts=merge_existing_record(enrichment,{
         "address":"Calle Real 10, 11130 Chiclana","phone":"956222222",
@@ -1259,6 +1271,20 @@ def candidate_review_notes(record):
     return notes
 
 
+def is_pagination_link(target, label, host):
+    """Identifica enlaces numerados de paginación, no fichas individuales."""
+    if not str(label or "").strip().isdigit():
+        return False
+    parsed=urllib.parse.urlsplit(target)
+    if parsed.netloc.lower()!=host.lower():
+        return False
+    query=urllib.parse.parse_qs(parsed.query)
+    if any(key.lower() in {"p","page","pagina","pag"} for key in query):
+        return True
+    match=re.search(r"-(\d+)\.html$",parsed.path,re.I)
+    return bool(match and int(match.group(1))<=1000)
+
+
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--self-test",action="store_true")
@@ -1297,20 +1323,31 @@ def main():
     # Fuentes locales directas: sus fichas individuales son una vía de detección
     # independiente de los buscadores. Solo se confía en rutas de detalle conocidas.
     for seed in DIRECTORY_SEEDS:
-        if not allowed(seed): continue
+        seed_host=urllib.parse.urlparse(seed).netloc.lower()
+        seed_limit=450 if any(x in seed_host for x in ("chiclanaguiadempresas","cylex.es","paginasamarillas.es")) else 160
+        seed_queue=[seed]
+        seed_pages_seen=set()
+        seed_count=0
         try:
-            seed_body,seed_final,_=get(seed,900000)
-            seed_page=Page(); seed_page.feed(seed_body)
-            seed_host=urllib.parse.urlparse(seed_final).netloc.lower()
-            seed_count=0
-            for _,href,_label in seed_page.links:
-                target=urllib.parse.urljoin(seed_final,html.unescape(href))
-                parsed=urllib.parse.urlparse(target)
-                if parsed.scheme not in ("http","https") or parsed.netloc.lower()!=seed_host: continue
-                if any(parsed.path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS.get(seed_host,())):
-                    trusted_urls.add(target); seed_count+=1
-                    seed_limit=450 if "chiclanaguiadempresas" in seed_host else 160
-                    if seed_count>=seed_limit: break
+            while seed_queue and len(seed_pages_seen)<50 and seed_count<seed_limit:
+                page_url=seed_queue.pop(0)
+                if page_url in seed_pages_seen: continue
+                seed_pages_seen.add(page_url)
+                if not allowed(page_url): continue
+                seed_body,seed_final,_=get(page_url,900000)
+                seed_page=Page(); seed_page.feed(seed_body)
+                final_host=urllib.parse.urlparse(seed_final).netloc.lower()
+                for _,href,label in seed_page.links:
+                    target=urllib.parse.urljoin(seed_final,html.unescape(href))
+                    parsed=urllib.parse.urlparse(target)
+                    if parsed.scheme not in ("http","https") or parsed.netloc.lower()!=final_host: continue
+                    if is_pagination_link(target,label,final_host):
+                        if target not in seed_pages_seen: seed_queue.append(target)
+                        continue
+                    if any(parsed.path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS.get(final_host,())):
+                        trusted_urls.add(target)
+                        seed_count+=1
+                        if seed_count>=seed_limit: break
         except Exception as exc:
             print(f"Fuente directa no disponible ({seed}): {exc}",flush=True)
     links.extend(sorted(trusted_urls))
