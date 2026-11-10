@@ -383,7 +383,7 @@ def clean_address(value, locality="", postal=""):
     raw=html.unescape(re.sub(r"<[^>]*>", " ", str(value or "")))
     raw=re.sub(r"(?i)^\s*(?:direcci[oó]n|address)\s*[:\-]?\s*", "", raw)
     # Descarta coordenadas GPS y altitud añadidas al final de una dirección.
-    raw=re.sub(r",?\s*\d{1,2}[º°]\s*\d{1,2}['′]\s*\d{1,2}(?:[\.,]\d+)?[\"″]?\s*[NSEW]?(?:\s+\d{1,4}\s*m)?\)?\s*$", "", raw, flags=re.I)
+    raw=re.sub(r"(?i),?\s*\d{1,2}[º°]\s*\d{1,2}['′]\s*\d{1,2}(?:[\.,]\d+)?["″]?\s*[NSEW]?(?:\s+\d{1,2}[º°]\s*\d{1,2}['′]\s*\d{1,2}(?:[\.,]\d+)?["″]?\s*[NSEW]?)?\s*\)?(?:\s+\d{1,4}\s*m)?\s*$", "", raw, flags=re.I)
     raw=re.split(r"(?i)\s+(?:tel[eé]fono|tel\.?|p[aá]gina web|c[oó]mo llegar|correo|email|horario)\s*[:\-]?", raw, maxsplit=1)[0]
     raw=re.sub(r"[\t\r\n]+", " ", raw)
     raw=re.sub(r"\s*,\s*", ", ", raw)
