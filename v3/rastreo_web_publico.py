@@ -1035,7 +1035,7 @@ def normalize_openrta_record(row):
     is_tourist_home=("vivienda con fines turisticos" in norm(object_type) or object_type_id=="3032")
     if is_tourist_home:
         holder_key=norm(holder)
-        corporate=bool(re.search(r"\\b(sl|s l|slu|s l u|sa|s a|sau|s a u|scoop|s coop|sociedad limitada|sociedad anonima|cooperativa)\\b",holder_key))
+        corporate=bool(re.search(r"\b(sl|s l|slu|s l u|sa|s a|sau|s a u|scoop|s coop|sociedad limitada|sociedad anonima|cooperativa)\b",holder_key))
         if not corporate: return None
     postal=val("postal_code","guide_postal_code")
     address=val("establishment_address","address")
@@ -1047,7 +1047,7 @@ def normalize_openrta_record(row):
     if municipality and norm(municipality) not in norm(address): address=(address+", "+municipality).strip(", ")
     address=clean_address(address,municipality,postal)
     address_detail=norm(address)
-    address_detail=re.sub(r"\\b(11130|11138|11139|chiclana|de|la|frontera)\\b"," ",address_detail)
+    address_detail=re.sub(r"\b(11130|11138|11139|chiclana|de|la|frontera)\b"," ",address_detail)
     if len(" ".join(address_detail.split()))<4: return None
     phones=[]
     for key in ("phone","mobile","guide_phone","guide_mobile"):
