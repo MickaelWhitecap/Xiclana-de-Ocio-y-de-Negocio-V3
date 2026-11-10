@@ -435,6 +435,10 @@ def clean_description(value, business_name=""):
         r"(?i)\s*[|–—]\s*(?:directorio de empresas|gu[ií]a de empresas|empresas de chiclana|"
         r"la gu[ií]a de chiclana|portal comercial).*$", "", raw
     ).strip(" |·-–—")
+    # Los fragmentos de buscadores/directorios con puntos suspensivos o
+    # etiquetas de contacto no son descripciones comerciales completas.
+    if re.search(r"(?:\\.{3,}|…|\\b(?:tel[eé]fono|tel\\.)\\s*[:：-]?)",raw,re.I):
+        return ""
     n=norm(raw)
     generic_phrases=(
         "directorio de empresas","guia de empresas","portal de empresas",
@@ -576,6 +580,15 @@ def classify(text):
     )
     if any(term in s_norm for term in real_estate_terms):
         return ("negocio","Inmobiliaria")
+
+    # Redes, telecomunicaciones e informática son servicios profesionales;
+    # no deben caer en Alojamiento por menciones accesorias en el texto.
+    if any(term in s_norm for term in (
+        "redes y comunicaciones","redes informaticas","telecomunicaciones",
+        "instalaciones de redes","cableado estructurado","fibra optica",
+        "sistemas informaticos","servicios informaticos","soporte informatico",
+    )):
+        return ("negocio","Servicios y negocios")
 
     groups=[
       (("inoxidables","metalurgia","metalurgica","acero inoxidable","caldereria","carpinteria metalica","soldadura industrial"),("negocio","Servicios y negocios")),
@@ -938,6 +951,12 @@ def self_test():
     assert clean_address("Avda. Fernando de Magallanes 36, 11130 Chiclana de la Fra., 11130 Chiclana de la Fra.") == "Avda. Fernando de Magallanes 36, 11130 Chiclana de la Frontera"
     assert clean_address("Calle Real 10, 11130, Chiclana de la Frontera, 11130, Chiclana de la Frontera") == "Calle Real 10, 11130, Chiclana de la Frontera"
     assert clean_description("Directorio de empresas de Chiclana | La Guía de Chiclana") == ""
+    assert clean_description("Motos Mondiña, concesionario oficial... Tel. 956 000 000") == ""
+    assert clean_description("Piscina Rueda Piscinas... especialistas en piscinas") == ""
+    assert clean_description("Q2 Cocinas | Cocinas a medida... Tel.") == ""
+    assert clean_description("Empresa local con servicios profesionales. Teléfono: 956 000 000") == ""
+    assert clean_description("Servicios de redes y comunicaciones para empresas en Chiclana") == "Servicios de redes y comunicaciones para empresas en Chiclana"
+    assert classify("LGA Redes y Comunicaciones, S.L.U. Redes informáticas y telecomunicaciones") == ("negocio","Servicios y negocios")
     assert clean_description("Aviso legal | Política de privacidad | Política de cookies") == ""
     assert clean_description("Información sobre la empresa Ver dirección", "Gestión 10 Asesoría") == ""
     assert clean_description("Chiclana de la Frontera, Cádiz, España", "Lola Robledo Modas y Complementos") == ""
