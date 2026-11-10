@@ -1387,7 +1387,7 @@ def main():
     links=list(dict.fromkeys(links))[:MAX_PAGES]
     added=[]; seen_pairs=set(); seen_urls=set(); seen_unlocated_names=set()
     coincidencias=[]; registros_conocidos=existing[:]
-    fichas_enriquecidas=set(); campos_actualizados=0; conflictos_web=0
+    fichas_enriquecidas=set(); campos_actualizados=0; conflictos_no_sobrescritos=0
     for url in links:
         trusted_local=urllib.parse.urlparse(url).netloc.lower() in TRUSTED_DIRECTORY_PATHS and any(urllib.parse.urlparse(url).path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS[urllib.parse.urlparse(url).netloc.lower()])
         record=extract(url,trusted_local=trusted_local)
@@ -1417,7 +1417,7 @@ def main():
                 if changed:
                     fichas_enriquecidas.add(str(old.get("id") or record_value(old,"n","nombre","name")))
                     campos_actualizados+=len(changed)
-                    conflictos_web+=len(conflicts)
+                    conflictos_no_sobrescritos+=len(conflicts)
                     coincidencias.append({
                         "nombre_detectado":record["name"],
                         "nombre_catalogo":record_value(old,"n","nombre","name"),
@@ -1490,7 +1490,7 @@ def main():
        "buscadores":["DuckDuckGo HTML","Bing RSS"],"fuentes_directas":DIRECTORY_SEEDS,"consultas":len(QUERIES),
        "urls_encontradas":len(links),"candidatas_nuevas":len(added),
        "fichas_enriquecidas":len(fichas_enriquecidas),"campos_actualizados":campos_actualizados,
-       "conflictos_web_no_sobrescritos":conflictos_web,
+       "conflictos_datos_no_sobrescritos":conflictos_no_sobrescritos,
        "coincidencias_catalogo":len(coincidencias),
        "detalle_coincidencias":coincidencias[:100],
        "publicacion_automatica":False}
