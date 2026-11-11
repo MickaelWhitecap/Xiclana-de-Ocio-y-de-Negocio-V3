@@ -14,6 +14,7 @@ on:
       - "v3/admin.html"
       - ".github/workflows/auditar-pr-v3.yml"
       - ".github/workflows/publicar-v3.yml"
+      - "supabase/migrations/**"
 permissions:
   contents: read
 jobs:
