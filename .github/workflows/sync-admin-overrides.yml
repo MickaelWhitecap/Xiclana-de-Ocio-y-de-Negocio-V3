@@ -1,5 +1,8 @@
 name: Sincronizar cambios de Administración
 on:
+  push:
+    paths:
+      - ".github/workflows/sync-admin-overrides.yml"
   workflow_dispatch:
   schedule:
     - cron: "*/15 * * * *"
