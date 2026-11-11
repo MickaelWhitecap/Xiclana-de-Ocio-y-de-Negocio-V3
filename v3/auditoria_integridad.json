@@ -649,8 +649,8 @@
     "distribucion": {
       "4": 6,
       "5": 7,
-      "6": 611,
-      "7": 410,
+      "6": 610,
+      "7": 411,
       "8": 150,
       "9": 170,
       "10": 53,
@@ -670,7 +670,7 @@
   "registros_invalidos_o_ids_repetidos": [],
   "fichas_sin_nombre_categoria_o_tipo_valido": [],
   "calidad_de_campos_opcionales": {
-    "fichas_sin_direccion": 642,
+    "fichas_sin_direccion": 641,
     "correos_invalidos": [
       {
         "id": "osm:node:9550529384",
@@ -695,15 +695,15 @@
     "nota": "Control informativo: no modifica fichas ni bloquea la publicación por campos opcionales."
   },
   "direcciones_pendientes": {
-    "total_sin_direccion": 642,
-    "con_coordenadas_validas": 593,
+    "total_sin_direccion": 641,
+    "con_coordenadas_validas": 592,
     "sin_coordenadas_validas": 49,
     "distribucion_por_tipo_y_categoria": [
       {
         "tipo": "ocio",
         "categoria": "Bar",
-        "total": 58,
-        "con_coordenadas": 58,
+        "total": 57,
+        "con_coordenadas": 57,
         "sin_coordenadas": 0
       },
       {
