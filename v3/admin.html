@@ -746,7 +746,7 @@ form.addEventListener("submit",async e=>{
    categories=categories.filter(c=>c.slug!==catData.slug);categories.push(catData);renderCategories();
   }
   await loadData();selectItem(id);
-  message("Ficha guardada correctamente. Ya está en Administración y disponible para la web pública.","ok");
+  message("Ficha guardada en Supabase. Se incorporará a la web pública en la próxima sincronización automática.","ok");
  }catch(err){
   message((savedId?"La ficha se guardó, pero hubo un problema al actualizar la vista: ":"No se pudo guardar la ficha: ")+(err.message||"error desconocido"),"error");
   if(savedId){try{await loadData();selectItem(savedId)}catch(refreshError){message("La ficha está guardada en Supabase, pero no se pudo recargar Administración: "+refreshError.message,"error")}}
