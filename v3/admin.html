@@ -597,7 +597,10 @@ $("#ads-refresh").addEventListener("click",async()=>{try{await loadAdvertisingSl
 function proposalFields(p){return p.fields&&typeof p.fields==="object"?p.fields:{}}
 function renderProposals(){
  const root=$("#proposal-list");root.textContent="";
- const pending=proposals.filter(p=>p.status==="pending").sort((a,b)=>String(b.created_at||"").localeCompare(String(a.created_at||"")));
+ const normProposalValue=v=>String(v??"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLocaleLowerCase("es").replace(/[^a-z0-9]+/g," ").trim().replace(/\\s+/g," ");
+ const activeListings=effectiveItems().filter(x=>x._xiclana_deleted!==true);
+ const alreadyPublished=p=>{const f=proposalFields(p),name=normProposalValue(f.n),address=normProposalValue(f.a);return Boolean(name&&address&&activeListings.some(x=>normProposalValue(x.n||x.nombre||x.name)===name&&normProposalValue(x.a||x.direccion||x.address)===address))};
+ const pending=proposals.filter(p=>p.status==="pending"&&!alreadyPublished(p)).sort((a,b)=>String(b.created_at||"").localeCompare(String(a.created_at||"")));
  if(!pending.length){root.textContent="No hay propuestas pendientes.";return}
  pending.forEach(p=>{
   const card=document.createElement("div");card.className="item";card.style.marginBottom=".5rem";
@@ -650,6 +653,9 @@ $("#proposal-form").addEventListener("submit",async e=>{
  try{
   const fields={n:$("#pr-n").value.trim(),t:$("#pr-t").value,c:$("#pr-c").value.trim(),a:$("#pr-a").value.trim(),p:$("#pr-p").value.trim(),e:"",w:$("#pr-w").value.trim(),h:$("#pr-h").value.trim(),s:"",d:$("#pr-d").value.trim(),lat:null,lon:null};
   if(!fields.n||!fields.c)throw new Error("El nombre y la categoría son obligatorios.");
+  const norm=v=>String(v??"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLocaleLowerCase("es").replace(/[^a-z0-9]+/g," ").trim().replace(/\\s+/g," ");
+  const duplicate=fields.a?effectiveItems().find(x=>norm(x.n||x.nombre||x.name)===norm(fields.n)&&norm(x.a||x.direccion||x.address)===norm(fields.a)):null;
+  if(duplicate)throw new Error("Ya existe una ficha publicada para ese establecimiento y dirección: "+(duplicate.n||fields.n)+". No se crea otra propuesta pendiente.");
   const row={fields,source_name:$("#pr-source").value.trim()||null,source_url:$("#pr-url").value.trim()||null,source_checked_at:$("#pr-date").value||null,notes:$("#pr-notes").value.trim()||null,status:"pending",created_by:user.id};
   const {error}=await client.from("listing_proposals").insert(row);if(error)throw error;
   $("#proposal-form").reset();$("#pr-t").value="negocio";await loadProposals();message("Propuesta guardada como privada. No aparece en la web hasta aprobarla.","ok");
@@ -670,7 +676,10 @@ $("#proposal-import").onclick=async()=>{
   if(batch.length>100)throw new Error("El lote supera el máximo de 100 fichas. Divídelo en varios lotes.")
   const cleanUrl=(v)=>{const s=String(v||"").trim();if(!s)return null;let u;try{u=new URL(s)}catch(_){throw new Error("URL no válida: "+s)}if(!["http:","https:"].includes(u.protocol))throw new Error("Solo se admiten URLs http/https.");return u.href};
   const seen=new Set(), rows=[];
-  const existing=new Set(proposals.filter(p=>p.status==="pending").map(p=>{const f=proposalFields(p);return [String(f.n||"").trim().toLocaleLowerCase("es"),String(f.a||"").trim().toLocaleLowerCase("es")].join("|")}));
+  const existing=new Set([
+   ...proposals.filter(p=>p.status==="pending").map(p=>{const f=proposalFields(p);return [String(f.n||"").trim().toLocaleLowerCase("es"),String(f.a||"").trim().toLocaleLowerCase("es")].join("|")}),
+   ...effectiveItems().map(x=>[String(x.n||x.nombre||x.name||"").trim().toLocaleLowerCase("es"),String(x.a||x.direccion||x.address||"").trim().toLocaleLowerCase("es")].join("|"))
+  ]);
   for(let i=0;i<batch.length;i++){
    const item=batch[i];if(!item||typeof item!=="object"||Array.isArray(item))throw new Error("La ficha "+(i+1)+" no es un objeto.")
    const n=String(item.n||item.nombre||"").trim(),c=String(item.c||item.categoria||"").trim();
