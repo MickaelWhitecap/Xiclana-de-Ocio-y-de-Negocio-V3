@@ -23,7 +23,7 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
 #advertising-panel > .grid > .panel{height:100%;min-width:0}
 .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}.wide{grid-column:1/-1}
 .actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem}.muted{color:var(--mut);font-size:.92rem}.status{padding:.75rem 1rem;border-radius:10px;background:#eaf0f1;margin:.8rem 0}.status.error{background:#fff0f1;color:var(--err)}.status.ok{background:#e8f5ed;color:var(--ok)}
-#list{display:flex;flex-direction:column;gap:.4rem;max-height:65vh;overflow:auto;margin-top:.7rem}.item{width:100%;text-align:left;background:white;color:var(--ink);border:1px solid var(--bd);padding:.7rem;border-radius:9px;display:block}.item.active{border-color:var(--acc);box-shadow:0 0 0 2px #17658a22}.item small{display:block;color:var(--mut);font-weight:400}.pill{font-size:.75rem;border-radius:999px;background:#e7f0f5;padding:.15rem .5rem;display:inline-block;margin-top:.3rem}
+#list{display:flex;flex-direction:column;gap:.4rem;max-height:65vh;overflow:auto;margin-top:.7rem}.item{width:100%;text-align:left;background:white;color:var(--ink);border:1px solid var(--bd);padding:.7rem;border-radius:9px;display:block}.item.active{border-color:var(--acc);box-shadow:0 0 0 2px #17658a22}.item small{display:block;color:var(--mut);font-weight:400}.pill{font-size:.75rem;border-radius:999px;background:#e7f0f5;padding:.15rem .5rem;display:inline-block;margin-top:.3rem}.verification{display:inline-flex;align-items:center;border-radius:999px;padding:.12rem .42rem;font:700 .68rem/1.25 Figtree,system-ui,sans-serif;white-space:nowrap;margin:.3rem .25rem 0 0}.verification.pending{background:#fff2cf;color:#76520b;border:1px solid #e5c36c}.verification.insufficient{background:#f1e9e5;color:#704b3d;border:1px solid #d9c4b9;padding:.08rem .32rem;font-size:.64rem;line-height:1.1}.verification.verified{background:#e3f2e8;color:#245c3b;border:1px solid #b8d9c3}
 .hidden{display:none!important}.topline{display:flex;align-items:center;justify-content:space-between;gap:.7rem;flex-wrap:wrap}
 @media(max-width:760px){.grid{grid-template-columns:1fr}#advertising-panel > .grid{grid-template-columns:1fr}.fields{grid-template-columns:1fr}#list{max-height:32vh}.wide{grid-column:auto}}
 </style>
@@ -143,7 +143,9 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
 <div class="wide"><label for="d">6. Descripción</label><textarea id="d" name="d" rows="4" maxlength="3000"></textarea></div>
 <div><label for="lat">Latitud (opcional; no computa)</label><input id="lat" name="lat" type="number" step="any"></div>
 <div><label for="lon">Longitud (opcional; no computa)</label><input id="lon" name="lon" type="number" step="any"></div>
-<div class="wide muted">Al guardar, la ficha quedará marcada como verificada por Xiclana con la fecha de hoy. Comprueba que los datos se han recogido correctamente antes de publicarlos.</div>
+<div class="wide"><label for="estado-verificacion">Estado de verificación</label><select id="estado-verificacion" name="estado_verificacion"><option value="pendiente">Pendiente de verificar</option><option value="verificada">Verificada</option><option value="insuficiente">Incompleta</option></select><small class="muted">Verificada exige comprobar existencia y datos principales con una fuente fiable. Pendiente se aplica a fichas incorporadas sin comprobación humana. Incompleta se reserva para fichas que no permiten identificar o localizar el establecimiento.</small></div>
+<div><label for="f">Fuente de verificación / procedencia</label><input id="f" maxlength="500" placeholder="Web oficial, Ayuntamiento, llamada…"></div>
+<div><label for="v">Fecha de comprobación</label><input id="v" type="date"></div>
 <div class="wide actions"><button id="save-button" type="submit">Guardar ficha</button><button id="delete-button" type="button" class="danger">Eliminar ficha</button><button id="cancel" type="button" class="secondary">Cancelar</button></div>
 </form>
 <div id="alternate-contacts" class="wide muted hidden" style="margin-top:1rem;padding:.8rem;border:1px solid var(--bd);border-radius:10px"><strong>Contactos alternativos y procedencia</strong><div id="alternate-contacts-list"></div><div style="display:grid;grid-template-columns:minmax(130px,.7fr) minmax(180px,1.5fr) minmax(140px,1fr) auto;gap:.5rem;align-items:end;margin-top:.8rem"><div><label for="alt-type">Tipo</label><select id="alt-type"><option value="p">Teléfono</option><option value="e">Correo electrónico</option><option value="w">Web</option></select></div><div><label for="alt-value">Contacto alternativo</label><input id="alt-value" type="text" placeholder="Dato adicional"></div><div><label for="alt-source">Fuente</label><input id="alt-source" type="text" placeholder="Web oficial, OSM…"></div><button id="alt-add" type="button">Añadir</button></div><small>El contacto principal no se sustituye. Los alternativos se conservan con su fuente y se muestran en la ficha pública.</small></div>
@@ -177,9 +179,9 @@ function effectiveItems(){
   const id=stableId(x),o=byId.get(id),fields=combinarCamposConDatos(x,o?.fields);
   if(o?.fields?._xiclana_restore_deleted===true)delete fields._xiclana_deleted;
   delete fields._xiclana_restore_deleted;delete fields._xiclana_address_proposal_rejected;delete fields.osm_ids_relacionados;
-  return {...fields,id,verified_at:o?.verified_at||null,is_new:false};
+  return {...fields,estado_verificacion:fields.estado_verificacion||"pendiente",id,verified_at:o?.verified_at||null,is_new:false};
  });
- overrides.filter(o=>o.is_new&&!o.fields?._xiclana_deleted).forEach(o=>{if(!baseItems.some(x=>stableId(x)===o.listing_id))out.push({...o.fields,id:o.listing_id,verified_at:o.verified_at,is_new:true})});
+ overrides.filter(o=>o.is_new&&!o.fields?._xiclana_deleted).forEach(o=>{if(!baseItems.some(x=>stableId(x)===o.listing_id))out.push({...o.fields,estado_verificacion:o.fields?.estado_verificacion||"pendiente",id:o.listing_id,verified_at:o.verified_at,is_new:true})});
  // La Rana Verde es una zona geográfica; agrupar solo variantes exactas del mismo camping.
  const claveRana=x=>String(x.n||x.nombre||x.name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()==="camping la rana verde";
  const rana=out.filter(claveRana);
@@ -243,7 +245,7 @@ function refreshList(){
   return Object.entries(x).some(([k,v])=>k!=="fields"&&normalize(typeof v==="object"?JSON.stringify(v):v).includes(q));
  }).sort((a,b)=>String(a.n||a.nombre||a.name||"").localeCompare(String(b.n||b.nombre||b.name||""),"es"));
  list.textContent="";$("#count").textContent=matches.length+" fichas";
- matches.forEach(x=>{const b=document.createElement("button");b.type="button";b.className="item"+(x.id===selectedId?" active":"");b.append(document.createTextNode(x.n||x.nombre||x.name||"Sin nombre"));const small=document.createElement("small");small.textContent=(x.c||"Sin categoría")+" · "+(x.a||"Sin dirección");b.append(small);const completeness=document.createElement("span");completeness.className="pill";completeness.textContent=visitorCompleteness(x)+"/6";completeness.title="Dirección, teléfono, correo, web, horario y descripción";b.append(completeness);if(x.verified_at){const p=document.createElement("span");p.className="pill";p.textContent="Verificada";b.append(p)}b.onclick=()=>selectItem(x.id);list.append(b)});
+ matches.forEach(x=>{const b=document.createElement("button");b.type="button";b.className="item"+(x.id===selectedId?" active":"");b.append(document.createTextNode(x.n||x.nombre||x.name||"Sin nombre"));const small=document.createElement("small");small.textContent=(x.c||"Sin categoría")+" · "+(x.a||"Sin dirección");b.append(small);const completeness=document.createElement("span");completeness.className="pill";completeness.textContent=visitorCompleteness(x)+"/6";completeness.title="Dirección, teléfono, correo, web, horario y descripción";b.append(completeness);const states={verificada:["Verificada","verified"],pendiente:["Pendiente de verificar","pending"],insuficiente:["Incompleta","insufficient"]};const state=states[x.estado_verificacion||"pendiente"]||states.pendiente;const p=document.createElement("span");p.className="verification "+state[1];p.textContent=state[0];b.append(p);b.onclick=()=>selectItem(x.id);list.append(b)});
 }
 function renderAlternateContacts(item){
  const panel=$("#alternate-contacts"),root=$("#alternate-contacts-list");root.textContent="";
@@ -347,8 +349,8 @@ async function addAlternateContact(){
  }catch(err){message("No se pudo guardar el contacto alternativo: "+(err.message||"error desconocido"),"error")}
  finally{btn.disabled=false;btn.textContent="Añadir"}
 }
-function selectItem(id){const x=effectiveItems().find(v=>v.id===id);if(!x)return;selectedId=id;isNew=!!x.is_new;$("#form-title").textContent=x.n;$("#record-meta").textContent=visitorCompleteness(x)+"/6 datos útiles · "+(x.verified_at?"Última verificación: "+new Date(x.verified_at).toLocaleString("es-ES"):"Ficha de directorio");$("#delete-button").disabled=false;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");fieldNames.forEach(k=>{const input=form.elements[k];input.value=x[k]??""});renderAlternateContacts(x);refreshList()}
-function startNew(){selectedId="new:"+crypto.randomUUID();isNew=true;$("#alternate-contacts").classList.add("hidden");$("#form-title").textContent="Nueva ficha";$("#record-meta").textContent="Se añadirá al directorio público";$("#delete-button").disabled=true;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");form.reset();$("#t").value="negocio";refreshList()}
+function selectItem(id){const x=effectiveItems().find(v=>v.id===id);if(!x)return;selectedId=id;isNew=!!x.is_new;$("#form-title").textContent=x.n;$("#record-meta").textContent=visitorCompleteness(x)+"/6 datos útiles · Estado: "+({verificada:"Verificada",pendiente:"Pendiente de verificar",insuficiente:"Incompleta"}[x.estado_verificacion||"pendiente"]||"Pendiente de verificar");$("#delete-button").disabled=false;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");fieldNames.forEach(k=>{const input=form.elements[k];input.value=x[k]??""});$("#estado-verificacion").value=x.estado_verificacion||"pendiente";$("#f").value=x.f||"";$("#v").value=x.v||"";renderAlternateContacts(x);refreshList()}
+function startNew(){selectedId="new:"+crypto.randomUUID();isNew=true;$("#alternate-contacts").classList.add("hidden");$("#form-title").textContent="Nueva ficha";$("#record-meta").textContent="Se añadirá al directorio público";$("#delete-button").disabled=true;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");form.reset();$("#t").value="negocio";$("#estado-verificacion").value="pendiente";$("#v").value=new Date().toISOString().slice(0,10);refreshList()}
 function cancelEdit(){selectedId=null;isNew=false;form.classList.add("hidden");$("#alternate-contacts").classList.add("hidden");$("#empty-editor").classList.remove("hidden");$("#form-title").textContent="Selecciona una ficha";$("#record-meta").textContent="";refreshList()}
 function candidateKey(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
 function candidateNameSignature(value){
@@ -534,7 +536,7 @@ async function approveAutomaticCandidate(candidate){
  const isRecovery=Boolean(base&&base._xiclana_deleted===true);
  const action=isRecovery?"recuperar y aprobar":"aprobar y publicar";
  if(!window.confirm("¿"+action.charAt(0).toUpperCase()+action.slice(1)+" «"+candidate.n+"»? La decisión será manual y la web se actualizará en la siguiente sincronización."))return;
- const fields={...(base||{}),...candidate,f:String(candidate.f||"OpenStreetMap"),fuente_estado:isRecovery?"Ficha recuperada de baja y aprobada manualmente":"Candidata automática revisada y aprobada por Administración",v:new Date().toISOString().slice(0,10)};
+ const fields={...(base||{}),...candidate,estado_verificacion:"pendiente",f:String(candidate.f||"OpenStreetMap"),fuente_estado:isRecovery?"Ficha recuperada de baja y aprobada manualmente":"Candidata automática revisada y aprobada por Administración"};
  if(candidate.source_url)fields.fuente_verificacion_url=String(candidate.source_url);
  if(candidate.nota_revision)fields.observaciones_revision=String(candidate.nota_revision);
  delete fields.estado_revision;delete fields._xiclana_osm_auto;delete fields._xiclana_recovered_from_deleted;delete fields._xiclana_recovery_review_batch;delete fields.osm_id;delete fields.url_osm;delete fields.source_url;delete fields.nota_revision;delete fields.osm_ids_relacionados;delete fields._xiclana_address_proposal_rejected;delete fields._xiclana_deleted;
@@ -549,7 +551,7 @@ async function approveAutomaticCandidate(candidate){
   categories=categories.filter(x=>x.slug!==cat.slug);categories.push(cat);renderCategories();
  }
  const now=new Date().toISOString();
- const {error}=await client.from("listing_overrides").upsert({listing_id:String(candidate.id),fields,is_new:!base,verified_at:now,updated_at:now,updated_by:user.id},{onConflict:"listing_id"});
+ const {error}=await client.from("listing_overrides").upsert({listing_id:String(candidate.id),fields,is_new:!base,verified_at:null,updated_at:now,updated_by:user.id},{onConflict:"listing_id"});
  if(error){message("No se pudo publicar la candidata: "+error.message,"error");return}
  await loadData();message((isRecovery?"Ficha recuperada y aprobada: ":"Candidata aprobada: ")+candidate.n,"ok");
 }
@@ -628,7 +630,7 @@ async function reviewProposal(p,nextStatus){
   const duplicate=effectiveItems().find(x=>x.id!==publicationId && String(x.n||"").trim().toLocaleLowerCase("es")===name && (!address||String(x.a||"").trim().toLocaleLowerCase("es")===address));
   if(duplicate){message("No se puede publicar automáticamente: ya existe una ficha con ese nombre y dirección. Revisa la ficha existente antes de continuar.","error");return}
   if(!f.n||!f.c){message("La propuesta necesita nombre y categoría antes de publicarse.","error");return}
-  f.t=f.t||"negocio";f.f="Verificado por Xiclana";f.v=new Date().toISOString().slice(0,10);
+  f.t=f.t||"negocio";f.estado_verificacion="pendiente";
   const known=categories.some(c=>c.name.toLocaleLowerCase("es")===String(f.c).toLocaleLowerCase("es")&&c.type===f.t);
   if(!known){
    const baseSlug=slugify(f.c),conflict=categories.some(c=>c.slug===baseSlug&&c.type!==f.t);
@@ -639,7 +641,7 @@ async function reviewProposal(p,nextStatus){
    categories=categories.filter(c=>c.slug!==cat.slug);categories.push(cat);
   }
   const id=publicationId;
-  const {error:saveError}=await client.from("listing_overrides").upsert({listing_id:id,fields:f,is_new:true,verified_at:new Date().toISOString(),updated_at:new Date().toISOString(),updated_by:user.id},{onConflict:"listing_id"});
+  const {error:saveError}=await client.from("listing_overrides").upsert({listing_id:id,fields:f,is_new:true,verified_at:null,updated_at:new Date().toISOString(),updated_by:user.id},{onConflict:"listing_id"});
   if(saveError){message("No se pudo publicar la ficha: "+saveError.message,"error");return}
  }
  const {error}=await client.from("listing_proposals").update({status:nextStatus,reviewed_at:new Date().toISOString(),reviewed_by:user.id,review_notes:nextStatus==="approved"?"Aprobada y enviada al directorio público":"Descartada desde Administración"}).eq("id",p.id);
@@ -727,10 +729,12 @@ form.addEventListener("submit",async e=>{
   fieldNames.forEach(k=>{const input=form.elements[k];if(!input)throw new Error("Falta el campo "+k+" en el formulario.");const raw=input.value;fields[k]=(["lat","lon"].includes(k)||raw.trim()==="")?(raw.trim()===""?null:Number(raw)):raw.trim()});
   if(!fields.n||!fields.c)throw new Error("El nombre y la categoría son obligatorios.");
   const newRecord=String(selectedId).startsWith("new:"),id=newRecord?"manual:"+crypto.randomUUID():selectedId;
-  fields.f="Verificado por Xiclana";fields.v=new Date().toISOString().slice(0,10);
+  fields.estado_verificacion=$("#estado-verificacion").value;
+  fields.f=$("#f").value.trim();fields.v=$("#v").value;
+  if(fields.estado_verificacion==="verificada"&&(!fields.f||!fields.v))throw new Error("Para marcar una ficha como verificada debes indicar la fuente y la fecha de comprobación.");
   const keepAsNew=newRecord||Boolean(overrides.find(o=>o.listing_id===id)?.is_new);
   const now=new Date().toISOString();
-  const row={listing_id:id,fields,is_new:keepAsNew,verified_at:now,updated_at:now,updated_by:user.id};
+  const row={listing_id:id,fields,is_new:keepAsNew,verified_at:fields.estado_verificacion==="verificada"?new Date(fields.v+"T12:00:00").toISOString():null,updated_at:now,updated_by:user.id};
   const {error}=await client.from("listing_overrides").upsert(row,{onConflict:"listing_id"});
   if(error)throw error;
   savedId=id;
