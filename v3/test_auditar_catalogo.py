@@ -132,7 +132,7 @@ class AuditDuplicateTests(unittest.TestCase):
             ]
             old_data, old_root = updater.DATA, updater.ROOT
             updater.DATA, updater.ROOT = data_path, root
-            with mock.patch.object(urllib.request, "urlopen", side_effect=[FakeResponse(first_page), FakeResponse(second_page)]) as mocked_urlopen:
+            with mock.patch.dict("os.environ", {"SUPABASE_SECRET_KEY": "sb_secret_test"}), mock.patch.object(urllib.request, "urlopen", side_effect=[FakeResponse(first_page), FakeResponse(second_page)]) as mocked_urlopen:
                 try:
                     with contextlib.redirect_stdout(io.StringIO()):
                         updater.main()
@@ -208,7 +208,7 @@ class AuditDuplicateTests(unittest.TestCase):
             )
             old_data, old_root = updater.DATA, updater.ROOT
             updater.DATA, updater.ROOT = data_path, root
-            with mock.patch.object(urllib.request, "urlopen", return_value=FakeResponse(rows)):
+            with mock.patch.dict("os.environ", {"SUPABASE_SECRET_KEY": "sb_secret_test"}), mock.patch.object(urllib.request, "urlopen", return_value=FakeResponse(rows)):
                 try:
                     with contextlib.redirect_stdout(io.StringIO()):
                         updater.main()
@@ -348,7 +348,7 @@ class ExplicitFieldClearingTests(unittest.TestCase):
                 "fields": {"p": None, "d": ""},
                 "is_new": False, "verified_at": None, "updated_at": "2026-01-01T00:00:00Z"
             }])
-            with mock.patch.object(urllib.request, "urlopen", return_value=response):
+            with mock.patch.dict("os.environ", {"SUPABASE_SECRET_KEY": "sb_secret_test"}), mock.patch.object(urllib.request, "urlopen", return_value=response):
                 try:
                     with contextlib.redirect_stdout(io.StringIO()):
                         updater.main()
