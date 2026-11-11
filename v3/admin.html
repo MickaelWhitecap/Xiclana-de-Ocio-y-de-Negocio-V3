@@ -553,7 +553,7 @@ async function approveAutomaticCandidate(candidate){
   categories=categories.filter(x=>x.slug!==cat.slug);categories.push(cat);renderCategories();
  }
  const now=new Date().toISOString();
- const {error}=await client.from("listing_overrides").upsert({listing_id:String(candidate.id),fields,is_new:!base,verified_at:null,updated_at:now,updated_by:user.id},{onConflict:"listing_id"});
+ const {error}=await client.from("listing_overrides").upsert({listing_id:String(candidate.id),fields,is_new:!base,verified_at:now,updated_at:now,updated_by:user.id},{onConflict:"listing_id"});
  if(error){message("No se pudo publicar la candidata: "+error.message,"error");return}
  await loadData();message((isRecovery?"Ficha recuperada y aprobada: ":"Candidata aprobada: ")+candidate.n,"ok");
 }
@@ -643,7 +643,7 @@ async function reviewProposal(p,nextStatus){
    categories=categories.filter(c=>c.slug!==cat.slug);categories.push(cat);
   }
   const id=publicationId;
-  const {error:saveError}=await client.from("listing_overrides").upsert({listing_id:id,fields:f,is_new:true,verified_at:null,updated_at:new Date().toISOString(),updated_by:user.id},{onConflict:"listing_id"});
+  const {error:saveError}=await client.from("listing_overrides").upsert({listing_id:id,fields:f,is_new:true,verified_at:new Date().toISOString(),updated_at:new Date().toISOString(),updated_by:user.id},{onConflict:"listing_id"});
   if(saveError){message("No se pudo publicar la ficha: "+saveError.message,"error");return}
  }
  const {error}=await client.from("listing_proposals").update({status:nextStatus,reviewed_at:new Date().toISOString(),reviewed_by:user.id,review_notes:nextStatus==="approved"?"Aprobada y enviada al directorio público":"Descartada desde Administración"}).eq("id",p.id);
@@ -740,7 +740,7 @@ form.addEventListener("submit",async e=>{
   if(fields.estado_verificacion==="verificada"&&(!fields.f||!fields.v))throw new Error("Para marcar una ficha como verificada debes indicar la fuente y la fecha de comprobación.");
   const keepAsNew=newRecord||Boolean(overrides.find(o=>o.listing_id===id)?.is_new);
   const now=new Date().toISOString();
-  const row={listing_id:id,fields,is_new:keepAsNew,verified_at:fields.estado_verificacion==="verificada"?new Date(fields.v+"T12:00:00").toISOString():null,updated_at:now,updated_by:user.id};
+  const row={listing_id:id,fields,is_new:keepAsNew,verified_at:overrides.find(o=>String(o.listing_id)===String(selectedId))?.verified_at||now,updated_at:now,updated_by:user.id};
   const {error}=await client.from("listing_overrides").upsert(row,{onConflict:"listing_id"});
   if(error)throw error;
   savedId=id;
