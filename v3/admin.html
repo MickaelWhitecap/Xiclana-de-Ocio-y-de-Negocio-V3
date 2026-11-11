@@ -164,6 +164,8 @@ const $=s=>document.querySelector(s), status=$("#status"), login=$("#login"), ap
 const config=window.XICLANA_SUPABASE||{};
 let client=null,user=null,baseItems=[],overrides=[],categories=[],proposals=[],reviewCandidates=[],addressProposals=[],selectedId=null,isNew=false,visibleItems=[],adSlots=[];
 const fieldNames=["n","t","c","a","p","e","w","h","s","d","lat","lon"];
+ // Evita que validaciones HTML heredadas bloqueen silenciosamente el guardado de otro campo.
+form.noValidate=true;
 function message(text,type=""){status.textContent=text;status.className="status"+(type?" "+type:"");status.classList.remove("hidden")}
 function showLogin(){login.classList.remove("hidden");app.classList.add("hidden");logout.classList.add("hidden")}
 function showApp(){login.classList.add("hidden");app.classList.remove("hidden");logout.classList.remove("hidden");$("#who").textContent="Sesión: "+(user?.email||"administrador")}
@@ -726,8 +728,12 @@ form.addEventListener("submit",async e=>{
  let savedId=null;
  try{
   const fields={...(overrides.find(o=>String(o.listing_id)===String(selectedId))?.fields||{})};
+  const original=effectiveItems().find(x=>String(x.id)===String(selectedId))||{};
   fieldNames.forEach(k=>{const input=form.elements[k];if(!input)throw new Error("Falta el campo "+k+" en el formulario.");const raw=input.value;fields[k]=(["lat","lon"].includes(k)||raw.trim()==="")?(raw.trim()===""?null:Number(raw)):raw.trim()});
   if(!fields.n||!fields.c)throw new Error("El nombre y la categoría son obligatorios.");
+  // Validar correo y web solo si se han modificado; no bloquear la edición por datos heredados.
+  if(fields.e&&String(fields.e)!==String(original.e||"")&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.e))throw new Error("El correo electrónico introducido no tiene un formato válido.");
+  if(fields.w&&String(fields.w)!==String(original.w||"")){let u;try{u=new URL(fields.w)}catch(_){throw new Error("La página web debe incluir una URL completa, por ejemplo https://ejemplo.es.")}if(!["http:","https:"].includes(u.protocol))throw new Error("La página web debe comenzar por http:// o https://.");}
   const newRecord=String(selectedId).startsWith("new:"),id=newRecord?"manual:"+crypto.randomUUID():selectedId;
   fields.estado_verificacion=$("#estado-verificacion").value;
   fields.f=$("#f").value.trim();fields.v=$("#v").value;
