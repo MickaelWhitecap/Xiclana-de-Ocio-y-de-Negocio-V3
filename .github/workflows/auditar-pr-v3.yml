@@ -14,6 +14,7 @@ on:
       - "v3/admin.html"
       - ".github/workflows/auditar-pr-v3.yml"
       - ".github/workflows/publicar-v3.yml"
+      - "supabase/migrations/**"
 permissions:
   contents: read
 jobs:
@@ -43,6 +44,8 @@ jobs:
       - name: Probar que ocio y negocio no se confundan como duplicados
         run: python -m unittest v3/test_auditar_catalogo.py
       - name: Sincronizar en entorno temporal las ediciones administrativas
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python v3/actualizar.py
       - name: Validar estructura e informar duplicados
         run: python v3/auditar_catalogo.py

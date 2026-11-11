@@ -57,6 +57,8 @@ jobs:
           node --check /tmp/index-inline-check.js
           node --check /tmp/admin-inline-check.js
       - name: Validar el fichero maestro único
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python v3/actualizar.py
       - name: Ampliar catálogo en el fichero maestro
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
