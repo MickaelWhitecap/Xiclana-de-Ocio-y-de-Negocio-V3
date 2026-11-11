@@ -105,7 +105,7 @@ jobs:
           import os
           index_path = Path("_site/index.html")
           index_html = index_path.read_text(encoding="utf-8")
-          build_id = os.environ["GITHUB_SHA"]
+          build_id = os.environ["GITHUB_RUN_ID"] + "-" + os.environ["GITHUB_RUN_ATTEMPT"]
           if "__XICLANA_BUILD_ID__" not in index_html:
               raise SystemExit("Falta el marcador de versión del catálogo en index.html.")
           index_path.write_text(index_html.replace("__XICLANA_BUILD_ID__", build_id), encoding="utf-8")
@@ -135,10 +135,11 @@ jobs:
       - name: Verificar que Pages sirve el mismo catálogo y HTML desplegados
         env:
           PAGES_URL: ${{ steps.deployment.outputs.page_url }}
+          BUILD_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}index.html?build=${GITHUB_SHA}" -o /tmp/xiclana-index.html
-          grep -Fq "${GITHUB_SHA}" /tmp/xiclana-index.html
-          curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}fichas_completas.json?build=${GITHUB_SHA}" -o /tmp/xiclana-catalogo-publicado.json
+          curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}index.html?build=${BUILD_ID}" -o /tmp/xiclana-index.html
+          grep -Fq "${BUILD_ID}" /tmp/xiclana-index.html
+          curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}fichas_completas.json?build=${BUILD_ID}" -o /tmp/xiclana-catalogo-publicado.json
           cmp _site/fichas_completas.json /tmp/xiclana-catalogo-publicado.json
           echo "Verificación pública correcta: HTML versionado y JSON idéntico al artefacto desplegado."
