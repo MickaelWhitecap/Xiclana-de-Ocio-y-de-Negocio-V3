@@ -775,6 +775,6 @@ async function aplicarCambios(j){
   $("#fecha").textContent="Datos actualizados: "+j.actualizado+" · "+items.length+" fichas";
   render();
  }
- fetch("fichas_completas.json").then(r=>{if(!r.ok)throw new Error("No se pudo cargar fichas_completas.json");return r.json()}).then(aplicarCambios).catch(err=>{console.error(err);render()});
+ fetch("fichas_completas.json?v=__XICLANA_BUILD_ID__").then(r=>{if(!r.ok)throw new Error("No se pudo cargar fichas_completas.json");return r.json()}).then(aplicarCambios).catch(err=>{console.error(err);render()});
 
 </script></body></html>
