@@ -1,0 +1,46 @@
+name: Sincronizar cambios de Administración
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: xiclana-admin-overrides-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v7
+        with:
+          ref: main
+      - name: Preparar Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Incorporar modificaciones administrativas al catálogo maestro
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python v3/actualizar.py
+      - name: Comprobar si el catálogo maestro ha cambiado
+        id: catalog
+        shell: bash
+        run: |
+          if git diff --quiet -- v3/fichas_completas.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No hay cambios administrativos nuevos."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Hay cambios: se solicitará la publicación del catálogo."
+          fi
+      - name: Publicar catálogo actualizado
+        if: steps.catalog.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run publicar-v3.yml --ref main -f admin_sync=true
