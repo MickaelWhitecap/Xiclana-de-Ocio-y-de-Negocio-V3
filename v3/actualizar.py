@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Valida y normaliza el único catálogo JSON de Xiclana V3."""
-import json, pathlib, datetime, hashlib, sys, re, urllib.parse, urllib.request
+import json, pathlib, datetime, hashlib, sys, re, os, urllib.parse, urllib.request
 ROOT = pathlib.Path(__file__).parent
 DATA = ROOT / "fichas_completas.json"
 def main():
@@ -24,10 +24,12 @@ def main():
     # Sincronizar las ediciones administrativas vigentes sin crear otro fichero de datos.
     config_text = (ROOT / "supabase-config.js").read_text(encoding="utf-8")
     url_match = re.search(r'url:\s*"([^"]+)"', config_text)
-    key_match = re.search(r'anonKey:\s*"([^"]+)"', config_text)
-    if not url_match or not key_match:
-        sys.exit("No se pudo leer la configuración pública de Supabase; no se publica un catálogo posiblemente incompleto.")
-    api_url, api_key = url_match.group(1).rstrip("/"), key_match.group(1)
+    api_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+    if not url_match:
+        sys.exit("No se pudo leer la URL pública de Supabase; no se publica un catálogo posiblemente incompleto.")
+    if not api_key:
+        sys.exit("Falta el secreto SUPABASE_SERVICE_ROLE_KEY en GitHub Actions; se cancela la sincronización para no usar acceso público.")
+    api_url = url_match.group(1).rstrip("/")
     query = urllib.parse.urlencode({"select":"listing_id,fields,is_new,verified_at,updated_at","order":"updated_at.asc,listing_id.asc"})
     headers = {"apikey":api_key,"Authorization":"Bearer " + api_key,"Accept":"application/json","User-Agent":"Xiclana-V3-catalog-sync/1.0"}
     overrides = []
