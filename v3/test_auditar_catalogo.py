@@ -239,7 +239,7 @@ class AuditDuplicateTests(unittest.TestCase):
 
     def test_public_page_uses_local_catalog_without_supabase_for_fichas(self):
         page = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
-        self.assertIn('fetch("fichas_completas.json")', page)
+        self.assertIn('fetch("fichas_completas.json?v=__XICLANA_BUILD_ID__")', page)
         self.assertIn("const esAguaGenerica=", page)
         self.assertIn("!esAguaGenerica(x.n", page)
         self.assertNotIn("https://cdn.jsdelivr.net/npm/@supabase/supabase-js", page)
