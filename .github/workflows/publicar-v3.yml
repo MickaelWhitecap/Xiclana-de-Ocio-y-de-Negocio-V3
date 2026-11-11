@@ -45,17 +45,16 @@ jobs:
           python-version: "3.12"
       - name: Ejecutar pruebas de regresión antes de sincronizar
         run: python -m unittest v3/test_auditar_catalogo.py
-      - name: Validar sintaxis JavaScript de Administración
+      - name: Validar sintaxis JavaScript de las páginas V3
         run: |
           python - <<'PY'
           import pathlib, re
-          html=pathlib.Path("v3/admin.html").read_text(encoding="utf-8")
-          scripts=re.findall(r"<script\b[^>]*>([\s\S]*?)</script>", html, re.I)
-          inline=[s for s in scripts if s.strip()]
-          if len(inline) != 1:
-              raise SystemExit(f"Se esperaba un script inline de Administración; encontrados: {len(inline)}")
-          pathlib.Path("/tmp/admin-inline-check.js").write_text(inline[0], encoding="utf-8")
+          for page in ("v3/index.html", "v3/admin.html"):
+              html=pathlib.Path(page).read_text(encoding="utf-8")
+              scripts=re.findall(r"<script(?![^>]*\\bsrc=)[^>]*>([\\s\\S]*?)</script>", html, re.I)
+              pathlib.Path("/tmp/"+pathlib.Path(page).stem+"-inline-check.js").write_text("\\n".join(scripts), encoding="utf-8")
           PY
+          node --check /tmp/index-inline-check.js
           node --check /tmp/admin-inline-check.js
       - name: Validar el fichero maestro único
         run: python v3/actualizar.py
@@ -103,6 +102,13 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+          import os
+          index_path = Path("_site/index.html")
+          index_html = index_path.read_text(encoding="utf-8")
+          build_id = os.environ["GITHUB_SHA"]
+          if "__XICLANA_BUILD_ID__" not in index_html:
+              raise SystemExit("Falta el marcador de versión del catálogo en index.html.")
+          index_path.write_text(index_html.replace("__XICLANA_BUILD_ID__", build_id), encoding="utf-8")
           source = json.loads(Path("v3/fichas_completas.json").read_text(encoding="utf-8"))
           # La extracción íntegra y los informes permanecen en el catálogo maestro de GitHub.
           # No se envían al navegador: son datos de auditoría y harían muy pesada la web.
@@ -125,3 +131,14 @@ jobs:
         uses: actions/deploy-pages@v5
         with:
           artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Verificar que Pages sirve el mismo catálogo y HTML desplegados
+        env:
+          PAGES_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}index.html?build=${GITHUB_SHA}" -o /tmp/xiclana-index.html
+          grep -Fq "${GITHUB_SHA}" /tmp/xiclana-index.html
+          curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}fichas_completas.json?build=${GITHUB_SHA}" -o /tmp/xiclana-catalogo-publicado.json
+          cmp _site/fichas_completas.json /tmp/xiclana-catalogo-publicado.json
+          echo "Verificación pública correcta: HTML versionado y JSON idéntico al artefacto desplegado."
