@@ -24,7 +24,7 @@ def main():
     # Sincronizar las ediciones administrativas vigentes sin crear otro fichero de datos.
     config_text = (ROOT / "supabase-config.js").read_text(encoding="utf-8")
     url_match = re.search(r'url:\s*"([^"]+)"', config_text)
-    api_key = os.environ.get("SUPABASE_SECRET_KEY", "").strip()
+    api_key = (os.environ.get("SUPABASE_SECRET_KEY") or os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or "").strip()
     if not url_match:
         sys.exit("No se pudo leer la URL pública de Supabase; no se publica un catálogo posiblemente incompleto.")
     if not api_key:
