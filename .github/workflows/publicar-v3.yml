@@ -1,6 +1,12 @@
 name: Publicar Xiclana V3
 on:
   workflow_dispatch:
+    inputs:
+      admin_sync:
+        description: "Publicar cambios administrativos sin ampliar el catálogo"
+        required: false
+        type: boolean
+        default: false
   workflow_run:
     workflows:
       - "Auditoría municipal completa de OpenStreetMap"
@@ -61,7 +67,7 @@ jobs:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python v3/actualizar.py
       - name: Ampliar catálogo en el fichero maestro
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.admin_sync != true)
         run: python v3/ampliar_catalogo.py
       - name: Auditar integridad del catálogo
         run: python v3/auditar_catalogo.py
