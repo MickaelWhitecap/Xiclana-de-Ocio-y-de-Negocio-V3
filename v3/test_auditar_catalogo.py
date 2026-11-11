@@ -239,7 +239,7 @@ class AuditDuplicateTests(unittest.TestCase):
 
     def test_public_page_uses_local_catalog_without_supabase_for_fichas(self):
         page = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
-        self.assertIn('fetch("fichas_completas.json")', page)
+        self.assertIn('fetch("fichas_completas.json?v=__XICLANA_BUILD_ID__")', page)
         self.assertIn("const esAguaGenerica=", page)
         self.assertIn("!esAguaGenerica(x.n", page)
         self.assertNotIn("https://cdn.jsdelivr.net/npm/@supabase/supabase-js", page)
@@ -308,3 +308,52 @@ class OSMIntegrationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ExplicitFieldClearingTests(unittest.TestCase):
+    def test_null_override_removes_existing_value_but_empty_string_does_not(self):
+        from unittest import mock
+        import urllib.request
+        import importlib.util
+
+        updater_path = Path(__file__).with_name("actualizar.py")
+        spec = importlib.util.spec_from_file_location("actualizar_clear_test", updater_path)
+        updater = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(updater)
+
+        class FakeResponse(io.StringIO):
+            def __init__(self, payload):
+                super().__init__(json.dumps(payload))
+                self.headers = {"Content-Range": "0-0/1"}
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                self.close()
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            data_path = root / "catalog.json"
+            (root / "supabase-config.js").write_text(
+                'window.XICLANA_SUPABASE = { url: "https://example.supabase.co", anonKey: "public-test-key" };',
+                encoding="utf-8"
+            )
+            data_path.write_text(json.dumps({"items": [{
+                "id": "manual:clear", "n": "Ficha", "t": "ocio", "c": "Deportes",
+                "p": "956 111 222", "d": "Descripción conservada"
+            }]}), encoding="utf-8")
+            old_data, old_root = updater.DATA, updater.ROOT
+            updater.DATA, updater.ROOT = data_path, root
+            response = FakeResponse([{
+                "listing_id": "manual:clear",
+                "fields": {"p": None, "d": ""},
+                "is_new": False, "verified_at": None, "updated_at": "2026-01-01T00:00:00Z"
+            }])
+            with mock.patch.object(urllib.request, "urlopen", return_value=response):
+                try:
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        updater.main()
+                    saved = json.loads(data_path.read_text(encoding="utf-8"))["items"][0]
+                    self.assertNotIn("p", saved)
+                    self.assertEqual(saved["d"], "Descripción conservada")
+                finally:
+                    updater.DATA, updater.ROOT = old_data, old_root

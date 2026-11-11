@@ -44,8 +44,6 @@ jobs:
         run: python -m unittest v3/test_auditar_catalogo.py
       - name: Sincronizar en entorno temporal las ediciones administrativas
         run: python v3/actualizar.py
-      - name: Buscar nuevas fichas y enviarlas a revisión provisional
-        run: python v3/ampliar_catalogo.py
       - name: Validar estructura e informar duplicados
         run: python v3/auditar_catalogo.py
       - name: Guardar catálogo e informes generados para revisión

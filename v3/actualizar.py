@@ -77,7 +77,11 @@ def main():
                 item.pop("_xiclana_deleted", None)
                 restored += 1
             for key, value in fields.items():
-                if key not in {"_xiclana_deleted", "_xiclana_restore_deleted", "_xiclana_address_proposal_rejected"} and value not in (None, ""):
+                if key in {"_xiclana_deleted", "_xiclana_restore_deleted", "_xiclana_address_proposal_rejected"}:
+                    continue
+                if value is None:
+                    item.pop(key, None)
+                elif value != "":
                     item[key] = value
             if row.get("is_new"):
                 item.setdefault("fuente_estado", "Ficha administrativa sincronizada desde Supabase")
