@@ -306,10 +306,6 @@ class OSMIntegrationTests(unittest.TestCase):
         self.assertNotIn('for key in ("osm_extraccion_inicial", "auditoria_osm", "propuestas_direcciones_osm"):', workflow)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class ExplicitFieldClearingTests(unittest.TestCase):
     def test_null_override_removes_existing_value_but_empty_string_does_not(self):
         from unittest import mock
@@ -390,3 +386,7 @@ class UsefulCompletenessAndVerificationTests(unittest.TestCase):
             "verificada": 1, "pendiente": 2, "insuficiente": 1, "otros": 0
         })
         self.assertEqual(result["fichas_sin_estado_explicito_tratadas_como_pendientes"], 1)
+
+
+if __name__ == "__main__":
+    unittest.main()
