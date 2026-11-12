@@ -10,8 +10,8 @@ class SingleSupabaseMasterTests(unittest.TestCase):
     def test_exporter_reads_listings_and_syncs_only_metadata(self):
         source = (ROOT / "v3/catalogo_supabase.py").read_text(encoding="utf-8")
         self.assertIn('fetch_all(base, key, "listings"', source)
-        self.assertIn('base + "/site_settings?select=id,data&id=eq.catalogo"', source)
-        self.assertIn('base + "/site_settings?id=eq.catalogo"', source)
+        self.assertIn('site_settings?select=id,data,updated_at&id=eq.catalogo', source)
+        self.assertIn('"updated_at": "eq." + timestamp if timestamp else "is.null"', source)
         self.assertIn('"fichas_modificadas": 0', source)
         self.assertNotIn('"/listing_overrides?', source)
 
