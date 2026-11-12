@@ -1,5 +1,8 @@
 name: Migrar catálogo maestro a Supabase
 on:
+  push:
+    branches:
+      - arquitectura-fuente-unica-supabase
   workflow_dispatch:
 permissions:
   contents: read
