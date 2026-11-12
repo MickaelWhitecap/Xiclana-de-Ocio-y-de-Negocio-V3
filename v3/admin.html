@@ -799,15 +799,22 @@ async function init(){
    upsert:async(input)=>{
     const {data:userData,error:userError}=await client.auth.getUser();
     if(userError||!userData?.user?.id)return {data:null,error:userError||new Error("No hay una sesión administrativa válida.")};
-    return supabaseFrom("listings").upsert((Array.isArray(input)?input:[input]).map(row=>({
-     id:String(row.listing_id),
-     data:{...(row.fields||{}),is_new:Boolean(row.is_new)},
-     is_published:true,
-     is_deleted:row.fields?._xiclana_deleted===true,
-     verified_at:row.verified_at||null,
-     updated_at:row.updated_at||new Date().toISOString(),
-     updated_by:userData.user.id
-    })),{onConflict:"id"});
+    const source=Array.isArray(input)?input:[input];
+    const prepared=await Promise.all(source.map(async row=>{
+     const id=String(row.listing_id);
+     const existing=await supabaseFrom("listings").select("data,is_deleted,verified_at").eq("id",id).maybeSingle();
+     if(existing.error)throw existing.error;
+     const fields={...(existing.data?.data||{}),...(row.fields||{})};
+     if(fields._xiclana_restore_deleted===true)delete fields._xiclana_deleted;
+     delete fields._xiclana_restore_deleted;
+     delete fields._xiclana_address_proposal_rejected;
+     fields.is_new=Boolean(row.is_new||existing.data?.data?.is_new);
+     const deleted=fields._xiclana_deleted===true;
+     return {id,data:fields,is_published:true,is_deleted:deleted,
+      verified_at:row.verified_at||existing.data?.verified_at||null,
+      updated_at:new Date().toISOString(),updated_by:userData.user.id};
+    }));
+    return supabaseFrom("listings").upsert(prepared,{onConflict:"id"});
    }
   };
  };
