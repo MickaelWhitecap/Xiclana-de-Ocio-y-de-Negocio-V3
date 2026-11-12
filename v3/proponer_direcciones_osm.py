@@ -8,7 +8,7 @@ import re
 from datetime import datetime, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parent
-MASTER = ROOT / "fichas_completas.json"
+MASTER = pathlib.Path(os.getenv("XICLANA_CATALOG_PATH", str(ROOT / "fichas_completas.json")))
 CURRENT = ROOT / "osm_chiclana_extraccion_completa.json"
 OUT = ROOT / "propuestas_direcciones_osm.json"
 OSM_ID_RE = re.compile(r"^(?:osm|osm-extra):(node|way|relation):(\d+)$")
