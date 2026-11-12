@@ -795,7 +795,7 @@ async function aplicarCambios(j){
  if(!settingResponse.ok)throw new Error("No se pudieron cargar los datos generales del catálogo.");
  const settings=await settingResponse.json();
  const items=rows.map(row=>({...row.data,id:row.id,verified_at:row.verified_at,seed:1}));
- await aplicarCambios({items,destacados:settings?.[0]?.data?.destacados||{}});
+ await aplicarCambios({...((settings?.[0]?.data)||{}),items,destacados:settings?.[0]?.data?.destacados||{}});
  }
 cargarCatalogoSupabase().catch(err=>{console.error(err);$("#fecha").textContent="No se pudo conectar con la base de datos central de Xiclana.";render()});
 
