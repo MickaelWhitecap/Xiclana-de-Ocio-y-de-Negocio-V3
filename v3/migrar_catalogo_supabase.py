@@ -37,7 +37,7 @@ def main():
     if not isinstance(catalog, dict) or not isinstance(catalog.get("items"), list):
         raise SystemExit("El catálogo no contiene items; migración cancelada.")
     config = CONFIG.read_text(encoding="utf-8")
-    match = re.search(r'url:\\s*"([^"]+)"', config)
+    match = re.search(r'url:\s*"([^"]+)"', config)
     key = (os.getenv("SUPABASE_SECRET_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY") or "").strip()
     if not match or not key:
         raise SystemExit("Falta URL de Supabase o secreto de servicio.")
