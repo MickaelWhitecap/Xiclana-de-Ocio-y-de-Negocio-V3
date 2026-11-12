@@ -3,7 +3,7 @@
 import collections, hashlib, json, math, os, pathlib, re, time, unicodedata, urllib.parse, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent
-MASTER = pathlib.Path(os.getenv("XICLANA_CATALOG_PATH", str(ROOT / "fichas_completas.json")))
+MASTER = pathlib.Path(os.environ["XICLANA_CATALOG_PATH"]) if os.environ.get("XICLANA_CATALOG_PATH") else None
 OUT_RAW = ROOT / "osm_chiclana_extraccion_completa.json"
 OUT_REPORT = ROOT / "osm_chiclana_cruce_catalogo.json"
 AREA_ID = 3600346951  # área Overpass derivada de la relación OSM 346951
@@ -71,7 +71,7 @@ def download():
     raise RuntimeError("No se pudo completar la extracción en ningún servidor:\n" + "\n".join(errors))
 
 def main():
-    if not MASTER.exists():
+    if MASTER is None or not MASTER.exists():
         raise SystemExit(f"No existe el catálogo maestro: {MASTER}")
     master = json.loads(MASTER.read_text(encoding="utf-8"))
     items = master.get("items")
