@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: rad-descubrimiento-supabase
+  group: xiclana-propuestas-supabase
   cancel-in-progress: false
 
 jobs:
