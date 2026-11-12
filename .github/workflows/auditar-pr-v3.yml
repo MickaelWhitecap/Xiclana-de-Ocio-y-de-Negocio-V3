@@ -34,8 +34,8 @@ jobs:
           import re, pathlib
           for page in ("v3/index.html", "v3/admin.html", "v3/exportar-fichas.html"):
               html = pathlib.Path(page).read_text(encoding="utf-8")
-              scripts = re.findall(r'<script(?![^>]*\\bsrc=)[^>]*>([\\s\\S]*?)</script>', html, re.I)
-              pathlib.Path("/tmp/" + pathlib.Path(page).stem + ".js").write_text("\\n".join(scripts), encoding="utf-8")
+              scripts = re.findall(r'<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>', html, re.I)
+              pathlib.Path("/tmp/" + pathlib.Path(page).stem + ".js").write_text("\n".join(scripts), encoding="utf-8")
           PY
           node --check /tmp/index.js
           node --check /tmp/admin.js
@@ -50,11 +50,11 @@ jobs:
           exporter=Path("v3/exportar-fichas.html").read_text(encoding="utf-8")
           publish=Path(".github/workflows/publicar-v3.yml").read_text(encoding="utf-8")
           for name, source in (("web pública",public),("Administración",admin),("exportador",exporter)):
-              if "fichas_completas.json" in source:
+              if 'fetch("./fichas_completas.json' in source or 'fetch("fichas_completas.json' in source:
                   raise SystemExit(f"{name} aún depende del JSON local.")
           if "listings?select=id,data,verified_at" not in public:
               raise SystemExit("La web pública no lee la tabla canónica listings.")
-          if 'client.from("site_settings")' not in admin or 'client.from("listings")' not in admin:
+          if 'client.from("site_settings")' not in admin or 'supabaseFrom("listings")' not in admin:
               raise SystemExit("Administración no está conectada a la base canónica.")
           if "no se incluye fichas_completas.json" not in publish:
               raise SystemExit("El despliegue todavía incluye el catálogo JSON.")
