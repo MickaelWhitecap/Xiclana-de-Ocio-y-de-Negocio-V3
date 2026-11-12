@@ -1,9 +1,67 @@
 import gzip
+import importlib.util
 import json
+import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+class RadSafeEnrichmentTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        spec = importlib.util.spec_from_file_location("catalogo_supabase", ROOT / "v3/catalogo_supabase.py")
+        cls.catalog = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.catalog)
+
+    def _run(self, status="Verificada", extra_field=None):
+        timestamp = "2026-11-12T12:00:00+00:00"
+        before_item = {
+            "id": "listing-1", "n": "Empresa de prueba", "a": "", "p": "",
+            "estado_verificacion": status, "is_published": True,
+            "verified_at": timestamp, "_xiclana_updated_at": timestamp
+        }
+        after_item = dict(before_item)
+        after_item["a"] = "Calle Real 10, Chiclana"
+        if extra_field:
+            after_item[extra_field] = "cambio no permitido"
+        before = {"items": [before_item]}
+        after = {"items": [after_item]}
+        current = [{
+            "id": "listing-1",
+            "data": {k:v for k,v in before_item.items() if k not in {"id","is_published","verified_at","_xiclana_updated_at"}},
+            "is_published": True, "is_deleted": False,
+            "verified_at": timestamp, "updated_at": timestamp
+        }]
+        with tempfile.TemporaryDirectory() as directory:
+            before_path = Path(directory) / "before.json"
+            after_path = Path(directory) / "after.json"
+            before_path.write_text(json.dumps(before),encoding="utf-8")
+            after_path.write_text(json.dumps(after),encoding="utf-8")
+            with patch.object(self.catalog,"connection",return_value=("https://example.supabase.co/rest/v1","secret")), \
+                 patch.object(self.catalog,"fetch_all",return_value=current), \
+                 patch.object(self.catalog,"request",return_value=([{"id":"listing-1"}],{})) as request:
+                result = self.catalog.sync_enrichment(before_path,after_path)
+        return result, request
+
+    def test_only_verified_active_listing_receives_safe_missing_field(self):
+        result, request = self._run()
+        self.assertEqual(result["fichas_actualizadas"],1)
+        self.assertEqual(result["campos_actualizados"],1)
+        self.assertIn("/listings?",request.call_args.args[0])
+        self.assertEqual(request.call_args.kwargs["payload"]["data"]["a"],"Calle Real 10, Chiclana")
+
+    def test_unverified_listing_is_not_changed(self):
+        result, request = self._run(status="Pendiente de Verificar")
+        self.assertEqual(result["fichas_actualizadas"],0)
+        self.assertEqual(result["saltadas_por_no_verificadas_o_inactivas"],1)
+        request.assert_not_called()
+
+    def test_rad_cannot_change_verification_or_publication_fields(self):
+        with self.assertRaises(RuntimeError):
+            self._run(extra_field="estado_verificacion")
 
 
 class SingleSupabaseMasterTests(unittest.TestCase):
@@ -23,10 +81,21 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertNotIn("git add v3/fichas_completas.json", workflow)
         self.assertNotIn("git push origin HEAD:main", workflow)
 
+
+    def test_rad_enrichment_updates_only_verified_listings_and_allowed_fields(self):
+        source = (ROOT / "v3/catalogo_supabase.py").read_text(encoding="utf-8")
+        self.assertIn('status != "verificada"', source)
+        self.assertIn('"a", "h", "d", "t", "c", "rta_registro"', source)
+        self.assertIn('base + "/listings?"', source)
+        self.assertIn('"publicacion_automatica": False', source)
+        self.assertIn('saltadas_por_cambio_concurrente', source)
+
     def test_weekly_rad_exports_from_supabase_and_never_writes_catalog_json(self):
         workflow = (ROOT / ".github/workflows/rad-enrich-catalog.yml").read_text(encoding="utf-8")
         self.assertIn("catalogo_supabase.py export", workflow)
         self.assertIn("catalogo_supabase.py sync-metadata", workflow)
+        self.assertIn("catalogo_supabase.py sync-enrichment", workflow)
+        self.assertIn("Aplicar enriquecimientos seguros a fichas verificadas", workflow)
         self.assertIn("--catalog", workflow)
         self.assertNotIn("git add", workflow)
         self.assertNotIn("git push", workflow)

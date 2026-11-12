@@ -39,7 +39,7 @@ La exportación es de solo lectura sobre las fichas. Los procesos RAD y OSM pued
 
 - La publicación web lee directamente `public.listings`.
 - Administración escribe directamente en `public.listings`.
-- RAD y OSM leen una exportación temporal de Supabase y guardan propuestas pendientes en Supabase.
+- RAD y OSM leen una exportación temporal de Supabase. RAD puede completar únicamente campos vacíos y añadir contactos alternativos en fichas activas con estado **Verificada**, sin sobrescribir valores existentes ni cambiar su publicación. OSM guarda propuestas de fichas y direcciones para aprobación manual.
 - Las copias de seguridad se generan desde la base de datos y se cifran. El JSON de respaldo, si se genera, es una exportación de Supabase.
 - `v3/migrar_catalogo_supabase.py` se conserva exclusivamente como herramienta histórica de migración inicial; no debe ejecutarse para actualizaciones ordinarias.
 
