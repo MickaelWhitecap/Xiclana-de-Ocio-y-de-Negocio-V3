@@ -1,20 +1,18 @@
-name: Auditoría de integridad V3 (PR)
+name: Auditoría de arquitectura V3 (PR)
 on:
   pull_request:
     branches: [main]
     paths:
-      - "v3/fichas_completas.json"
-      - "v3/catalogo_auto_baseline.json"
-      - "v3/plan_consolidacion.json"
-      - "v3/auditar_catalogo.py"
-      - "v3/test_auditar_catalogo.py"
-      - "v3/ampliar_catalogo.py"
-      - "v3/actualizar.py"
       - "v3/index.html"
       - "v3/admin.html"
+      - "v3/exportar-fichas.html"
+      - "v3/test_auditar_catalogo.py"
+      - "v3/migrar_catalogo_supabase.py"
       - ".github/workflows/auditar-pr-v3.yml"
       - ".github/workflows/publicar-v3.yml"
-      - "supabase/migrations/**"
+      - ".github/workflows/sincronizar-cambios-admin.yml"
+      - ".github/workflows/sync-admin-overrides.yml"
+      - ".github/workflows/backup-supabase.yml"
 permissions:
   contents: read
 jobs:
@@ -29,34 +27,36 @@ jobs:
         with:
           node-version: "22"
       - name: Comprobar sintaxis Python
-        run: python -m py_compile v3/auditar_catalogo.py v3/ampliar_catalogo.py v3/actualizar.py
+        run: python -m py_compile v3/migrar_catalogo_supabase.py v3/test_auditar_catalogo.py
       - name: Comprobar sintaxis JavaScript de las páginas
         run: |
           python - <<'PY'
           import re, pathlib
-          for page in ("v3/index.html", "v3/admin.html"):
+          for page in ("v3/index.html", "v3/admin.html", "v3/exportar-fichas.html"):
               html = pathlib.Path(page).read_text(encoding="utf-8")
-              scripts = re.findall(r'<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>', html, re.I)
-              pathlib.Path("/tmp/" + pathlib.Path(page).stem + ".js").write_text("\n".join(scripts), encoding="utf-8")
+              scripts = re.findall(r'<script(?![^>]*\\bsrc=)[^>]*>([\\s\\S]*?)</script>', html, re.I)
+              pathlib.Path("/tmp/" + pathlib.Path(page).stem + ".js").write_text("\\n".join(scripts), encoding="utf-8")
           PY
           node --check /tmp/index.js
           node --check /tmp/admin.js
-      - name: Probar que ocio y negocio no se confundan como duplicados
-        run: python -m unittest v3/test_auditar_catalogo.py
-      - name: Sincronizar en entorno temporal las ediciones administrativas
-        env:
-          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: python v3/actualizar.py
-      - name: Validar estructura e informar duplicados
-        run: python v3/auditar_catalogo.py
-      - name: Guardar catálogo e informes generados para revisión
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: auditoria-catalogo-v3
-          path: |
-            v3/fichas_completas.json
-            v3/auditoria_integridad.json
-            v3/plan_consolidacion.json
-          if-no-files-found: ignore
-          retention-days: 14
+          node --check /tmp/exportar-fichas.js
+      - name: Probar reglas de catálogo y fuente única
+        run: |
+          python -m unittest v3/test_auditar_catalogo.py
+          python - <<'PY'
+          from pathlib import Path
+          public=Path("v3/index.html").read_text(encoding="utf-8")
+          admin=Path("v3/admin.html").read_text(encoding="utf-8")
+          exporter=Path("v3/exportar-fichas.html").read_text(encoding="utf-8")
+          publish=Path(".github/workflows/publicar-v3.yml").read_text(encoding="utf-8")
+          for name, source in (("web pública",public),("Administración",admin),("exportador",exporter)):
+              if "fichas_completas.json" in source:
+                  raise SystemExit(f"{name} aún depende del JSON local.")
+          if "listings?select=id,data,verified_at" not in public:
+              raise SystemExit("La web pública no lee la tabla canónica listings.")
+          if 'client.from("site_settings")' not in admin or 'client.from("listings")' not in admin:
+              raise SystemExit("Administración no está conectada a la base canónica.")
+          if "no se incluye fichas_completas.json" not in publish:
+              raise SystemExit("El despliegue todavía incluye el catálogo JSON.")
+          print("Arquitectura verificada: web, Administración y exportador usan Supabase; no usan JSON local.")
+          PY
