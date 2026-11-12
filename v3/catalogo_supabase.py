@@ -208,7 +208,7 @@ def merge_candidate_lists(current, incoming):
     """Combina candidatas RAD/OSM por ID sin perder altas de ejecuciones concurrentes."""
     merged = []
     positions = {}
-    for item in current if isinstance(current, list) else []:
+    for item in (current if isinstance(current, list) else []):
         if isinstance(item, dict) and item.get("id"):
             ident = str(item["id"])
             if ident in positions:
@@ -218,7 +218,7 @@ def merge_candidate_lists(current, incoming):
                 merged.append(dict(item))
         elif item not in merged:
             merged.append(item)
-    for item in incoming if isinstance(incoming, list) else []:
+    for item in (incoming if isinstance(incoming, list) else []):
         if isinstance(item, dict) and item.get("id"):
             ident = str(item["id"])
             if ident in positions:
