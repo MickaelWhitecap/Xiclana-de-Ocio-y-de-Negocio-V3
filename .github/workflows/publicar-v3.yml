@@ -27,8 +27,8 @@ jobs:
           import pathlib, re
           for page in ("v3/index.html", "v3/admin.html", "v3/exportar-fichas.html"):
               html=pathlib.Path(page).read_text(encoding="utf-8")
-              scripts=re.findall(r'<script(?![^>]*\\bsrc=)[^>]*>([\\s\\S]*?)</script>',html,re.I)
-              pathlib.Path("/tmp/"+pathlib.Path(page).stem+".js").write_text("\\n".join(scripts),encoding="utf-8")
+              scripts=re.findall(r'<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>',html,re.I)
+              pathlib.Path("/tmp/"+pathlib.Path(page).stem+".js").write_text("\n".join(scripts),encoding="utf-8")
           PY
           node --check /tmp/index.js
           node --check /tmp/admin.js
@@ -57,8 +57,8 @@ jobs:
           import re
           from pathlib import Path
           s=Path("v3/supabase-config.js").read_text(encoding="utf-8")
-          url=re.search(r'url:\\s*"([^"]+)"',s).group(1)
-          key=re.search(r'anonKey:\\s*"([^"]+)"',s).group(1)
+          url=re.search(r'url:\s*"([^"]+)"',s).group(1)
+          key=re.search(r'anonKey:\s*"([^"]+)"',s).group(1)
           print("SUPABASE_URL="+url)
           print("SUPABASE_ANON_KEY="+key)
           PY
