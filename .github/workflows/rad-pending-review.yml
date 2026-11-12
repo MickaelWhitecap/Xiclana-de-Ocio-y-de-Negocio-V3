@@ -1,4 +1,4 @@
-name: RAD - inventario de candidatas pendientes
+name: RAD - inventario de candidatas pendientes en Supabase
 
 on:
   pull_request:
@@ -6,12 +6,15 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - 'v3/rastreo_web_publico.py'
+      - 'v3/catalogo_supabase.py'
       - '.github/workflows/rad-pending-review.yml'
   push:
     branches: [main, rad-fuentes-enriquecimiento-global]
     paths:
       - 'v3/rastreo_web_publico.py'
+      - 'v3/catalogo_supabase.py'
       - '.github/workflows/rad-pending-review.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -20,21 +23,25 @@ jobs:
   pending-review:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar catálogo y código RAD
-        uses: actions/checkout@v4
+      - name: Descargar código
+        uses: actions/checkout@v7
       - name: Preparar Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - name: Exportar metadatos de candidatas desde Supabase
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python v3/catalogo_supabase.py export --output "$RUNNER_TEMP/xiclana-catalogo.json"
       - name: Generar inventario de candidatas RAD pendientes
         run: |
           python - <<'PY'
-          import importlib.util, json
+          import importlib.util, json, os
           from pathlib import Path
           spec=importlib.util.spec_from_file_location("rad","v3/rastreo_web_publico.py")
           rad=importlib.util.module_from_spec(spec)
           spec.loader.exec_module(rad)
-          data=json.loads(Path("v3/fichas_completas.json").read_text(encoding="utf-8"))
+          data=json.loads(Path(os.path.join(os.environ["RUNNER_TEMP"],"xiclana-catalogo.json")).read_text(encoding="utf-8"))
           pending=[]
           for item in data.get("candidatas_revision",[]):
               if not isinstance(item,dict) or not str(item.get("id","")).startswith("rad:"):
@@ -48,10 +55,9 @@ jobs:
                   "fuentes_datos":item.get("fuentes_datos"),
                   "notas_calidad":rad.candidate_review_notes(item)
               })
-          report={"fichas_publicadas":len(data.get("items",[])),
+          report={"fichas_publicadas":sum(1 for x in data.get("items",[]) if x.get("is_published") and not x.get("_xiclana_deleted")),
                   "candidatas_revision_rad":len(pending),"candidatas":pending}
-          Path("rad-pendientes-revision.json").write_text(
-              json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          Path("rad-pendientes-revision.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
           print(json.dumps({"fichas_publicadas":report["fichas_publicadas"],
                             "candidatas_revision_rad":len(pending),
                             "sin_url_fuente":sum(not x.get("url_fuente_rastreo") for x in pending),
@@ -61,9 +67,9 @@ jobs:
           assert all(x.get("url_fuente_rastreo") for x in pending), "Hay candidatas RAD sin procedencia"
           PY
       - name: Guardar inventario para revisión
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: rad-pendientes-revision-${{ github.run_id }}
+          name: rad-pendientes-revision-supabase-${{ github.run_id }}
           path: rad-pendientes-revision.json
           if-no-files-found: error
           retention-days: 30
