@@ -781,7 +781,7 @@ async function aplicarCambios(j){
  async function cargarCatalogoSupabase(){
  const cfg=window.XICLANA_SUPABASE||{};
  if(!cfg.url||!cfg.anonKey)throw new Error("Falta la configuración pública de Supabase.");
- const base=cfg.url.replace(/\\/+$/,"")+"/rest/v1/";
+ const base=cfg.url.replace(/\/+$/,"")+"/rest/v1/";
  const headers={apikey:cfg.anonKey,Authorization:"Bearer "+cfg.anonKey};
  const pageSize=500;let rows=[],offset=0;
  while(true){
