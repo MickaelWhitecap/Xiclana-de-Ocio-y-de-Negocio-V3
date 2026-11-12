@@ -3,6 +3,7 @@
 No modifica el catálogo maestro ni publica fichas. Solo usa coincidencias exactas por ID OSM.
 """
 import json
+import os
 import pathlib
 import re
 from datetime import datetime, timezone
