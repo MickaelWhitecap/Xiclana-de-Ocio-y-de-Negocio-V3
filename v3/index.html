@@ -783,23 +783,20 @@ async function aplicarCambios(j){
  if(!cfg.url||!cfg.anonKey)throw new Error("Falta la configuración pública de Supabase.");
  const base=cfg.url.replace(/\\/+$/,"")+"/rest/v1/";
  const headers={apikey:cfg.anonKey,Authorization:"Bearer "+cfg.anonKey};
- const pageSize=500;let rows=[],offset=0,total=null;
- while(total===null||offset<total){
-  const url=base+"listings?select=id,data,verified_at&is_published=eq.true&is_deleted=eq.false&order=id.asc";
-  const response=await fetch(url,{headers:{...headers,Range:offset+"-"+(offset+pageSize-1),"Range-Unit":"items"},cache:"no-store"});
+ const pageSize=500;let rows=[],offset=0;
+ while(true){
+  const url=base+"listings?select=id,data,verified_at&is_published=eq.true&is_deleted=eq.false&order=id.asc&limit="+pageSize+"&offset="+offset;
+  const response=await fetch(url,{headers,cache:"no-store"});
   if(!response.ok)throw new Error("Supabase no ha permitido cargar el catálogo ("+response.status+").");
   const page=await response.json();if(!Array.isArray(page))throw new Error("Formato de catálogo inesperado en Supabase.");
-  rows.push(...page);
-  const range=response.headers.get("Content-Range")||"";
-  const match=range.match(/\\/(\\d+|\\*)$/);if(match&&match[1]!=="*")total=Number(match[1]);else if(page.length<pageSize)total=rows.length;
-  if(!page.length)break;offset+=page.length;
+  rows.push(...page);if(page.length<pageSize)break;offset+=page.length;
  }
  const settingResponse=await fetch(base+"site_settings?select=data&id=eq.catalogo",{headers,cache:"no-store"});
  if(!settingResponse.ok)throw new Error("No se pudieron cargar los datos generales del catálogo.");
  const settings=await settingResponse.json();
  const items=rows.map(row=>({...row.data,id:row.id,verified_at:row.verified_at,seed:1}));
  await aplicarCambios({items,destacados:settings?.[0]?.data?.destacados||{}});
-}
+ }
 cargarCatalogoSupabase().catch(err=>{console.error(err);$("#fecha").textContent="No se pudo conectar con la base de datos central de Xiclana.";render()});
 
 </script></body></html>
