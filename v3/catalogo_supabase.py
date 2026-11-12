@@ -118,17 +118,22 @@ def export_catalog(path):
 
 
 def sync_enrichment(before_path, after_path):
-    """Aplica solo los campos que RAD añadió a fichas activas sin pisar cambios concurrentes."""
+    """Aplica solo campos seguros añadidos por RAD a fichas verificadas y activas."""
     base, key = connection()
     before = json.loads(pathlib.Path(before_path).read_text(encoding="utf-8"))
     after = json.loads(pathlib.Path(after_path).read_text(encoding="utf-8"))
     if not isinstance(before.get("items"), list) or not isinstance(after.get("items"), list):
         raise RuntimeError("Las copias RAD no contienen listas items válidas.")
     before_by_id = {str(x.get("id")): x for x in before["items"] if isinstance(x, dict) and x.get("id")}
-    current_rows = fetch_all(base, key, "listings", "id,data,is_published,is_deleted,updated_at", "id.asc")
+    current_rows = fetch_all(base, key, "listings", "id,data,is_published,is_deleted,verified_at,updated_at", "id.asc")
     current_by_id = {str(x.get("id")): x for x in current_rows}
     meta_keys = {"id", "is_published", "_xiclana_deleted", "verified_at", "_xiclana_updated_at"}
-    updated_count = field_count = conflict_count = inactive_count = 0
+    allowed_fields = {
+        "a", "h", "d", "t", "c", "rta_registro", "direcciones_alternativas",
+        "p", "e", "w", "web_alternativas", "fuentes_datos",
+    }
+    to_update = []
+    conflict_count = inactive_count = 0
     for item in after["items"]:
         if not isinstance(item, dict) or not item.get("id"):
             continue
@@ -137,7 +142,12 @@ def sync_enrichment(before_path, after_path):
         current = current_by_id.get(ident)
         if original is None or current is None:
             continue
-        if current.get("is_deleted") or not current.get("is_published"):
+        current_data = current.get("data") or {}
+        if not isinstance(current_data, dict):
+            conflict_count += 1
+            continue
+        status = str(current_data.get("estado_verificacion") or "").strip().casefold()
+        if current.get("is_deleted") or not current.get("is_published") or status != "verificada":
             inactive_count += 1
             continue
         before_data = {k: v for k, v in original.items() if k not in meta_keys}
@@ -145,10 +155,9 @@ def sync_enrichment(before_path, after_path):
         changed_keys = [k for k, v in after_data.items() if before_data.get(k) != v]
         if not changed_keys:
             continue
-        current_data = current.get("data") or {}
-        if not isinstance(current_data, dict):
-            conflict_count += 1
-            continue
+        unsafe = sorted(set(changed_keys) - allowed_fields)
+        if unsafe:
+            raise RuntimeError(f"RAD intentó modificar campos no autorizados en {ident}: {unsafe}")
         current_clean = {k: v for k, v in current_data.items() if k not in meta_keys}
         if current_clean != before_data or current.get("updated_at") != original.get("_xiclana_updated_at"):
             conflict_count += 1
@@ -156,6 +165,13 @@ def sync_enrichment(before_path, after_path):
         merged = dict(current_data)
         for field in changed_keys:
             merged[field] = after_data[field]
+        to_update.append((ident, current, merged, len(changed_keys)))
+
+    if len(to_update) > 500:
+        raise RuntimeError(f"RAD propone modificar {len(to_update)} fichas; se supera el límite defensivo de 500 y no se aplica ninguna.")
+
+    updated_count = field_count = 0
+    for ident, current, merged, changed_count in to_update:
         timestamp = current.get("updated_at")
         filters = {"id": "eq." + ident, "updated_at": "eq." + timestamp if timestamp else "is.null"}
         result, _ = request(
@@ -167,18 +183,16 @@ def sync_enrichment(before_path, after_path):
         )
         if isinstance(result, list) and result:
             updated_count += 1
-            field_count += len(changed_keys)
+            field_count += changed_count
         else:
             conflict_count += 1
-        if updated_count + conflict_count > 500:
-            raise RuntimeError("Límite defensivo de 500 fichas RAD; se detiene la sincronización.")
     summary = {
         "tabla": "public.listings",
-        "fichas_detectadas": updated_count + conflict_count,
+        "fichas_detectadas": len(to_update) + conflict_count,
         "fichas_actualizadas": updated_count,
         "campos_actualizados": field_count,
         "saltadas_por_cambio_concurrente": conflict_count,
-        "saltadas_por_inactivas": inactive_count,
+        "saltadas_por_no_verificadas_o_inactivas": inactive_count,
         "publicacion_automatica": False,
     }
     print(json.dumps(summary, ensure_ascii=False))
