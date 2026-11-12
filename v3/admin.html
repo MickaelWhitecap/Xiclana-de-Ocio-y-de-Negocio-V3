@@ -181,7 +181,7 @@ function effectiveItems(){
   const id=stableId(x),o=byId.get(id),fields=combinarCamposConDatos(x,o?.fields);
   if(o?.fields?._xiclana_restore_deleted===true)delete fields._xiclana_deleted;
   delete fields._xiclana_restore_deleted;delete fields._xiclana_address_proposal_rejected;delete fields.osm_ids_relacionados;
-  return {...fields,estado_verificacion:fields.estado_verificacion||"pendiente",id,verified_at:o?.verified_at||null,is_new:false};
+  return {...fields,estado_verificacion:fields.estado_verificacion||"pendiente",id,verified_at:o?.verified_at||null,is_new:Boolean(x.is_new||o?.is_new)};
  });
  overrides.filter(o=>o.is_new&&!o.fields?._xiclana_deleted).forEach(o=>{if(!baseItems.some(x=>stableId(x)===o.listing_id))out.push({...o.fields,estado_verificacion:o.fields?.estado_verificacion||"pendiente",id:o.listing_id,verified_at:o.verified_at,is_new:true})});
  // La Rana Verde es una zona geográfica; agrupar solo variantes exactas del mismo camping.
@@ -569,20 +569,21 @@ async function rejectAutomaticCandidate(candidate){
  await loadProposals();renderAutomaticCandidates();message("Candidata descartada; no se ha publicado.","ok");
 }
 async function loadData(){
- const [dataRes,overrideRes]=await Promise.all([
-  fetch("./fichas_completas.json",{cache:"no-store"}),
-  client.from("listing_overrides").select("listing_id,fields,is_new,verified_at,updated_at")
+ const [overrideRes,settingsRes]=await Promise.all([
+  client.from("listing_overrides").select("listing_id,fields,is_new,verified_at,updated_at"),
+  client.from("site_settings").select("data").eq("id","catalogo").maybeSingle()
  ]);
- if(!dataRes.ok)throw new Error("No se pudo cargar fichas_completas.json. Comprueba que GitHub Pages haya publicado el sitio.");
- const data=await dataRes.json();if(overrideRes.error)throw overrideRes.error;
- baseItems=(data.items||[]).map(x=>({...x}));
- reviewCandidates=(data.candidatas_revision||[]).map(x=>({...x}));
- const rawAddressProposals=data.propuestas_direcciones_osm;
+ if(overrideRes.error)throw overrideRes.error;
+ if(settingsRes.error)throw settingsRes.error;
+ overrides=overrideRes.data||[];
+ baseItems=overrides.map(o=>({...o.fields,id:o.listing_id,verified_at:o.verified_at,is_new:o.is_new,_xiclana_deleted:o.is_deleted||o.fields?._xiclana_deleted===true}));
+ const metadata=settingsRes.data?.data||{};
+ reviewCandidates=Array.isArray(metadata.candidatas_revision)?metadata.candidatas_revision.map(x=>({...x})):[];
+ const rawAddressProposals=metadata.propuestas_direcciones_osm;
  const normalizedAddressProposals=Array.isArray(rawAddressProposals)?rawAddressProposals:(Array.isArray(rawAddressProposals?.propuestas)?rawAddressProposals.propuestas:[]);
  addressProposals=normalizedAddressProposals.filter(x=>x&&typeof x==="object").map(x=>({...x}));
- overrides=overrideRes.data||[];
  const categoryRes=await client.from("listing_categories").select("slug,name,type,created_at").order("name");
- if(categoryRes.error)throw new Error("No se pudieron cargar las categorías. Comprueba que has ejecutado supabase-categories.sql en Supabase: "+categoryRes.error.message);
+ if(categoryRes.error)throw new Error("No se pudieron cargar las categorías: "+categoryRes.error.message);
  categories=categoryRes.data||[];renderCategories();refreshList();renderTrash();renderAutomaticCandidates();renderAddressProposals();await loadProposals();await loadAdvertisingSlots();
 }
 
@@ -785,6 +786,38 @@ async function init(){
  if(!config.url||!config.anonKey){message("Falta configurar Supabase. Sigue ADMIN.md en el repositorio V1 para conectar la base de datos y activar el acceso privado.","error");return}
  if(!window.supabase?.createClient){message("No se ha podido cargar la biblioteca de acceso. Recarga la página o inténtalo más tarde.","error");return}
  client=window.supabase.createClient(config.url,config.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ const supabaseFrom=client.from.bind(client);
+ // Compatibilidad interna temporal: las operaciones históricas sobre listing_overrides
+ // se redirigen a la tabla canónica listings. No se consulta ni escribe la tabla antigua.
+ client.from=(table)=>{
+  if(table!=="listing_overrides")return supabaseFrom(table);
+  return {
+   select:()=>supabaseFrom("listings").select("id,data,is_deleted,verified_at,updated_at").then(result=>({
+    ...result,
+    data:(result.data||[]).map(row=>({listing_id:row.id,fields:{...(row.data||{}),...(row.is_deleted?{_xiclana_deleted:true}:{})},is_new:Boolean(row.data?.is_new),verified_at:row.verified_at,updated_at:row.updated_at,is_deleted:row.is_deleted}))
+   })),
+   upsert:async(input)=>{
+    const {data:userData,error:userError}=await client.auth.getUser();
+    if(userError||!userData?.user?.id)return {data:null,error:userError||new Error("No hay una sesión administrativa válida.")};
+    const source=Array.isArray(input)?input:[input];
+    const prepared=await Promise.all(source.map(async row=>{
+     const id=String(row.listing_id);
+     const existing=await supabaseFrom("listings").select("data,is_deleted,verified_at").eq("id",id).maybeSingle();
+     if(existing.error)throw existing.error;
+     const fields={...(existing.data?.data||{}),...(row.fields||{})};
+     if(fields._xiclana_restore_deleted===true)delete fields._xiclana_deleted;
+     delete fields._xiclana_restore_deleted;
+     delete fields._xiclana_address_proposal_rejected;
+     fields.is_new=Boolean(row.is_new);
+     const deleted=fields._xiclana_deleted===true;
+     return {id,data:fields,is_published:true,is_deleted:deleted,
+      verified_at:row.verified_at||existing.data?.verified_at||null,
+      updated_at:new Date().toISOString(),updated_by:userData.user.id};
+    }));
+    return supabaseFrom("listings").upsert(prepared,{onConflict:"id"});
+   }
+  };
+ };
  const {data,error}=await client.auth.getSession();if(error){message("Error al comprobar la sesión: "+error.message,"error");showLogin();return}
  if(data.session&&data.session.user?.id==="2ebd10a1-fbae-454b-a12b-e1692f1eed17"){user=data.session.user;showApp();wireAdForms();try{await loadData();message("Sesión activa. Elige una ficha para editarla.","ok")}catch(err){message("Error al cargar fichas: "+err.message,"error")}}
  else{if(data.session)await client.auth.signOut();user=null;showLogin();message("Inicia sesión con la cuenta autorizada de administración.")}

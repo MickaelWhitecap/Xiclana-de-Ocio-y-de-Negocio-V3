@@ -237,12 +237,13 @@ class AuditDuplicateTests(unittest.TestCase):
         self.assertEqual(result["urls_invalidas"], [])
         self.assertEqual(result["coordenadas_invalidas"], [])
 
-    def test_public_page_uses_local_catalog_without_supabase_for_fichas(self):
+    def test_public_page_reads_fichas_from_the_single_supabase_catalog(self):
         page = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
-        self.assertIn('fetch("fichas_completas.json?v=__XICLANA_BUILD_ID__")', page)
-        self.assertIn("const esAguaGenerica=", page)
-        self.assertIn("!esAguaGenerica(x.n", page)
-        self.assertNotIn("https://cdn.jsdelivr.net/npm/@supabase/supabase-js", page)
+        self.assertIn("async function cargarCatalogoSupabase()", page)
+        self.assertIn('listings?select=id,data,verified_at', page)
+        self.assertIn('site_settings?select=data&id=eq.catalogo', page)
+        self.assertIn("await aplicarCambios(", page)
+        self.assertNotIn('fetch("fichas_completas.json', page)
         self.assertNotIn('sb.from("listing_overrides")', page)
         self.assertNotIn('sb.from("listing_categories")', page)
 
@@ -293,17 +294,18 @@ class OSMIntegrationTests(unittest.TestCase):
         self.assertIn('stored_proposals = address_doc.get("propuestas", [])', source)
         self.assertIn('data["propuestas_direcciones_osm"] = address_proposals', source)
 
-    def test_admin_loads_osm_review_data_from_master_not_auxiliary_json(self):
+    def test_admin_loads_review_metadata_from_the_canonical_supabase_database(self):
         admin = (Path(__file__).with_name("admin.html")).read_text(encoding="utf-8")
-        self.assertIn('reviewCandidates=(data.candidatas_revision||[])', admin)
-        self.assertIn('const rawAddressProposals=data.propuestas_direcciones_osm', admin)
-        self.assertIn('Array.isArray(rawAddressProposals?.propuestas)', admin)
+        self.assertIn('client.from("site_settings").select("data")', admin)
+        self.assertIn('const metadata=settingsRes.data?.data||{}', admin)
+        self.assertIn('reviewCandidates=Array.isArray(metadata.candidatas_revision)', admin)
+        self.assertIn('const rawAddressProposals=metadata.propuestas_direcciones_osm', admin)
         self.assertIn('addressProposals=normalizedAddressProposals.filter', admin)
         self.assertNotIn('fetch("./osm_candidatas_pendientes.json"', admin)
         self.assertNotIn('fetch("./propuestas_direcciones_osm.json"', admin)
         workflow = (Path(__file__).parents[1] / ".github" / "workflows" / "publicar-v3.yml").read_text(encoding="utf-8")
-        self.assertIn('for key in ("osm_extraccion_inicial", "auditoria_osm"):', workflow)
-        self.assertNotIn('for key in ("osm_extraccion_inicial", "auditoria_osm", "propuestas_direcciones_osm"):', workflow)
+        self.assertIn("no se incluye fichas_completas.json", workflow)
+        self.assertIn("SUPABASE_ANON_KEY", workflow)
 
 
 if __name__ == "__main__":

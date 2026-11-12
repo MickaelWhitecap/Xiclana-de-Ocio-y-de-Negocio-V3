@@ -778,6 +778,25 @@ async function aplicarCambios(j){
   $("#fecha").textContent="Datos actualizados: "+j.actualizado+" · "+items.length+" fichas";
   render();
  }
- fetch("fichas_completas.json?v=__XICLANA_BUILD_ID__").then(r=>{if(!r.ok)throw new Error("No se pudo cargar fichas_completas.json");return r.json()}).then(aplicarCambios).catch(err=>{console.error(err);render()});
+ async function cargarCatalogoSupabase(){
+ const cfg=window.XICLANA_SUPABASE||{};
+ if(!cfg.url||!cfg.anonKey)throw new Error("Falta la configuración pública de Supabase.");
+ const base=cfg.url.replace(/\/+$/,"")+"/rest/v1/";
+ const headers={apikey:cfg.anonKey,Authorization:"Bearer "+cfg.anonKey};
+ const pageSize=500;let rows=[],offset=0;
+ while(true){
+  const url=base+"listings?select=id,data,verified_at&is_published=eq.true&is_deleted=eq.false&order=id.asc&limit="+pageSize+"&offset="+offset;
+  const response=await fetch(url,{headers,cache:"no-store"});
+  if(!response.ok)throw new Error("Supabase no ha permitido cargar el catálogo ("+response.status+").");
+  const page=await response.json();if(!Array.isArray(page))throw new Error("Formato de catálogo inesperado en Supabase.");
+  rows.push(...page);if(page.length<pageSize)break;offset+=page.length;
+ }
+ const settingResponse=await fetch(base+"site_settings?select=data&id=eq.catalogo",{headers,cache:"no-store"});
+ if(!settingResponse.ok)throw new Error("No se pudieron cargar los datos generales del catálogo.");
+ const settings=await settingResponse.json();
+ const items=rows.map(row=>({...row.data,id:row.id,verified_at:row.verified_at,seed:1}));
+ await aplicarCambios({...((settings?.[0]?.data)||{}),items,destacados:settings?.[0]?.data?.destacados||{}});
+ }
+cargarCatalogoSupabase().catch(err=>{console.error(err);$("#fecha").textContent="No se pudo conectar con la base de datos central de Xiclana.";render()});
 
 </script></body></html>

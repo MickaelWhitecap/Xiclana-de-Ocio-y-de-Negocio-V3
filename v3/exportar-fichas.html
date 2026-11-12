@@ -12,7 +12,7 @@
 </head>
 <body>
 <h1>Inventario completo de Xiclana</h1>
-<p>Esta herramienta combina las fichas base publicadas con las correcciones y fichas nuevas guardadas en Supabase. Solo descarga un archivo; no modifica el directorio ni la base de datos.</p>
+<p>Esta herramienta exporta las fichas publicadas directamente desde la única base de datos de Xiclana (Supabase). Solo descarga un archivo; no modifica el directorio ni la base de datos.</p>
 <div class="panel">
   <p id="status">Cargando fichas…</p>
   <button id="download" disabled>Descargar fichas_completas.json</button>
@@ -21,47 +21,24 @@
 <script>
 const statusEl=document.getElementById("status"),button=document.getElementById("download");
 let exportData=null;
-function norm(v){return String(v||"").normalize("NFD").replace(/\p{Diacritic}/gu,"").toLowerCase().trim()}
-function combinarCamposConDatos(base,aportados){const resultado={...base};Object.entries(aportados||{}).forEach(([clave,valor])=>{const vacio=valor===null||valor===undefined||(typeof valor==="string"&&valor.trim()==="");if(!vacio)resultado[clave]=valor});return resultado}
 async function build(){
- const response=await fetch("./fichas_completas.json",{cache:"no-store"});
- if(!response.ok)throw new Error("No se pudo cargar fichas_completas.json (HTTP "+response.status+").");
- const j=await response.json();
- let items=(j.items||[]).filter(x=>x&&x._xiclana_deleted!==true).map(x=>({...x}));
  const cfg=window.XICLANA_SUPABASE||{};
- if(!cfg.url||!cfg.anonKey||!window.supabase?.createClient)throw new Error("No está disponible la conexión de lectura a Supabase.");
- const sb=window.supabase.createClient(cfg.url,cfg.anonKey);
- const data=[];
- for(let from=0;;from+=1000){
-  const {data:page,error}=await sb.from("listing_overrides").select("listing_id,fields,is_new,verified_at").range(from,from+999);
-  if(error)throw new Error("Error al leer correcciones de Supabase: "+error.message);
-  data.push(...(page||[]));
-  if(!page||page.length<1000)break;
+ if(!cfg.url||!cfg.anonKey)throw new Error("No está disponible la conexión a la base central.");
+ const base=cfg.url.replace(/\/+$/,"")+"/rest/v1/";
+ const headers={apikey:cfg.anonKey,Authorization:"Bearer "+cfg.anonKey};
+ const items=[];const pageSize=500;let offset=0;
+ while(true){
+  const response=await fetch(base+"listings?select=id,data,verified_at&is_published=eq.true&is_deleted=eq.false&order=id.asc&limit="+pageSize+"&offset="+offset,{headers,cache:"no-store"});
+  if(!response.ok)throw new Error("Error al leer las fichas de Supabase: HTTP "+response.status);
+  const page=await response.json();if(!Array.isArray(page))throw new Error("Respuesta inesperada de Supabase.");
+  items.push(...page.map(row=>({...row.data,id:row.id,verified_at:row.verified_at})));
+  if(page.length<pageSize)break;offset+=page.length;
  }
- const byId=new Map(data.map(o=>[String(o.listing_id),o]));
- const deletedIds=new Set(data.filter(o=>o.fields?._xiclana_deleted===true).map(o=>String(o.listing_id)));
- items=items.filter(x=>!deletedIds.has(String(x.id||"")));
- items=items.map(x=>{const o=byId.get(String(x.id||""));return o?({...combinarCamposConDatos(x,o.fields),id:x.id,verified_at:o.verified_at}):x});
- const ids=new Set(items.map(x=>String(x.id||"")));
- for(const o of data){if(o.is_new&&!o.fields?._xiclana_deleted&&!ids.has(String(o.listing_id))){items.push({...o.fields,id:o.listing_id,verified_at:o.verified_at});ids.add(String(o.listing_id))}}
- // Reproducir exactamente los filtros y consolidaciones de la web pública.
- const nombreAgua=x=>String(x.n||x.nombre||x.name||x.title||"").normalize("NFD").replace(/\\p{Diacritic}/gu,"").toLowerCase().trim();
- items=items.filter(x=>!["agua","agua potable"].includes(nombreAgua(x)));
- const normalizarExacto=v=>String(v??"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim().replace(/\\s+/g," ");
- const claveExacta=x=>{const n=normalizarExacto(x.n||x.nombre||x.name||x.title),c=normalizarExacto(x.c||x.categoria||x.category),t=normalizarExacto(x.t||x.tipo),a=normalizarExacto(x.a||x.direccion||x.address);return n&&c&&t&&a?[n,c,t,a].join("|"):""};
- const prioridadExacta=x=>String(x.id||"").startsWith("manual:")?0:String(x.id||"").startsWith("oficial:")?1:String(x.id||"").startsWith("consolidado:")?2:String(x.id||"").startsWith("proposal:")?3:4;
- const gruposExactos=new Map();
- for(const x of items){const k=claveExacta(x);if(k){if(!gruposExactos.has(k))gruposExactos.set(k,[]);gruposExactos.get(k).push(x)}}
- const suprimidos=new Set();
- for(const grupo of gruposExactos.values()){if(grupo.length<2)continue;grupo.sort((a,b)=>prioridadExacta(a)-prioridadExacta(b));const maestra=grupo[0];for(const otra of grupo.slice(1)){for(const [k,v] of Object.entries(otra)){if((maestra[k]===undefined||maestra[k]===null||String(maestra[k]).trim()==="")&&v!==undefined&&v!==null&&String(v).trim()!=="")maestra[k]=v}suprimidos.add(otra)}}
- items=items.filter(x=>!suprimidos.has(x));
- const claveRana=x=>normalizarExacto(x.n||x.nombre||x.name||x.title)==="camping la rana verde";
- const candidatasRana=items.filter(claveRana);
- if(candidatasRana.length){const puntuacion=x=>(String(x.t||x.tipo||"").toLowerCase()==="ocio"?100000:0)+(String(x.id||"").startsWith("manual:")?10000:0)+Object.entries(x).reduce((n,[k,v])=>n+(!["id","seed","verified_at"].includes(k)&&v!=null&&String(v).trim()!==""?1:0),0);const mejor=candidatasRana.reduce((best,x)=>puntuacion(x)>puntuacion(best)?x:best);items=items.filter(x=>!claveRana(x));items.push({...mejor,t:"ocio",c:"Camping"})}
- items=items.map(x=>["camping","nautica"].includes(normalizarExacto(x.c))?({...x,t:"ocio"}):x);
-
- exportData={actualizado:j.actualizado||null,total:items.length,items};
- statusEl.textContent="Inventario preparado: "+items.length+" fichas.\nBase publicada: "+(j.items||[]).length+" fichas.\nCorrecciones y fichas nuevas de Supabase: "+data.length+".";
+ const response=await fetch(base+"site_settings?select=data&id=eq.catalogo",{headers,cache:"no-store"});
+ if(!response.ok)throw new Error("No se pudieron leer los metadatos del catálogo.");
+ const settings=await response.json(),metadata=settings?.[0]?.data||{};
+ exportData={...metadata,actualizado:new Date().toISOString().slice(0,10),total:items.length,items};
+ statusEl.textContent="Inventario preparado desde la base central: "+items.length+" fichas publicadas.\nNo se ha leído ningún fichero JSON externo.";
  button.disabled=false;
 }
 button.addEventListener("click",()=>{
@@ -70,6 +47,6 @@ button.addEventListener("click",()=>{
  const url=URL.createObjectURL(blob),a=document.createElement("a");
  a.href=url;a.download="fichas_completas.json";a.click();URL.revokeObjectURL(url);
 });
-build().catch(err=>{statusEl.textContent="No se pudo generar el inventario completo.\n"+err.message+"\nNo se ha descargado ningún archivo parcial.";});
+build().catch(err=>{statusEl.textContent="No se pudo generar el inventario desde Supabase.\n"+err.message;});
 </script>
 </body></html>
