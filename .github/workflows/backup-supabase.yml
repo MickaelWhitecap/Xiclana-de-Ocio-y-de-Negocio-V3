@@ -52,12 +52,14 @@ jobs:
         with:
           version: latest
 
-      - name: Exportar esquema, roles y datos de Supabase
+      - name: Exportar esquema, roles, datos y catálogo desde Supabase
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           set -euo pipefail
-          test -s v3/fichas_completas.json || { echo "::error::No se encuentra v3/fichas_completas.json o está vacío."; exit 1; }
+          python v3/catalogo_supabase.py export --output fichas_completas.json
+          test -s fichas_completas.json || { echo "::error::No se pudo exportar el catálogo desde Supabase."; exit 1; }
           supabase db dump --db-url "$SUPABASE_DB_URL" -f schema.sql
           supabase db dump --db-url "$SUPABASE_DB_URL" -f roles.sql --role-only
           # Solo se respaldan los datos propios de Xiclana; Supabase Auth/Storage son esquemas gestionados.
@@ -71,7 +73,7 @@ jobs:
           BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
         run: |
           set -euo pipefail
-          gzip -9 -c v3/fichas_completas.json > fichas_completas.json.gz
+          gzip -9 -c fichas_completas.json > fichas_completas.json.gz
           for file in schema.sql roles.sql data.sql; do
             openssl enc -aes-256-cbc -salt -pbkdf2 -iter 600000 \
               -in "$file" -out "$file.enc" -pass env:BACKUP_PASSPHRASE
@@ -82,7 +84,7 @@ jobs:
           openssl enc -aes-256-cbc -salt -pbkdf2 -iter 600000 \
             -in xiclana-v3-source.zip -out xiclana-v3-source.zip.enc \
             -pass env:BACKUP_PASSPHRASE
-          rm -f schema.sql roles.sql data.sql fichas_completas.json.gz xiclana-v3-source.zip v3/fichas_completas.json
+          rm -f schema.sql roles.sql data.sql fichas_completas.json fichas_completas.json.gz xiclana-v3-source.zip
           test -s schema.sql.enc
           test -s roles.sql.enc
           test -s data.sql.enc
