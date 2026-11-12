@@ -3,7 +3,7 @@
 import collections, hashlib, json, math, pathlib, re, time, unicodedata, urllib.parse, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent
-MASTER = ROOT / "fichas_completas.json"
+MASTER = pathlib.Path(os.getenv("XICLANA_CATALOG_PATH", str(ROOT / "fichas_completas.json")))
 OUT_RAW = ROOT / "osm_chiclana_extraccion_completa.json"
 OUT_REPORT = ROOT / "osm_chiclana_cruce_catalogo.json"
 AREA_ID = 3600346951  # área Overpass derivada de la relación OSM 346951
