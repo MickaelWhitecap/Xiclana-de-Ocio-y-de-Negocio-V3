@@ -1,40 +1,11 @@
-name: Sincronizar cambios administrativos Supabase
+name: Sincronizar cambios administrativos Supabase (retirado)
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "*/15 * * * *"
 permissions:
   contents: read
-  actions: write
-concurrency:
-  group: xiclana-admin-sync
-  cancel-in-progress: false
 jobs:
-  detectar-cambios:
+  retired:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
-      - name: Comprobar y sincronizar ediciones administrativas
-        id: sync
-        env:
-          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: |
-          set -euo pipefail
-          python -m unittest v3/test_auditar_catalogo.py
-          python v3/actualizar.py
-          if git diff --quiet -- v3/fichas_completas.json; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No hay cambios administrativos nuevos."
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "Se han detectado cambios administrativos pendientes de publicación."
-          fi
-      - name: Lanzar publicación V3 sin ampliar el catálogo
-        if: steps.sync.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh workflow run publicar-v3.yml --repo "${{ github.repository }}" --ref main -f admin_sync=true
+      - name: Confirmar retirada del mecanismo antiguo
+        run: echo "Desactivado. Supabase public.listings es la fuente única; no se sincroniza desde listing_overrides ni desde fichas_completas.json."
