@@ -20,6 +20,8 @@ on:
       - "v3/auditar_osm_municipal.py"
       - "v3/proponer_direcciones_osm.py"
       - "v3/comparar_cambios_osm.py"
+      - "v3/rastreo_web_publico.py"
+      - "v3/auditar_bajas_catalogo.py"
       - ".github/workflows/extraccion-inicial-osm.yml"
       - ".github/workflows/prueba-rad-real.yml"
       - ".github/workflows/rad-catalog-validation.yml"
@@ -51,7 +53,7 @@ jobs:
         with:
           node-version: "22"
       - name: Comprobar sintaxis Python
-        run: python -m py_compile v3/catalogo_supabase.py v3/migrar_catalogo_supabase.py v3/actualizar.py v3/ampliar_catalogo.py v3/auditar_catalogo.py v3/incorporar_candidatas_osm.py v3/auditar_osm_municipal.py v3/proponer_direcciones_osm.py v3/comparar_cambios_osm.py v3/test_auditar_catalogo.py v3/test_fuente_unica.py
+        run: python -m py_compile v3/catalogo_supabase.py v3/migrar_catalogo_supabase.py v3/actualizar.py v3/ampliar_catalogo.py v3/auditar_catalogo.py v3/incorporar_candidatas_osm.py v3/auditar_osm_municipal.py v3/proponer_direcciones_osm.py v3/comparar_cambios_osm.py v3/rastreo_web_publico.py v3/auditar_bajas_catalogo.py v3/test_auditar_catalogo.py v3/test_fuente_unica.py
       - name: Comprobar sintaxis JavaScript de las páginas
         run: |
           python - <<'PY'
