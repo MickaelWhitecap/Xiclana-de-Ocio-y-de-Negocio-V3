@@ -64,7 +64,7 @@ def main():
         if not ident:
             continue
         item = by_id.get(ident)
-        if item is None and row.get("is_new") and fields.get("_xiclana_deleted") is not True:
+        if item is None and row.get("is_new"):
             item = {k:v for k,v in fields.items() if k not in {"_xiclana_restore_deleted","_xiclana_address_proposal_rejected"}}
             item["id"] = ident
             item.setdefault("fuente_estado", "Ficha administrativa migrada a Supabase")
