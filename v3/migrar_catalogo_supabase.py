@@ -45,6 +45,8 @@ def paged(url, key, page_size=500):
             raise RuntimeError("Se superó el límite defensivo de lectura.")
 
 def main():
+    if os.getenv("XICLANA_ALLOW_INITIAL_MIGRATION") != "1":
+        raise SystemExit("Migración inicial ya completada. Para impedir una reimportación accidental, este script requiere XICLANA_ALLOW_INITIAL_MIGRATION=1.")
     if not CATALOG.is_file():
         raise SystemExit("No existe el catálogo fuente; migración cancelada.")
     catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
