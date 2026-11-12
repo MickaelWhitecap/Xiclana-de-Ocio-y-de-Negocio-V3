@@ -12,7 +12,7 @@ def request(url, key, method="GET", payload=None, extra=None):
                "Content-Type": "application/json", "User-Agent": "Xiclana-canonical-migration/1.0"}
     headers.update(extra or {})
     req = urllib.request.Request(url, data=body, headers=headers, method=method)
-    with urllib.request.urlopen(req, timeout=90) as response:
+    with urllib.request.urlopen(req, timeout=300) as response:
         raw = response.read()
         return json.loads(raw) if raw else None, response.headers
 
@@ -108,7 +108,7 @@ def main():
     for start in range(0, len(records), 100):
         request(base + "listings?on_conflict=id", key, "POST", records[start:start+100],
                 {"Prefer":"resolution=merge-duplicates,return=minimal"})
-    metadata = {k:v for k,v in catalog.items() if k != "items"}
+    metadata = {k:catalog[k] for k in ("destacados","candidatas_revision","total_candidatas_revision","propuestas_direcciones_osm","actualizado") if k in catalog}
     metadata["migracion_supabase"] = {"fecha":datetime.datetime.now(datetime.timezone.utc).isoformat(),
       "fichas_fuente":len(catalog["items"]), "overrides_leidos":len(overrides),
       "fichas_nuevas_de_overrides":added, "fichas_actualizadas_por_overrides":merged,
