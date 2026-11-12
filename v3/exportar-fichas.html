@@ -24,7 +24,7 @@ let exportData=null;
 async function build(){
  const cfg=window.XICLANA_SUPABASE||{};
  if(!cfg.url||!cfg.anonKey)throw new Error("No está disponible la conexión a la base central.");
- const base=cfg.url.replace(/\\/+$/,"")+"/rest/v1/";
+ const base=cfg.url.replace(/\/+$/,"")+"/rest/v1/";
  const headers={apikey:cfg.anonKey,Authorization:"Bearer "+cfg.anonKey};
  const items=[];const pageSize=500;let offset=0;
  while(true){
