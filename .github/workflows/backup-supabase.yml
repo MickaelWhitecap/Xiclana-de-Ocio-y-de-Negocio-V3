@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - ".github/workflows/backup-supabase.yml"
+      - "v3/catalogo_supabase.py"
   workflow_dispatch:
   schedule:
     - cron: "30 3 * * *"
