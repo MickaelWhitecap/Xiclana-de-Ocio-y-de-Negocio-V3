@@ -1,45 +1,17 @@
-name: Publicar Xiclana V3
+name: Publicar Xiclana V3 desde Supabase
 on:
-  workflow_dispatch:
-    inputs:
-      admin_sync:
-        description: "Publicar cambios administrativos sin ampliar el catálogo"
-        required: false
-        type: boolean
-        default: false
-  workflow_run:
-    workflows:
-      - "Auditoría municipal completa de OpenStreetMap"
-      - "Recuperar propuestas de direcciones OSM"
-      - "RAD - enriquecimiento del catálogo global"
-      - "Integrar candidatas RAD al catálogo global"
-    types:
-      - completed
   push:
     branches: [main]
-    paths-ignore:
-      - "v3/incorporar_candidatas_osm.py"
-      - "v3/osm_candidatas_pendientes.json"
-      - "v3/propuestas_direcciones_osm.json"
-      - "v3/osm_candidatas_resumen.json"
-      - "v3/auditar_bajas_catalogo.py"
-      - "v3/recuperar_direcciones_osm.py"
-      - ".github/workflows/recuperar-direcciones-osm.yml"
-      - ".github/workflows/auditoria-osm-municipal.yml"
-      - ".github/workflows/auditar-bajas-catalogo.yml"
-      - ".github/workflows/backup-supabase.yml"
-  schedule:
-    - cron: "0 4 * * 1"
+  workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 concurrency:
-  group: xiclana-catalogo-maestro
-  cancel-in-progress: false
+  group: xiclana-pages-supabase
+  cancel-in-progress: true
 jobs:
   publicar:
-    if: (github.actor != 'github-actions[bot]' || github.event_name != 'push') && (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'))
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -49,87 +21,47 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-      - name: Ejecutar pruebas de regresión antes de sincronizar
-        run: python -m unittest v3/test_auditar_catalogo.py
-      - name: Validar sintaxis JavaScript de las páginas V3
+      - name: Validar sintaxis JavaScript de las páginas
         run: |
           python - <<'PY'
           import pathlib, re
-          for page in ("v3/index.html", "v3/admin.html"):
+          for page in ("v3/index.html", "v3/admin.html", "v3/exportar-fichas.html"):
               html=pathlib.Path(page).read_text(encoding="utf-8")
-              scripts=re.findall(r"<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>", html, re.I)
-              pathlib.Path("/tmp/"+pathlib.Path(page).stem+"-inline-check.js").write_text("\n".join(scripts), encoding="utf-8")
+              scripts=re.findall(r'<script(?![^>]*\\bsrc=)[^>]*>([\\s\\S]*?)</script>',html,re.I)
+              pathlib.Path("/tmp/"+pathlib.Path(page).stem+".js").write_text("\\n".join(scripts),encoding="utf-8")
           PY
-          node --check /tmp/index-inline-check.js
-          node --check /tmp/admin-inline-check.js
-      - name: Validar el fichero maestro único
+          node --check /tmp/index.js
+          node --check /tmp/admin.js
+          node --check /tmp/exportar-fichas.js
+      - name: Preparar sitio sin catálogo JSON local
         env:
-          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: python v3/actualizar.py
-      - name: Ampliar catálogo en el fichero maestro
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.admin_sync != true)
-        run: python v3/ampliar_catalogo.py
-      - name: Auditar integridad del catálogo
-        run: python v3/auditar_catalogo.py
-      - name: Validar catálogo e informes antes de publicar
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          for name in ("fichas_completas.json", "auditoria_integridad.json", "plan_consolidacion.json"):
-              path = Path("v3") / name
-              if not path.is_file():
-                  raise SystemExit(f"Falta el archivo requerido: {path}")
-              with path.open(encoding="utf-8") as stream:
-                  json.load(stream)
-          catalog = json.loads(Path("v3/fichas_completas.json").read_text(encoding="utf-8"))
-          if not isinstance(catalog.get("items"), list):
-              raise SystemExit("El catálogo no contiene una lista items válida.")
-          report = json.loads(Path("v3/auditoria_integridad.json").read_text(encoding="utf-8"))
-          if not isinstance(report, dict) or "parametros_documentados_por_ficha" not in report:
-              raise SystemExit("El informe de auditoría no contiene las estadísticas esperadas.")
-          PY
-      - name: Guardar el catálogo maestro
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v3/fichas_completas.json v3/auditoria_integridad.json v3/plan_consolidacion.json
-          if ! git diff --cached --quiet; then
-            git commit -m "Actualizar catálogo maestro V3"
-            # Integrar cualquier escritura concurrente antes de actualizar main.
-            git pull --rebase origin main
-            git push origin HEAD:main
-          else
-            echo "El catálogo maestro no ha cambiado."
-          fi
-      - name: Preparar sitio V3 independiente sin cargar el archivo de auditoría OSM
+          BUILD_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           set -euo pipefail
           mkdir -p _site
           cp v3/index.html v3/admin.html v3/exportar-fichas.html v3/supabase-config.js _site/
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          import os
-          index_path = Path("_site/index.html")
-          index_html = index_path.read_text(encoding="utf-8")
-          build_id = os.environ["GITHUB_RUN_ID"] + "-" + os.environ["GITHUB_RUN_ATTEMPT"]
-          if "__XICLANA_BUILD_ID__" not in index_html:
-              raise SystemExit("Falta el marcador de versión del catálogo en index.html.")
-          index_path.write_text(index_html.replace("__XICLANA_BUILD_ID__", build_id), encoding="utf-8")
-          source = json.loads(Path("v3/fichas_completas.json").read_text(encoding="utf-8"))
-          # La extracción íntegra y los informes permanecen en el catálogo maestro de GitHub.
-          # No se envían al navegador: son datos de auditoría y harían muy pesada la web.
-          for key in ("osm_extraccion_inicial", "auditoria_osm"):
-              source.pop(key, None)
-          Path("_site/fichas_completas.json").write_text(
-              json.dumps(source, ensure_ascii=False, separators=(",", ":")),
-              encoding="utf-8"
-          )
-          print(f"Catálogo público preparado: {len(source.get('items', []))} registros; auditoría OSM excluida.")
-          PY
           cp v3/espacio-1-flamenca.jpg _site/
           cp README.md _site/README.md
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          build=os.environ["BUILD_ID"]
+          for name in ("index.html","admin.html","exportar-fichas.html"):
+              p=Path("_site")/name
+              html=p.read_text(encoding="utf-8")
+              html=html.replace("</head>",f"<!-- XICLANA_BUILD_ID={build} -->\\n</head>",1)
+              p.write_text(html,encoding="utf-8")
+          print("Sitio preparado: el navegador consultará Supabase; no se incluye fichas_completas.json.")
+          PY
+          python - <<'PY' >> "$GITHUB_ENV"
+          import re
+          from pathlib import Path
+          s=Path("v3/supabase-config.js").read_text(encoding="utf-8")
+          url=re.search(r'url:\\s*"([^"]+)"',s).group(1)
+          key=re.search(r'anonKey:\\s*"([^"]+)"',s).group(1)
+          print("SUPABASE_URL="+url)
+          print("SUPABASE_ANON_KEY="+key)
+          PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -139,15 +71,25 @@ jobs:
         uses: actions/deploy-pages@v5
         with:
           artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
-
-      - name: Verificar que Pages sirve el mismo catálogo y HTML desplegados
+      - name: Verificar web y lectura pública de la base única
         env:
           PAGES_URL: ${{ steps.deployment.outputs.page_url }}
           BUILD_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}index.html?build=${BUILD_ID}" -o /tmp/xiclana-index.html
-          grep -Fq "${BUILD_ID}" /tmp/xiclana-index.html
-          curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}fichas_completas.json?build=${BUILD_ID}" -o /tmp/xiclana-catalogo-publicado.json
-          cmp _site/fichas_completas.json /tmp/xiclana-catalogo-publicado.json
-          echo "Verificación pública correcta: HTML versionado y JSON idéntico al artefacto desplegado."
+          curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}index.html?build=${BUILD_ID}" -o /tmp/index.html
+          curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}admin.html?build=${BUILD_ID}" -o /tmp/admin.html
+          grep -Fq "XICLANA_BUILD_ID=${BUILD_ID}" /tmp/index.html
+          grep -Fq "XICLANA_BUILD_ID=${BUILD_ID}" /tmp/admin.html
+          curl --fail --silent --show-error "${SUPABASE_URL}/rest/v1/listings?select=id&is_published=eq.true&is_deleted=eq.false&limit=1" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" -o /tmp/listings.json
+          curl --fail --silent --show-error "${SUPABASE_URL}/rest/v1/site_settings?select=id&id=eq.catalogo" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" -o /tmp/settings.json
+          python - <<'PY'
+          import json
+          listings=json.load(open("/tmp/listings.json",encoding="utf-8"))
+          settings=json.load(open("/tmp/settings.json",encoding="utf-8"))
+          if not listings or not settings:
+              raise SystemExit("Supabase no devuelve fichas o metadatos con la clave pública.")
+          print(f"Verificado: {len(listings)} muestra(s) de fichas y {len(settings)} metadatos disponibles públicamente.")
+          PY
