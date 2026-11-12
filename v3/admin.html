@@ -808,7 +808,7 @@ async function init(){
      if(fields._xiclana_restore_deleted===true)delete fields._xiclana_deleted;
      delete fields._xiclana_restore_deleted;
      delete fields._xiclana_address_proposal_rejected;
-     fields.is_new=Boolean(row.is_new||existing.data?.data?.is_new);
+     fields.is_new=Boolean(row.is_new);
      const deleted=fields._xiclana_deleted===true;
      return {id,data:fields,is_published:true,is_deleted:deleted,
       verified_at:row.verified_at||existing.data?.verified_at||null,
