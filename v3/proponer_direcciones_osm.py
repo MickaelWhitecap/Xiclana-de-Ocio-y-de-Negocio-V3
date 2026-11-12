@@ -9,7 +9,7 @@ import re
 from datetime import datetime, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parent
-MASTER = pathlib.Path(os.getenv("XICLANA_CATALOG_PATH", str(ROOT / "fichas_completas.json")))
+MASTER = pathlib.Path(os.environ["XICLANA_CATALOG_PATH"]) if os.environ.get("XICLANA_CATALOG_PATH") else None
 CURRENT = ROOT / "osm_chiclana_extraccion_completa.json"
 OUT = ROOT / "propuestas_direcciones_osm.json"
 OSM_ID_RE = re.compile(r"^(?:osm|osm-extra):(node|way|relation):(\d+)$")
@@ -57,6 +57,8 @@ def build_address(tags):
 
 
 def main():
+    if MASTER is None:
+        raise SystemExit("Define XICLANA_CATALOG_PATH con una exportación temporal de public.listings.")
     for path in (MASTER, CURRENT):
         if not path.is_file() or path.stat().st_size == 0:
             raise SystemExit(f"Falta archivo obligatorio: {path}")
