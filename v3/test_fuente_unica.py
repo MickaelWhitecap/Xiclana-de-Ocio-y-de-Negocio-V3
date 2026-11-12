@@ -118,6 +118,7 @@ class SingleSupabaseMasterTests(unittest.TestCase):
     def test_backup_json_is_generated_from_supabase_not_repository_snapshot(self):
         workflow = (ROOT / ".github/workflows/backup-supabase.yml").read_text(encoding="utf-8")
         self.assertIn("catalogo_supabase.py export --output fichas_completas.json", workflow)
+        self.assertIn('"v3/catalogo_supabase.py"', workflow)
         self.assertIn("gzip -9 -c fichas_completas.json", workflow)
         self.assertNotIn("test -s v3/fichas_completas.json", workflow)
         self.assertNotIn("gzip -9 -c v3/fichas_completas.json", workflow)
