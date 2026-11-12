@@ -220,7 +220,7 @@ def allowed(url):
     rp,valid=CACHE_ROBOTS[origin]
     return bool(valid and rp and rp.can_fetch(UA,url))
 
-def search_ddg(query):
+def search_ddg(query, limit=MAX_RESULTS_PER_QUERY):
     url="https://html.duckduckgo.com/html/?"+urllib.parse.urlencode({"q":query})
     if not allowed(url): return []
     body,_,_=get(url,700000)
@@ -237,10 +237,10 @@ def search_ddg(query):
         parsed=urllib.parse.urlparse(href)
         if parsed.scheme in ("http","https") and "duckduckgo.com" not in parsed.netloc:
             found.append(href)
-        if len(found)>=MAX_RESULTS_PER_QUERY: break
+        if len(found)>=limit: break
     return list(dict.fromkeys(found))
 
-def search_bing(query):
+def search_bing(query, limit=MAX_RESULTS_PER_QUERY):
     url="https://www.bing.com/search?format=rss&"+urllib.parse.urlencode({"q":query})
     if not allowed(url): return []
     body,_,_=get(url,700000)
@@ -253,7 +253,7 @@ def search_bing(query):
             parsed=urllib.parse.urlparse(link)
             if parsed.scheme in ("http","https") and "bing.com" not in parsed.netloc:
                 found.append(link)
-        return list(dict.fromkeys(found))[:MAX_RESULTS_PER_QUERY]
+        return list(dict.fromkeys(found))[:limit]
     except Exception: return []
 
 def flatten_jsonld(value):
@@ -817,8 +817,12 @@ def compare_catalog_record(candidate, existing):
     # una dirección o contacto independiente confirma el establecimiento.
     new_tokens=set(norm(new_name).split())
     old_tokens=set(norm(old_name).split())
+    contained_tokens=(new_tokens if len(new_tokens)<=len(old_tokens) else old_tokens)
+    generic_singletons={"bar","pub","casa","centro","tienda","hotel","clinica","restaurante","cafe","muebles","servicios"}
     contained_name=bool(new_tokens and old_tokens and
-        (new_tokens.issubset(old_tokens) or old_tokens.issubset(new_tokens)))
+        (new_tokens.issubset(old_tokens) or old_tokens.issubset(new_tokens)) and
+        (len(contained_tokens)>1 or
+         (len(next(iter(contained_tokens)))>=7 and next(iter(contained_tokens)) not in generic_singletons)))
     if score < 0.86 and not (contained_name and (same_address or same_contact)):
         return None
     if contained_name and (same_address or same_contact):
@@ -1773,7 +1777,7 @@ def main():
     targeted_queries=targeted_catalog_queries(data["items"],limit=50,rotation=iso.year*53+iso.week)
     for q in targeted_queries:
         for engine in (search_ddg,search_bing):
-            try: links.extend(engine(q))
+            try: links.extend(engine(q,limit=4))
             except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
     trusted_urls=set()
     # Fuentes locales directas: sus fichas individuales son una vía de detección
