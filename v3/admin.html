@@ -181,7 +181,7 @@ function effectiveItems(){
   const id=stableId(x),o=byId.get(id),fields=combinarCamposConDatos(x,o?.fields);
   if(o?.fields?._xiclana_restore_deleted===true)delete fields._xiclana_deleted;
   delete fields._xiclana_restore_deleted;delete fields._xiclana_address_proposal_rejected;delete fields.osm_ids_relacionados;
-  return {...fields,estado_verificacion:fields.estado_verificacion||"pendiente",id,verified_at:o?.verified_at||null,is_new:false};
+  return {...fields,estado_verificacion:fields.estado_verificacion||"pendiente",id,verified_at:o?.verified_at||null,is_new:Boolean(x.is_new||o?.is_new)};
  });
  overrides.filter(o=>o.is_new&&!o.fields?._xiclana_deleted).forEach(o=>{if(!baseItems.some(x=>stableId(x)===o.listing_id))out.push({...o.fields,estado_verificacion:o.fields?.estado_verificacion||"pendiente",id:o.listing_id,verified_at:o.verified_at,is_new:true})});
  // La Rana Verde es una zona geográfica; agrupar solo variantes exactas del mismo camping.
