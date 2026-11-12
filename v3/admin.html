@@ -796,15 +796,19 @@ async function init(){
     ...result,
     data:(result.data||[]).map(row=>({listing_id:row.id,fields:{...(row.data||{}),...(row.is_deleted?{_xiclana_deleted:true}:{})},is_new:Boolean(row.data?.is_new),verified_at:row.verified_at,updated_at:row.updated_at,is_deleted:row.is_deleted}))
    })),
-   upsert:(input)=>supabaseFrom("listings").upsert((Array.isArray(input)?input:[input]).map(row=>({
-    id:String(row.listing_id),
-    data:{...(row.fields||{}),is_new:Boolean(row.is_new)},
-    is_published:true,
-    is_deleted:row.fields?._xiclana_deleted===true,
-    verified_at:row.verified_at||null,
-    updated_at:row.updated_at||new Date().toISOString(),
-    updated_by:row.updated_by||null
-   })),{onConflict:"id"})
+   upsert:async(input)=>{
+    const {data:userData,error:userError}=await client.auth.getUser();
+    if(userError||!userData?.user?.id)return {data:null,error:userError||new Error("No hay una sesión administrativa válida.")};
+    return supabaseFrom("listings").upsert((Array.isArray(input)?input:[input]).map(row=>({
+     id:String(row.listing_id),
+     data:{...(row.fields||{}),is_new:Boolean(row.is_new)},
+     is_published:true,
+     is_deleted:row.fields?._xiclana_deleted===true,
+     verified_at:row.verified_at||null,
+     updated_at:row.updated_at||new Date().toISOString(),
+     updated_by:userData.user.id
+    })),{onConflict:"id"});
+   }
   };
  };
  const {data,error}=await client.auth.getSession();if(error){message("Error al comprobar la sesión: "+error.message,"error");showLogin();return}
