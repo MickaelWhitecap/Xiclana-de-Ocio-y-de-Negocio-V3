@@ -120,11 +120,13 @@ jobs:
               catalog=json.load(f)
           items=catalog.get("items")
           if not isinstance(items,list):
-              raise SystemExit("El catálogo descifrado no contiene items.")
-          osm=catalog.get("osm_extraccion_inicial",{}).get("objetos",[])
-          if len(osm)!=132875:
-              raise SystemExit(f"La extracción OSM del catálogo no coincide con la referencia: {len(osm)}")
-          print(f"Catálogo descifrado y validado: {len(items)} fichas históricas y {len(osm)} objetos OSM.")
+              raise SystemExit("La exportación descifrada no contiene items.")
+          ids=[x.get("id") for x in items if isinstance(x,dict)]
+          if len(ids)!=len(items) or len(ids)!=len(set(ids)):
+              raise SystemExit("La exportación contiene fichas inválidas o IDs duplicados.")
+          if catalog.get("exportado_desde")!="Supabase public.listings":
+              raise SystemExit("La copia JSON no procede de la tabla canónica public.listings.")
+          print(f"Exportación de Supabase descifrada y validada: {len(items)} fichas, IDs únicos.")
           PY
           if ! command -v psql >/dev/null 2>&1; then
             sudo apt-get update
@@ -183,8 +185,11 @@ jobs:
           PY
           psql "$RESTORE_DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/xiclana-restore/data.sql
           python - <<'PY'
-          import subprocess, os
+          import subprocess, os, gzip, json
           url=os.environ["RESTORE_DATABASE_URL"]
+          with gzip.open("/tmp/xiclana-restore/fichas_completas.json.gz","rt",encoding="utf-8") as f:
+              catalog=json.load(f)
+          expected_listings=len(catalog["items"])
           tables=subprocess.check_output(
               ["psql",url,"-At","-c","SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename"],
               text=True
@@ -202,6 +207,8 @@ jobs:
               actual["public."+table]=int(count)
           if sum(actual.values())==0:
               raise SystemExit("La restauración terminó sin recuperar registros.")
+          if actual.get("public.listings")!=expected_listings:
+              raise SystemExit(f"El backup SQL recuperó {actual.get('public.listings')} listings, pero la exportación JSON contiene {expected_listings}.")
           print("Restauración aislada verificada; filas por tabla:",actual)
           PY
 
