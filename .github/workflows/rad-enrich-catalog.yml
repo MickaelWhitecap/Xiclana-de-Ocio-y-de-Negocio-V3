@@ -1,12 +1,6 @@
 name: RAD - descubrimiento y propuestas desde Supabase
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'v3/rastreo_web_publico.py'
-      - 'v3/catalogo_supabase.py'
-      - '.github/workflows/rad-enrich-catalog.yml'
   schedule:
     - cron: "47 6 * * 1"
   workflow_dispatch:
