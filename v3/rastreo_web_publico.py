@@ -821,6 +821,8 @@ def compare_catalog_record(candidate, existing):
         (new_tokens.issubset(old_tokens) or old_tokens.issubset(new_tokens)))
     if score < 0.86 and not (contained_name and (same_address or same_contact)):
         return None
+    if contained_name and (same_address or same_contact):
+        return {"kind":"duplicate","reason":"nombre distintivo contenido y misma dirección o contacto","score":max(score,0.86)}
     if exact_name and same_address:
         return {"kind":"duplicate","reason":"mismo nombre y dirección","score":score}
     if score >= 0.88 and (same_address or same_contact):
