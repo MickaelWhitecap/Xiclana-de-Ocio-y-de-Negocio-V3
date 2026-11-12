@@ -78,6 +78,8 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertIn("catalogo_supabase.py export", workflow)
         self.assertIn("catalogo_supabase.py sync-metadata", workflow)
         self.assertIn("XICLANA_CATALOG_PATH", workflow)
+        self.assertIn('"v3/catalogo_supabase.py"', workflow)
+        self.assertIn('".github/workflows/auditoria-osm-municipal.yml"', workflow)
         self.assertNotIn("git add v3/fichas_completas.json", workflow)
         self.assertNotIn("git push origin HEAD:main", workflow)
 
