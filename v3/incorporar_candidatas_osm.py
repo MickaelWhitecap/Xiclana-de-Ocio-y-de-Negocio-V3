@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Prepara candidatas OSM para revisión en Administración; nunca publica fichas."""
 import collections
+import os
 import json
 import math
 import pathlib
