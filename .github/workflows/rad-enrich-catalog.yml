@@ -67,7 +67,7 @@ jobs:
             "coincidencias_catalogo":rad.get("coincidencias_catalogo",0),
             "fuentes_directas":rad.get("fuentes_directas",[]),
             "publicacion_automatica":False,
-            "fichas_modificadas_en_supabase":0
+            "fichas_modificadas_en_supabase":"pendiente de sincronización"
           }
           with open("rad-enriquecimiento-resumen.json","w",encoding="utf-8") as f:
             json.dump(summary,f,ensure_ascii=False,indent=2)
@@ -75,6 +75,39 @@ jobs:
             f.write("## Resultado RAD sobre el catálogo Supabase\n\n")
             for key,value in summary.items(): f.write(f"- **{key}:** {value}\n")
           print(json.dumps(summary,ensure_ascii=False))
+          PY
+      - name: Aplicar enriquecimientos seguros a fichas verificadas
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python v3/catalogo_supabase.py sync-enrichment \
+            --before "$RUNNER_TEMP/xiclana-rad-antes.json" \
+            --after "$RUNNER_TEMP/xiclana-rad.json" > rad-enrichment-sync.json
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          sync=json.loads(Path("rad-enrichment-sync.json").read_text(encoding="utf-8"))
+          path=Path(os.path.join(os.environ["RUNNER_TEMP"],"xiclana-rad.json"))
+          data=json.loads(path.read_text(encoding="utf-8"))
+          rad=data.get("rad_ultima_ejecucion",{})
+          rad["fichas_modificadas_en_supabase"]=sync.get("fichas_actualizadas",0)
+          rad["campos_aplicados_en_supabase"]=sync.get("campos_actualizados",0)
+          rad["fichas_omitidas_por_cambio_concurrente"]=sync.get("saltadas_por_cambio_concurrente",0)
+          rad["fichas_omitidas_por_no_verificadas_o_inactivas"]=sync.get("saltadas_por_no_verificadas_o_inactivas",0)
+          data["rad_ultima_ejecucion"]=rad
+          path.write_text(json.dumps(data,ensure_ascii=False,separators=(",",":")),encoding="utf-8")
+          summary=json.loads(Path("rad-enriquecimiento-resumen.json").read_text(encoding="utf-8"))
+          summary.update({
+            "fichas_modificadas_en_supabase":sync.get("fichas_actualizadas",0),
+            "campos_aplicados_en_supabase":sync.get("campos_actualizados",0),
+            "fichas_omitidas_por_cambio_concurrente":sync.get("saltadas_por_cambio_concurrente",0),
+            "fichas_omitidas_por_no_verificadas_o_inactivas":sync.get("saltadas_por_no_verificadas_o_inactivas",0)
+          })
+          Path("rad-enriquecimiento-resumen.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+          with open(os.environ["GITHUB_STEP_SUMMARY"],"a",encoding="utf-8") as f:
+              f.write("\n### Enriquecimientos aplicados\n\n")
+              for key,value in sync.items(): f.write(f"- **{key}:** {value}\n")
+          print(json.dumps(sync,ensure_ascii=False))
           PY
       - name: Guardar candidatas RAD como metadatos pendientes
         env:
