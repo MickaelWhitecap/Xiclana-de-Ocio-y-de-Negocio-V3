@@ -142,7 +142,7 @@ def main():
     report = {
         "fecha_extraccion_utc": raw["fecha_extraccion_utc"],
         "fuente": raw["fuente"], "relacion_municipal_osm": 346951,
-        "catalogo_maestro": "v3/fichas_completas.json",
+        "catalogo_maestro": "Supabase public.listings",
         "catalogo_actualizado": master.get("actualizado"),
         "total_fichas_catalogo": len(items),
         "total_candidatas_revision_catalogo": len(master.get("candidatas_revision") or []),
@@ -169,7 +169,7 @@ def main():
             "La extracción incluye nodos, vías y relaciones dentro del área municipal, con metadatos, etiquetas y geometría.",
             "El cruce por ID es exacto; el cruce por nombre y coordenadas es orientativo y requiere revisión.",
             "Los elementos sin coincidencia se entregan como candidatos; no se incorporan al catálogo.",
-            "No se modifica fichas_completas.json ni se publica ninguna ficha.",
+            "No se modifica public.listings ni se publica ninguna ficha.",
         ],
     }
     OUT_REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
