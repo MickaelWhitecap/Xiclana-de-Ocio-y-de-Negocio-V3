@@ -11,7 +11,7 @@ import unicodedata
 from datetime import datetime, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parent
-MASTER = ROOT / "fichas_completas.json"
+MASTER = pathlib.Path(os.getenv("XICLANA_CATALOG_PATH", str(ROOT / "fichas_completas.json")))
 OUT = ROOT / "auditoria_bajas_catalogo.json"
 OSM_ID_RE = re.compile(r"^(?:osm|osm-extra):(node|way|relation):(\d+)$")
 INTEREST_TAGS = ("amenity", "shop", "tourism", "leisure", "office", "craft", "healthcare", "historic", "sport", "club")
