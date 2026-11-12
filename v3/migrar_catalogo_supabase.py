@@ -18,11 +18,14 @@ def request(url, key, method="GET", payload=None, extra=None):
 
 def paged(url, key, page_size=500):
     result, offset = [], 0
+    separator = "&" if "?" in url else "?"
     while True:
-        _, _ = None, None
-        page, headers = request(url, key, extra={"Range": f"{offset}-{offset+page_size-1}", "Range-Unit": "items"})
+        page_url = url + separator + "limit=" + str(page_size) + "&offset=" + str(offset)
+        page, _headers = request(page_url, key)
         if not isinstance(page, list):
-            raise RuntimeError("Respuesta inesperada al leer overrides.")
+            raise RuntimeError("Respuesta inesperada al leer datos de Supabase.")
+        if not page:
+            return result
         result.extend(page)
         if len(page) < page_size:
             return result
