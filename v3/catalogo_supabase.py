@@ -203,6 +203,34 @@ def sync_enrichment(before_path, after_path):
     return summary
 
 
+
+def merge_candidate_lists(current, incoming):
+    """Combina candidatas RAD/OSM por ID sin perder altas de ejecuciones concurrentes."""
+    merged = []
+    positions = {}
+    for item in (current if isinstance(current, list) else []):
+        if isinstance(item, dict) and item.get("id"):
+            ident = str(item["id"])
+            if ident in positions:
+                merged[positions[ident]] = {**merged[positions[ident]], **item}
+            else:
+                positions[ident] = len(merged)
+                merged.append(dict(item))
+        elif item not in merged:
+            merged.append(item)
+    for item in (incoming if isinstance(incoming, list) else []):
+        if isinstance(item, dict) and item.get("id"):
+            ident = str(item["id"])
+            if ident in positions:
+                merged[positions[ident]] = {**merged[positions[ident]], **item}
+            else:
+                positions[ident] = len(merged)
+                merged.append(dict(item))
+        elif item not in merged:
+            merged.append(item)
+    return merged
+
+
 def sync_metadata(path, keys):
     base, key = connection()
     working = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
@@ -226,7 +254,14 @@ def sync_metadata(path, keys):
         if not isinstance(current, dict):
             raise RuntimeError("Los metadatos actuales de Supabase no son un objeto.")
         updated = dict(current)
-        updated.update(patch)
+        patch_to_apply = dict(patch)
+        if "candidatas_revision" in patch_to_apply:
+            patch_to_apply["candidatas_revision"] = merge_candidate_lists(
+                updated.get("candidatas_revision", []),
+                patch_to_apply["candidatas_revision"],
+            )
+            patch_to_apply["total_candidatas_revision"] = len(patch_to_apply["candidatas_revision"])
+        updated.update(patch_to_apply)
         timestamp = settings[0].get("updated_at")
         filters = {"id": "eq.catalogo", "updated_at": "eq." + timestamp if timestamp else "is.null"}
         result, _ = request(

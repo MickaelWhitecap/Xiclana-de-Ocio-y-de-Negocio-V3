@@ -78,10 +78,34 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertIn("catalogo_supabase.py export", workflow)
         self.assertIn("catalogo_supabase.py sync-metadata", workflow)
         self.assertIn("XICLANA_CATALOG_PATH", workflow)
-        self.assertIn('"v3/catalogo_supabase.py"', workflow)
-        self.assertIn('".github/workflows/auditoria-osm-municipal.yml"', workflow)
+        self.assertIn('cron: "30 4 * * 1"', workflow)
+        self.assertIn("workflow_dispatch:", workflow)
+        self.assertNotIn("\n  push:", workflow)
         self.assertNotIn("git add v3/fichas_completas.json", workflow)
         self.assertNotIn("git push origin HEAD:main", workflow)
+
+
+
+    def test_rad_and_osm_candidate_lists_merge_without_lost_updates(self):
+        spec = importlib.util.spec_from_file_location("catalogo_supabase_merge", ROOT / "v3/catalogo_supabase.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        current = [{"id":"osm:node:1","n":"Local OSM","nota":"conservada"}]
+        incoming = [{"id":"rad:abc","n":"Local RAD"},{"id":"osm:node:1","direccion":"Calle Real"}]
+        merged = module.merge_candidate_lists(current,incoming)
+        by_id = {item["id"]:item for item in merged}
+        self.assertEqual(set(by_id),{"osm:node:1","rad:abc"})
+        self.assertEqual(by_id["osm:node:1"]["nota"],"conservada")
+        self.assertEqual(by_id["osm:node:1"]["direccion"],"Calle Real")
+
+    def test_rad_and_osm_use_separate_concurrency_groups(self):
+        osm = (ROOT / ".github/workflows/auditoria-osm-municipal.yml").read_text(encoding="utf-8")
+        rad = (ROOT / ".github/workflows/rad-enrich-catalog.yml").read_text(encoding="utf-8")
+        self.assertIn("group: xiclana-osm-semanal", osm)
+        self.assertIn("group: rad-descubrimiento-supabase", rad)
+        helper = (ROOT / "v3/catalogo_supabase.py").read_text(encoding="utf-8")
+        self.assertIn("updated_at", helper)
+        self.assertIn("merge_candidate_lists", helper)
 
 
     def test_rad_enrichment_updates_only_verified_listings_and_allowed_fields(self):
@@ -98,6 +122,9 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertIn("catalogo_supabase.py sync-metadata", workflow)
         self.assertIn("catalogo_supabase.py sync-enrichment", workflow)
         self.assertIn("Aplicar enriquecimientos seguros a fichas verificadas", workflow)
+        self.assertIn('cron: "47 6 * * 1"', workflow)
+        self.assertIn("workflow_dispatch:", workflow)
+        self.assertNotIn("\\n  push:", workflow)
         self.assertIn("--catalog", workflow)
         self.assertNotIn("git add", workflow)
         self.assertNotIn("git push", workflow)
