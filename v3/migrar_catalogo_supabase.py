@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Migración idempotente del catálogo y overrides a la tabla canónica Supabase."""
-import datetime, hashlib, json, os, pathlib, re, sys, urllib.parse, urllib.request
+import datetime, hashlib, json, os, pathlib, re, sys, time, urllib.error, urllib.parse, urllib.request
 
 ROOT = pathlib.Path(__file__).parent
 CATALOG = ROOT / "fichas_completas.json"
@@ -12,9 +12,20 @@ def request(url, key, method="GET", payload=None, extra=None):
                "Content-Type": "application/json", "User-Agent": "Xiclana-canonical-migration/1.0"}
     headers.update(extra or {})
     req = urllib.request.Request(url, data=body, headers=headers, method=method)
-    with urllib.request.urlopen(req, timeout=300) as response:
-        raw = response.read()
-        return json.loads(raw) if raw else None, response.headers
+    for attempt in range(8):
+        try:
+            with urllib.request.urlopen(req, timeout=180) as response:
+                raw = response.read()
+                return json.loads(raw) if raw else None, response.headers
+        except urllib.error.HTTPError as exc:
+            if exc.code not in (408, 425, 429, 500, 502, 503, 504, 520, 522, 524) or attempt == 7:
+                raise
+            time.sleep(min(60, 3 * (2 ** attempt)))
+        except (TimeoutError, urllib.error.URLError):
+            if attempt == 7:
+                raise
+            time.sleep(min(60, 3 * (2 ** attempt)))
+    raise RuntimeError("Supabase no respondió tras varios intentos.")
 
 def paged(url, key, page_size=500):
     result, offset = [], 0
@@ -105,8 +116,8 @@ def main():
     ids = [r["id"] for r in records]
     if len(ids) != len(set(ids)):
         raise SystemExit("IDs duplicados tras fusionar overrides.")
-    for start in range(0, len(records), 100):
-        request(base + "listings?on_conflict=id", key, "POST", records[start:start+100],
+    for start in range(0, len(records), 50):
+        request(base + "listings?on_conflict=id", key, "POST", records[start:start+50],
                 {"Prefer":"resolution=merge-duplicates,return=minimal"})
     metadata = {k:catalog[k] for k in ("destacados","candidatas_revision","total_candidatas_revision","propuestas_direcciones_osm","actualizado") if k in catalog}
     metadata["migracion_supabase"] = {"fecha":datetime.datetime.now(datetime.timezone.utc).isoformat(),
