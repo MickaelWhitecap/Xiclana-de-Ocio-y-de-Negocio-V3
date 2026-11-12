@@ -133,14 +133,23 @@ def sync_enrichment(before_path, after_path):
         "p", "e", "w", "web_alternativas", "fuentes_datos",
     }
     to_update = []
-    conflict_count = inactive_count = 0
+    detected_count = conflict_count = inactive_count = 0
     for item in after["items"]:
         if not isinstance(item, dict) or not item.get("id"):
             continue
         ident = str(item["id"])
         original = before_by_id.get(ident)
         current = current_by_id.get(ident)
-        if original is None or current is None:
+        if original is None:
+            continue
+        before_data = {k: v for k, v in original.items() if k not in meta_keys}
+        after_data = {k: v for k, v in item.items() if k not in meta_keys}
+        changed_keys = [k for k, v in after_data.items() if before_data.get(k) != v]
+        if not changed_keys:
+            continue
+        detected_count += 1
+        if current is None:
+            conflict_count += 1
             continue
         current_data = current.get("data") or {}
         if not isinstance(current_data, dict):
@@ -149,11 +158,6 @@ def sync_enrichment(before_path, after_path):
         status = str(current_data.get("estado_verificacion") or "").strip().casefold()
         if current.get("is_deleted") or not current.get("is_published") or status != "verificada":
             inactive_count += 1
-            continue
-        before_data = {k: v for k, v in original.items() if k not in meta_keys}
-        after_data = {k: v for k, v in item.items() if k not in meta_keys}
-        changed_keys = [k for k, v in after_data.items() if before_data.get(k) != v]
-        if not changed_keys:
             continue
         unsafe = sorted(set(changed_keys) - allowed_fields)
         if unsafe:
@@ -188,7 +192,7 @@ def sync_enrichment(before_path, after_path):
             conflict_count += 1
     summary = {
         "tabla": "public.listings",
-        "fichas_detectadas": len(to_update) + conflict_count,
+        "fichas_detectadas": detected_count,
         "fichas_actualizadas": updated_count,
         "campos_actualizados": field_count,
         "saltadas_por_cambio_concurrente": conflict_count,
