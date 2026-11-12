@@ -23,10 +23,21 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertNotIn("git add v3/fichas_completas.json", workflow)
         self.assertNotIn("git push origin HEAD:main", workflow)
 
+
+    def test_rad_enrichment_updates_only_verified_listings_and_allowed_fields(self):
+        source = (ROOT / "v3/catalogo_supabase.py").read_text(encoding="utf-8")
+        self.assertIn('status != "verificada"', source)
+        self.assertIn('"a", "h", "d", "t", "c", "rta_registro"', source)
+        self.assertIn('base + "/listings?"', source)
+        self.assertIn('"publicacion_automatica": False', source)
+        self.assertIn('saltadas_por_cambio_concurrente', source)
+
     def test_weekly_rad_exports_from_supabase_and_never_writes_catalog_json(self):
         workflow = (ROOT / ".github/workflows/rad-enrich-catalog.yml").read_text(encoding="utf-8")
         self.assertIn("catalogo_supabase.py export", workflow)
         self.assertIn("catalogo_supabase.py sync-metadata", workflow)
+        self.assertIn("catalogo_supabase.py sync-enrichment", workflow)
+        self.assertIn("Aplicar enriquecimientos seguros a fichas verificadas", workflow)
         self.assertIn("--catalog", workflow)
         self.assertNotIn("git add", workflow)
         self.assertNotIn("git push", workflow)
