@@ -95,7 +95,7 @@ def main():
     now = datetime.now(timezone.utc).isoformat()
     result = {
         "fecha_comparacion_utc": now,
-        "fecha_extraccion_inicial_utc": (master.get("osm_extraccion_inicial") or {}).get("fecha_extraccion_utc"),
+        "fecha_extraccion_inicial_utc": None,
         "fecha_consulta_actual_utc": current_doc.get("fecha_extraccion_utc"),
         "ambito": {"relacion_osm": 346951, "area_overpass": 3600346951},
         "referencia": "Extracción inicial verificada e inmutable en osm_extraccion_inicial.json.gz",
