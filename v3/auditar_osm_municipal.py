@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Auditoría municipal completa de OSM. No modifica el catálogo maestro."""
-import collections, hashlib, json, math, pathlib, re, time, unicodedata, urllib.parse, urllib.request
+import collections, hashlib, json, math, os, pathlib, re, time, unicodedata, urllib.parse, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent
 MASTER = pathlib.Path(os.getenv("XICLANA_CATALOG_PATH", str(ROOT / "fichas_completas.json")))
