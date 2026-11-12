@@ -3,9 +3,9 @@
 
 La detección de duplicados genera propuestas; nunca borra fichas por sí sola.
 """
-import json, pathlib, re, sys, unicodedata, datetime
+import json, os, pathlib, re, sys, unicodedata, datetime
 ROOT = pathlib.Path(__file__).parent
-DATA = ROOT / "fichas_completas.json"
+DATA = pathlib.Path(os.environ["XICLANA_CATALOG_PATH"]) if os.environ.get("XICLANA_CATALOG_PATH") else None
 REPORT = ROOT / "auditoria_integridad.json"
 MERGE_PLAN = ROOT / "plan_consolidacion.json"
 BASELINE = ROOT / "catalogo_auto_baseline.json"
