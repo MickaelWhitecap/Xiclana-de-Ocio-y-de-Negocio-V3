@@ -11,7 +11,7 @@ import urllib.request
 from datetime import datetime, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parent
-MASTER = ROOT / "fichas_completas.json"
+MASTER = pathlib.Path(os.getenv("XICLANA_CATALOG_PATH", str(ROOT / "fichas_completas.json")))
 RAW = ROOT / "osm_chiclana_extraccion_completa.json"
 REPORT = ROOT / "osm_chiclana_cruce_catalogo.json"
 SUMMARY = ROOT / "osm_candidatas_resumen.json"
@@ -200,33 +200,6 @@ def tags_to_fields(name, tags, location, ident):
     }
 
 
-def get_overrides():
-    config = (ROOT / "supabase-config.js").read_text(encoding="utf-8")
-    url = re.search(r'url:\s*"([^"]+)"', config)
-    key = re.search(r'anonKey:\s*"([^"]+)"', config)
-    if not url or not key:
-        raise RuntimeError("No se pudo leer la configuración pública de Supabase.")
-    api = url.group(1).rstrip("/")
-    anon = key.group(1)
-    query = urllib.parse.urlencode({"select": "listing_id,fields,is_new,verified_at,updated_at", "order": "updated_at.asc,listing_id.asc"})
-    headers = {"apikey": anon, "Authorization": "Bearer " + anon, "Accept": "application/json", "User-Agent": "Xiclana-OSM-candidate-sync/1.0"}
-    rows, offset, page_size = [], 0, 500
-    while True:
-        req = urllib.request.Request(api + "/rest/v1/listing_overrides?" + query, headers={**headers, "Range": f"{offset}-{offset + page_size - 1}", "Range-Unit": "items"})
-        with urllib.request.urlopen(req, timeout=30) as response:
-            page = json.load(response)
-        if not isinstance(page, list):
-            raise RuntimeError("Supabase devolvió un formato inesperado para listing_overrides.")
-        rows.extend(page)
-        if len(page) < page_size:
-            break
-        offset += len(page)
-        if offset > 100000:
-            raise RuntimeError("La lectura de overrides superó el límite defensivo.")
-    return rows
-
-
-
 def integrate_review_data(data, manual, auto, address_proposals, summary):
     """Mantiene las propuestas OSM dentro del único catálogo maestro."""
     data["candidatas_revision"] = manual + auto
@@ -257,34 +230,23 @@ def main():
     if len(current) != len(raw["elementos"]):
         raise SystemExit("La extracción OSM contiene IDs duplicados.")
 
-    overrides = get_overrides()
+    # El catálogo temporal procede íntegramente de public.listings; no se consulta listing_overrides.
     deleted_override_ids = {
-        str(row.get("listing_id")) for row in overrides
-        if isinstance(row.get("fields"), dict) and row["fields"].get("_xiclana_deleted") is True
+        str(item.get("id")) for item in items
+        if isinstance(item, dict) and item.get("_xiclana_deleted") is True
     }
-    active_override_rows = [
-        row for row in overrides
-        if isinstance(row, dict) and row.get("listing_id")
-        and not (isinstance(row.get("fields"), dict) and row["fields"].get("_xiclana_deleted") is True)
+    active = [
+        item for item in items
+        if isinstance(item, dict)
+        and item.get("_xiclana_deleted") is not True
+        and item.get("is_published", True) is not False
     ]
-    active = [x for x in items if isinstance(x, dict) and x.get("_xiclana_deleted") is not True]
     active_by_name = collections.defaultdict(list)
     for item in active:
         name = norm(item.get("n") or item.get("nombre") or item.get("name"))
         if name:
             active_by_name[name].append(item)
-    # Las fichas aprobadas en Supabase también cuentan como activas aunque
-    # todavía no estén integradas en el JSON maestro.
-    for row in active_override_rows:
-        fields = row.get("fields")
-        if not isinstance(fields, dict):
-            continue
-        override_item = {**fields, "id": str(row.get("listing_id"))}
-        name = norm(override_item.get("n") or override_item.get("nombre") or override_item.get("name"))
-        if name:
-            active_by_name[name].append(override_item)
     all_ids = {str(x.get("id")) for x in items if isinstance(x, dict) and x.get("id")}
-    all_ids.update(str(row["listing_id"]) for row in active_override_rows)
 
     recovered, skipped_recovered = [], collections.Counter()
     for item in items:
@@ -443,7 +405,7 @@ def main():
     PENDING.write_text(json.dumps(pending, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     SUMMARY.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    # El catálogo maestro es la única fuente que consume Administración.
+    # Se actualiza únicamente la copia temporal; el workflow sincroniza los metadatos a site_settings.
     address_path = ROOT / "propuestas_direcciones_osm.json"
     address_proposals = data.get("propuestas_direcciones_osm", [])
     # Versiones previas guardaban el documento completo (resumen + propuestas);
@@ -462,7 +424,7 @@ def main():
     integrate_review_data(data, manual, auto, address_proposals, summary)
     data["auditoria_osm_objetos_sin_ficha"] = classify_unmatched_osm(report.get("posibles_nuevas_fichas_sin_incorporar", []))
     MASTER.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    print(json.dumps({**summary["resumen"], "maestro_actualizado": True, "propuestas_direcciones_en_maestro": len(address_proposals)}, ensure_ascii=False), flush=True)
+    print(json.dumps({**summary["resumen"], "catalogo_temporal_actualizado": True, "propuestas_direcciones_en_maestro": len(address_proposals)}, ensure_ascii=False), flush=True)
 
 
 if __name__ == "__main__":
