@@ -9,7 +9,7 @@ from html.parser import HTMLParser
 from datetime import datetime, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parent
-MASTER = ROOT / "fichas_completas.json"
+MASTER = None  # El catálogo debe exportarse desde Supabase y pasarse explícitamente con --catalog.
 UA = "Xiclana-RAD/1.0 (+https://mickaelwhitecap.github.io/Xiclana-de-Ocio-y-de-Negocio-V3/)"
 CITY = '"Chiclana de la Frontera"'
 QUERIES = [
@@ -1697,14 +1697,16 @@ def serialize_catalog(data):
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--self-test",action="store_true")
-    parser.add_argument("--catalog",type=pathlib.Path,default=MASTER,
-                        help="Catálogo JSON de entrada/salida; permite probar sobre una copia.")
+    parser.add_argument("--catalog",type=pathlib.Path,default=None,
+                        help="Copia temporal exportada desde Supabase; nunca usa el JSON histórico.")
     args=parser.parse_args()
     if args.self_test:
         self_test()
         return
     catalog_path=args.catalog
-    if not catalog_path.is_file(): raise SystemExit("No existe el catálogo indicado.")
+    if catalog_path is None:
+        raise SystemExit("Debes indicar --catalog con una exportación temporal de Supabase; fichas_completas.json no es una fuente operativa.")
+    if not catalog_path.is_file(): raise SystemExit("No existe el catálogo temporal indicado.")
     data=json.loads(catalog_path.read_text(encoding="utf-8"))
     if not isinstance(data.get("items"),list) or not isinstance(data.get("candidatas_revision",[]),list):
         raise SystemExit("Estructura del catálogo no válida; se cancela sin modificar.")
