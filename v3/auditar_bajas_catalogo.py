@@ -3,6 +3,7 @@
 No modifica fichas ni Supabase.
 """
 import collections
+import os
 import json
 import math
 import pathlib
