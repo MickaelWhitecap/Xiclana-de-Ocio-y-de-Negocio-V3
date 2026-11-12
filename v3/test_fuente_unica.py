@@ -59,6 +59,19 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertIn('is_published:!deleted,is_deleted:deleted', admin)
 
 
+
+    def test_legacy_json_writing_scripts_are_disabled(self):
+        for name in ("actualizar.py", "ampliar_catalogo.py", "extraccion_inicial_osm.py",
+                     "incorporar_auditoria_osm.py", "recuperar_direcciones_osm.py"):
+            source = (ROOT / "v3" / name).read_text(encoding="utf-8")
+            self.assertIn("retirad", source.lower())
+
+    def test_osm_and_audit_scripts_require_a_supabase_export_path(self):
+        for name in ("auditar_osm_municipal.py", "incorporar_candidatas_osm.py",
+                     "proponer_direcciones_osm.py", "auditar_catalogo.py"):
+            source = (ROOT / "v3" / name).read_text(encoding="utf-8")
+            self.assertIn('os.environ["XICLANA_CATALOG_PATH"]', source)
+
     def test_osm_weekly_comparison_uses_separate_immutable_baseline(self):
         source = (ROOT / "v3/comparar_cambios_osm.py").read_text(encoding="utf-8")
         self.assertIn('BASELINE = ROOT / "osm_extraccion_inicial.json.gz"', source)
@@ -78,7 +91,9 @@ class SingleSupabaseMasterTests(unittest.TestCase):
 
     def test_historical_import_and_extraction_workflows_are_retired(self):
         for name in ("extraccion-inicial-osm.yml", "migrar-catalogo-supabase.yml",
-                     "rad-catalog-validation.yml", "recuperar-direcciones-osm.yml"):
+                     "rad-catalog-validation.yml", "recuperar-direcciones-osm.yml",
+                     "integrar-candidatas-rad.yml", "incorporar-auditoria-osm.yml",
+                     "auditar-bajas-catalogo.yml"):
             workflow = (ROOT / ".github/workflows" / name).read_text(encoding="utf-8")
             self.assertIn("retirad", workflow.lower())
             self.assertNotIn("git push", workflow)
