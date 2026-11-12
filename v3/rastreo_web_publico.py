@@ -220,7 +220,7 @@ def allowed(url):
     rp,valid=CACHE_ROBOTS[origin]
     return bool(valid and rp and rp.can_fetch(UA,url))
 
-def search_ddg(query):
+def search_ddg(query, limit=MAX_RESULTS_PER_QUERY):
     url="https://html.duckduckgo.com/html/?"+urllib.parse.urlencode({"q":query})
     if not allowed(url): return []
     body,_,_=get(url,700000)
@@ -237,10 +237,10 @@ def search_ddg(query):
         parsed=urllib.parse.urlparse(href)
         if parsed.scheme in ("http","https") and "duckduckgo.com" not in parsed.netloc:
             found.append(href)
-        if len(found)>=MAX_RESULTS_PER_QUERY: break
+        if len(found)>=limit: break
     return list(dict.fromkeys(found))
 
-def search_bing(query):
+def search_bing(query, limit=MAX_RESULTS_PER_QUERY):
     url="https://www.bing.com/search?format=rss&"+urllib.parse.urlencode({"q":query})
     if not allowed(url): return []
     body,_,_=get(url,700000)
@@ -253,7 +253,7 @@ def search_bing(query):
             parsed=urllib.parse.urlparse(link)
             if parsed.scheme in ("http","https") and "bing.com" not in parsed.netloc:
                 found.append(link)
-        return list(dict.fromkeys(found))[:MAX_RESULTS_PER_QUERY]
+        return list(dict.fromkeys(found))[:limit]
     except Exception: return []
 
 def flatten_jsonld(value):
@@ -802,8 +802,6 @@ def compare_catalog_record(candidate, existing):
     new_name=record_value(candidate,"n","nombre","name")
     old_name=record_value(existing,"n","nombre","name")
     score=name_similarity(new_name,old_name)
-    if score < 0.86:
-        return None
     new_addr=norm(record_value(candidate,"a","direccion","address"))
     old_addr=norm(record_value(existing,"a","direccion","address"))
     new_phones=set(extract_phones(record_value(candidate,"p","telefono","phone")))
@@ -815,6 +813,20 @@ def compare_catalog_record(candidate, existing):
     same_contact=bool((new_phones and old_phones and new_phones.intersection(old_phones)) or
                       (new_web and old_web and new_web==old_web))
     exact_name=norm(new_name)==norm(old_name)
+    # Permite descriptores añadidos cuando el nombre distintivo coincide y
+    # una dirección o contacto independiente confirma el establecimiento.
+    new_tokens=set(norm(new_name).split())
+    old_tokens=set(norm(old_name).split())
+    contained_tokens=(new_tokens if len(new_tokens)<=len(old_tokens) else old_tokens)
+    generic_singletons={"bar","pub","casa","centro","tienda","hotel","clinica","restaurante","cafe","muebles","servicios"}
+    contained_name=bool(new_tokens and old_tokens and
+        (new_tokens.issubset(old_tokens) or old_tokens.issubset(new_tokens)) and
+        (len(contained_tokens)>1 or
+         (len(next(iter(contained_tokens)))>=7 and next(iter(contained_tokens)) not in generic_singletons)))
+    if score < 0.86 and not (contained_name and (same_address or same_contact)):
+        return None
+    if contained_name and (same_address or same_contact):
+        return {"kind":"duplicate","reason":"nombre distintivo contenido y misma dirección o contacto","score":max(score,0.86)}
     if exact_name and same_address:
         return {"kind":"duplicate","reason":"mismo nombre y dirección","score":score}
     if score >= 0.88 and (same_address or same_contact):
@@ -1448,9 +1460,18 @@ def self_test():
         {"n":"Adiestramiento Canino Educa Dog","a":"Calle Real 10","p":"956999999"}
     )["kind"] == "duplicate"
     assert compare_catalog_record(
+        {"n":"Pub El Anticuario","a":"Calle Arrecife 20, 11139 Chiclana","p":"651008282"},
+        {"n":"Anticuario","a":"Calle Arrecife 20, 11139 Chiclana","p":""}
+    )["kind"] == "duplicate"
+    assert compare_catalog_record(
         {"n":"Casa Bernardo","a":"Calle Real 10","p":"956123456"},
         {"n":"Casa Bernarda","a":"Avenida Diputación 20","p":"956999999"}
     ) is None
+    targeted=targeted_catalog_queries([
+        {"n":"Ficha vacía","a":"","p":"","e":"","w":"","h":"","d":""},
+        {"n":"Ficha completa","a":"Calle Real","p":"956123456","e":"x@y.es","w":"https://x.es","h":"10-20","d":"Texto"}
+    ],limit=10,rotation=0)
+    assert len(targeted)==1 and "Ficha vacía" in targeted[0]
     assert compare_catalog_record(
         {"n":"Bodegas Primitivo Collantes","a":"Calle Real 10","p":"956400150 / 956531722"},
         {"n":"Bodegas Primitivo Collantes S.A.","a":"Avenida Diputación 20","p":"956531722 / 956400150"}
@@ -1694,6 +1715,28 @@ def serialize_catalog(data):
     """Serializa el catálogo maestro en JSON compacto para respetar el límite de 100 MB de GitHub."""
     return json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n"
 
+def targeted_catalog_queries(records, limit=50, rotation=0):
+    """Busca fuentes para fichas ya existentes con campos incompletos."""
+    targets=[]
+    for record in records:
+        if not isinstance(record,dict):
+            continue
+        name=record_value(record,"n","nombre","name")
+        if len(norm(name)) < 4:
+            continue
+        present=sum(bool(str(record.get(key) or "").strip()) for key in ("a","p","e","w","h","d"))
+        if present < 6:
+            targets.append((present,norm(name),name))
+    targets.sort(key=lambda x:(x[0],x[1]))
+    if not targets or limit <= 0:
+        return []
+    start=(max(0,int(rotation))*limit)%len(targets)
+    ordered=targets[start:]+targets[:start]
+    selected=ordered[:min(limit,len(ordered))]
+    return [f'"{name}" "Chiclana de la Frontera" (teléfono OR dirección OR contacto)'
+            for _,_,name in selected]
+
+
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--self-test",action="store_true")
@@ -1728,6 +1771,14 @@ def main():
         if name and addr: existing_pairs.add(name+"|"+addr)
         if name: existing_name_addresses.setdefault(name,set()).add(addr)
     links=list(DIRECT_DETAIL_URLS)
+    # Prioriza búsquedas por nombre de fichas existentes: el rastreo general
+    # no garantiza que los buscadores devuelvan negocios concretos poco visibles.
+    iso=datetime.now(timezone.utc).isocalendar()
+    targeted_queries=targeted_catalog_queries(data["items"],limit=50,rotation=iso.year*53+iso.week)
+    for q in targeted_queries:
+        for engine in (search_ddg,search_bing):
+            try: links.extend(engine(q,limit=4))
+            except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
     trusted_urls=set()
     # Fuentes locales directas: sus fichas individuales son una vía de detección
     # independiente de los buscadores. Solo se confía en rutas de detalle conocidas.
@@ -1882,6 +1933,7 @@ def main():
        "fuentes_detalle_directo":DIRECT_DETAIL_URLS,"consultas":len(QUERIES),
        "fuente_registro_oficial":{"nombre":"OpenRTA - Junta de Andalucía","url":"https://datos.juntadeandalucia.es/api/v0/openrta/search","licencia":"CC BY 4.0"},
        "openrta_registros_validos":len(openrta_records),
+        "consultas_fichas_existentes":len(targeted_queries),
        "urls_encontradas":len(links),"candidatas_nuevas":len(added),
        "fichas_enriquecidas":len(fichas_enriquecidas),"campos_actualizados":campos_actualizados,
        "conflictos_datos_no_sobrescritos":conflictos_no_sobrescritos,
