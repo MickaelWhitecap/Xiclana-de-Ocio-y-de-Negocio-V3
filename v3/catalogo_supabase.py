@@ -97,6 +97,7 @@ def export_catalog(path):
             item.pop("_xiclana_deleted", None)
         if row.get("verified_at"):
             item["verified_at"] = row["verified_at"]
+        item["_xiclana_updated_at"] = row.get("updated_at")
         items.append(item)
     result = dict(settings[0]["data"])
     result["items"] = items
@@ -113,6 +114,75 @@ def export_catalog(path):
         "papelera": sum(1 for x in items if x.get("_xiclana_deleted")),
         "destino_temporal": str(path),
     }, ensure_ascii=False))
+
+
+
+def sync_enrichment(before_path, after_path):
+    """Aplica solo los campos que RAD añadió a fichas activas sin pisar cambios concurrentes."""
+    base, key = connection()
+    before = json.loads(pathlib.Path(before_path).read_text(encoding="utf-8"))
+    after = json.loads(pathlib.Path(after_path).read_text(encoding="utf-8"))
+    if not isinstance(before.get("items"), list) or not isinstance(after.get("items"), list):
+        raise RuntimeError("Las copias RAD no contienen listas items válidas.")
+    before_by_id = {str(x.get("id")): x for x in before["items"] if isinstance(x, dict) and x.get("id")}
+    current_rows = fetch_all(base, key, "listings", "id,data,is_published,is_deleted,updated_at", "id.asc")
+    current_by_id = {str(x.get("id")): x for x in current_rows}
+    meta_keys = {"id", "is_published", "_xiclana_deleted", "verified_at", "_xiclana_updated_at"}
+    updated_count = field_count = conflict_count = inactive_count = 0
+    for item in after["items"]:
+        if not isinstance(item, dict) or not item.get("id"):
+            continue
+        ident = str(item["id"])
+        original = before_by_id.get(ident)
+        current = current_by_id.get(ident)
+        if original is None or current is None:
+            continue
+        if current.get("is_deleted") or not current.get("is_published"):
+            inactive_count += 1
+            continue
+        before_data = {k: v for k, v in original.items() if k not in meta_keys}
+        after_data = {k: v for k, v in item.items() if k not in meta_keys}
+        changed_keys = [k for k, v in after_data.items() if before_data.get(k) != v]
+        if not changed_keys:
+            continue
+        current_data = current.get("data") or {}
+        if not isinstance(current_data, dict):
+            conflict_count += 1
+            continue
+        current_clean = {k: v for k, v in current_data.items() if k not in meta_keys}
+        if current_clean != before_data or current.get("updated_at") != original.get("_xiclana_updated_at"):
+            conflict_count += 1
+            continue
+        merged = dict(current_data)
+        for field in changed_keys:
+            merged[field] = after_data[field]
+        timestamp = current.get("updated_at")
+        filters = {"id": "eq." + ident, "updated_at": "eq." + timestamp if timestamp else "is.null"}
+        result, _ = request(
+            base + "/listings?" + urllib.parse.urlencode(filters),
+            key,
+            method="PATCH",
+            payload={"data": merged, "updated_at": datetime.now(timezone.utc).isoformat()},
+            headers={"Prefer": "return=representation"},
+        )
+        if isinstance(result, list) and result:
+            updated_count += 1
+            field_count += len(changed_keys)
+        else:
+            conflict_count += 1
+        if updated_count + conflict_count > 500:
+            raise RuntimeError("Límite defensivo de 500 fichas RAD; se detiene la sincronización.")
+    summary = {
+        "tabla": "public.listings",
+        "fichas_detectadas": updated_count + conflict_count,
+        "fichas_actualizadas": updated_count,
+        "campos_actualizados": field_count,
+        "saltadas_por_cambio_concurrente": conflict_count,
+        "saltadas_por_inactivas": inactive_count,
+        "publicacion_automatica": False,
+    }
+    print(json.dumps(summary, ensure_ascii=False))
+    return summary
 
 
 def sync_metadata(path, keys):
@@ -165,6 +235,9 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
     export = sub.add_parser("export", help="Exporta fichas y metadatos desde Supabase a un JSON temporal.")
     export.add_argument("--output", required=True)
+    enrich = sub.add_parser("sync-enrichment", help="Aplica a listings solo los campos vacíos completados por RAD.")
+    enrich.add_argument("--before", required=True)
+    enrich.add_argument("--after", required=True)
     sync = sub.add_parser("sync-metadata", help="Actualiza solo metadatos de revisión en Supabase.")
     sync.add_argument("--input", required=True)
     sync.add_argument("--keys", nargs="+", default=list(DEFAULT_METADATA_KEYS))
@@ -172,6 +245,8 @@ def main():
     try:
         if args.command == "export":
             export_catalog(args.output)
+        elif args.command == "sync-enrichment":
+            sync_enrichment(args.before, args.after)
         else:
             sync_metadata(args.input, args.keys)
     except (OSError, ValueError, RuntimeError, urllib.error.URLError, urllib.error.HTTPError) as exc:
