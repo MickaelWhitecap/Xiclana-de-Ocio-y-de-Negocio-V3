@@ -92,6 +92,45 @@ def resumen_direcciones(items):
         "nota": "Las coordenadas permiten priorizar la búsqueda, pero no equivalen por sí solas a una dirección postal."
     }
 
+def resumen_completitud_y_verificacion(items):
+    """Calcula la completitud útil N/6 y la verificación como dimensiones independientes."""
+    campos_utiles = ("a", "p", "e", "w", "h", "d")
+    distribucion = {str(n): 0 for n in range(7)}
+    estados = {"verificada": 0, "pendiente": 0, "insuficiente": 0, "otros": 0}
+    sin_estado_explicito = 0
+
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        completitud = sum(
+            1 for campo in campos_utiles
+            if item.get(campo) is not None and str(item.get(campo)).strip()
+        )
+        distribucion[str(completitud)] += 1
+
+        estado_original = str(item.get("estado_verificacion") or "").strip()
+        estado = norm(estado_original)
+        if not estado:
+            sin_estado_explicito += 1
+            estado = "pendiente"
+        if estado in {"verificada", "verificado", "verified"}:
+            estados["verificada"] += 1
+        elif estado in {"pendiente", "pendiente de verificar"}:
+            estados["pendiente"] += 1
+        elif estado in {"insuficiente", "datos dudosos", "dudosa", "dudoso"}:
+            estados["insuficiente"] += 1
+        else:
+            estados["otros"] += 1
+
+    return {
+        "campos_contados": list(campos_utiles),
+        "distribucion_0_a_6": distribucion,
+        "total_fichas": sum(distribucion.values()),
+        "estados_verificacion": estados,
+        "fichas_sin_estado_explicito_tratadas_como_pendientes": sin_estado_explicito,
+        "nota": "La completitud N/6 y el estado de verificación son independientes. Un 0/6 no determina por sí solo que una ficha sea dudosa."
+    }
+
 def main():
     if not DATA.exists():
         sys.exit("ERROR: falta fichas_completas.json.")
@@ -209,17 +248,8 @@ def main():
             and not tiene_aprobacion_manual_explicita(item)
         }
     )
-    # Estadísticas reproducibles para priorizar mejoras de fichas sin revisar una a una.
-    documented_fields = ("n", "t", "c", "a", "d", "p", "e", "w", "m", "lat", "lon", "f")
-    distribution = {}
-    contact_count = email_count = 0
-    for item in active_items:
-        count = sum(1 for field in documented_fields if item.get(field) is not None and str(item.get(field)).strip())
-        distribution[str(count)] = distribution.get(str(count), 0) + 1
-        if any(item.get(field) is not None and str(item.get(field)).strip() for field in ("p", "e", "w", "m")):
-            contact_count += 1
-        if item.get("e") is not None and str(item.get("e")).strip():
-            email_count += 1
+    # Completitud útil N/6 y estado de verificación: cálculos independientes.
+    completeness_summary = resumen_completitud_y_verificacion(active_items)
 
     category_counts = {}
     for item in active_items:
@@ -244,12 +274,7 @@ def main():
             "distribucion": category_distribution,
             "nota": "Cuenta categorías literales de fichas activas, separadas por tipo; no fusiona variantes ni propone equivalencias."
         },
-        "parametros_documentados_por_ficha": {
-            "campos_contados": list(documented_fields),
-            "distribucion": dict(sorted(distribution.items(), key=lambda pair: int(pair[0]))),
-            "fichas_con_algun_medio_de_contacto": contact_count,
-            "fichas_con_email": email_count
-        },
+        "completitud_y_verificacion": completeness_summary,
         "total_registros_historicos": len(items),
         "total_items_publicables": len(active_items),
         "total_items_marcados_borrados": len(items) - len(active_items),

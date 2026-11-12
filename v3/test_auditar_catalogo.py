@@ -306,10 +306,6 @@ class OSMIntegrationTests(unittest.TestCase):
         self.assertNotIn('for key in ("osm_extraccion_inicial", "auditoria_osm", "propuestas_direcciones_osm"):', workflow)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class ExplicitFieldClearingTests(unittest.TestCase):
     def test_null_override_removes_existing_value_but_empty_string_does_not(self):
         from unittest import mock
@@ -357,3 +353,40 @@ class ExplicitFieldClearingTests(unittest.TestCase):
                     self.assertEqual(saved["d"], "Descripción conservada")
                 finally:
                     updater.DATA, updater.ROOT = old_data, old_root
+
+
+class UsefulCompletenessAndVerificationTests(unittest.TestCase):
+    def test_completeness_uses_exactly_the_six_public_fields(self):
+        items = [
+            {"id": "zero", "n": "Sin datos", "t": "ocio", "c": "Cultura",
+             "lat": 36.4, "lon": -6.1, "f": "fuente"},
+            {"id": "three", "a": "Calle 1", "p": "956123456", "d": "Descripción",
+             "n": "Ficha", "t": "ocio", "c": "Cultura", "lat": 36.4},
+            {"id": "six", "a": "Calle 2", "p": "956123457", "e": "info@example.com",
+             "w": "https://example.com", "h": "09:00-18:00", "d": "Descripción",
+             "n": "Completa", "t": "negocio", "c": "Comercio", "lat": 36.5, "lon": -6.2},
+        ]
+        result = audit.resumen_completitud_y_verificacion(items)
+        self.assertEqual(result["campos_contados"], ["a", "p", "e", "w", "h", "d"])
+        self.assertEqual(result["distribucion_0_a_6"], {
+            "0": 1, "1": 0, "2": 0, "3": 1, "4": 0, "5": 0, "6": 1
+        })
+        self.assertEqual(result["total_fichas"], 3)
+
+    def test_verification_status_is_independent_and_missing_defaults_to_pending(self):
+        items = [
+            {"id": "a", "estado_verificacion": "insuficiente"},
+            {"id": "b", "estado_verificacion": "verificada"},
+            {"id": "c", "estado_verificacion": "pendiente"},
+            {"id": "d"},
+        ]
+        result = audit.resumen_completitud_y_verificacion(items)
+        self.assertEqual(result["distribucion_0_a_6"]["0"], 4)
+        self.assertEqual(result["estados_verificacion"], {
+            "verificada": 1, "pendiente": 2, "insuficiente": 1, "otros": 0
+        })
+        self.assertEqual(result["fichas_sin_estado_explicito_tratadas_como_pendientes"], 1)
+
+
+if __name__ == "__main__":
+    unittest.main()
