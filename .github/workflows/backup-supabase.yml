@@ -187,7 +187,7 @@ jobs:
               ["psql",url,"-At","-c","SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename"],
               text=True
           ).splitlines()
-          required={"advertising_slots","listing_categories","listing_overrides","listing_proposals"}
+          required={"advertising_slots","listing_categories","listing_overrides","listing_proposals","listings","site_settings"}
           missing=required-set(tables)
           if missing:
               raise SystemExit(f"Faltan tablas de Xiclana tras restaurar: {sorted(missing)}")
