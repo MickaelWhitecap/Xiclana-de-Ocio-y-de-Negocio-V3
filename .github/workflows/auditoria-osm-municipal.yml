@@ -16,6 +16,8 @@ on:
     paths:
       - "v3/incorporar_candidatas_osm.py"
       - "v3/proponer_direcciones_osm.py"
+      - "v3/catalogo_supabase.py"
+      - ".github/workflows/auditoria-osm-municipal.yml"
   schedule:
     - cron: "30 4 * * 1"
 
