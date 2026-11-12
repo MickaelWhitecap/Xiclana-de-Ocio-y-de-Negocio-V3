@@ -1,3 +1,5 @@
+import gzip
+import json
 import unittest
 from pathlib import Path
 
@@ -55,6 +57,32 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertIn('supabaseFrom("listings").select("id,data,is_deleted,verified_at,updated_at")', admin)
         self.assertIn('return supabaseFrom("listings").upsert(prepared,{onConflict:"id"})', admin)
         self.assertIn('is_published:!deleted,is_deleted:deleted', admin)
+
+
+    def test_osm_weekly_comparison_uses_separate_immutable_baseline(self):
+        source = (ROOT / "v3/comparar_cambios_osm.py").read_text(encoding="utf-8")
+        self.assertIn('BASELINE = ROOT / "osm_extraccion_inicial.json.gz"', source)
+        self.assertIn("gzip.decompress(BASELINE.read_bytes())", source)
+        self.assertNotIn('MASTER = ROOT / "fichas_completas.json"', source)
+        with gzip.open(ROOT / "v3/osm_extraccion_inicial.json.gz", "rt", encoding="utf-8") as stream:
+            baseline = json.load(stream)
+        if isinstance(baseline, dict):
+            baseline = baseline.get("objetos") or baseline.get("elementos") or []
+        self.assertEqual(len(baseline), 132875)
+
+    def test_manual_rad_checks_use_supabase_export(self):
+        for name in ("prueba-rad-real.yml", "rad-review-old-candidates.yml"):
+            workflow = (ROOT / ".github/workflows" / name).read_text(encoding="utf-8")
+            self.assertIn("catalogo_supabase.py export", workflow)
+            self.assertNotIn("v3/fichas_completas.json", workflow)
+
+    def test_historical_import_and_extraction_workflows_are_retired(self):
+        for name in ("extraccion-inicial-osm.yml", "migrar-catalogo-supabase.yml",
+                     "rad-catalog-validation.yml", "recuperar-direcciones-osm.yml"):
+            workflow = (ROOT / ".github/workflows" / name).read_text(encoding="utf-8")
+            self.assertIn("retirad", workflow.lower())
+            self.assertNotIn("git push", workflow)
+            self.assertNotIn("git add", workflow)
 
     def test_public_web_and_exporter_use_supabase_listings(self):
         public = (ROOT / "v3/index.html").read_text(encoding="utf-8")
