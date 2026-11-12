@@ -80,7 +80,7 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertIn("XICLANA_CATALOG_PATH", workflow)
         self.assertIn('cron: "30 4 * * 1"', workflow)
         self.assertIn("workflow_dispatch:", workflow)
-        self.assertNotIn("\\n  push:", workflow)
+        self.assertNotIn("\n  push:", workflow)
         self.assertNotIn("git add v3/fichas_completas.json", workflow)
         self.assertNotIn("git push origin HEAD:main", workflow)
 
