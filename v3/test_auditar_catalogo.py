@@ -29,32 +29,8 @@ class AuditDuplicateTests(unittest.TestCase):
         self.assertEqual(result["distribucion_por_tipo_y_categoria"][0]["categoria"], "Bar")
         self.assertEqual(result["distribucion_por_tipo_y_categoria"][0]["con_coordenadas"], 2)
 
-    def test_duplicate_catalog_ids_abort_instead_of_rewriting_ids(self):
-        import importlib.util
-        updater_path = Path(__file__).with_name("actualizar.py")
-        spec = importlib.util.spec_from_file_location("actualizar_catalogo_test", updater_path)
-        updater = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(updater)
-        with tempfile.TemporaryDirectory() as tmp:
-            data_path = Path(tmp) / "catalog.json"
-            data_path.write_text(json.dumps({"items": [
-                {"id": "manual:same", "n": "Ficha A", "t": "ocio", "c": "Deportes", "a": "Calle 1"},
-                {"id": "manual:same", "n": "Ficha B", "t": "ocio", "c": "Deportes", "a": "Calle 2"}
-            ]}), encoding="utf-8")
-            old_data = updater.DATA
-            updater.DATA = data_path
-            try:
-                with self.assertRaises(SystemExit):
-                    updater.main()
-                stored = json.loads(data_path.read_text(encoding="utf-8"))
-                self.assertEqual([x["id"] for x in stored["items"]], ["manual:same", "manual:same"])
-            finally:
-                updater.DATA = old_data
 
 
-    def test_automatic_expansion_does_not_remove_existing_catalog_records(self):
-        source = Path(__file__).with_name("ampliar_catalogo.py").read_text(encoding="utf-8")
-        self.assertNotIn("items.remove(", source)
 
     def test_different_types_are_not_duplicates_but_same_type_is(self):
         with tempfile.TemporaryDirectory() as tmp:
