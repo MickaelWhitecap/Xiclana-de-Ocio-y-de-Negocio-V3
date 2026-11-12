@@ -120,39 +120,44 @@ def sync_metadata(path, keys):
     working = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
     if not isinstance(working, dict) or not isinstance(working.get("items"), list):
         raise RuntimeError("El catálogo temporal no tiene una estructura válida.")
-    settings, _ = request(base + "/site_settings?select=id,data&id=eq.catalogo", key)
-    if not isinstance(settings, list) or not settings:
-        raise RuntimeError("No existe public.site_settings(id='catalogo').")
-    current = settings[0].get("data") or {}
-    if not isinstance(current, dict):
-        raise RuntimeError("Los metadatos actuales de Supabase no son un objeto.")
-    updated = dict(current)
-    for name in keys:
-        if name in working:
-            updated[name] = working[name]
-    if "candidatas_revision" in keys and "candidatas_revision" in updated:
-        if not isinstance(updated["candidatas_revision"], list):
+    patch = {name: working[name] for name in keys if name in working}
+    if "candidatas_revision" in patch:
+        if not isinstance(patch["candidatas_revision"], list):
             raise RuntimeError("candidatas_revision debe ser una lista.")
-        updated["total_candidatas_revision"] = len(updated["candidatas_revision"])
-    payload = {
-        "data": updated,
-        "updated_at": datetime.now(timezone.utc).isoformat(),
-    }
-    result, _ = request(
-        base + "/site_settings?id=eq.catalogo",
-        key,
-        method="PATCH",
-        payload=payload,
-        headers={"Prefer": "return=representation"},
-    )
-    if not isinstance(result, list) or not result:
-        raise RuntimeError("Supabase no confirmó la actualización de metadatos.")
-    print(json.dumps({
-        "tabla": "public.site_settings",
-        "id": "catalogo",
-        "metadatos_actualizados": [name for name in keys if name in working],
-        "fichas_modificadas": 0,
-    }, ensure_ascii=False))
+        patch["total_candidatas_revision"] = len(patch["candidatas_revision"])
+    if not patch:
+        print(json.dumps({"metadatos_actualizados": [], "fichas_modificadas": 0}, ensure_ascii=False))
+        return
+
+    # Control optimista de concurrencia: evita pisar cambios recientes de Administración.
+    for attempt in range(3):
+        settings, _ = request(base + "/site_settings?select=id,data,updated_at&id=eq.catalogo", key)
+        if not isinstance(settings, list) or not settings:
+            raise RuntimeError("No existe public.site_settings(id='catalogo').")
+        current = settings[0].get("data") or {}
+        if not isinstance(current, dict):
+            raise RuntimeError("Los metadatos actuales de Supabase no son un objeto.")
+        updated = dict(current)
+        updated.update(patch)
+        timestamp = settings[0].get("updated_at")
+        filters = {"id": "eq.catalogo", "updated_at": "eq." + timestamp if timestamp else "is.null"}
+        result, _ = request(
+            base + "/site_settings?" + urllib.parse.urlencode(filters),
+            key,
+            method="PATCH",
+            payload={"data": updated, "updated_at": datetime.now(timezone.utc).isoformat()},
+            headers={"Prefer": "return=representation"},
+        )
+        if isinstance(result, list) and result:
+            print(json.dumps({
+                "tabla": "public.site_settings",
+                "id": "catalogo",
+                "metadatos_actualizados": sorted(patch),
+                "fichas_modificadas": 0,
+                "control_concurrencia": "ok",
+            }, ensure_ascii=False))
+            return
+    raise RuntimeError("Los metadatos cambiaron durante tres intentos; no se sobrescribió ningún cambio concurrente.")
 
 
 def main():
