@@ -23,7 +23,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: xiclana-osm-semanal
+  group: xiclana-propuestas-supabase
   cancel-in-progress: false
 
 jobs:
