@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Auditoría municipal completa de OSM. No modifica el catálogo maestro."""
-import collections, hashlib, json, math, pathlib, re, time, unicodedata, urllib.parse, urllib.request
+import collections, hashlib, json, math, os, pathlib, re, time, unicodedata, urllib.parse, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent
-MASTER = ROOT / "fichas_completas.json"
+MASTER = pathlib.Path(os.environ["XICLANA_CATALOG_PATH"]) if os.environ.get("XICLANA_CATALOG_PATH") else None
 OUT_RAW = ROOT / "osm_chiclana_extraccion_completa.json"
 OUT_REPORT = ROOT / "osm_chiclana_cruce_catalogo.json"
 AREA_ID = 3600346951  # área Overpass derivada de la relación OSM 346951
@@ -71,7 +71,7 @@ def download():
     raise RuntimeError("No se pudo completar la extracción en ningún servidor:\n" + "\n".join(errors))
 
 def main():
-    if not MASTER.exists():
+    if MASTER is None or not MASTER.exists():
         raise SystemExit(f"No existe el catálogo maestro: {MASTER}")
     master = json.loads(MASTER.read_text(encoding="utf-8"))
     items = master.get("items")
@@ -142,7 +142,7 @@ def main():
     report = {
         "fecha_extraccion_utc": raw["fecha_extraccion_utc"],
         "fuente": raw["fuente"], "relacion_municipal_osm": 346951,
-        "catalogo_maestro": "v3/fichas_completas.json",
+        "catalogo_maestro": "Supabase public.listings",
         "catalogo_actualizado": master.get("actualizado"),
         "total_fichas_catalogo": len(items),
         "total_candidatas_revision_catalogo": len(master.get("candidatas_revision") or []),
@@ -169,7 +169,7 @@ def main():
             "La extracción incluye nodos, vías y relaciones dentro del área municipal, con metadatos, etiquetas y geometría.",
             "El cruce por ID es exacto; el cruce por nombre y coordenadas es orientativo y requiere revisión.",
             "Los elementos sin coincidencia se entregan como candidatos; no se incorporan al catálogo.",
-            "No se modifica fichas_completas.json ni se publica ninguna ficha.",
+            "No se modifica public.listings ni se publica ninguna ficha.",
         ],
     }
     OUT_REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")

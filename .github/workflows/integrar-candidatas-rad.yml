@@ -1,129 +1,17 @@
-name: Integrar candidatas RAD al catálogo global
+name: Integrar candidatas RAD (retirado)
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/integrar-candidatas-rad.yml'
+  workflow_dispatch:
 
 permissions:
-  contents: write
-
-concurrency:
-  group: xiclana-integrar-candidatas-rad
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  integrar:
+  retired:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar catálogo maestro
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 1
-      - name: Preparar Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Incorporar las 322 candidatas RAD al catálogo maestro
+      - name: Confirmar retirada
         run: |
-          python - <<'PY'
-          import json
-          from datetime import datetime, timezone
-          from pathlib import Path
-
-          path = Path("v3/fichas_completas.json")
-          data = json.loads(path.read_text(encoding="utf-8"))
-          items = data.get("items")
-          candidates = data.get("candidatas_revision", [])
-          if not isinstance(items, list) or not isinstance(candidates, list):
-              raise SystemExit("Estructura del catálogo no válida; no se modifica.")
-
-          pending = [
-              x for x in candidates
-              if isinstance(x, dict) and str(x.get("id", "")).startswith("rad:")
-          ]
-          if len(pending) != 322:
-              raise SystemExit(
-                  f"Se esperaban exactamente 322 candidatas RAD; se encontraron {len(pending)}. "
-                  "No se modifica el catálogo para evitar incorporar un lote distinto."
-              )
-
-          existing_ids = {str(x.get("id")) for x in items if isinstance(x, dict) and x.get("id")}
-          duplicates = [x.get("id") for x in pending if str(x.get("id")) in existing_ids]
-          if duplicates:
-              raise SystemExit(f"Hay IDs RAD ya presentes en items: {duplicates[:10]}")
-
-          invalid = [
-              x for x in pending
-              if not str(x.get("n", "")).strip()
-              or x.get("t") not in ("ocio", "negocio")
-              or not str(x.get("c", "")).strip()
-              or not str(x.get("url_fuente_rastreo", "")).startswith(("http://", "https://"))
-          ]
-          if invalid:
-              raise SystemExit(
-                  f"{len(invalid)} candidatas no tienen nombre, tipo, categoría o URL válida. "
-                  "No se modifica el catálogo."
-              )
-
-          stamp = datetime.now(timezone.utc).date().isoformat()
-          incorporated = []
-          for candidate in pending:
-              item = dict(candidate)
-              item.pop("estado_revision", None)
-              item.pop("_xiclana_osm_auto", None)
-              item.pop("_xiclana_recovered_from_deleted", None)
-              item.pop("_xiclana_recovery_review_batch", None)
-              item["f"] = item.get("f") or "Rastreo web público (RAD)"
-              item["fuente_estado"] = (
-                  "Incorporada al catálogo global por decisión del administrador; "
-                  "pendiente de depuración posterior en Administración"
-              )
-              item["v"] = stamp
-              incorporated.append(item)
-
-          data["items"].extend(incorporated)
-          incorporated_ids = {str(x["id"]) for x in pending}
-          data["candidatas_revision"] = [
-              x for x in candidates
-              if not (isinstance(x, dict) and str(x.get("id", "")) in incorporated_ids)
-          ]
-          data["total_candidatas_revision"] = len(data["candidatas_revision"])
-          data["rad_incorporacion_global"] = {
-              "fecha_utc": datetime.now(timezone.utc).isoformat(),
-              "fichas_incorporadas": len(incorporated),
-              "fichas_publicadas_antes": len(items) - len(incorporated),
-              "fichas_publicadas_despues": len(data["items"]),
-              "criterio": "Incorporación solicitada por el administrador; depuración posterior desde Administración",
-              "publicacion_automatica": False
-          }
-
-          serialized = json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n"
-          if len(serialized.encode("utf-8")) >= 100_000_000:
-              raise SystemExit("El catálogo superaría 100 MB; no se modifica.")
-          path.write_text(serialized, encoding="utf-8")
-          print(json.dumps({
-              "incorporadas": len(incorporated),
-              "publicadas_antes": len(items) - len(incorporated),
-              "publicadas_despues": len(data["items"]),
-              "pendientes_restantes": len(data["candidatas_revision"]),
-              "bytes": len(serialized.encode("utf-8"))
-          }, ensure_ascii=False))
-          PY
-      - name: Validar catálogo
-        run: python v3/actualizar.py && python v3/auditar_catalogo.py
-      - name: Guardar catálogo maestro
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v3/fichas_completas.json v3/auditoria_integridad.json v3/plan_consolidacion.json
-          git commit -m "Incorporar 322 candidatas RAD al catálogo global"
-          git pull --rebase origin main
-          size=$(wc -c < v3/fichas_completas.json)
-          if [ "$size" -ge 100000000 ]; then
-            echo "::error::El catálogo supera el límite de 100 MB de GitHub."
-            exit 1
-          fi
-          git push origin HEAD:main
+          echo "Retirado: RAD ya guarda candidatas pendientes en public.site_settings."
+          echo "Las candidatas no se incorporan ni publican automáticamente."
+          echo "La aprobación manual desde Administración crea el registro en public.listings."

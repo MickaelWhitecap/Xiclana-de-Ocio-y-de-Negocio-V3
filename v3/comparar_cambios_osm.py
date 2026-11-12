@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Compara la consulta OSM semanal con la extracción inicial inmutable del catálogo maestro."""
 import collections
+import gzip
 import json
 import pathlib
 import sys
 from datetime import datetime, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parent
-MASTER = ROOT / "fichas_completas.json"
+BASELINE = ROOT / "osm_extraccion_inicial.json.gz"
 CURRENT = ROOT / "osm_chiclana_extraccion_completa.json"
 OUT = ROOT / "osm_chiclana_cambios_semanales.json"
 
@@ -36,12 +37,14 @@ def counts(records):
 
 
 def main():
-    if not MASTER.is_file() or not CURRENT.is_file():
-        raise SystemExit("Falta el catálogo maestro o la extracción semanal; no se genera comparación.")
-    master = json.loads(MASTER.read_text(encoding="utf-8"))
-    baseline = (master.get("osm_extraccion_inicial") or {}).get("objetos")
+    if not BASELINE.is_file() or not CURRENT.is_file():
+        raise SystemExit("Falta la extracción inicial OSM inmutable o la extracción semanal; no se genera comparación.")
+    baseline_doc = json.loads(gzip.decompress(BASELINE.read_bytes()).decode("utf-8"))
+    baseline = baseline_doc if isinstance(baseline_doc, list) else (
+        baseline_doc.get("objetos") or baseline_doc.get("elementos") or []
+    )
     if not isinstance(baseline, list) or len(baseline) != 132875:
-        raise SystemExit("La extracción inicial del maestro no contiene los 132.875 objetos esperados.")
+        raise SystemExit("La extracción inicial OSM no contiene los 132.875 objetos esperados.")
     current_doc = json.loads(CURRENT.read_text(encoding="utf-8"))
     if current_doc.get("relacion_municipal_osm") != 346951 or current_doc.get("area_overpass") != 3600346951:
         raise SystemExit("La consulta semanal no corresponde al ámbito municipal de Chiclana.")
@@ -92,10 +95,10 @@ def main():
     now = datetime.now(timezone.utc).isoformat()
     result = {
         "fecha_comparacion_utc": now,
-        "fecha_extraccion_inicial_utc": (master.get("osm_extraccion_inicial") or {}).get("fecha_extraccion_utc"),
+        "fecha_extraccion_inicial_utc": None,
         "fecha_consulta_actual_utc": current_doc.get("fecha_extraccion_utc"),
         "ambito": {"relacion_osm": 346951, "area_overpass": 3600346951},
-        "referencia": "Extracción inicial verificada e inmutable guardada en fichas_completas.json",
+        "referencia": "Extracción inicial verificada e inmutable en osm_extraccion_inicial.json.gz",
         "resumen": {
             "objetos_iniciales": len(before),
             "objetos_actuales": len(after),

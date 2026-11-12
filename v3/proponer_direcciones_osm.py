@@ -3,12 +3,13 @@
 No modifica el catálogo maestro ni publica fichas. Solo usa coincidencias exactas por ID OSM.
 """
 import json
+import os
 import pathlib
 import re
 from datetime import datetime, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parent
-MASTER = ROOT / "fichas_completas.json"
+MASTER = pathlib.Path(os.environ["XICLANA_CATALOG_PATH"]) if os.environ.get("XICLANA_CATALOG_PATH") else None
 CURRENT = ROOT / "osm_chiclana_extraccion_completa.json"
 OUT = ROOT / "propuestas_direcciones_osm.json"
 OSM_ID_RE = re.compile(r"^(?:osm|osm-extra):(node|way|relation):(\d+)$")
@@ -56,6 +57,8 @@ def build_address(tags):
 
 
 def main():
+    if MASTER is None:
+        raise SystemExit("Define XICLANA_CATALOG_PATH con una exportación temporal de public.listings.")
     for path in (MASTER, CURRENT):
         if not path.is_file() or path.stat().st_size == 0:
             raise SystemExit(f"Falta archivo obligatorio: {path}")
@@ -73,7 +76,7 @@ def main():
             raise SystemExit(f"ID OSM duplicado en extracción: {key}")
         osm_by_id[key] = element
 
-    active = [x for x in items if isinstance(x, dict) and x.get("_xiclana_deleted") is not True]
+    active = [x for x in items if isinstance(x, dict) and x.get("_xiclana_deleted") is not True and x.get("is_published", True) is not False]
     without_address = [x for x in active if not clean(x.get("a"))]
     with_osm_id, without_osm_id = [], []
     proposals, no_address_tags, missing_osm_objects = [], [], []
@@ -108,7 +111,7 @@ def main():
     result = {
         "fecha_generacion_utc": datetime.now(timezone.utc).isoformat(),
         "fuente": "OpenStreetMap / extracción municipal actual",
-        "catalogo_maestro": "v3/fichas_completas.json",
+        "catalogo_maestro": "Supabase public.listings",
         "extraccion_utc": current_doc.get("fecha_extraccion_utc"),
         "regla": "Solo fichas activas sin dirección y con coincidencia exacta por ID OSM. No se modifica el catálogo ni se publica nada.",
         "resumen": {

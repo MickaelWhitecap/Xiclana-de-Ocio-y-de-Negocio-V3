@@ -3,6 +3,7 @@
 No modifica fichas ni Supabase.
 """
 import collections
+import os
 import json
 import math
 import pathlib
@@ -11,7 +12,7 @@ import unicodedata
 from datetime import datetime, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parent
-MASTER = ROOT / "fichas_completas.json"
+MASTER = pathlib.Path(os.environ["XICLANA_CATALOG_PATH"]) if os.environ.get("XICLANA_CATALOG_PATH") else None
 OUT = ROOT / "auditoria_bajas_catalogo.json"
 OSM_ID_RE = re.compile(r"^(?:osm|osm-extra):(node|way|relation):(\d+)$")
 INTEREST_TAGS = ("amenity", "shop", "tourism", "leisure", "office", "craft", "healthcare", "historic", "sport", "club")
@@ -75,7 +76,7 @@ def classify(tags):
 
 
 def main():
-    if not MASTER.is_file() or MASTER.stat().st_size == 0:
+    if MASTER is None or not MASTER.is_file() or MASTER.stat().st_size == 0:
         raise SystemExit("No existe el catálogo maestro.")
     data = json.loads(MASTER.read_text(encoding="utf-8"))
     items = data.get("items")

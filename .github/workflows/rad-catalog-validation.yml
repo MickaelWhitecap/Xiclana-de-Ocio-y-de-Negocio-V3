@@ -1,80 +1,17 @@
-name: RAD - validación contra catálogo real
+name: RAD - validación diaria de catálogo JSON (retirada)
+
 on:
-  schedule:
-    - cron: "27 3 * * *"
   workflow_dispatch:
-concurrency:
-  group: rad-catalog-validation-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  validate-real-catalog:
+  retired:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
     steps:
-      - name: Descargar código de main
-        uses: actions/checkout@v4
-      - name: Preparar Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Obtener catálogo vigente de main en copia aislada
+      - name: Confirmar consolidación del proceso RAD
         run: |
-          git fetch origin main --depth=1
-          git show FETCH_HEAD:v3/fichas_completas.json > /tmp/fichas_completas_rad_validacion.json
-          test -s /tmp/fichas_completas_rad_validacion.json
-          python - <<'PY'
-          import json
-          p='/tmp/fichas_completas_rad_validacion.json'
-          d=json.load(open(p,encoding='utf-8'))
-          assert isinstance(d.get('items'),list), 'El catálogo no contiene items'
-          assert len(d['items']) >= 1200, f"Catálogo inesperadamente pequeño: {len(d['items'])}"
-          open('/tmp/rad_ids_antes.json','w').write(json.dumps([x.get('id') for x in d.get('candidatas_revision',[]) if isinstance(x,dict)]))
-          open('/tmp/rad_items_antes.txt','w').write(str(len(d['items'])))
-          print(f"Catálogo vigente de main: {len(d['items'])} fichas; {len(d.get('candidatas_revision',[]))} candidatas previas.")
-          PY
-      - name: Ejecutar RAD real sobre la copia
-        run: python v3/rastreo_web_publico.py --catalog /tmp/fichas_completas_rad_validacion.json
-      - name: Generar informe y comprobar que no hay publicación automática
-        run: |
-          python - <<'PY'
-          import json
-          p='/tmp/fichas_completas_rad_validacion.json'
-          d=json.load(open(p,encoding='utf-8'))
-          before=set(json.load(open('/tmp/rad_ids_antes.json',encoding='utf-8')))
-          added=[x for x in d.get('candidatas_revision',[]) if isinstance(x,dict) and str(x.get('id','')).startswith('rad:') and x.get('id') not in before]
-          rad=d.get('rad_ultima_ejecucion',{})
-          report={
-            'fichas_catalogo':len(d.get('items',[])),
-            'fichas_enriquecidas':rad.get('fichas_enriquecidas',0),
-            'campos_actualizados':rad.get('campos_actualizados',0),
-            'candidatas_revision_antes':len(before),
-            'rad':rad,
-            'candidatas_nuevas':[
-              {k:x.get(k) for k in ('id','n','t','c','a','p','e','w','h','d','url_fuente_rastreo','fuentes_datos','estado_revision','nota_revision','fecha_deteccion_utc')}
-              for x in added
-            ]
-          }
-          with open('rad-validacion-catalogo.json','w',encoding='utf-8') as f:
-            json.dump(report,f,ensure_ascii=False,indent=2)
-          print(json.dumps({
-            'fichas_catalogo':report['fichas_catalogo'],
-            'candidatas_nuevas':len(added),
-            'fichas_enriquecidas':rad.get('fichas_enriquecidas',0),
-            'campos_actualizados':rad.get('campos_actualizados',0),
-            'coincidencias_catalogo':rad.get('coincidencias_catalogo'),
-            'urls_encontradas':rad.get('urls_encontradas'),
-            'publicacion_automatica':rad.get('publicacion_automatica')
-          },ensure_ascii=False))
-          assert len(d.get('items',[])) == int(open('/tmp/rad_items_antes.txt').read()), 'RAD no debe alterar el número de fichas publicadas'
-          assert rad.get('publicacion_automatica') is False, 'El RAD no debe publicar automáticamente'
-          assert all(x.get('estado_revision') == 'pendiente' for x in added), 'Hay una candidata nueva que no está pendiente'
-          assert all(x.get('url_fuente_rastreo') for x in added), 'Hay una candidata nueva sin URL de procedencia'
-          PY
-      - name: Guardar informe de validación
-        uses: actions/upload-artifact@v4
-        with:
-          name: rad-validacion-catalogo-${{ github.run_id }}
-          path: rad-validacion-catalogo.json
-          if-no-files-found: error
-          retention-days: 14
+          echo "La validación diaria basada en el JSON histórico se ha retirado."
+          echo "El rastreo y la validación RAD se concentran en rad-enrich-catalog.yml."
+          echo "El proceso semanal exporta listings desde Supabase y no modifica fichas publicadas."

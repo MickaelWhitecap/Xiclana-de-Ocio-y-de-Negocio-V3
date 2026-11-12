@@ -18,15 +18,19 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Preparar copia aislada del catálogo
-        run: cp v3/fichas_completas.json "$RUNNER_TEMP/fichas_completas_rad.json"
-      - name: Ejecutar rastreo RAD de main sin modificar el catálogo maestro
+      - name: Exportar catálogo canónico desde Supabase
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python v3/catalogo_supabase.py export --output "$RUNNER_TEMP/fichas_completas_rad.json"
+          cp "$RUNNER_TEMP/fichas_completas_rad.json" "$RUNNER_TEMP/fichas_completas_rad_antes.json"
+      - name: Ejecutar rastreo RAD de main sobre copia temporal
         run: python v3/rastreo_web_publico.py --catalog "$RUNNER_TEMP/fichas_completas_rad.json"
       - name: Generar informe y validar candidatas
         run: |
           python - <<'PY'
           import json, os
-          original=json.load(open("v3/fichas_completas.json",encoding="utf-8"))
+          original=json.load(open(os.path.join(os.environ["RUNNER_TEMP"],"fichas_completas_rad_antes.json"),encoding="utf-8"))
           path=os.path.join(os.environ["RUNNER_TEMP"],"fichas_completas_rad.json")
           result=json.load(open(path,encoding="utf-8"))
           old={x.get("id") for x in original.get("candidatas_revision",[]) if isinstance(x,dict)}

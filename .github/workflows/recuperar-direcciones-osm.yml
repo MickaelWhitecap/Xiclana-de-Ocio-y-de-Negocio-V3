@@ -1,56 +1,17 @@
-name: Recuperar propuestas de direcciones OSM
+name: Recuperación de direcciones OSM desde JSON (retirada)
 
 on:
-  push:
-    paths:
-      - "v3/recuperar_direcciones_osm.py"
-      - ".github/workflows/recuperar-direcciones-osm.yml"
   workflow_dispatch:
 
 permissions:
-  contents: write
-
-concurrency:
-  group: xiclana-catalogo-maestro
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  recuperar:
+  retired:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
-      - name: Descargar repositorio
-        uses: actions/checkout@v7
-      - name: Preparar Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
-      - name: Recalcular propuestas sobre la última versión del catálogo y guardar sin rebase conflictivo
-        shell: bash
+      - name: Confirmar retirada
         run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          # El catálogo es un único JSON grande. Si otro proceso lo actualiza,
-          # no intentamos fusionar dos versiones minificadas: recalculamos
-          # las propuestas sobre la última versión de main.
-          for attempt in 1 2 3; do
-            echo "Intento de guardado $attempt/3"
-            git fetch origin main
-            git reset --hard origin/main
-            python v3/recuperar_direcciones_osm.py
-            git add v3/fichas_completas.json
-            if git diff --cached --quiet; then
-              echo "No hay cambios en las propuestas."
-              exit 0
-            fi
-            git commit -m "Incorporar propuestas de direcciones OSM al catálogo maestro"
-            if git push origin HEAD:main; then
-              echo "Propuestas guardadas correctamente."
-              exit 0
-            fi
-            echo "main avanzó durante el guardado; se recalculará sobre la versión nueva."
-          done
-          echo "No se pudo guardar tras tres intentos." >&2
-          exit 1
+          echo "Retirado: las propuestas de direcciones OSM se generan en auditoria-osm-municipal.yml."
+          echo "Se guardan en public.site_settings y se aplican manualmente desde Administración."
+          echo "No se escriben propuestas en fichas_completas.json."

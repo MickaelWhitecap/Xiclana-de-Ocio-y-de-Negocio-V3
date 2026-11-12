@@ -18,20 +18,24 @@ jobs:
   compare-old-candidates:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar catálogo maestro y código RAD
+      - name: Descargar código
         uses: actions/checkout@v4
       - name: Preparar Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Exportar catálogo vigente desde Supabase
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python v3/catalogo_supabase.py export --output "$RUNNER_TEMP/xiclana-catalogo.json"
       - name: Comparar las 11 candidatas de la prueba RAD anterior
         run: |
           python - <<'PY'
-          import importlib.util, json
+          import importlib.util, json, os
           from pathlib import Path
           spec=importlib.util.spec_from_file_location("rad","v3/rastreo_web_publico.py")
           rad=importlib.util.module_from_spec(spec); spec.loader.exec_module(rad)
-          data=json.loads(Path("v3/fichas_completas.json").read_text(encoding="utf-8"))
+          data=json.loads(Path(os.path.join(os.environ["RUNNER_TEMP"],"xiclana-catalogo.json")).read_text(encoding="utf-8"))
           candidates=[
             {"n":"ALBA FERRETERÍA «HERRAJES PARA LA MADERA» – AE Chiclana","a":"23 Avenida Bahía de Cádiz, 11130 Chiclana de la Frontera","p":"956209585","w":"http://ferreteriaalba.com/"},
             {"n":"Autoservicio la Nueva Suerte – AE Chiclana","a":"","p":"637174154","e":"pedrohr68@outlook.es"},

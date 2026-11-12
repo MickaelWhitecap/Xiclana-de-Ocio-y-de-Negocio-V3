@@ -20,10 +20,10 @@ on:
     - cron: "30 4 * * 1"
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: xiclana-osm-semanal
+  group: xiclana-propuestas-supabase
   cancel-in-progress: false
 
 jobs:
@@ -49,15 +49,19 @@ jobs:
           python-version: "3.12"
       - name: Ejecutar pruebas internas del rastreador RAD
         run: python rad-source/v3/rastreo_web_publico.py --self-test
-      - name: Preparar copia aislada del catálogo
-        run: cp v3/fichas_completas.json "$RUNNER_TEMP/fichas_completas_rad.json"
-      - name: Ejecutar rastreo real sin modificar el catálogo maestro
+      - name: Exportar catálogo vigente desde Supabase
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python v3/catalogo_supabase.py export --output "$RUNNER_TEMP/fichas_completas_rad.json"
+          cp "$RUNNER_TEMP/fichas_completas_rad.json" "$RUNNER_TEMP/fichas_completas_rad_antes.json"
+      - name: Ejecutar rastreo real sobre copia temporal de Supabase
         run: python rad-source/v3/rastreo_web_publico.py --catalog "$RUNNER_TEMP/fichas_completas_rad.json"
       - name: Generar informe de candidatas detectadas
         run: |
           python - <<'PY'
           import json, os
-          original=json.load(open("v3/fichas_completas.json",encoding="utf-8"))
+          original=json.load(open(os.path.join(os.environ["RUNNER_TEMP"],"fichas_completas_rad_antes.json"),encoding="utf-8"))
           path=os.path.join(os.environ["RUNNER_TEMP"],"fichas_completas_rad.json")
           result=json.load(open(path,encoding="utf-8"))
           old={x.get("id") for x in original.get("candidatas_revision",[]) if isinstance(x,dict)}
@@ -89,7 +93,14 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Extraer todos los elementos OSM y cruzar con catálogo maestro
+      - name: Exportar catálogo canónico desde Supabase a copia temporal
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python v3/catalogo_supabase.py export --output "$RUNNER_TEMP/xiclana-catalogo-temporal.json"
+          echo "XICLANA_CATALOG_PATH=$RUNNER_TEMP/xiclana-catalogo-temporal.json" >> "$GITHUB_ENV"
+
+      - name: Extraer todos los elementos OSM y cruzar con listings
         run: python v3/auditar_osm_municipal.py
 
       - name: Comparar consulta semanal con la extracción inicial
@@ -104,29 +115,14 @@ jobs:
         if: success()
         run: python v3/incorporar_candidatas_osm.py
 
-      - name: Guardar propuestas OSM pendientes para Administración
+      - name: Guardar propuestas OSM en metadatos de Supabase
         if: success()
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v3/fichas_completas.json
-          if git diff --cached --quiet; then
-            echo "No hay cambios en los ficheros de propuestas OSM."
-          else
-            git commit -m "Actualizar propuestas OSM pendientes de revisión"
-            for attempt in 1 2 3; do
-              git fetch origin main
-              git rebase origin/main
-              if git push origin HEAD:main; then
-                echo "Catálogo maestro actualizado en main."
-                exit 0
-              fi
-              echo "Push concurrente; reintentando ($attempt/3)."
-              sleep 3
-            done
-            echo "No se pudo actualizar main tras tres intentos."
-            exit 1
-          fi
+          python v3/catalogo_supabase.py sync-metadata \
+            --input "$RUNNER_TEMP/xiclana-catalogo-temporal.json" \
+            --keys candidatas_revision total_candidatas_revision propuestas_direcciones_osm integracion_osm_revision auditoria_osm_objetos_sin_ficha
 
       - name: Publicar resumen de auditoría
         if: always()

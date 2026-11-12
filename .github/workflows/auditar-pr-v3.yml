@@ -8,6 +8,35 @@ on:
       - "v3/exportar-fichas.html"
       - "v3/test_auditar_catalogo.py"
       - "v3/migrar_catalogo_supabase.py"
+      - "v3/actualizar.py"
+      - "v3/ampliar_catalogo.py"
+      - "v3/auditar_catalogo.py"
+      - "v3/incorporar_auditoria_osm.py"
+      - "v3/extraccion_inicial_osm.py"
+      - "v3/recuperar_direcciones_osm.py"
+      - "v3/catalogo_supabase.py"
+      - "v3/test_fuente_unica.py"
+      - "v3/incorporar_candidatas_osm.py"
+      - "v3/auditar_osm_municipal.py"
+      - "v3/proponer_direcciones_osm.py"
+      - "v3/comparar_cambios_osm.py"
+      - "v3/rastreo_web_publico.py"
+      - "v3/auditar_bajas_catalogo.py"
+      - "v3/extraccion_inicial_osm.py"
+      - "v3/incorporar_auditoria_osm.py"
+      - "v3/recuperar_direcciones_osm.py"
+      - ".github/workflows/extraccion-inicial-osm.yml"
+      - ".github/workflows/prueba-rad-real.yml"
+      - ".github/workflows/rad-catalog-validation.yml"
+      - ".github/workflows/rad-review-old-candidates.yml"
+      - ".github/workflows/recuperar-direcciones-osm.yml"
+      - ".github/workflows/migrar-catalogo-supabase.yml"
+      - ".github/workflows/auditoria-osm-municipal.yml"
+      - ".github/workflows/rad-enrich-catalog.yml"
+      - ".github/workflows/rad-pending-review.yml"
+      - ".github/workflows/integrar-candidatas-rad.yml"
+      - ".github/workflows/incorporar-auditoria-osm.yml"
+      - ".github/workflows/auditar-bajas-catalogo.yml"
       - ".github/workflows/auditar-pr-v3.yml"
       - ".github/workflows/publicar-v3.yml"
       - ".github/workflows/sincronizar-cambios-admin.yml"
@@ -27,7 +56,7 @@ jobs:
         with:
           node-version: "22"
       - name: Comprobar sintaxis Python
-        run: python -m py_compile v3/migrar_catalogo_supabase.py v3/test_auditar_catalogo.py
+        run: python -m py_compile v3/catalogo_supabase.py v3/migrar_catalogo_supabase.py v3/actualizar.py v3/ampliar_catalogo.py v3/auditar_catalogo.py v3/incorporar_candidatas_osm.py v3/auditar_osm_municipal.py v3/proponer_direcciones_osm.py v3/comparar_cambios_osm.py v3/rastreo_web_publico.py v3/auditar_bajas_catalogo.py v3/extraccion_inicial_osm.py v3/incorporar_auditoria_osm.py v3/recuperar_direcciones_osm.py v3/test_auditar_catalogo.py v3/test_fuente_unica.py
       - name: Comprobar sintaxis JavaScript de las páginas
         run: |
           python - <<'PY'
@@ -42,7 +71,7 @@ jobs:
           node --check /tmp/exportar-fichas.js
       - name: Probar reglas de catálogo y fuente única
         run: |
-          python -m unittest v3/test_auditar_catalogo.py
+          python -m unittest v3/test_auditar_catalogo.py v3/test_fuente_unica.py
           python - <<'PY'
           from pathlib import Path
           public=Path("v3/index.html").read_text(encoding="utf-8")

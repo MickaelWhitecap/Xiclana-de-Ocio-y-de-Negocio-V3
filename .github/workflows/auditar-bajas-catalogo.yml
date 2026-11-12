@@ -1,67 +1,17 @@
-name: Auditoría de bajas del catálogo maestro
-# Ejecución de revisión 2026-11-05; análisis de lectura, sin restaurar ni modificar fichas.
+name: Auditoría histórica de bajas JSON (retirada)
 
 on:
-  push:
-    paths:
-      - ".github/workflows/auditar-bajas-catalogo.yml"
-      - "v3/auditar_bajas_catalogo.py"
   workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: xiclana-auditoria-bajas
-  cancel-in-progress: false
-
 jobs:
-  auditar:
+  retired:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
-      - name: Descargar repositorio
-        uses: actions/checkout@v7
-
-      - name: Preparar Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
-
-      - name: Auditar las fichas marcadas como borradas
-        run: python v3/auditar_bajas_catalogo.py
-
-      - name: Validar integridad del informe de bajas
+      - name: Confirmar retirada
         run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          p=Path("v3/auditoria_bajas_catalogo.json")
-          d=json.loads(p.read_text(encoding="utf-8"))
-          bajas=d.get("bajas")
-          if not isinstance(bajas,list) or len(bajas)!=d.get("total_marcados_borrados"):
-              raise SystemExit("El total de bajas no coincide con el detalle.")
-          ids=[x.get("id") for x in bajas]
-          if len(ids)!=len(set(ids)):
-              raise SystemExit("El informe contiene IDs de baja repetidos.")
-          if d.get("total_registros") != d.get("total_activos",0)+d.get("total_marcados_borrados",0):
-              raise SystemExit("La suma de activos y bajas no coincide con el total.")
-          print(json.dumps({
-              "total_registros":d["total_registros"],
-              "activos":d["total_activos"],
-              "bajas":d["total_marcados_borrados"],
-              "detalle_bajas":len(bajas),
-              "candidatas_recuperables":d["resumen_contraste_osm"]["candidatas_recuperables_para_revision_manual"],
-              "clasificacion_osm":d["resumen_contraste_osm"]["clasificacion_osm"],
-              "fichas_modificadas":0
-          },ensure_ascii=False))
-          PY
-
-      - name: Guardar informe como artefacto de auditoría
-        uses: actions/upload-artifact@v7
-        with:
-          name: auditoria-bajas-catalogo-${{ github.run_id }}
-          path: v3/auditoria_bajas_catalogo.json
-          if-no-files-found: error
-          compression-level: 6
-          retention-days: 90
+          echo "Retirada la auditoría basada en el JSON histórico."
+          echo "El estado actual de cada ficha se consulta en public.listings (is_deleted)."
+          echo "No se restauran ni modifican fichas automáticamente."

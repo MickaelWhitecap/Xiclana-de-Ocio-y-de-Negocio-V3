@@ -29,37 +29,8 @@ class AuditDuplicateTests(unittest.TestCase):
         self.assertEqual(result["distribucion_por_tipo_y_categoria"][0]["categoria"], "Bar")
         self.assertEqual(result["distribucion_por_tipo_y_categoria"][0]["con_coordenadas"], 2)
 
-    def test_duplicate_catalog_ids_abort_instead_of_rewriting_ids(self):
-        import importlib.util
-        updater_path = Path(__file__).with_name("actualizar.py")
-        spec = importlib.util.spec_from_file_location("actualizar_catalogo_test", updater_path)
-        updater = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(updater)
-        with tempfile.TemporaryDirectory() as tmp:
-            data_path = Path(tmp) / "catalog.json"
-            data_path.write_text(json.dumps({"items": [
-                {"id": "manual:same", "n": "Ficha A", "t": "ocio", "c": "Deportes", "a": "Calle 1"},
-                {"id": "manual:same", "n": "Ficha B", "t": "ocio", "c": "Deportes", "a": "Calle 2"}
-            ]}), encoding="utf-8")
-            old_data = updater.DATA
-            updater.DATA = data_path
-            try:
-                with self.assertRaises(SystemExit):
-                    updater.main()
-                stored = json.loads(data_path.read_text(encoding="utf-8"))
-                self.assertEqual([x["id"] for x in stored["items"]], ["manual:same", "manual:same"])
-            finally:
-                updater.DATA = old_data
 
-    def test_supabase_override_sync_uses_pagination(self):
-        source = Path(__file__).with_name("actualizar.py").read_text(encoding="utf-8")
-        self.assertIn('"Range":f"{offset}-{offset + page_size - 1}"', source)
-        self.assertIn('while True:', source)
-        self.assertIn('page_size = 500', source)
 
-    def test_automatic_expansion_does_not_remove_existing_catalog_records(self):
-        source = Path(__file__).with_name("ampliar_catalogo.py").read_text(encoding="utf-8")
-        self.assertNotIn("items.remove(", source)
 
     def test_different_types_are_not_duplicates_but_same_type_is(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -89,138 +60,9 @@ class AuditDuplicateTests(unittest.TestCase):
             finally:
                 audit.DATA, audit.BASELINE, audit.REPORT, audit.MERGE_PLAN = old
 
-    def test_updater_reads_all_override_pages_before_writing_catalog(self):
-        import importlib.util
-        from unittest import mock
-        import urllib.request
-
-        updater_path = Path(__file__).with_name("actualizar.py")
-        spec = importlib.util.spec_from_file_location("actualizar_paginacion_test", updater_path)
-        updater = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(updater)
-
-        class FakeResponse(io.StringIO):
-            def __init__(self, payload):
-                super().__init__(json.dumps(payload))
-                self.headers = {"Content-Range": "*/*"}
-
-            def __enter__(self):
-                return self
-
-            def __exit__(self, *args):
-                self.close()
-
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            data_path = root / "catalog.json"
-            config_path = root / "supabase-config.js"
-            data_path.write_text(json.dumps({"items": [
-                {"id": "manual:existing", "n": "Ficha existente", "t": "ocio", "c": "Deportes", "a": "Calle 1"}
-            ]}), encoding="utf-8")
-            config_path.write_text(
-                'window.XICLANA_SUPABASE = { url: "https://example.supabase.co", anonKey: "public-test-key" };',
-                encoding="utf-8"
-            )
-            first_page = [
-                {"listing_id": f"manual:{i}", "fields": {"n": f"Ficha {i}", "t": "ocio", "c": "Deportes", "a": f"Calle {i}"},
-                 "is_new": True, "verified_at": None, "updated_at": "2026-01-01T00:00:00Z"}
-                for i in range(500)
-            ]
-            second_page = [
-                {"listing_id": "manual:500", "fields": {"n": "Ficha 500", "t": "ocio", "c": "Deportes", "a": "Calle 500"},
-                 "is_new": True, "verified_at": None, "updated_at": "2026-01-01T00:00:00Z"}
-            ]
-            old_data, old_root = updater.DATA, updater.ROOT
-            updater.DATA, updater.ROOT = data_path, root
-            with mock.patch.dict("os.environ", {"SUPABASE_SECRET_KEY": "sb_secret_test"}), mock.patch.object(urllib.request, "urlopen", side_effect=[FakeResponse(first_page), FakeResponse(second_page)]) as mocked_urlopen:
-                try:
-                    with contextlib.redirect_stdout(io.StringIO()):
-                        updater.main()
-                    self.assertEqual(mocked_urlopen.call_count, 2)
-                    ranges = [call.args[0].get_header("Range") for call in mocked_urlopen.call_args_list]
-                    self.assertEqual(ranges, ["0-499", "500-999"])
-                    stored = json.loads(data_path.read_text(encoding="utf-8"))
-                    self.assertEqual(stored["sincronizacion_supabase"]["overrides_leidos"], 501)
-                    self.assertEqual(stored["sincronizacion_supabase"]["fichas_nuevas_incorporadas"], 501)
-                    self.assertTrue(any(item.get("id") == "manual:500" for item in stored["items"]))
-                finally:
-                    updater.DATA, updater.ROOT = old_data, old_root
-
-    def test_malformed_catalog_item_aborts_without_rewriting_file(self):
-        import importlib.util
-        updater_path = Path(__file__).with_name("actualizar.py")
-        spec = importlib.util.spec_from_file_location("actualizar_malformado_test", updater_path)
-        updater = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(updater)
-        with tempfile.TemporaryDirectory() as tmp:
-            data_path = Path(tmp) / "catalog.json"
-            original = json.dumps({"items": [{"id": "manual:1", "n": "Ficha"}, None]})
-            data_path.write_text(original, encoding="utf-8")
-            old_data = updater.DATA
-            updater.DATA = data_path
-            try:
-                with self.assertRaises(SystemExit):
-                    updater.main()
-                self.assertEqual(data_path.read_text(encoding="utf-8"), original)
-            finally:
-                updater.DATA = old_data
 
 
-    def test_tombstones_are_not_revived_or_reintroduced_by_sync(self):
-        import importlib.util
-        from unittest import mock
-        import urllib.request
 
-        updater_path = Path(__file__).with_name("actualizar.py")
-        spec = importlib.util.spec_from_file_location("actualizar_tombstones_test", updater_path)
-        updater = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(updater)
-
-        class FakeResponse(io.StringIO):
-            def __init__(self, payload):
-                super().__init__(json.dumps(payload))
-                self.headers = {"Content-Range": "0-1/2"}
-
-            def __enter__(self):
-                return self
-
-            def __exit__(self, *args):
-                self.close()
-
-        rows = [
-            {"listing_id": "manual:deleted-existing", "fields": {"n": "Ficha retirada", "t": "ocio", "c": "Deportes"}, "is_new": False, "updated_at": "2026-01-01T00:00:00Z"},
-            {"listing_id": "manual:deleted-missing", "fields": {"n": "No reintroducir", "_xiclana_deleted": True}, "is_new": True, "updated_at": "2026-01-01T00:00:00Z"},
-            {"listing_id": "manual:active-existing", "fields": {"n": "Ficha activa actualizada"}, "is_new": False, "updated_at": "2026-01-01T00:00:00Z"},
-            {"listing_id": "manual:agua-generica", "fields": {"n": "Agua potable", "t": "ocio", "c": "Servicios públicos"}, "is_new": True, "updated_at": "2026-01-01T00:00:00Z"},
-        ]
-
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            data_path = root / "catalog.json"
-            config_path = root / "supabase-config.js"
-            data_path.write_text(json.dumps({"items": [
-                {"id": "manual:deleted-existing", "n": "Ficha retirada", "_xiclana_deleted": True},
-                {"id": "manual:active-existing", "n": "Ficha activa"},
-            ]}), encoding="utf-8")
-            config_path.write_text(
-                'window.XICLANA_SUPABASE = { url: "https://example.supabase.co", anonKey: "public-test-key" };',
-                encoding="utf-8"
-            )
-            old_data, old_root = updater.DATA, updater.ROOT
-            updater.DATA, updater.ROOT = data_path, root
-            with mock.patch.dict("os.environ", {"SUPABASE_SECRET_KEY": "sb_secret_test"}), mock.patch.object(urllib.request, "urlopen", return_value=FakeResponse(rows)):
-                try:
-                    with contextlib.redirect_stdout(io.StringIO()):
-                        updater.main()
-                    stored = json.loads(data_path.read_text(encoding="utf-8"))
-                    by_id = {item["id"]: item for item in stored["items"]}
-                    self.assertTrue(by_id["manual:deleted-existing"]["_xiclana_deleted"])
-                    self.assertNotIn("manual:deleted-missing", by_id)
-                    self.assertNotIn("manual:agua-generica", by_id)
-                    self.assertEqual(by_id["manual:active-existing"]["n"], "Ficha activa actualizada")
-                    self.assertNotIn("_xiclana_deleted", by_id["manual:active-existing"])
-                finally:
-                    updater.DATA, updater.ROOT = old_data, old_root
 
 
     def test_contact_quality_accepts_multiple_emails_and_phone_extensions(self):
@@ -237,6 +79,11 @@ class AuditDuplicateTests(unittest.TestCase):
         self.assertEqual(result["urls_invalidas"], [])
         self.assertEqual(result["coordenadas_invalidas"], [])
 
+    def test_legacy_json_updater_is_disabled(self):
+        source = (Path(__file__).with_name("actualizar.py")).read_text(encoding="utf-8")
+        self.assertIn("está retirado", source)
+        self.assertIn("public.listings", source)
+ 
     def test_public_page_reads_fichas_from_the_single_supabase_catalog(self):
         page = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
         self.assertIn("async function cargarCatalogoSupabase()", page)
@@ -311,51 +158,3 @@ class OSMIntegrationTests(unittest.TestCase):
 if __name__ == "__main__":
     unittest.main()
 
-
-class ExplicitFieldClearingTests(unittest.TestCase):
-    def test_null_override_removes_existing_value_but_empty_string_does_not(self):
-        from unittest import mock
-        import urllib.request
-        import importlib.util
-
-        updater_path = Path(__file__).with_name("actualizar.py")
-        spec = importlib.util.spec_from_file_location("actualizar_clear_test", updater_path)
-        updater = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(updater)
-
-        class FakeResponse(io.StringIO):
-            def __init__(self, payload):
-                super().__init__(json.dumps(payload))
-                self.headers = {"Content-Range": "0-0/1"}
-            def __enter__(self):
-                return self
-            def __exit__(self, *args):
-                self.close()
-
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            data_path = root / "catalog.json"
-            (root / "supabase-config.js").write_text(
-                'window.XICLANA_SUPABASE = { url: "https://example.supabase.co", anonKey: "public-test-key" };',
-                encoding="utf-8"
-            )
-            data_path.write_text(json.dumps({"items": [{
-                "id": "manual:clear", "n": "Ficha", "t": "ocio", "c": "Deportes",
-                "p": "956 111 222", "d": "Descripción conservada"
-            }]}), encoding="utf-8")
-            old_data, old_root = updater.DATA, updater.ROOT
-            updater.DATA, updater.ROOT = data_path, root
-            response = FakeResponse([{
-                "listing_id": "manual:clear",
-                "fields": {"p": None, "d": ""},
-                "is_new": False, "verified_at": None, "updated_at": "2026-01-01T00:00:00Z"
-            }])
-            with mock.patch.dict("os.environ", {"SUPABASE_SECRET_KEY": "sb_secret_test"}), mock.patch.object(urllib.request, "urlopen", return_value=response):
-                try:
-                    with contextlib.redirect_stdout(io.StringIO()):
-                        updater.main()
-                    saved = json.loads(data_path.read_text(encoding="utf-8"))["items"][0]
-                    self.assertNotIn("p", saved)
-                    self.assertEqual(saved["d"], "Descripción conservada")
-                finally:
-                    updater.DATA, updater.ROOT = old_data, old_root

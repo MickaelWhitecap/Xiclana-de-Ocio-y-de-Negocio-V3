@@ -1,111 +1,93 @@
-name: RAD - enriquecimiento del catálogo global
+name: RAD - descubrimiento y propuestas desde Supabase
 
 on:
   push:
     branches: [main]
     paths:
       - 'v3/rastreo_web_publico.py'
+      - 'v3/catalogo_supabase.py'
       - '.github/workflows/rad-enrich-catalog.yml'
   schedule:
     - cron: "47 6 * * 1"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: rad-enriquecimiento-catalogo-global
-  cancel-in-progress: true
+  group: xiclana-propuestas-supabase
+  cancel-in-progress: false
 
 jobs:
-  enrich-global-catalog:
-    name: Enriquecer fichas y conservar candidatas pendientes
+  discovery:
+    name: Rastrear fuentes y guardar propuestas pendientes
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
-      - name: Descargar main y catálogo maestro
-        uses: actions/checkout@v4
+      - name: Descargar código de main
+        uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 1
       - name: Preparar Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-      - name: Guardar copia de seguridad de trabajo y ejecutar RAD
+      - name: Exportar copia temporal del catálogo canónico
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
-          cp v3/fichas_completas.json "$RUNNER_TEMP/fichas_completas_antes_rad.json"
-          cp v3/fichas_completas.json "$RUNNER_TEMP/fichas_completas_rad.json"
-          python v3/rastreo_web_publico.py --catalog "$RUNNER_TEMP/fichas_completas_rad.json"
-      - name: Validar integridad y preparar resumen
+          python v3/catalogo_supabase.py export --output "$RUNNER_TEMP/xiclana-rad.json"
+          cp "$RUNNER_TEMP/xiclana-rad.json" "$RUNNER_TEMP/xiclana-rad-antes.json"
+      - name: Ejecutar pruebas internas RAD
+        run: python v3/rastreo_web_publico.py --self-test
+      - name: Ejecutar rastreo sobre la copia temporal
+        run: python v3/rastreo_web_publico.py --catalog "$RUNNER_TEMP/xiclana-rad.json"
+      - name: Validar resultados y preparar informe
         run: |
           python - <<'PY'
           import json, os
-          before=json.load(open(os.path.join(os.environ["RUNNER_TEMP"],"fichas_completas_antes_rad.json"),encoding="utf-8"))
-          path=os.path.join(os.environ["RUNNER_TEMP"],"fichas_completas_rad.json")
-          after=json.load(open(path,encoding="utf-8"))
+          root=os.environ["RUNNER_TEMP"]
+          before=json.load(open(os.path.join(root,"xiclana-rad-antes.json"),encoding="utf-8"))
+          after=json.load(open(os.path.join(root,"xiclana-rad.json"),encoding="utf-8"))
           rad=after.get("rad_ultima_ejecucion",{})
-          assert isinstance(after.get("items"),list), "Catálogo sin items"
-          assert len(after["items"]) == len(before.get("items",[])), "RAD ha alterado el número de fichas publicadas"
-          assert rad.get("publicacion_automatica") is False, "Publicación automática no permitida"
-          old_ids={x.get("id") for x in before.get("candidatas_revision",[]) if isinstance(x,dict)}
-          new_candidates=[x for x in after.get("candidatas_revision",[]) if isinstance(x,dict) and x.get("id") not in old_ids]
-          assert all(x.get("estado_revision")=="pendiente" for x in new_candidates), "Hay candidatas nuevas que no están pendientes"
-          assert all(x.get("url_fuente_rastreo") for x in new_candidates), "Hay candidatas sin URL de procedencia"
+          assert isinstance(after.get("items"),list), "La copia temporal no contiene items"
+          assert len(after["items"]) == len(before.get("items",[])), "RAD ha alterado el número de fichas"
+          assert rad.get("publicacion_automatica") is False, "RAD no puede publicar automáticamente"
+          old_ids={str(x.get("id")) for x in before.get("candidatas_revision",[]) if isinstance(x,dict)}
+          candidates=[x for x in after.get("candidatas_revision",[]) if isinstance(x,dict) and str(x.get("id","")).startswith("rad:") and str(x.get("id")) not in old_ids]
+          assert all(x.get("estado_revision")=="pendiente" for x in candidates), "Hay candidatas nuevas que no están pendientes"
+          assert all(str(x.get("url_fuente_rastreo","")).startswith(("http://","https://")) for x in candidates), "Hay candidatas sin procedencia"
           summary={
-            "fichas_publicadas":len(after["items"]),
-            "fichas_enriquecidas":rad.get("fichas_enriquecidas",0),
-            "campos_actualizados":rad.get("campos_actualizados",0),
-            "candidatas_nuevas":len(new_candidates),
+            "fichas_consultadas":len(after["items"]),
+            "fichas_con_sugerencias_de_enriquecimiento":rad.get("fichas_enriquecidas",0),
+            "campos_con_sugerencias":rad.get("campos_actualizados",0),
+            "candidatas_nuevas_pendientes":len(candidates),
             "urls_encontradas":rad.get("urls_encontradas",0),
             "coincidencias_catalogo":rad.get("coincidencias_catalogo",0),
             "fuentes_directas":rad.get("fuentes_directas",[]),
-            "publicacion_automatica":rad.get("publicacion_automatica")
+            "publicacion_automatica":False,
+            "fichas_modificadas_en_supabase":0
           }
           with open("rad-enriquecimiento-resumen.json","w",encoding="utf-8") as f:
-              json.dump(summary,f,ensure_ascii=False,indent=2)
+            json.dump(summary,f,ensure_ascii=False,indent=2)
           with open(os.environ["GITHUB_STEP_SUMMARY"],"a",encoding="utf-8") as f:
-              f.write("## Resultado RAD sobre el catálogo global\\n\\n")
-              for key,value in summary.items():
-                  f.write(f"- **{key}:** {value}\\n")
+            f.write("## Resultado RAD sobre el catálogo Supabase\n\n")
+            for key,value in summary.items(): f.write(f"- **{key}:** {value}\n")
           print(json.dumps(summary,ensure_ascii=False))
           PY
-      - name: Integrar los datos en el fichero global
+      - name: Guardar candidatas RAD como metadatos pendientes
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
-          python - <<'PY'
-          import json, os, shutil
-          p=os.path.join(os.environ["RUNNER_TEMP"],"fichas_completas_rad.json")
-          d=json.load(open(p,encoding="utf-8"))
-          r=d.get("rad_ultima_ejecucion",{})
-          if not (r.get("fichas_enriquecidas",0) or r.get("candidatas_nuevas",0)):
-              print("Sin cambios de datos: no se genera un commit.")
-              raise SystemExit(0)
-          shutil.copyfile(p,"v3/fichas_completas.json")
-          PY
-          if git diff --quiet -- v3/fichas_completas.json; then
-            echo "No hay cambios de datos que integrar."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v3/fichas_completas.json
-          git commit -m "Enriquecer catálogo global con fuentes RAD"
-          git fetch origin main
-          git rebase origin/main
-          size=$(wc -c < v3/fichas_completas.json)
-          echo "Tamaño del catálogo maestro tras RAD: $size bytes"
-          if [ "$size" -ge 100000000 ]; then
-            echo "::error::El catálogo supera el límite de 100 MB de GitHub; se cancela la integración sin modificar main."
-            exit 1
-          fi
-          git push origin HEAD:main
+          python v3/catalogo_supabase.py sync-metadata \
+            --input "$RUNNER_TEMP/xiclana-rad.json" \
+            --keys candidatas_revision total_candidatas_revision rad_ultima_ejecucion
       - name: Guardar informe RAD
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: rad-enriquecimiento-global-${{ github.run_id }}
+          name: rad-descubrimiento-supabase-${{ github.run_id }}
           path: rad-enriquecimiento-resumen.json
           if-no-files-found: ignore
           retention-days: 30

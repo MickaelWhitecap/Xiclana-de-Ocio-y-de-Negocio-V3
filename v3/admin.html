@@ -756,7 +756,7 @@ form.addEventListener("submit",async e=>{
    categories=categories.filter(c=>c.slug!==catData.slug);categories.push(catData);renderCategories();
   }
   await loadData();selectItem(id);
-  message("Ficha guardada en Supabase. Se incorporará a la web pública en la próxima sincronización automática.","ok");
+  message("Ficha guardada en public.listings. La web pública consulta directamente esta base; puedes actualizarla.","ok");
  }catch(err){
   message((savedId?"La ficha se guardó, pero hubo un problema al actualizar la vista: ":"No se pudo guardar la ficha: ")+(err.message||"error desconocido"),"error");
   if(savedId){try{await loadData();selectItem(savedId)}catch(refreshError){message("La ficha está guardada en Supabase, pero no se pudo recargar Administración: "+refreshError.message,"error")}}
@@ -769,7 +769,7 @@ $("#search").addEventListener("input",refreshList);$("#new-record").onclick=star
  $("#delete-button").onclick=async()=>{
   if(!user||!selectedId||String(selectedId).startsWith("new:"))return;
   const item=effectiveItems().find(x=>x.id===selectedId);if(!item)return;
-  if(!confirm(`¿Eliminar «${item.n||"esta ficha"}» del directorio público? La ficha original no se borrará de fichas_completas.json; quedará marcada como oculta en Supabase.`))return;
+  if(!confirm(`¿Eliminar «${item.n||"esta ficha"}» del directorio público? Se conservará en Supabase como eliminada y dejará de mostrarse en la web.`))return;
   const btn=$("#delete-button");btn.disabled=true;btn.textContent="Eliminando…";
   try{
    const existing=overrides.find(o=>o.listing_id===selectedId);
@@ -810,7 +810,7 @@ async function init(){
      delete fields._xiclana_address_proposal_rejected;
      fields.is_new=Boolean(row.is_new);
      const deleted=fields._xiclana_deleted===true;
-     return {id,data:fields,is_published:true,is_deleted:deleted,
+     return {id,data:fields,is_published:!deleted,is_deleted:deleted,
       verified_at:row.verified_at||existing.data?.verified_at||null,
       updated_at:new Date().toISOString(),updated_by:userData.user.id};
     }));
