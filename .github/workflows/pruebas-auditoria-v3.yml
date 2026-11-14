@@ -1,0 +1,26 @@
+name: Pruebas unitarias de auditoría V3
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "v3/auditar_catalogo.py"
+      - "v3/test_auditar_catalogo.py"
+      - ".github/workflows/pruebas-auditoria-v3.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Ejecutar pruebas unitarias
+        run: python -m unittest discover -s v3 -p "test_auditar_catalogo.py" -v
