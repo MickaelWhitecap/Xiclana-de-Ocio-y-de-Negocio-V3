@@ -709,7 +709,7 @@ function render(){
   const groupEntries=Object.entries(groupMap).filter(([,categories])=>categories.some(category=>all.some(x=>x.t===modo&&x.c===category)));
   const mappedCategories=new Set(Object.values(groupMap).flat());
   const ungroupedCategories=[...new Set(all.filter(x=>x.t===modo).map(x=>x.c))].filter(category=>!mappedCategories.has(category));
-  if(ungroupedCategories.length)groupEntries.push(["Otros",ungroupedCategories]);
+  if(ungroupedCategories.length){groupMap["Otros"]=ungroupedCategories;groupEntries.push(["Otros",ungroupedCategories]);}
   const gr=$("#groups");gr.textContent="";
   [["","Todas"],...groupEntries].forEach(([value,label])=>{const b=el("button","chip"+(grupo===value?" on":""),(grupo===value?"✓ ":"")+label);b.onclick=()=>{grupo=value;cat="";render()};gr.append(b)});
   const allowed=grupo?new Set(groupMap[grupo]||[]):null;
