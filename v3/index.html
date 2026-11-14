@@ -644,20 +644,20 @@ const $=s=>document.querySelector(s),el=(t,c,x)=>{const e=document.createElement
 const map=s=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(s+" Chiclana de la Frontera 11130");
 const GROUPS={
  ocio:{
-  "Comer y beber":["Bar","Cafetería","Comida rápida","Heladería","Restaurante","Bodega"],
-  "Cultura y visitas":["Biblioteca","Cultura","Museo","Oficina de turismo","Patrimonio","Ruta cultural","Teatro"],
-  "Naturaleza y aire libre":["Atracción","Aventura","Mirador","Naturaleza","Parque","Playa","Plaza / paseo"],
-  "Deporte y bienestar":["Baile","Balneario y spa","Buceo","Deporte","Estadio","Gimnasio","Golf","Instalación deportiva","Náutica"],
+  "Comer y beber":["Bar","Cafetería","Comida rápida","Heladería","Restaurante","Restauración","Bodega"],
+  "Cultura y visitas":["Arte público","Biblioteca","Cultura","Espacios culturales","Información turística","Museo","Ocio y cultura","Oficina de turismo","Patrimonio","Patrimonio y culto","Ruta cultural","Teatro"],
+  "Naturaleza y aire libre":["Atracción","Aventura","Mirador","Naturaleza","Parque","Parques infantiles","Playa","Plaza / paseo"],
+  "Deporte y bienestar":["Baile","Balneario y spa","Buceo","Deporte","Estadio","Gimnasio","Golf","Instalación deportiva","Instalaciones deportivas","Náutica"],
   "Ocio familiar y estancias":["Camping","Discoteca","Ocio familiar","Ocio infantil"]
  },
  negocio:{
   "Alojamiento":["Alojamiento","Apartamentos","Camping","Hostal","Hotel"],
-  "Alimentación":["Bodega","Bodega y licores","Carnicería","Delicatessen","Frutería","Mercado","Panadería","Pescadería","Supermercado","Tienda de barrio"],
-  "Compras":["Bazar","Bicicletas","Calzado","Comercio","Decoración","Deportes","Droguería","Electrónica","Estanco","Floristería","Joyería","Juguetes","Librería","Mascotas","Muebles","Óptica","Papelería","Quiosco","Regalos","Ropa","Telas","Telefonía"],
-  "Servicios profesionales":["Abogado","Administración","Agencia de viajes","Banco","Empresa","Inmobiliaria","Oficina","Oficios y artesanía","Seguros"],
-  "Motor y movilidad":["Alquiler de coches","Autoescuela","Concesionario","Gasolinera","Lavado de coches","Neumáticos","Parking","Taller mecánico"],
-  "Salud y cuidado":["Clínica","Consulta médica","Dentista","Estética","Farmacia","Peluquería","Veterinario"],
-  "Educación, hogar y servicios públicos":["Colegio","Correos","Ferretería","Guardería","Jardinería","Lavandería","Servicio público"]
+  "Alimentación":["Alimentación","Bodega","Bodega y licores","Carnicería","Delicatessen","Frutería","Mercado","Panadería","Pescadería","Supermercado","Tienda de barrio"],
+  "Compras":["Bazar","Bicicletas","Calzado","Comercio","Decoración","Deportes","Droguería","Electrónica","Estanco","Floristería","Joyería","Joyería y relojería","Juguetes","Librería","Mascotas","Muebles","Muebles y decoración","Óptica","Papelería","Quiosco","Regalos","Ropa","Telas","Telefonía"],
+  "Servicios profesionales":["Abogado","Administración","Agencia de viajes","Banco","Empresa","Inmobiliaria","Oficina","Oficios y artesanía","Servicios y negocios","Seguros"],
+  "Motor y movilidad":["Alquiler de coches","Automoción","Autoescuela","Concesionario","Gasolinera","Lavado de coches","Neumáticos","Parking","Taller mecánico"],
+  "Salud y cuidado":["Clínica","Consulta médica","Dentista","Estética","Farmacia","Peluquería","Salud","Belleza y deporte","Bienestar","Veterinario"],
+  "Educación, hogar y servicios públicos":["Colegio","Educación","Emergencias","Correos","Ferretería","Guardería","Jardinería","Lavandería","Servicio público","Servicios públicos","Servicios sociales","Transporte"]
  }
 };
 let cat="",grupo="",modo="";
@@ -707,6 +707,9 @@ function render(){
  const all=[...SEED,...mine].sort((a,b)=>String(a.n||"").localeCompare(String(b.n||""),"es",{sensitivity:"base",numeric:true}));document.querySelectorAll(".cnt").forEach(e=>{const k=all.filter(x=>x.t===e.dataset.c).length;e.textContent=k.toLocaleString("es-ES")+(k===1?" ficha":" fichas")});const q=$("#q").value,t=modo;
   const groupMap=GROUPS[modo]||{};
   const groupEntries=Object.entries(groupMap).filter(([,categories])=>categories.some(category=>all.some(x=>x.t===modo&&x.c===category)));
+  const mappedCategories=new Set(Object.values(groupMap).flat());
+  const ungroupedCategories=[...new Set(all.filter(x=>x.t===modo).map(x=>x.c))].filter(category=>!mappedCategories.has(category));
+  if(ungroupedCategories.length)groupEntries.push(["Otros",ungroupedCategories]);
   const gr=$("#groups");gr.textContent="";
   [["","Todas"],...groupEntries].forEach(([value,label])=>{const b=el("button","chip"+(grupo===value?" on":""),(grupo===value?"✓ ":"")+label);b.onclick=()=>{grupo=value;cat="";render()};gr.append(b)});
   const allowed=grupo?new Set(groupMap[grupo]||[]):null;
