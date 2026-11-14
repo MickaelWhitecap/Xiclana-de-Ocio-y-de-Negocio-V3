@@ -604,6 +604,21 @@ body{background-color:var(--bg)}
   line-height:1 !important;
 }
 </style>
+<style id="completion-six-segments-fix">
+/* Los seis campos deben verse siempre como seis bloques independientes. */
+.card .completitud{flex-shrink:0;overflow:visible}
+.card .completitud .completion-track{
+ display:flex!important;flex:0 0 58px;width:58px;min-width:58px;height:14px;
+ gap:3px;align-items:center;justify-content:space-between;overflow:visible
+}
+.card .completitud .completion-track i{
+ display:block!important;flex:0 0 7px;width:7px!important;min-width:7px;height:12px!important;
+ margin:0;padding:0;border:1px solid var(--mut);border-radius:2px;background:transparent
+}
+.card .completitud .completion-track i.on{
+ background:var(--acc);border-color:var(--acc)
+}
+</style>
 </head><body>
 <header class="hero foto"><svg viewBox="0 0 1200 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect class="salt" width="1200" height="340"/><rect class="p" style="--d:0" x="0" y="0" width="300" height="150" fill="#f08fa8"/><rect class="p" style="--d:1" x="308" y="0" width="220" height="100" fill="#f7c1cd"/><rect class="p" style="--d:2" x="536" y="0" width="330" height="170" fill="#e56b8d"/><rect class="p" style="--d:3" x="874" y="0" width="326" height="120" fill="#f3a3b6"/><rect class="p" style="--d:4" x="0" y="158" width="180" height="182" fill="#8cc9cf"/><rect class="p" style="--d:5" x="188" y="158" width="330" height="90" fill="#5fb0ba"/><rect class="p" style="--d:6" x="526" y="178" width="180" height="162" fill="#f7c1cd"/><rect class="p" style="--d:7" x="714" y="178" width="200" height="100" fill="#f08fa8"/><rect class="p" style="--d:8" x="922" y="128" width="278" height="212" fill="#8cc9cf"/><rect class="p" style="--d:9" x="188" y="256" width="330" height="84" fill="#f3a3b6"/><rect class="p" style="--d:10" x="714" y="286" width="200" height="54" fill="#5fb0ba"/><circle cx="1080" cy="62" r="34" fill="#f6b93b"/></svg><div class="t"><h1>Xiclana <span class="de-conector">de</span> <span class="brand-ocio">Ocio</span> <span class="de-conector">y</span> <span class="de-conector">de</span> <span class="brand-negocio">Negocio</span></h1><p>Playas, marismas, bares y comercios de Chiclana de la Frontera (11130, Cádiz) en un solo sitio.</p></div></header>
 <div class="cuerpo"><aside class="lado" id="lado-i" aria-label="Espacio destacado"></aside><div class="centro"><section id="elige"><h2>¿Qué buscas hoy?</h2><div class="dos">
