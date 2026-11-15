@@ -50,7 +50,8 @@ function cleanPatch(input: unknown) {
     if (!editableFields.has(key) || typeof raw !== "string") throw new Error("Se ha incluido un campo no permitido.");
     const value = raw.trim();
     if (value.length > limits[key]) throw new Error("Uno de los campos supera la longitud permitida.");
-    patch[key] = value;
+    // Un campo vacío representa una petición explícita de borrado.
+    patch[key] = value === "" ? null : value;
   }
   if (patch.e && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(patch.e)) throw new Error("El correo electrónico no tiene un formato válido.");
   if (patch.w) {
@@ -104,7 +105,7 @@ Deno.serve(async (req: Request) => {
       let patch: Record<string, string>;
       try { patch = cleanPatch(body.fields); }
       catch (error) { return response(req, { error: error instanceof Error ? error.message : "Los datos enviados no son válidos." }, 400); }
-      const changed = Object.entries(patch).filter(([key, value]) => String(listing.data?.[key] ?? "").trim() !== value);
+      const changed = Object.entries(patch).filter(([key, value]) => String(listing.data?.[key] ?? "").trim() !== String(value ?? "").trim());
       if (!changed.length) return response(req, { error: "No hay cambios nuevos que enviar." }, 400);
       const safePatch = Object.fromEntries(changed);
       const fields = {
