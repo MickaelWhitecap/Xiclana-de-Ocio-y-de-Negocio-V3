@@ -792,10 +792,20 @@ async function init(){
  client.from=(table)=>{
   if(table!=="listing_overrides")return supabaseFrom(table);
   return {
-   select:()=>supabaseFrom("listings").select("id,data,is_deleted,verified_at,updated_at").then(result=>({
-    ...result,
-    data:(result.data||[]).map(row=>({listing_id:row.id,fields:{...(row.data||{}),...(row.is_deleted?{_xiclana_deleted:true}:{})},is_new:Boolean(row.data?.is_new),verified_at:row.verified_at,updated_at:row.updated_at,is_deleted:row.is_deleted}))
-   })),
+   // Supabase limita por defecto cada respuesta REST a 1.000 filas.
+   // Leer por páginas ordenadas evita que Administración pierda fichas del catálogo maestro.
+   select:async()=>{
+    const rows=[];const pageSize=500;let offset=0;
+    while(true){
+     const result=await supabaseFrom("listings").select("id,data,is_deleted,verified_at,updated_at")
+      .order("id",{ascending:true}).range(offset,offset+pageSize-1);
+     if(result.error)return {...result,data:null};
+     const page=result.data||[];rows.push(...page);
+     if(page.length<pageSize)break;
+     offset+=page.length;
+    }
+    return {data:rows.map(row=>({listing_id:row.id,fields:{...(row.data||{}),...(row.is_deleted?{_xiclana_deleted:true}:{})},is_new:Boolean(row.data?.is_new),verified_at:row.verified_at,updated_at:row.updated_at,is_deleted:row.is_deleted})),error:null};
+   },
    upsert:async(input)=>{
     const {data:userData,error:userError}=await client.auth.getUser();
     if(userError||!userData?.user?.id)return {data:null,error:userError||new Error("No hay una sesión administrativa válida.")};
