@@ -986,9 +986,14 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False):
     if not phone:
         phone=" / ".join(extract_phones(blob))
     phone=" / ".join(sanitize_contact_phones(name,phone))
-    if target and not allow_single_email:
+    if target:
+        # La web oficial puede representar varias sucursales aunque solo haya
+        # una ficha local en el catálogo. En este rastreo dirigido solo se
+        # incorpora el correo asociado por contexto; no se mezclan teléfonos,
+        # horarios ni descripciones generales de otras sedes.
         phone=""
         hours=""
+        desc=""
     if target:
         email=select_contextual_email(body,target,allow_single=allow_single_email)
     else:
@@ -2078,7 +2083,8 @@ def main():
        "dominios_web_oficiales_consultados":official_domains,
        "paginas_web_oficiales_consultadas":official_pages,
        "consultas_por_ficha_y_pagina_oficial":len(official_jobs),
-       "correos_detectados_en_webs_oficiales":sum(1 for x in official_records if x.get("email")),
+       "fichas_con_email_detectado_en_web_oficial":len({str(x.get("_target_id","")) for x in official_records if x.get("email")}),
+       "correos_detectados_en_webs_oficiales":len({str(x.get("email","")).strip().lower() for x in official_records if x.get("email")}),
        "urls_encontradas":len(links),"candidatas_nuevas":len(added),
        "fichas_enriquecidas":len(fichas_enriquecidas),"campos_actualizados":campos_actualizados,
        "conflictos_datos_no_sobrescritos":conflictos_no_sobrescritos,
