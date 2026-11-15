@@ -918,15 +918,15 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False):
     # es más fiable que cualquier enlace genérico (mapas o redes sociales).
     if not website:
         for _cls,href,label in p.links:
-            target=urllib.parse.urljoin(final_url,html.unescape(href))
-            host=urllib.parse.urlparse(target).netloc.lower()
+            link_target=urllib.parse.urljoin(final_url,html.unescape(href))
+            host=urllib.parse.urlparse(link_target).netloc.lower()
             label_n=norm(label)
             host_label=re.sub(r"^www\.", "", host)
             label_host=re.sub(r"^www\.", "", str(label or "").strip().lower()).rstrip("/")
             explicit_web=any(k in label_n for k in ("sitio web","web oficial","website","pagina web"))
             domain_label=bool(re.fullmatch(r"[a-z0-9.-]+\.[a-z]{2,}",label_host)) and label_host==host_label
             if host and host != urllib.parse.urlparse(final_url).netloc.lower() and (explicit_web or domain_label):
-                website=clean_website(target,final_url)
+                website=clean_website(link_target,final_url)
                 if website:
                     break
     if not addr:
@@ -2078,7 +2078,7 @@ def main():
        "dominios_web_oficiales_consultados":official_domains,
        "paginas_web_oficiales_consultadas":official_pages,
        "consultas_por_ficha_y_pagina_oficial":len(official_jobs),
-       "correos_detectados_en_webes_oficiales":sum(1 for x in official_records if x.get("email")),
+       "correos_detectados_en_webs_oficiales":sum(1 for x in official_records if x.get("email")),
        "urls_encontradas":len(links),"candidatas_nuevas":len(added),
        "fichas_enriquecidas":len(fichas_enriquecidas),"campos_actualizados":campos_actualizados,
        "conflictos_datos_no_sobrescritos":conflictos_no_sobrescritos,
