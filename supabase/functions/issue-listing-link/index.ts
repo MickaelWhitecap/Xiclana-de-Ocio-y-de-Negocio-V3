@@ -3,11 +3,24 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const ADMIN_ID = "2ebd10a1-fbae-454b-a12b-e1692f1eed17";
 const PAGE_BASE = "https://mickaelwhitecap.github.io/Xiclana-de-Ocio-y-de-Negocio-V3";
 
-function response(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
+const corsOrigins = new Set([
+  "https://mickaelwhitecap.github.io",
+  "http://localhost:5500",
+  "http://127.0.0.1:5500",
+]);
+
+function response(req: Request, body: unknown, status = 200) {
+  const origin = req.headers.get("Origin") || "";
+  const headers = new Headers({
+    "Content-Type": "application/json",
+    "Vary": "Origin",
   });
+  if (corsOrigins.has(origin)) {
+    headers.set("Access-Control-Allow-Origin", origin);
+    headers.set("Access-Control-Allow-Headers", "authorization, x-client-info, apikey, content-type");
+    headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  }
+  return new Response(JSON.stringify(body), { status, headers });
 }
 
 function getSecretKey() {
@@ -47,11 +60,14 @@ async function sha256(value: string) {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method !== "POST") return response({ error: "Método no permitido." }, 405);
+  const origin = req.headers.get("Origin") || "";
+  if (origin && !corsOrigins.has(origin)) return response(req, { error: "Origen no autorizado." }, 403);
+  if (req.method === "OPTIONS") return response(req, { ok: true });
+  if (req.method !== "POST") return response(req, { error: "Método no permitido." }, 405);
   try {
     const authHeader = req.headers.get("Authorization") || "";
     const bearer = authHeader.match(/^Bearer\s+(.+)$/i)?.[1] || "";
-    if (!bearer) return response({ error: "Sesión administrativa requerida." }, 401);
+    if (!bearer) return response(req, { error: "Sesión administrativa requerida." }, 401);
 
     const url = Deno.env.get("SUPABASE_URL") || "";
     const publishableKey = getPublishableKey();
@@ -63,17 +79,17 @@ Deno.serve(async (req: Request) => {
       auth: { persistSession: false, autoRefreshToken: false },
     });
     const { data: authData, error: authError } = await authClient.auth.getUser(bearer);
-    if (authError || authData.user?.id !== ADMIN_ID) return response({ error: "No tienes permiso para gestionar enlaces." }, 403);
+    if (authError || authData.user?.id !== ADMIN_ID) return response(req, { error: "No tienes permiso para gestionar enlaces." }, 403);
 
     const admin = createClient(url, secretKey, { auth: { persistSession: false, autoRefreshToken: false } });
     const body = await req.json();
     const listingId = typeof body.listing_id === "string" ? body.listing_id.trim() : "";
-    if (!listingId) return response({ error: "Falta el identificador de la ficha." }, 400);
+    if (!listingId) return response(req, { error: "Falta el identificador de la ficha." }, 400);
 
     const { data: listing, error: listingError } = await admin
       .from("listings").select("id, is_published, is_deleted").eq("id", listingId).maybeSingle();
     if (listingError || !listing || !listing.is_published || listing.is_deleted) {
-      return response({ error: "La ficha no existe o no está publicada." }, 404);
+      return response(req, { error: "La ficha no existe o no está publicada." }, 404);
     }
 
     if (body.action === "revoke") {
@@ -81,9 +97,9 @@ Deno.serve(async (req: Request) => {
         .update({ revoked_at: new Date().toISOString() })
         .eq("listing_id", listingId).is("revoked_at", null);
       if (error) throw error;
-      return response({ ok: true, revoked: true });
+      return response(req, { ok: true, revoked: true });
     }
-    if (body.action !== "issue") return response({ error: "Acción no reconocida." }, 400);
+    if (body.action !== "issue") return response(req, { error: "Acción no reconocida." }, 400);
 
     const token = randomToken();
     const tokenHash = await sha256(token);
@@ -103,12 +119,12 @@ Deno.serve(async (req: Request) => {
     });
     if (insertError) throw insertError;
 
-    return response({
+    return response(req, {
       ok: true,
       expires_at: expires,
       url: PAGE_BASE + "/completar-ficha.html?token=" + encodeURIComponent(token),
     });
   } catch (error) {
-    return response({ error: error instanceof Error ? error.message : "Error interno." }, 400);
+    return response(req, { error: error instanceof Error ? error.message : "Error interno." }, 500);
   }
 });
