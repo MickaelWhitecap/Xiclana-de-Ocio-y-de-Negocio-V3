@@ -101,7 +101,9 @@ Deno.serve(async (req: Request) => {
     }
 
     if (body.action === "submit") {
-      const patch = cleanPatch(body.fields);
+      let patch: Record<string, string>;
+      try { patch = cleanPatch(body.fields); }
+      catch (error) { return response(req, { error: error instanceof Error ? error.message : "Los datos enviados no son válidos." }, 400); }
       const changed = Object.entries(patch).filter(([key, value]) => String(listing.data?.[key] ?? "").trim() !== value);
       if (!changed.length) return response(req, { error: "No hay cambios nuevos que enviar." }, 400);
       const safePatch = Object.fromEntries(changed);
@@ -126,6 +128,7 @@ Deno.serve(async (req: Request) => {
 
     return response(req, { error: "Acción no reconocida." }, 400);
   } catch (error) {
-    return response(req, { error: error instanceof Error ? error.message : "Error interno." }, 400);
+    console.error("Private listing portal request failed", error);
+    return response(req, { error: "No se ha podido procesar la solicitud. Inténtalo más tarde." }, 500);
   }
 });
