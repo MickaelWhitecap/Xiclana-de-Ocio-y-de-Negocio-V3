@@ -873,7 +873,7 @@ def is_chiclana(address, locality, postal, body, title, url, trusted_local=False
         if any(path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS[host]): return True
     return False
 
-def extract(url, trusted_local=False):
+def extract(url, trusted_local=False, target=None, allow_single_email=False):
     if not allowed(url): return None
     try: body,final_url,ctype=get(url)
     except Exception: return None
@@ -891,6 +891,10 @@ def extract(url, trusted_local=False):
     # Prioriza el nombre estructurado de la ficha; el H1 puede contener SEO del portal.
     raw_name=textval(obj.get("name")) or (p.headings[0] if p.headings else "") or title
     name=clean_business_name(raw_name)
+    if target:
+        target_name=record_value(target,"n","nombre","name")
+        if target_name:
+            name=clean_business_name(target_name)
     if not name or not valid_business_name(name): return None
     # Compara JSON-LD, metadescripción y texto visible: algunos directorios
     # publican metadescripciones truncadas aunque el contenido completo esté en la ficha.
@@ -908,6 +912,8 @@ def extract(url, trusted_local=False):
     phone=" / ".join(dict.fromkeys(phone_values))
     email=textval(obj.get("email"))
     website=clean_website(textval(obj.get("url")),final_url)
+    if target:
+        website=record_value(target,"w","web","website") or website
     # En fichas de directorios, el enlace externo rotulado como web oficial
     # es más fiable que cualquier enlace genérico (mapas o redes sociales).
     if not website:
@@ -941,6 +947,13 @@ def extract(url, trusted_local=False):
     # No conservar direcciones que no acrediten Chiclana: una página de directorio
     # puede incluir la sede de otra ciudad o datos globales de la propia guía.
     addr=clean_address(addr,locality,postal)
+    if target:
+        target_address=record_value(target,"a","direccion","address")
+        if target_address:
+            addr=target_address
+            locality="Chiclana de la Frontera"
+            postal_match=re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",target_address)
+            postal=postal_match.group(1) if postal_match else ""
     if addr and not re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",addr) and "chiclana" not in norm(addr):
         addr=""
     hours=obj.get("openingHours") or obj.get("openingHoursSpecification") or ""
@@ -973,18 +986,21 @@ def extract(url, trusted_local=False):
     if not phone:
         phone=" / ".join(extract_phones(blob))
     phone=" / ".join(sanitize_contact_phones(name,phone))
-    if not email:
-        mailto_values=[]
-        for _cls,href,_label in p.links:
-            if str(href).lower().startswith("mailto:"):
-                value=urllib.parse.unquote(str(href)[7:].split("?",1)[0]).strip()
-                if re.fullmatch(r"(?i)[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}",value):
-                    mailto_values.append(value)
-        mailto_values=list(dict.fromkeys(mailto_values))
-        if len(mailto_values)==1: email=mailto_values[0]
-    if not email:
-        email_values=list(dict.fromkeys(re.findall(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b",blob)))
-        if len(email_values)==1: email=email_values[0]
+    if target:
+        email=select_contextual_email(body,target,allow_single=allow_single_email)
+    else:
+        if not email:
+            mailto_values=[]
+            for _cls,href,_label in p.links:
+                if str(href).lower().startswith("mailto:"):
+                    value=urllib.parse.unquote(str(href)[7:].split("?",1)[0]).strip()
+                    if re.fullmatch(r"(?i)[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}",value):
+                        mailto_values.append(value)
+            mailto_values=list(dict.fromkeys(mailto_values))
+            if len(mailto_values)==1: email=mailto_values[0]
+        if not email:
+            email_values=list(dict.fromkeys(re.findall(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b",blob)))
+            if len(email_values)==1: email=email_values[0]
     # Nunca atribuir al negocio el correo corporativo del directorio que aloja la ficha.
     if is_directory_email(email,final_url): email=""
     # Una localidad aislada no constituye una dirección postal verificable.
@@ -1362,6 +1378,10 @@ def self_test():
     assert is_chiclana("Calle Real 1, 11130, Chiclana","", "11130", "", "", "https://example.org")
     assert is_chiclana("","Chiclana de la Frontera","", "", "", "https://example.org")
     assert not is_chiclana("","", "", "Servicio en Chiclana y alrededores", "Empresa", "https://example.org")
+    email_sample="""<html><body><h2>CHICLANA DE LA FRONTERA - LA BARROSA</h2><p>Calle El Bogavante, 12-10</p><p>Email: fmlabarrosa@elfogondemariana.com</p><h2>CÁDIZ - PASEO MARÍTIMO</h2><p>Calle Brasil, 1</p><p>Email: fmbrasil@elfogondemariana.com</p></body></html>"""
+    assert select_contextual_email(email_sample,{"n":"El Fogón de Mariana","a":"Calle El Bogavante 10, 11139 Chiclana de la Frontera"})=="fmlabarrosa@elfogondemariana.com"
+    assert select_contextual_email("<p>Correo: info@negocio.example</p>",{"n":"Negocio Local","a":"Calle Real 1, Chiclana"},allow_single=True)=="info@negocio.example"
+    assert select_contextual_email("<p>Correo: info@negocio.example</p>",{"n":"Negocio Local","a":"Calle Real 1, Chiclana"},allow_single=False)==""
     assert url_key("HTTPS://Example.COM/Ruta/ConMayusculas/") == "https://example.com/Ruta/ConMayusculas"
     page=Page(); page.feed('<h1>Empresa local</h1><a class="external" href="https://example.org">Página web</a>')
     assert page.links == [("external","https://example.org","Página web")]
@@ -1710,6 +1730,109 @@ def serialize_catalog(data):
     """Serializa el catálogo maestro en JSON compacto para respetar el límite de 100 MB de GitHub."""
     return json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n"
 
+def select_contextual_email(body, target, allow_single=False):
+    """Asocia un correo a la ficha por proximidad textual; evita mezclar sucursales."""
+    raw=html.unescape(str(body or ""))
+    raw=re.sub(r"(?is)<(script|style).*?>.*?</\1>", " ", raw)
+    text=" ".join(re.sub(r"<[^>]*>", " ", raw).split())
+    candidates=list(dict.fromkeys(re.findall(
+        r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", raw
+    )))
+    if len(candidates)==1 and allow_single:
+        return candidates[0].strip().lower()
+    name=str((target or {}).get("n") or (target or {}).get("nombre") or (target or {}).get("name") or "")
+    address=str((target or {}).get("a") or (target or {}).get("direccion") or (target or {}).get("address") or "")
+    stop={"calle","avenida","avda","av","plaza","paseo","carretera","ctra","camino","chiclana","frontera","cadiz","espana","de","la","el","los","las","del","numero"}
+    address_tokens=[x for x in norm(address).split() if len(x)>3 and x not in stop and not x.isdigit() and x not in {"11130","11138","11139"}]
+    name_tokens=[x for x in norm(name).split() if len(x)>3 and x not in stop]
+    scored=[]
+    for candidate in candidates:
+        best=0
+        for match in re.finditer(re.escape(candidate),text,re.I):
+            context=text[max(0,match.start()-420):min(len(text),match.end()+420)]
+            context_n=norm(context)
+            street_hits=sum(1 for token in address_tokens if token in context_n)
+            name_hits=sum(1 for token in name_tokens if token in context_n)
+            score=street_hits*5 + (3 if name_hits>=2 else name_hits) + (1 if "chiclana" in context_n else 0)
+            best=max(best,score)
+        if best>=3:
+            scored.append((best,candidate.strip().lower()))
+    if not scored:
+        return ""
+    scored.sort(reverse=True)
+    if len(scored)>1 and scored[0][0]==scored[1][0]:
+        return ""
+    return scored[0][1]
+
+
+def discover_official_website_jobs(records, max_pages_per_host=4, max_pages_total=1500):
+    """Explora webs ya vinculadas al catálogo y prioriza páginas interiores de contacto."""
+    grouped={}
+    for record in records:
+        if not isinstance(record,dict):
+            continue
+        website=record_value(record,"w","web","website")
+        parsed=urllib.parse.urlsplit(website)
+        if parsed.scheme.lower() not in ("http","https") or not parsed.netloc:
+            continue
+        grouped.setdefault(parsed.netloc.lower(),[]).append(record)
+    jobs=[]
+    pages_seen=0
+    page_hints={
+        "contact":10,"contacto":10,"correo":10,"email":10,"sucursal":9,"sucursales":9,
+        "restaurante":8,"restaurantes":8,"establecimiento":8,"ubicacion":8,"localizacion":8,
+        "horario":7,"opening":7,"about":6,"nosotros":6,"quienes-somos":6,"empresa":6,
+        "reservas":6,"reservation":6,"legal":5,"aviso-legal":5,"privacidad":5,"privacy":5,
+        "carta":4,"menu":4,"datos":4,"locales":8,"tiendas":7
+    }
+    for host,targets in sorted(grouped.items()):
+        seeds=list(dict.fromkeys(record_value(x,"w","web","website") for x in targets))
+        selected=[]
+        ranked=[]
+        for seed in seeds:
+            if len(selected)>=max_pages_per_host or pages_seen>=max_pages_total:
+                break
+            if seed not in selected:
+                selected.append(seed)
+            try:
+                if not allowed(seed):
+                    continue
+                body,final_url,_=get(seed,900000)
+                page=Page()
+                page.feed(body)
+                for _cls,href,label in page.links:
+                    candidate=urllib.parse.urljoin(final_url,html.unescape(href))
+                    parsed=urllib.parse.urlsplit(candidate)
+                    if parsed.scheme.lower() not in ("http","https") or parsed.netloc.lower()!=host:
+                        continue
+                    if parsed.path.lower().endswith((".pdf",".jpg",".jpeg",".png",".zip",".doc",".docx")):
+                        continue
+                    if any(x in parsed.path.lower() for x in ("/wp-admin","/wp-json","/cart","/checkout","/login","/buscar","/search")):
+                        continue
+                    hint_text=(parsed.path+" "+str(label or "")).lower()
+                    score=max((weight for hint,weight in page_hints.items() if hint in hint_text),default=0)
+                    if score:
+                        ranked.append((score,candidate))
+            except Exception as exc:
+                print(f"Web oficial no disponible ({seed}): {exc}",flush=True)
+        for _score,candidate in sorted(ranked,key=lambda x:(-x[0],x[1])):
+            if len(selected)>=max_pages_per_host or pages_seen>=max_pages_total:
+                break
+            if candidate not in selected:
+                selected.append(candidate)
+        for page_url in selected:
+            if pages_seen>=max_pages_total:
+                break
+            pages_seen+=1
+            for target in targets:
+                jobs.append({
+                    "url":page_url,
+                    "target":target,
+                    "allow_single_email":len(targets)==1,
+                })
+    return jobs, len(grouped), pages_seen
+
+
 def targeted_catalog_queries(records, limit=50, rotation=0):
     """Genera búsquedas rotativas para fichas existentes que no están completas en N/6."""
     targets=[]
@@ -1728,7 +1851,7 @@ def targeted_catalog_queries(records, limit=50, rotation=0):
     start=(max(0,int(rotation))*limit)%len(targets)
     ordered=targets[start:]+targets[:start]
     selected=ordered[:min(limit,len(ordered))]
-    return [f'"{name}" "Chiclana de la Frontera" (teléfono OR dirección OR contacto)'
+    return [f'"{name}" "Chiclana de la Frontera" (email OR correo OR mailto OR teléfono OR dirección OR horario OR contacto OR sucursales OR reservas)'
             for _,_,name in selected]
 
 
@@ -1817,11 +1940,23 @@ def main():
             try: links.extend(engine(q))
             except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
     links=list(dict.fromkeys(links))[:MAX_PAGES]
+    official_jobs, official_domains, official_pages=discover_official_website_jobs(data["items"])
+    official_records=[]
+    for job in official_jobs:
+        try:
+            record=extract(job["url"],target=job["target"],allow_single_email=job["allow_single_email"])
+        except Exception as exc:
+            print(f"Error en web oficial {job['url']}: {exc}",flush=True)
+            record=None
+        if record:
+            record["_official_site"]=True
+            record["_target_id"]=str(job["target"].get("id") or record_value(job["target"],"n","nombre","name"))
+            official_records.append(record)
     openrta_records=fetch_openrta_records()
     added=[]; seen_pairs=set(); seen_urls=set(); seen_unlocated_names=set()
     coincidencias=[]; registros_conocidos=existing[:]
     fichas_enriquecidas=set(); campos_actualizados=0; conflictos_no_sobrescritos=0
-    for source in links+openrta_records:
+    for source in links+official_records+openrta_records:
         if isinstance(source,dict):
             record=source
             url=record["source_url"]
@@ -1835,7 +1970,9 @@ def main():
         pair=name_key+"|"+addr_key if addr_key else ""
         source_url=record["source_url"]
         u_key=url_key(source_url)
-        if not name_key or u_key in urls or u_key in seen_urls: continue
+        official_site=bool(record.get("_official_site")) if isinstance(source,dict) else False
+        seen_key=u_key+"|"+str(record.get("_target_id","")) if official_site else u_key
+        if not name_key or (u_key in urls and not official_site) or seen_key in seen_urls: continue
         if pair and pair in seen_pairs: continue
         if not pair and name_key in seen_unlocated_names: continue
         candidate={
@@ -1870,7 +2007,7 @@ def main():
                         "tipo":match["kind"],"motivo":"Coincidencia confirmada; no había campos vacíos que completar.",
                         "url_detectada":source_url
                     })
-                seen_urls.add(u_key)
+                seen_urls.add(seen_key)
                 continue
             coincidencias.append({
                 "nombre_detectado":record["name"],
@@ -1878,7 +2015,7 @@ def main():
                 "tipo":match["kind"],"motivo":match["reason"],
                 "similitud":round(match["score"],3),"url_detectada":source_url
             })
-            seen_urls.add(u_key)
+            seen_urls.add(seen_key)
             continue
         # Los directorios locales sin teléfono/web solo pueden completar una ficha
         # existente; no generan candidatas nuevas sin un canal de contacto.
@@ -1897,7 +2034,7 @@ def main():
             })
             seen_urls.add(u_key)
             continue
-        seen_urls.add(u_key)
+        seen_urls.add(seen_key)
         if pair: seen_pairs.add(pair)
         if not pair: seen_unlocated_names.add(name_key)
         digest=hashlib.sha256((name_key+"|"+addr_key+"|"+u_key).encode()).hexdigest()[:16]
@@ -1933,6 +2070,11 @@ def main():
        "fuente_registro_oficial":{"nombre":"OpenRTA - Junta de Andalucía","url":"https://datos.juntadeandalucia.es/api/v0/openrta/search","licencia":"CC BY 4.0"},
        "openrta_registros_validos":len(openrta_records),
        "consultas_fichas_existentes":len(targeted_queries),
+       "fichas_con_web_oficial":sum(1 for x in data["items"] if record_value(x,"w","web","website")),
+       "dominios_web_oficiales_consultados":official_domains,
+       "paginas_web_oficiales_consultadas":official_pages,
+       "consultas_por_ficha_y_pagina_oficial":len(official_jobs),
+       "correos_detectados_en_webes_oficiales":sum(1 for x in official_records if x.get("email")),
        "urls_encontradas":len(links),"candidatas_nuevas":len(added),
        "fichas_enriquecidas":len(fichas_enriquecidas),"campos_actualizados":campos_actualizados,
        "conflictos_datos_no_sobrescritos":conflictos_no_sobrescritos,
