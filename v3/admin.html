@@ -646,7 +646,7 @@ async function reviewProposal(p,nextStatus){
    if(!patch||typeof patch!=="object"||Array.isArray(patch)){message("La propuesta de actualización no contiene campos válidos.","error");return}
    const allowed=new Set(["a","p","e","w","h","s","d"]),cleanPatch={};
    for(const [key,value] of Object.entries(patch)){
-    if(!allowed.has(key)||typeof value!=="string"){message("La propuesta contiene un campo no permitido. No se ha aplicado.","error");return}
+    if(!allowed.has(key)||(value!==null&&typeof value!=="string")){message("La propuesta contiene un campo no permitido. No se ha aplicado.","error");return}
     cleanPatch[key]=value;
    }
    if(!Object.keys(cleanPatch).length){message("La propuesta no contiene cambios aplicables.","error");return}
