@@ -59,6 +59,10 @@ jobs:
           assert all(str(x.get("url_fuente_rastreo","")).startswith(("http://","https://")) for x in candidates), "Hay candidatas sin procedencia"
           summary={
             "fichas_consultadas":len(after["items"]),
+            "fichas_con_web_oficial":rad.get("fichas_con_web_oficial",0),
+            "dominios_web_oficiales_consultados":rad.get("dominios_web_oficiales_consultados",0),
+            "paginas_web_oficiales_consultadas":rad.get("paginas_web_oficiales_consultadas",0),
+            "correos_detectados_en_webs_oficiales":rad.get("correos_detectados_en_webs_oficiales",0),
             "fichas_con_sugerencias_de_enriquecimiento":rad.get("fichas_enriquecidas",0),
             "campos_con_sugerencias":rad.get("campos_actualizados",0),
             "candidatas_nuevas_pendientes":len(candidates),
