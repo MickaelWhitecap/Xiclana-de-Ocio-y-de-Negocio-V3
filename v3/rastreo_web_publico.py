@@ -1752,7 +1752,7 @@ def select_contextual_email(body, target, allow_single=False):
     for candidate in candidates:
         best=0
         for match in re.finditer(re.escape(candidate),text,re.I):
-            context=text[max(0,match.start()-220):min(len(text),match.end()+220)]
+            context=text[max(0,match.start()-90):min(len(text),match.end()+90)]
             context_n=norm(context)
             street_hits=sum(1 for token in address_tokens if token in context_n)
             name_hits=sum(1 for token in name_tokens if token in context_n)
