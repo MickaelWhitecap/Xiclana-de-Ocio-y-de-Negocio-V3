@@ -62,7 +62,7 @@ Deno.serve(async (req: Request) => {
       global: { headers: { Authorization: "Bearer " + bearer } },
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { data: authData, error: authError } = await authClient.auth.getUser();
+    const { data: authData, error: authError } = await authClient.auth.getUser(bearer);
     if (authError || authData.user?.id !== ADMIN_ID) return response({ error: "No tienes permiso para gestionar enlaces." }, 403);
 
     const admin = createClient(url, secretKey, { auth: { persistSession: false, autoRefreshToken: false } });
