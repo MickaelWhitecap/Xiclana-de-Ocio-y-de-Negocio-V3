@@ -159,6 +159,13 @@ class SingleSupabaseMasterTests(unittest.TestCase):
 
 
 
+    def test_admin_loads_the_entire_master_catalog_in_stable_pages(self):
+        admin = (ROOT / "v3/admin.html").read_text(encoding="utf-8")
+        self.assertIn('const pageSize=500;let offset=0;', admin)
+        self.assertIn('.order("id",{ascending:true}).range(offset,offset+pageSize-1)', admin)
+        self.assertIn('if(page.length<pageSize)break;', admin)
+        self.assertIn('return {data:rows.map(row=>', admin)
+
     def test_legacy_json_writing_scripts_are_disabled(self):
         for name in ("actualizar.py", "ampliar_catalogo.py", "extraccion_inicial_osm.py",
                      "incorporar_auditoria_osm.py", "recuperar_direcciones_osm.py"):
