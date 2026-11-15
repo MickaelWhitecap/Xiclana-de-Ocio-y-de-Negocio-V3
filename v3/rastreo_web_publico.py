@@ -986,6 +986,9 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False):
     if not phone:
         phone=" / ".join(extract_phones(blob))
     phone=" / ".join(sanitize_contact_phones(name,phone))
+    if target and not allow_single_email:
+        phone=""
+        hours=""
     if target:
         email=select_contextual_email(body,target,allow_single=allow_single_email)
     else:
@@ -1749,7 +1752,7 @@ def select_contextual_email(body, target, allow_single=False):
     for candidate in candidates:
         best=0
         for match in re.finditer(re.escape(candidate),text,re.I):
-            context=text[max(0,match.start()-420):min(len(text),match.end()+420)]
+            context=text[max(0,match.start()-220):min(len(text),match.end()+220)]
             context_n=norm(context)
             street_hits=sum(1 for token in address_tokens if token in context_n)
             name_hits=sum(1 for token in name_tokens if token in context_n)
@@ -1803,7 +1806,8 @@ def discover_official_website_jobs(records, max_pages_per_host=4, max_pages_tota
                 for _cls,href,label in page.links:
                     candidate=urllib.parse.urljoin(final_url,html.unescape(href))
                     parsed=urllib.parse.urlsplit(candidate)
-                    if parsed.scheme.lower() not in ("http","https") or parsed.netloc.lower()!=host:
+                    final_host=urllib.parse.urlsplit(final_url).netloc.lower()
+                    if parsed.scheme.lower() not in ("http","https") or parsed.netloc.lower()!=final_host:
                         continue
                     if parsed.path.lower().endswith((".pdf",".jpg",".jpeg",".png",".zip",".doc",".docx")):
                         continue
