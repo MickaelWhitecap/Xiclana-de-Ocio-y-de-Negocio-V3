@@ -43,9 +43,9 @@ function adminClient() {
 const editableFields = new Set(["a", "p", "e", "w", "h", "s", "d"]);
 const limits: Record<string, number> = { a: 240, p: 100, e: 180, w: 500, h: 300, s: 500, d: 3000 };
 
-function cleanPatch(input: unknown) {
+function cleanPatch(input: unknown): Record<string, string | null> {
   if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Los datos enviados no son válidos.");
-  const patch: Record<string, string> = {};
+  const patch: Record<string, string | null> = {};
   for (const [key, raw] of Object.entries(input as Record<string, unknown>)) {
     if (!editableFields.has(key) || typeof raw !== "string") throw new Error("Se ha incluido un campo no permitido.");
     const value = raw.trim();
@@ -102,7 +102,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (body.action === "submit") {
-      let patch: Record<string, string>;
+      let patch: Record<string, string | null>;
       try { patch = cleanPatch(body.fields); }
       catch (error) { return response(req, { error: error instanceof Error ? error.message : "Los datos enviados no son válidos." }, 400); }
       const changed = Object.entries(patch).filter(([key, value]) => String(listing.data?.[key] ?? "").trim() !== String(value ?? "").trim());
