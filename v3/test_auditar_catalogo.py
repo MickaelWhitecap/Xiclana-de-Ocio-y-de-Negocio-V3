@@ -170,6 +170,27 @@ class UsefulCompletenessAndVerificationTests(unittest.TestCase):
         })
         self.assertEqual(result["total_fichas"], 3)
 
+    def test_legacy_incompleta_is_not_a_verification_state(self):
+        result = audit.resumen_completitud_y_verificacion([
+            {"id": "legacy", "estado_verificacion": "incompleta"}
+        ])
+        self.assertEqual(result["estados_verificacion"], {
+            "verificada": 0, "pendiente": 0, "insuficiente": 0, "otros": 1
+        })
+
+    def test_admin_and_public_page_share_the_same_six_fields_and_status_labels(self):
+        root = Path(__file__).parent
+        admin = (root / "admin.html").read_text(encoding="utf-8")
+        public = (root / "index.html").read_text(encoding="utf-8")
+        six_fields = '["a","p","e","w","h","d"]'
+        self.assertIn(six_fields, admin)
+        self.assertIn('const camposUtiles=["a","p","e","w","h","d"]', public)
+        for label in ("Verificada", "Pendiente de verificar", "Datos Dudosos"):
+            self.assertIn(label, admin)
+            self.assertIn(label, public)
+        self.assertNotIn("Incompleta", admin)
+        self.assertNotIn("Incompleta", public)
+
     def test_verification_is_independent_from_completeness(self):
         items = [
             {"id": "a", "estado_verificacion": "insuficiente"},
