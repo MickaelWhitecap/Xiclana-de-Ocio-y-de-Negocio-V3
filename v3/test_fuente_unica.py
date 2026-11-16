@@ -59,6 +59,12 @@ class RadSafeEnrichmentTests(unittest.TestCase):
         self.assertEqual(result["saltadas_por_no_verificadas_o_inactivas"],1)
         request.assert_not_called()
 
+    def test_missing_verification_status_is_not_overridden_by_verified_at(self):
+        result, request = self._run(status=None)
+        self.assertEqual(result["fichas_actualizadas"],0)
+        self.assertEqual(result["saltadas_por_no_verificadas_o_inactivas"],1)
+        request.assert_not_called()
+
     def test_rad_cannot_change_verification_or_publication_fields(self):
         with self.assertRaises(RuntimeError):
             self._run(extra_field="estado_verificacion")
@@ -156,6 +162,12 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertIn('supabaseFrom("listings").select("id,data,is_deleted,verified_at,updated_at")', admin)
         self.assertIn('return supabaseFrom("listings").upsert(prepared,{onConflict:"id"})', admin)
         self.assertIn('is_published:!deleted,is_deleted:deleted', admin)
+
+    def test_admin_verified_at_follows_explicit_verification_status(self):
+        admin = (ROOT / "v3/admin.html").read_text(encoding="utf-8")
+        self.assertIn('fields.estado_verificacion=allowedStatuses.includes(nextStatus)?nextStatus:"pendiente"', admin)
+        self.assertIn('const verifiedAt=fields.estado_verificacion==="verificada"', admin)
+        self.assertIn(':null;', admin)
 
 
 
