@@ -172,6 +172,9 @@ def sync_enrichment(before_path, after_path):
         unsafe = sorted(set(changed_keys) - allowed_fields)
         if unsafe:
             raise RuntimeError(f"RAD intentó modificar campos no autorizados en {ident}: {unsafe}")
+        verification_fields = sorted(set(changed_keys) & {"estado_verificacion", "f", "v"})
+        if verification_fields and not promote:
+            raise RuntimeError(f"RAD intentó cambiar el estado o la procedencia de verificación sin prueba de web oficial en {ident}: {verification_fields}")
         current_clean = {k: v for k, v in current_data.items() if k not in meta_keys}
         if current_clean != before_data or current.get("updated_at") != original.get("_xiclana_updated_at"):
             conflict_count += 1
