@@ -1,6 +1,16 @@
 name: Pruebas unitarias de auditoría V3
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "v3/admin.html"
+      - "v3/index.html"
+      - "v3/auditar_catalogo.py"
+      - "v3/test_auditar_catalogo.py"
+      - "v3/test_fuente_unica.py"
+      - "v3/rastreo_web_publico.py"
+      - ".github/workflows/pruebas-auditoria-v3.yml"
   pull_request:
     branches: [main]
     paths:
