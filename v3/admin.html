@@ -733,7 +733,7 @@ form.addEventListener("submit",async e=>{
  try{
   const fields={...(overrides.find(o=>String(o.listing_id)===String(selectedId))?.fields||{})};
   const original=effectiveItems().find(x=>String(x.id)===String(selectedId))||{};
-  fieldNames.forEach(k=>{const input=form.elements[k];if(!input)throw new Error("Falta el campo "+k+" en el formulario.");const raw=input.value;fields[k]=(["lat","lon"].includes(k)||raw.trim()==="")?(raw.trim()===""?null:Number(raw)):raw.trim()});
+  fieldNames.forEach(k=>{const input=form.elements[k];if(!input)throw new Error("Falta el campo "+k+" en el formulario.");const raw=input.value.trim();fields[k]=raw===""?null:(["lat","lon"].includes(k)?Number(raw):raw)});
   if(!fields.n||!fields.c)throw new Error("El nombre y la categoría son obligatorios.");
   // Validar correo y web solo si se han modificado; no bloquear la edición por datos heredados.
   if(fields.e&&String(fields.e)!==String(original.e||"")&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.e))throw new Error("El correo electrónico introducido no tiene un formato válido.");
