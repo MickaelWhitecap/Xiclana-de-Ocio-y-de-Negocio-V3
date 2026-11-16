@@ -3,6 +3,8 @@
 
 El JSON generado es una copia de trabajo/exportación; nunca es una fuente de escritura
 para las fichas. Las fichas se modifican exclusivamente en public.listings.
+
+Los cambios en este exportador disparan también la copia cifrada y su prueba de restauración.
 """
 import argparse
 import json
