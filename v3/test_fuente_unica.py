@@ -70,6 +70,61 @@ class RadSafeEnrichmentTests(unittest.TestCase):
             self._run(extra_field="estado_verificacion")
 
 
+class RadOfficialVerificationTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        spec = importlib.util.spec_from_file_location("catalogo_supabase_verification", ROOT / "v3/catalogo_supabase.py")
+        cls.catalog = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.catalog)
+
+    def _run(self, status="pendiente"):
+        timestamp = "2026-11-16T10:00:00+00:00"
+        before_item = {
+            "id": "listing-official", "n": "Establecimiento de prueba",
+            "estado_verificacion": status, "f": None, "v": None,
+            "is_published": True, "verified_at": None,
+            "_xiclana_updated_at": timestamp
+        }
+        after_item = dict(before_item)
+        after_item.update({
+            "estado_verificacion": "verificada",
+            "f": "https://establecimiento.example/",
+            "v": "2026-11-16",
+            "_rad_official_verified": True
+        })
+        current = [{
+            "id": "listing-official",
+            "data": {k:v for k,v in before_item.items() if k not in {"id","is_published","verified_at","_xiclana_updated_at"}},
+            "is_published": True, "is_deleted": False,
+            "verified_at": None, "updated_at": timestamp
+        }]
+        with tempfile.TemporaryDirectory() as directory:
+            before_path = Path(directory) / "before.json"
+            after_path = Path(directory) / "after.json"
+            before_path.write_text(json.dumps({"items":[before_item]}),encoding="utf-8")
+            after_path.write_text(json.dumps({"items":[after_item]}),encoding="utf-8")
+            with patch.object(self.catalog,"connection",return_value=("https://example.supabase.co/rest/v1","secret")), \\
+                 patch.object(self.catalog,"fetch_all",return_value=current), \\
+                 patch.object(self.catalog,"request",return_value=([{"id":"listing-official"}],{})) as request:
+                result = self.catalog.sync_enrichment(before_path,after_path)
+        return result, request
+
+    def test_official_website_can_verify_published_pending_listing(self):
+        result, request = self._run()
+        self.assertEqual(result["fichas_verificadas_desde_web_oficial"],1)
+        payload = request.call_args.kwargs["payload"]
+        self.assertEqual(payload["data"]["estado_verificacion"],"verificada")
+        self.assertEqual(payload["data"]["f"],"https://establecimiento.example/")
+        self.assertEqual(payload["data"]["v"],"2026-11-16")
+        self.assertIsNotNone(payload["verified_at"])
+
+    def test_official_website_does_not_override_doubtful_listing(self):
+        result, request = self._run(status="insuficiente")
+        self.assertEqual(result["fichas_verificadas_desde_web_oficial"],0)
+        self.assertEqual(result["saltadas_por_no_verificadas_o_inactivas"],1)
+        request.assert_not_called()
+
+
 class SingleSupabaseMasterTests(unittest.TestCase):
     def test_exporter_reads_listings_and_syncs_only_metadata(self):
         source = (ROOT / "v3/catalogo_supabase.py").read_text(encoding="utf-8")
