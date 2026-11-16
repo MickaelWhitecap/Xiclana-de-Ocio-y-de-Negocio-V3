@@ -361,30 +361,43 @@ function candidateKey(v){return String(v||"").normalize("NFD").replace(/[\u0300-
 function candidateNameSignature(value){
  return candidateKey(value).split(" ").filter(Boolean).sort().join(" ");
 }
+function candidateCoordinatesNear(left,right){
+ const hasCoords=left?.lat!=null&&left?.lon!=null&&right?.lat!=null&&right?.lon!=null;
+ if(!hasCoords)return false;
+ const lat1=Number(left.lat),lon1=Number(left.lon),lat2=Number(right.lat),lon2=Number(right.lon);
+ return [lat1,lon1,lat2,lon2].every(Number.isFinite)&&Math.abs(lat1-lat2)<0.00035&&Math.abs(lon1-lon2)<0.00045;
+}
+function candidateNameSimilarity(left,right){
+ const a=new Set(candidateKey(left).split(" ").filter(Boolean));
+ const b=new Set(candidateKey(right).split(" ").filter(Boolean));
+ const common=[...a].filter(token=>b.has(token)).length;
+ return common/Math.max(a.size,b.size,1);
+}
 function candidateAlreadyExists(candidate){
  const name=candidateNameSignature(candidate.n),address=candidateKey(candidate.a);
  if(!name)return null;
  return effectiveItems().find(x=>{
+  if(candidate.t&&x.t&&candidateKey(candidate.t)!==candidateKey(x.t))return false;
   const existingName=candidateNameSignature(x.n);
-  // Mismo conjunto de palabras aunque OSM y el catálogo inviertan el orden:
-  // «Charter Alcántara» = «Alcántara Charter».
+  const existingAddress=candidateKey(x.a);
+  const hasBothAddresses=Boolean(address&&existingAddress);
+  const sameAddress=hasBothAddresses&&address===existingAddress;
+  const hasBothCoords=candidate.lat!=null&&candidate.lon!=null&&x.lat!=null&&x.lon!=null;
+  const near=candidateCoordinatesNear(candidate,x);
   if(existingName===name){
-   if(candidate.t&&x.t&&candidateKey(candidate.t)!==candidateKey(x.t))return false;
+   // El mismo nombre no basta: cadenas como Covirán, Repsol o Correos
+   // pueden tener varios establecimientos. Exigir ubicación coincidente.
+   if(hasBothCoords)return near;
+   if(hasBothAddresses)return sameAddress;
+   // Si falta ubicación en una o ambas fichas, bloquear para revisión manual,
+   // sin afirmar que sean duplicados confirmados.
    return true;
   }
-  // Coincidencia geográfica muy próxima: solo se considera duplicado si
-  // también coincide el tipo y existe una dirección común o nombre muy parecido.
-  const hasCoords=candidate.lat!=null&&candidate.lon!=null&&x.lat!=null&&x.lon!=null;
-  const a=Number(candidate.lat),b=Number(candidate.lon),la=Number(x.lat),lo=Number(x.lon);
-  const near=hasCoords&&Number.isFinite(a)&&Number.isFinite(b)&&Number.isFinite(la)&&Number.isFinite(lo)&&Math.abs(a-la)<0.00035&&Math.abs(b-lo)<0.00045;
-  if(near&&candidate.t&&x.t&&candidateKey(candidate.t)===candidateKey(x.t)){
-   const left=new Set(candidateKey(candidate.n).split(" ").filter(Boolean));
-   const right=new Set(candidateKey(x.n).split(" ").filter(Boolean));
-   const common=[...left].filter(token=>right.has(token)).length;
-   const similarity=common/Math.max(left.size,right.size,1);
-   return similarity>=0.5;
-  }
-  return Boolean(address&&candidateKey(x.a)&&address===candidateKey(x.a)&&candidate.t&&x.t&&candidateKey(candidate.t)===candidateKey(x.t));
+  // Para nombres parecidos, exigir además proximidad o dirección coincidente.
+  if(candidateNameSimilarity(candidate.n,x.n)<0.5)return false;
+  if(hasBothCoords)return near;
+  if(hasBothAddresses)return sameAddress;
+  return false;
  });
 }
 function renderAddressProposals(){
