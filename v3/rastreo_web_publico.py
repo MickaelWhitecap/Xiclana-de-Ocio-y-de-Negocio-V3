@@ -1693,6 +1693,7 @@ def self_test():
         shared_host_pages = {
             "https://directory.example/profile/a": '<html><body><a href="/profile/a/contacto">Contacto</a></body></html>',
             "https://directory.example/profile/b": '<html><body><a href="/profile/b/contacto">Contacto</a></body></html>',
+            "https://barcelo.example/novo-resort/": '<html><body><a href="/novo-resort/contacto">Contacto</a></body></html>',
         }
         get = lambda url, limit=1200000: (
             shared_host_pages.get(url, "<html><body>Contacto</body></html>"),
@@ -1740,6 +1741,14 @@ def self_test():
         assert single_email_by_id == {"novo":True,"hotel":False,"spa":False}, (
             "Una URL específica de una ficha debe poder conservar su único correo aunque comparta dominio; "
             "una URL genérica compartida por varias fichas no."
+        )
+        novo_contact_jobs = [
+            job for job in scoped_jobs
+            if str(job["target"].get("id"))=="novo"
+        ]
+        assert any(job["url"]=="https://barcelo.example/novo-resort/contacto" and not job["allow_single_email"]
+                   for job in novo_contact_jobs), (
+            "Una página interior genérica de contacto no debe heredar la excepción de correo único de la URL propia."
         )
     finally:
         allowed, get = original_allowed, original_get
@@ -1951,7 +1960,10 @@ def discover_official_website_jobs(records, max_pages_per_target=4, max_pages_to
             jobs.append({
                 "url":page_url,
                 "target":target,
-                "allow_single_email":allow_single,
+                # Solo la URL propia de la ficha puede aportar un correo único
+                # sin contexto textual. Las páginas interiores genéricas (/contact)
+                # deben vincular el correo al negocio por contexto.
+                "allow_single_email":allow_single and depth==0,
             })
             selected_unique_pages.add(page_url)
         if len(jobs)>=max_pages_total:
