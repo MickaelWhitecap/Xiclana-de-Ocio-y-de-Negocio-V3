@@ -848,15 +848,23 @@ async function init(){
      const id=String(row.listing_id);
      const existing=await supabaseFrom("listings").select("data,is_deleted,verified_at").eq("id",id).maybeSingle();
      if(existing.error)throw existing.error;
+     const previousStatus=String(existing.data?.data?.estado_verificacion||"pendiente").trim().toLowerCase();
      const fields={...(existing.data?.data||{}),...(row.fields||{})};
      if(fields._xiclana_restore_deleted===true)delete fields._xiclana_deleted;
      delete fields._xiclana_restore_deleted;
      delete fields._xiclana_address_proposal_rejected;
      fields.is_new=Boolean(row.is_new);
+     const allowedStatuses=["verificada","pendiente","insuficiente"];
+     const nextStatus=String(fields.estado_verificacion||"pendiente").trim().toLowerCase();
+     fields.estado_verificacion=allowedStatuses.includes(nextStatus)?nextStatus:"pendiente";
      const deleted=fields._xiclana_deleted===true;
+     const now=new Date().toISOString();
+     const verifiedAt=fields.estado_verificacion==="verificada"
+      ?(previousStatus==="verificada"?(existing.data?.verified_at||row.verified_at||now):now)
+      :null;
      return {id,data:fields,is_published:!deleted,is_deleted:deleted,
-      verified_at:row.verified_at||existing.data?.verified_at||null,
-      updated_at:new Date().toISOString(),updated_by:userData.user.id};
+      verified_at:verifiedAt,
+      updated_at:now,updated_by:userData.user.id};
     }));
     return supabaseFrom("listings").upsert(prepared,{onConflict:"id"});
    }
