@@ -2209,6 +2209,25 @@ def main():
             safe_to_enrich=(match["kind"]=="duplicate" or (exact_name and exact_name_matches==1 and (trusted_local or bool(record["address"]))))
             if safe_to_enrich:
                 changed,conflicts=merge_existing_record(old,record,source_url)
+                # Una coincidencia con una web propia solo verifica la ficha si la página
+                # identifica inequívocamente al establecimiento y aporta datos comprobables.
+                official_evidence=official_site and any(str(record.get(k) or "").strip() for k in ("address","phone","email","hours","description"))
+                current_status=norm(old.get("estado_verificacion"))
+                if official_evidence and current_status in ("","pendiente","pendiente de verificar"):
+                    verification_date=datetime.now(timezone.utc).date().isoformat()
+                    old["estado_verificacion"]="verificada"
+                    old["f"]=source_url
+                    old["v"]=verification_date
+                    old["_rad_official_verified"]=True
+                    changed.extend(["estado_verificacion","f","v"])
+                    sources=old.setdefault("fuentes_datos",[])
+                    if not isinstance(sources,list):
+                        sources=[]
+                        old["fuentes_datos"]=sources
+                    if not any(isinstance(x,dict) and url_key(x.get("url",""))==url_key(source_url) for x in sources):
+                        sources.append({"url":source_url,"tipo":"web_oficial","campos":["verificacion"],"fecha":verification_date})
+                    if "fuentes_datos" not in changed:
+                        changed.append("fuentes_datos")
                 if changed:
                     fichas_enriquecidas.add(str(old.get("id") or record_value(old,"n","nombre","name")))
                     campos_actualizados+=len(changed)

@@ -83,7 +83,7 @@ jobs:
             for key,value in summary.items(): f.write(f"- **{key}:** {value}\n")
           print(json.dumps(summary,ensure_ascii=False))
           PY
-      - name: Aplicar enriquecimientos seguros a fichas verificadas
+      - name: Aplicar enriquecimientos seguros a fichas verificadas y verificaciones desde webs oficiales
         env:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
@@ -99,6 +99,7 @@ jobs:
           rad=data.get("rad_ultima_ejecucion",{})
           rad["fichas_modificadas_en_supabase"]=sync.get("fichas_actualizadas",0)
           rad["campos_aplicados_en_supabase"]=sync.get("campos_actualizados",0)
+          rad["fichas_verificadas_desde_web_oficial"]=sync.get("fichas_verificadas_desde_web_oficial",0)
           rad["fichas_omitidas_por_cambio_concurrente"]=sync.get("saltadas_por_cambio_concurrente",0)
           rad["fichas_omitidas_por_no_verificadas_o_inactivas"]=sync.get("saltadas_por_no_verificadas_o_inactivas",0)
           data["rad_ultima_ejecucion"]=rad
@@ -107,6 +108,7 @@ jobs:
           summary.update({
             "fichas_modificadas_en_supabase":sync.get("fichas_actualizadas",0),
             "campos_aplicados_en_supabase":sync.get("campos_actualizados",0),
+            "fichas_verificadas_desde_web_oficial":sync.get("fichas_verificadas_desde_web_oficial",0),
             "fichas_omitidas_por_cambio_concurrente":sync.get("saltadas_por_cambio_concurrente",0),
             "fichas_omitidas_por_no_verificadas_o_inactivas":sync.get("saltadas_por_no_verificadas_o_inactivas",0)
           })

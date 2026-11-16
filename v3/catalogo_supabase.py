@@ -129,13 +129,13 @@ def sync_enrichment(before_path, after_path):
     before_by_id = {str(x.get("id")): x for x in before["items"] if isinstance(x, dict) and x.get("id")}
     current_rows = fetch_all(base, key, "listings", "id,data,is_published,is_deleted,verified_at,updated_at", "id.asc")
     current_by_id = {str(x.get("id")): x for x in current_rows}
-    meta_keys = {"id", "is_published", "_xiclana_deleted", "verified_at", "_xiclana_updated_at"}
+    meta_keys = {"id", "is_published", "_xiclana_deleted", "verified_at", "_xiclana_updated_at", "_rad_official_verified"}
     allowed_fields = {
         "a", "h", "d", "t", "c", "rta_registro", "direcciones_alternativas",
-        "p", "e", "w", "web_alternativas", "fuentes_datos",
+        "p", "e", "w", "web_alternativas", "fuentes_datos", "estado_verificacion", "f", "v",
     }
     to_update = []
-    detected_count = conflict_count = inactive_count = 0
+    detected_count = conflict_count = inactive_count = verification_count = 0
     for item in after["items"]:
         if not isinstance(item, dict) or not item.get("id"):
             continue
@@ -147,7 +147,8 @@ def sync_enrichment(before_path, after_path):
         before_data = {k: v for k, v in original.items() if k not in meta_keys}
         after_data = {k: v for k, v in item.items() if k not in meta_keys}
         changed_keys = [k for k, v in after_data.items() if before_data.get(k) != v]
-        if not changed_keys:
+        verify_official = bool(item.get("_rad_official_verified"))
+        if not changed_keys and not verify_official:
             continue
         detected_count += 1
         if current is None:
@@ -158,12 +159,22 @@ def sync_enrichment(before_path, after_path):
             conflict_count += 1
             continue
         status = str(current_data.get("estado_verificacion") or "").strip().casefold()
-        if current.get("is_deleted") or not current.get("is_published") or status != "verificada":
+        pending_status = status in ("", "pendiente", "pendiente de verificar")
+        promote = verify_official and pending_status
+        if current.get("is_deleted") or not current.get("is_published") or (status != "verificada" and not promote):
             inactive_count += 1
             continue
+        if promote:
+            source = str(after_data.get("f") or "").strip()
+            date_value = str(after_data.get("v") or "").strip()
+            if after_data.get("estado_verificacion") != "verificada" or not source.startswith(("https://", "http://")) or not date_value:
+                raise RuntimeError(f"RAD intentó verificar {ident} sin estado, web oficial o fecha válidos.")
         unsafe = sorted(set(changed_keys) - allowed_fields)
         if unsafe:
             raise RuntimeError(f"RAD intentó modificar campos no autorizados en {ident}: {unsafe}")
+        verification_fields = sorted(set(changed_keys) & {"estado_verificacion", "f", "v"})
+        if verification_fields and not promote:
+            raise RuntimeError(f"RAD intentó cambiar el estado o la procedencia de verificación sin prueba de web oficial en {ident}: {verification_fields}")
         current_clean = {k: v for k, v in current_data.items() if k not in meta_keys}
         if current_clean != before_data or current.get("updated_at") != original.get("_xiclana_updated_at"):
             conflict_count += 1
@@ -171,25 +182,31 @@ def sync_enrichment(before_path, after_path):
         merged = dict(current_data)
         for field in changed_keys:
             merged[field] = after_data[field]
-        to_update.append((ident, current, merged, len(changed_keys)))
+        to_update.append((ident, current, merged, len(changed_keys), promote))
 
     if len(to_update) > 500:
         raise RuntimeError(f"RAD propone modificar {len(to_update)} fichas; se supera el límite defensivo de 500 y no se aplica ninguna.")
 
     updated_count = field_count = 0
-    for ident, current, merged, changed_count in to_update:
+    for ident, current, merged, changed_count, promote in to_update:
         timestamp = current.get("updated_at")
         filters = {"id": "eq." + ident, "updated_at": "eq." + timestamp if timestamp else "is.null"}
         result, _ = request(
             base + "/listings?" + urllib.parse.urlencode(filters),
             key,
             method="PATCH",
-            payload={"data": merged, "updated_at": datetime.now(timezone.utc).isoformat()},
+            payload={
+                "data": merged,
+                "verified_at": datetime.now(timezone.utc).isoformat() if promote else current.get("verified_at"),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            },
             headers={"Prefer": "return=representation"},
         )
         if isinstance(result, list) and result:
             updated_count += 1
             field_count += changed_count
+            if promote:
+                verification_count += 1
         else:
             conflict_count += 1
     summary = {
@@ -199,6 +216,7 @@ def sync_enrichment(before_path, after_path):
         "campos_actualizados": field_count,
         "saltadas_por_cambio_concurrente": conflict_count,
         "saltadas_por_no_verificadas_o_inactivas": inactive_count,
+        "fichas_verificadas_desde_web_oficial": verification_count,
         "publicacion_automatica": False,
     }
     print(json.dumps(summary, ensure_ascii=False))
