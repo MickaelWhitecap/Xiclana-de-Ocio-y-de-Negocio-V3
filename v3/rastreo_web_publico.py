@@ -1737,6 +1737,7 @@ def self_test():
         single_email_by_id = {
             str(job["target"].get("id")): job["allow_single_email"]
             for job in scoped_jobs
+            if job["url"] == record_value(job["target"],"w","web","website")
         }
         assert single_email_by_id == {"novo":True,"hotel":False,"spa":False}, (
             "Una URL específica de una ficha debe poder conservar su único correo aunque comparta dominio; "
