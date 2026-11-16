@@ -61,6 +61,8 @@ jobs:
           summary={
             "fichas_consultadas":len(after["items"]),
             "fichas_con_web_oficial":rad.get("fichas_con_web_oficial",0),
+            "fichas_sin_web_consultadas":rad.get("fichas_sin_web_consultadas",0),
+            "webs_propias_descubiertas_sin_url_previa":rad.get("webs_propias_descubiertas_sin_url_previa",0),
             "dominios_web_oficiales_consultados":rad.get("dominios_web_oficiales_consultados",0),
             "paginas_web_oficiales_consultadas":rad.get("paginas_web_oficiales_consultadas",0),
             "correos_detectados_en_webs_oficiales":rad.get("correos_detectados_en_webs_oficiales",0),
