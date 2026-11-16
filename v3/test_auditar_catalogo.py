@@ -88,7 +88,7 @@ class AuditDuplicateTests(unittest.TestCase):
         page = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
         self.assertIn("async function cargarCatalogoSupabase()", page)
         self.assertIn('listings?select=id,data,verified_at', page)
-        self.assertIn('site_settings?select=data&id=eq.catalogo', page)
+        self.assertIn('site_settings?select=id,public_data&id=eq.catalogo', page)
         self.assertIn("await aplicarCambios(", page)
         self.assertNotIn('fetch("fichas_completas.json', page)
         self.assertNotIn('sb.from("listing_overrides")', page)
