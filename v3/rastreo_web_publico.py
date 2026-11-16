@@ -907,6 +907,16 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False):
     if target:
         target_name=record_value(target,"n","nombre","name")
         if target_name:
+            # Una búsqueda puede devolver resultados de homónimos o negocios
+            # de municipios próximos. Exigimos que el nombre de la ficha aparezca
+            # en el título, encabezados o texto visible antes de vincular la web.
+            evidence=norm(" ".join([title]+p.headings+p.text))
+            tokens=[x for x in norm(target_name).split() if x not in {"de","la","el","los","las","del","y","en"}]
+            evidence_tokens=set(evidence.split())
+            if len(tokens)>=2 and not all(x in evidence_tokens for x in tokens):
+                return None
+            if len(tokens)==1 and tokens[0] not in set(norm(title+" "+" ".join(p.headings)).split()):
+                return None
             name=clean_business_name(target_name)
     if not name or not valid_business_name(name): return None
     # Compara JSON-LD, metadescripción y texto visible: algunos directorios
@@ -1993,6 +2003,73 @@ def targeted_catalog_queries(records, limit=50, rotation=0):
             for _,_,name in selected]
 
 
+def discover_unlinked_official_website_jobs(records, limit=100, rotation=0):
+    """Busca webs propias también para fichas que todavía no tienen URL.
+
+    Solo acepta páginas cuyo título/contenido identifica inequívocamente el
+    establecimiento. Los directorios y redes sociales sirven para descubrir,
+    pero no se confunden con la web oficial.
+    """
+    targets=[]
+    for item in records:
+        if not isinstance(item,dict):
+            continue
+        name=record_value(item,"n","nombre","name")
+        website=record_value(item,"w","web","website")
+        present=sum(bool(record_value(item,k)) for k in ("a","p","e","w","h","d"))
+        if name and not website and present < 6:
+            targets.append((present,norm(name),item))
+    targets.sort(key=lambda x:(x[0],x[1]))
+    if not targets or limit <= 0:
+        return [],0
+    start=(max(0,int(rotation))*limit)%len(targets)
+    selected=(targets[start:]+targets[:start])[:min(limit,len(targets))]
+    excluded_hosts=set(TRUSTED_DIRECTORY_PATHS)|{
+        "duckduckgo.com","www.bing.com","google.com","www.google.com",
+        "facebook.com","www.facebook.com","instagram.com","www.instagram.com",
+        "tripadvisor.es","www.tripadvisor.es","youtube.com","www.youtube.com",
+        "maps.google.com","linktr.ee","wa.me"
+    }
+    jobs=[]
+    seen=set()
+    for _present,_name_key,target in selected:
+        name=record_value(target,"n","nombre","name")
+        query=f'"{name}" "Chiclana de la Frontera" (web oficial OR página web OR contacto)'
+        results=[]
+        for engine in (search_ddg,search_bing):
+            try:
+                results.extend(engine(query,limit=4))
+            except Exception as exc:
+                print(f"Buscador de web propia no disponible ({engine.__name__}): {exc}",flush=True)
+        for candidate_url in dict.fromkeys(results):
+            parsed=urllib.parse.urlsplit(candidate_url)
+            host=(parsed.hostname or "").lower().removeprefix("www.")
+            if parsed.scheme not in ("http","https") or not host or host in excluded_hosts:
+                continue
+            if any(host==x.removeprefix("www.") for x in excluded_hosts):
+                continue
+            if any(x in host for x in ("facebook.","instagram.","tripadvisor.","cylex.","paginasamarillas.","qdq.","chiclanaguiadempresas","todociudad.")):
+                continue
+            key=(str(target.get("id") or name),url_key(candidate_url))
+            if key in seen:
+                continue
+            seen.add(key)
+            try:
+                record=extract(candidate_url,target=target)
+            except Exception as exc:
+                print(f"Error al comprobar posible web propia {candidate_url}: {exc}",flush=True)
+                record=None
+            if not record:
+                continue
+            # El sitio visitado es la web propia aunque no publique JSON-LD "url".
+            record["website"]=record.get("website") or record.get("source_url") or candidate_url
+            record["_official_site"]=True
+            record["_target_id"]=str(target.get("id") or name)
+            jobs.append(record)
+            break
+    return jobs,len(selected)
+
+
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--self-test",action="store_true")
@@ -2079,7 +2156,11 @@ def main():
             except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
     links=list(dict.fromkeys(links))[:MAX_PAGES]
     official_jobs, official_domains, official_pages=discover_official_website_jobs(data["items"])
-    official_records=[]
+    iso=datetime.now(timezone.utc).isocalendar()
+    unlinked_official_records, fichas_sin_web_consultadas=discover_unlinked_official_website_jobs(
+        data["items"],limit=100,rotation=iso.year*53+iso.week
+    )
+    official_records=list(unlinked_official_records)
     for job in official_jobs:
         try:
             record=extract(job["url"],target=job["target"],allow_single_email=job["allow_single_email"])
@@ -2212,6 +2293,8 @@ def main():
        "dominios_web_oficiales_consultados":official_domains,
        "paginas_web_oficiales_consultadas":official_pages,
        "consultas_por_ficha_y_pagina_oficial":len(official_jobs),
+       "fichas_sin_web_consultadas":fichas_sin_web_consultadas,
+       "webs_propias_descubiertas_sin_url_previa":len(unlinked_official_records),
        "fichas_con_email_detectado_en_web_oficial":len({str(x.get("_target_id","")) for x in official_records if x.get("email")}),
        "correos_detectados_en_webs_oficiales":len({str(x.get("email","")).strip().lower() for x in official_records if x.get("email")}),
        "urls_encontradas":len(links),"candidatas_nuevas":len(added),
