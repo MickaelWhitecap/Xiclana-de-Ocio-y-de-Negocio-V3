@@ -833,7 +833,7 @@ async function aplicarCambios(j){
   const page=await response.json();if(!Array.isArray(page))throw new Error("Formato de catálogo inesperado en Supabase.");
   rows.push(...page);if(page.length<pageSize)break;offset+=page.length;
  }
- const settingResponse=await fetch(base+"site_settings_public?select=data&id=eq.catalogo",{headers,cache:"no-store"});
+ const settingResponse=await fetch(base+"rpc/get_public_site_settings",{headers,cache:"no-store"});
  if(!settingResponse.ok)throw new Error("No se pudieron cargar los datos generales del catálogo.");
  const settings=await settingResponse.json();
  const items=rows.map(row=>({...row.data,id:row.id,verified_at:row.verified_at,seed:1}));
