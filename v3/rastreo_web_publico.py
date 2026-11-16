@@ -1649,6 +1649,43 @@ def self_test():
         </script></head><body>Servicio en Chiclana y alrededores</body></html>"""
         get = lambda url, limit=1200000: (nonlocal_sample, url, "text/html")
         assert extract("https://directorio.example/servicio-nacional") is None, "El filtro geográfico ha aceptado un negocio no local"
+
+        # Cada ficha conserva su propia URL aunque comparta dominio con muchas otras.
+        shared_host_pages = {
+            "https://directory.example/profile/a": '<html><body><a href="/profile/a/contacto">Contacto</a></body></html>',
+            "https://directory.example/profile/b": '<html><body><a href="/profile/b/contacto">Contacto</a></body></html>',
+        }
+        get = lambda url, limit=1200000: (
+            shared_host_pages.get(url, "<html><body>Contacto</body></html>"),
+            url, "text/html"
+        )
+        shared_targets = [
+            {"id":"a","n":"Empresa A","w":"https://directory.example/profile/a"},
+            {"id":"b","n":"Empresa B","w":"https://directory.example/profile/b"},
+        ]
+        jobs, domains, unique_pages = discover_official_website_jobs(
+            shared_targets, max_pages_per_target=2, max_pages_total=20
+        )
+        assert domains == 1
+        assert unique_pages == 4
+        by_target = {
+            ident: {job["url"] for job in jobs if str(job["target"].get("id")) == ident}
+            for ident in ("a","b")
+        }
+        assert by_target["a"] == {
+            "https://directory.example/profile/a",
+            "https://directory.example/profile/a/contacto",
+        }, by_target["a"]
+        assert by_target["b"] == {
+            "https://directory.example/profile/b",
+            "https://directory.example/profile/b/contacto",
+        }, by_target["b"]
+        fair_jobs, _, _ = discover_official_website_jobs(
+            shared_targets, max_pages_per_target=2, max_pages_total=2
+        )
+        assert {str(job["target"].get("id")) for job in fair_jobs} == {"a","b"}, (
+            "El presupuesto global debe visitar primero la URL propia de cada ficha."
+        )
     finally:
         allowed, get = original_allowed, original_get
     print("RAD self-test: OK",flush=True)
@@ -1773,8 +1810,14 @@ def select_contextual_email(body, target, allow_single=False):
     return scored[0][1]
 
 
-def discover_official_website_jobs(records, max_pages_per_host=4, max_pages_total=1500):
-    """Explora webs ya vinculadas al catálogo y prioriza páginas interiores de contacto."""
+def discover_official_website_jobs(records, max_pages_per_target=4, max_pages_total=1500):
+    """Explora cada URL de ficha por separado y prioriza páginas interiores de contacto.
+
+    El límite es por ficha, no por dominio: un directorio con muchas fichas no
+    debe hacer que las primeras cuatro URL monopolicen el rastreo del dominio.
+    El presupuesto global se reparte por rondas para visitar primero la URL
+    propia de todas las fichas antes de añadir páginas interiores.
+    """
     grouped={}
     for record in records:
         if not isinstance(record,dict):
@@ -1784,8 +1827,7 @@ def discover_official_website_jobs(records, max_pages_per_host=4, max_pages_tota
         if parsed.scheme.lower() not in ("http","https") or not parsed.netloc:
             continue
         grouped.setdefault(parsed.netloc.lower(),[]).append(record)
-    jobs=[]
-    pages_seen=0
+
     page_hints={
         "contact":10,"contacto":10,"correo":10,"email":10,"sucursal":9,"sucursales":9,
         "restaurante":8,"restaurantes":8,"establecimiento":8,"ubicacion":8,"localizacion":8,
@@ -1793,54 +1835,67 @@ def discover_official_website_jobs(records, max_pages_per_host=4, max_pages_tota
         "reservas":6,"reservation":6,"legal":5,"aviso-legal":5,"privacidad":5,"privacy":5,
         "carta":4,"menu":4,"datos":4,"locales":8,"tiendas":7
     }
+    target_pages=[]
+    seed_cache={}
     for host,targets in sorted(grouped.items()):
-        seeds=list(dict.fromkeys(record_value(x,"w","web","website") for x in targets))
-        selected=[]
-        ranked=[]
-        for seed in seeds:
-            if len(selected)>=max_pages_per_host or pages_seen>=max_pages_total:
-                break
-            if seed not in selected:
-                selected.append(seed)
-            try:
-                if not allowed(seed):
-                    continue
-                body,final_url,_=get(seed,900000)
-                page=Page()
-                page.feed(body)
-                for _cls,href,label in page.links:
-                    candidate=urllib.parse.urljoin(final_url,html.unescape(href))
-                    parsed=urllib.parse.urlsplit(candidate)
-                    final_host=urllib.parse.urlsplit(final_url).netloc.lower()
-                    if parsed.scheme.lower() not in ("http","https") or parsed.netloc.lower()!=final_host:
-                        continue
-                    if parsed.path.lower().endswith((".pdf",".jpg",".jpeg",".png",".zip",".doc",".docx")):
-                        continue
-                    if any(x in parsed.path.lower() for x in ("/wp-admin","/wp-json","/cart","/checkout","/login","/buscar","/search")):
-                        continue
-                    hint_text=(parsed.path+" "+str(label or "")).lower()
-                    score=max((weight for hint,weight in page_hints.items() if hint in hint_text),default=0)
-                    if score:
-                        ranked.append((score,candidate))
-            except Exception as exc:
-                print(f"Web oficial no disponible ({seed}): {exc}",flush=True)
-        for _score,candidate in sorted(ranked,key=lambda x:(-x[0],x[1])):
-            if len(selected)>=max_pages_per_host or pages_seen>=max_pages_total:
-                break
-            if candidate not in selected:
-                selected.append(candidate)
-        for page_url in selected:
-            if pages_seen>=max_pages_total:
-                break
-            pages_seen+=1
-            for target in targets:
-                jobs.append({
-                    "url":page_url,
-                    "target":target,
-                    "allow_single_email":len(targets)==1,
-                })
-    return jobs, len(grouped), pages_seen
+        for target in targets:
+            seed=record_value(target,"w","web","website")
+            selected=[seed]
+            if seed not in seed_cache:
+                ranked=[]
+                try:
+                    if allowed(seed):
+                        body,final_url,_=get(seed,900000)
+                        page=Page()
+                        page.feed(body)
+                        final_host=urllib.parse.urlsplit(final_url).netloc.lower()
+                        for _cls,href,label in page.links:
+                            candidate=urllib.parse.urljoin(final_url,html.unescape(href))
+                            parsed=urllib.parse.urlsplit(candidate)
+                            if parsed.scheme.lower() not in ("http","https") or parsed.netloc.lower()!=final_host:
+                                continue
+                            if parsed.path.lower().endswith((".pdf",".jpg",".jpeg",".png",".zip",".doc",".docx")):
+                                continue
+                            if any(x in parsed.path.lower() for x in ("/wp-admin","/wp-json","/cart","/checkout","/login","/buscar","/search")):
+                                continue
+                            hint_text=(parsed.path+" "+str(label or "")).lower()
+                            score=max((weight for hint,weight in page_hints.items() if hint in hint_text),default=0)
+                            if score:
+                                ranked.append((score,candidate))
+                except Exception as exc:
+                    print(f"Web oficial no disponible ({seed}): {exc}",flush=True)
+                seed_cache[seed]=[
+                    candidate for _score,candidate in sorted(
+                        dict(((candidate,score) for score,candidate in ranked)).items(),
+                        key=lambda x:(-x[1],x[0])
+                    )
+                ]
+            for candidate in seed_cache[seed]:
+                if len(selected)>=max_pages_per_target:
+                    break
+                if candidate not in selected:
+                    selected.append(candidate)
+            target_pages.append((host,target,selected,len(targets)==1))
 
+    # Rondas: primero la URL propia de cada ficha; después sus páginas interiores.
+    # Así el límite global no deja sin visitar fichas situadas al final de un dominio.
+    jobs=[]
+    selected_unique_pages=set()
+    max_depth=max((len(entry[2]) for entry in target_pages),default=0)
+    for depth in range(max_depth):
+        for _host,target,selected,allow_single in target_pages:
+            if depth>=len(selected) or len(jobs)>=max_pages_total:
+                continue
+            page_url=selected[depth]
+            jobs.append({
+                "url":page_url,
+                "target":target,
+                "allow_single_email":allow_single,
+            })
+            selected_unique_pages.add(page_url)
+        if len(jobs)>=max_pages_total:
+            break
+    return jobs, len(grouped), len(selected_unique_pages)
 
 def targeted_catalog_queries(records, limit=50, rotation=0):
     """Genera búsquedas rotativas para fichas existentes que no están completas en N/6."""
