@@ -32,6 +32,14 @@ class AuditDuplicateTests(unittest.TestCase):
 
 
 
+    def test_admin_duplicate_detection_requires_location_for_same_name_branches(self):
+        page = (Path(__file__).with_name("admin.html")).read_text(encoding="utf-8")
+        self.assertIn("function candidateCoordinatesNear(left,right)", page)
+        self.assertIn("if(existingName===name)", page)
+        self.assertIn("if(hasBothCoords)return near", page)
+        self.assertIn("if(hasBothAddresses)return sameAddress", page)
+        self.assertIn("function candidateNameSimilarity(left,right)", page)
+
     def test_different_types_are_not_duplicates_but_same_type_is(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
