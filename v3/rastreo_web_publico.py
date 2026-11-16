@@ -1865,7 +1865,7 @@ def discover_official_website_jobs(records, max_pages_per_target=4, max_pages_to
                 except Exception as exc:
                     print(f"Web oficial no disponible ({seed}): {exc}",flush=True)
                 seed_cache[seed]=[
-                    candidate for _score,candidate in sorted(
+                    candidate for candidate,_score in sorted(
                         dict(((candidate,score) for score,candidate in ranked)).items(),
                         key=lambda x:(-x[1],x[0])
                     )
