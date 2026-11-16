@@ -1725,6 +1725,22 @@ def self_test():
         assert {str(job["target"].get("id")) for job in fair_jobs} == {"a","b"}, (
             "El presupuesto global debe visitar primero la URL propia de cada ficha."
         )
+        scoped_targets = [
+            {"id":"novo","n":"Novo Resort The Residence","w":"https://barcelo.example/novo-resort/"},
+            {"id":"hotel","n":"Hotel Barceló","w":"https://barcelo.example/"},
+            {"id":"spa","n":"U-Spa Barceló","w":"https://barcelo.example/"},
+        ]
+        scoped_jobs, _, _ = discover_official_website_jobs(
+            scoped_targets, max_pages_per_target=1, max_pages_total=20
+        )
+        single_email_by_id = {
+            str(job["target"].get("id")): job["allow_single_email"]
+            for job in scoped_jobs
+        }
+        assert single_email_by_id == {"novo":True,"hotel":False,"spa":False}, (
+            "Una URL específica de una ficha debe poder conservar su único correo aunque comparta dominio; "
+            "una URL genérica compartida por varias fichas no."
+        )
     finally:
         allowed, get = original_allowed, original_get
     print("RAD self-test: OK",flush=True)
@@ -1877,6 +1893,12 @@ def discover_official_website_jobs(records, max_pages_per_target=4, max_pages_to
     target_pages=[]
     seed_cache={}
     for host,targets in sorted(grouped.items()):
+        # La posibilidad de aceptar un único correo se decide por URL de ficha,
+        # no por dominio: una cadena puede alojar varias fichas distintas.
+        seed_counts={}
+        for item in targets:
+            item_seed=record_value(item,"w","web","website")
+            seed_counts[item_seed]=seed_counts.get(item_seed,0)+1
         for target in targets:
             seed=record_value(target,"w","web","website")
             selected=[seed]
@@ -1914,7 +1936,7 @@ def discover_official_website_jobs(records, max_pages_per_target=4, max_pages_to
                     break
                 if candidate not in selected:
                     selected.append(candidate)
-            target_pages.append((host,target,selected,len(targets)==1))
+            target_pages.append((host,target,selected,seed_counts.get(seed,0)==1))
 
     # Rondas: primero la URL propia de cada ficha; después sus páginas interiores.
     # Así el límite global no deja sin visitar fichas situadas al final de un dominio.
