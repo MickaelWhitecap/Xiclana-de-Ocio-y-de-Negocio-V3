@@ -1732,7 +1732,7 @@ def self_test():
             {"id":"spa","n":"U-Spa Barceló","w":"https://barcelo.example/"},
         ]
         scoped_jobs, _, _ = discover_official_website_jobs(
-            scoped_targets, max_pages_per_target=1, max_pages_total=20
+            scoped_targets, max_pages_per_target=2, max_pages_total=20
         )
         single_email_by_id = {
             str(job["target"].get("id")): job["allow_single_email"]
