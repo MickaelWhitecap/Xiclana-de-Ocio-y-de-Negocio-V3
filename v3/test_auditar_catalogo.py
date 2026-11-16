@@ -39,6 +39,8 @@ class AuditDuplicateTests(unittest.TestCase):
         self.assertIn("if(hasBothCoords)return near", page)
         self.assertIn("if(hasBothAddresses)return sameAddress", page)
         self.assertIn("function candidateNameSimilarity(left,right)", page)
+        self.assertIn("function candidateNameClose(left,right)", page)
+        self.assertIn("candidateNameSimilarity(left,right)>=0.6", page)
 
     def test_different_types_are_not_duplicates_but_same_type_is(self):
         with tempfile.TemporaryDirectory() as tmp:
