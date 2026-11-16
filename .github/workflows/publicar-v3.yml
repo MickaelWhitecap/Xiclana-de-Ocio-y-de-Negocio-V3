@@ -83,7 +83,7 @@ jobs:
           grep -Fq "XICLANA_BUILD_ID=${BUILD_ID}" /tmp/admin.html
           curl --fail --silent --show-error "${SUPABASE_URL}/rest/v1/listings?select=id&is_published=eq.true&is_deleted=eq.false&limit=1" \
             -H "apikey: ${SUPABASE_ANON_KEY}" -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" -o /tmp/listings.json
-          curl --fail --silent --show-error "${SUPABASE_URL}/rest/v1/site_settings?select=id&id=eq.catalogo" \
+          curl --fail --silent --show-error "${SUPABASE_URL}/rest/v1/site_settings_public?select=id&id=eq.catalogo" \
             -H "apikey: ${SUPABASE_ANON_KEY}" -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" -o /tmp/settings.json
           python - <<'PY'
           import json
