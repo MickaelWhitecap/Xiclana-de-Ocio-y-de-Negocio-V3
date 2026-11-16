@@ -587,13 +587,26 @@ def clean_description(value, business_name=""):
 
 
 def is_directory_email(value, page_url):
-    """Rechaza correos del propio portal/directorio, no del establecimiento."""
+    """Rechaza correos de directorios, pero conserva el correo del propio negocio."""
     email=str(value or "").strip().lower()
     if not email or "@" not in email: return False
-    domain=email.rsplit("@",1)[-1].rstrip(".")
-    source_host=(urllib.parse.urlparse(page_url).hostname or "").lower()
-    blocked={"chiclanaguiadempresas.com","www.chiclanaguiadempresas.com"}
-    return domain in blocked or domain==source_host or domain.removeprefix("www.")==source_host.removeprefix("www.")
+    domain=email.rsplit("@",1)[-1].rstrip(".").removeprefix("www.")
+    source_host=(urllib.parse.urlparse(page_url).hostname or "").lower().removeprefix("www.")
+    blocked={"chiclanaguiadempresas.com"}
+    directory_domains={
+        str(host).lower().removeprefix("www.")
+        for host in TRUSTED_DIRECTORY_PATHS
+    } | {"informa.es"}
+    known_directory=any(
+        source_host==host or source_host.endswith("."+host)
+        for host in directory_domains
+    )
+    same_domain=(
+        domain==source_host
+        or domain.endswith("."+source_host)
+        or source_host.endswith("."+domain)
+    )
+    return domain in blocked or (known_directory and same_domain)
 
 
 def clean_website(value, page_url):
@@ -987,15 +1000,17 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False):
         phone=" / ".join(extract_phones(blob))
     phone=" / ".join(sanitize_contact_phones(name,phone))
     if target:
-        # La web oficial puede representar varias sucursales aunque solo haya
-        # una ficha local en el catálogo. En este rastreo dirigido solo se
-        # incorpora el correo asociado por contexto; no se mezclan teléfonos,
-        # horarios ni descripciones generales de otras sedes.
+        # La web puede representar varias sucursales: no se mezclan teléfonos,
+        # horarios ni descripciones generales. El correo estructurado JSON-LD
+        # ya ha sido asociado a esta página por choose_schema_entity; solo se
+        # sustituye cuando existe una coincidencia contextual más específica.
         phone=""
         hours=""
         desc=""
     if target:
-        email=select_contextual_email(body,target,allow_single=allow_single_email)
+        contextual_email=select_contextual_email(body,target,allow_single=allow_single_email)
+        if contextual_email:
+            email=contextual_email
     else:
         if not email:
             mailto_values=[]
@@ -1312,6 +1327,9 @@ def self_test():
     assert clean_description("Lunes a Jueves de: 09.30 a 14.00h y 18:00 a 20:00 UN VIAJE SIEMPRE ES LA MEJOR OPCIÓN", "Viajes MMS Chiclana") == ""
     assert clean_description("Pinturas, Barnices y suministros. Disponemos de sistema tintométrico para todo tipo de", "Pinturas Hermanos Vicario") == ""
     assert clean_description("Nuestro objetivo es ofrecer a nuestros clientes la mejor atención en todos los sentidos: asesoramie", "Dualópticos") == ""
+    assert is_directory_email("info@cylex.es","https://www.cylex.es/chiclana-de-la-frontera/negocio.html")
+    assert is_directory_email("info@chiclanaguiadempresas.com","https://empresa.example/contacto")
+    assert not is_directory_email("sanctipetri@barcelo.com","https://www.barcelo.com/es-es/novo-resort/")
     assert clean_description("Somos una tienda online pero el respaldo en tiendas físicas,", "MundoPhone") == ""
     assert clean_business_name("Bar Cervecería D´Los Oliva Bares") == "Bar Cervecería D´Los Oliva"
     assert clean_business_name("Centros deportivos Amigos del Aerobic pilates Body Combat") == "Amigos del Aerobic"
@@ -1599,6 +1617,27 @@ def self_test():
         assert record["website"] == "https://empresa-prueba.es"
         assert record["hours"] == "Mo-Fr 09:00-18:00"
         assert record["description"] == "Descripción de prueba del establecimiento"
+
+        # El correo JSON-LD de la propia empresa no debe perderse por no aparecer
+        # en el texto visible ni rechazarse por compartir dominio con su web.
+        targeted_schema_sample = """<html><head><title>Empresa Oficial</title>
+        <script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"LocalBusiness","name":"Empresa Oficial",
+        "url":"https://empresa-oficial.example/","email":"info@empresa-oficial.example",
+        "address":{"@type":"PostalAddress","streetAddress":"Calle Real 10",
+        "postalCode":"11130","addressLocality":"Chiclana de la Frontera"}}
+        </script></head><body><h1>Empresa Oficial</h1><p>Establecimiento local.</p></body></html>"""
+        get = lambda url, limit=1200000: (targeted_schema_sample, url, "text/html")
+        targeted = extract(
+            "https://empresa-oficial.example/",
+            target={"id":"empresa","n":"Empresa Oficial","a":"Calle Real 10, 11130 Chiclana de la Frontera",
+                    "w":"https://empresa-oficial.example/"},
+            allow_single_email=False
+        )
+        assert targeted is not None, "No se ha extraído la ficha oficial con JSON-LD"
+        assert targeted["email"] == "info@empresa-oficial.example", (
+            "Se ha perdido el correo JSON-LD del propio dominio."
+        )
 
         multi_phone_sample = """<html><head><title>Agrojardín Reina</title>
         <meta name="description" content="Maquinaria de jardinería y suministros profesionales para el campo">
