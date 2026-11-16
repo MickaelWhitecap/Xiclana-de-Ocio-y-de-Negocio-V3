@@ -8,9 +8,9 @@ V3 utiliza **Supabase como fuente única de datos operativa**. La web pública, 
 ## Arquitectura de datos
 
 - **`public.listings`**: fuente maestra única de las fichas. Contiene los datos de cada establecimiento y sus estados de publicación, baja y verificación. Crear, editar, publicar, ocultar o restaurar una ficha se realiza sobre esta tabla.
-- **`public.site_settings`**, registro `id='catalogo'`: metadatos generales del directorio, destacados, candidatas y propuestas de revisión RAD/OSM. No es un segundo catálogo de fichas.
+- **`public.site_settings`**, registro `id='catalogo'`: metadatos generales del directorio, destacados y propuestas de revisión RAD/OSM. No es un segundo catálogo. La columna `data` conserva los metadatos administrativos; `public_data` contiene únicamente `actualizado` y `destacados`, se mantiene mediante un trigger y es la única información de esta tabla legible por el rol público.
 - **`public.listing_categories`**, **`public.listing_proposals`** y **`public.advertising_slots`**: tablas auxiliares para categorías, propuestas administrativas y publicidad. No sustituyen ni duplican la fuente maestra `public.listings`.
-- **`public.listing_overrides`**: tabla histórica retirada. No debe volver a utilizarse para sincronizar cambios ni como fuente de fichas.
+- **`public.listing_overrides`**: tabla histórica conservada, sin uso operativo. La compatibilidad de Administración redirige las llamadas antiguas a `public.listings`; no se deben crear ni sincronizar datos en esta tabla.
 
 ### Papel de los ficheros JSON
 
@@ -34,7 +34,7 @@ python v3/catalogo_supabase.py export --output /tmp/xiclana-catalogo.json
 ## Publicación y copias de seguridad
 
 - El workflow de publicación prepara la web sin incluir el catálogo JSON. La web consulta Supabase y la publicación comprueba que las tablas centrales responden.
-- Administración lee y escribe las fichas en `public.listings` y utiliza los metadatos de `public.site_settings` para las propuestas y la configuración del directorio.
+- Administración lee y escribe las fichas en `public.listings` y utiliza el JSON administrativo de `public.site_settings`. La web pública solo puede leer `id` y `public_data` de esa tabla.
 - Las copias de seguridad se generan desde Supabase: incluyen los volcados SQL, una exportación JSON auxiliar para validar el número e integridad de las fichas y una copia cifrada del código. La exportación JSON no sustituye la restauración de la base de datos.
 - La restauración y sus límites están descritos en [RECUPERACION_XICLANA.md](RECUPERACION_XICLANA.md).
 
