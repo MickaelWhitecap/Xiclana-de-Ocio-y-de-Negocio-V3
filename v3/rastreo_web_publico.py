@@ -2192,6 +2192,7 @@ def discover_unlinked_official_website_jobs(records, retry_ids=None):
     audits={}
     for _name_key,target in targets:
         name=record_value(target,"n","nombre","name")
+        ident=str(target.get("id") or name)
         query=f'"{name}" "Chiclana de la Frontera" (web oficial OR página web OR contacto)'
         ficha_started=time.monotonic()
         log_event("busqueda_web_propia_inicio",ficha_id=ident,nombre=name)
