@@ -1897,6 +1897,18 @@ def self_test():
 
     finally:
         allowed, get, extract = original_allowed, original_get, original_extract
+    # Checkpoints independientes para varias fichas y URLs candidatas.
+    checkpoint_store={"version":1,"checkpoints":{}}
+    p1={"target_id":"aurora","seed_url":"https://aurora.example/","queue":["https://aurora.example/a"],"visited":["https://aurora.example/"],"records":[]}
+    p2={"target_id":"aurora","seed_url":"https://aurora-alt.example/","queue":[],"visited":[],"records":[]}
+    p3={"target_id":"bravo","seed_url":"https://bravo.example/","queue":[],"visited":[],"records":[]}
+    store_crawl_checkpoint(checkpoint_store,p1)
+    store_crawl_checkpoint(checkpoint_store,p2)
+    store_crawl_checkpoint(checkpoint_store,p3)
+    assert checkpoint_for(checkpoint_store,"aurora","https://aurora.example/") is p1
+    assert checkpoint_for(checkpoint_store,"aurora","https://aurora-alt.example/") is p2
+    assert checkpoint_for(checkpoint_store,"bravo","https://bravo.example/") is p3
+    assert checkpoint_for(checkpoint_store,"aurora","https://bravo.example/") is None
     print("RAD self-test: OK",flush=True)
 
 def candidate_review_notes(record):
@@ -2083,6 +2095,39 @@ def sitemap_page_urls(seed_url, site_host):
     return list(dict.fromkeys(pages))
 
 
+def crawl_checkpoint_key(target_id, seed_url):
+    raw=str(target_id)+"\\n"+url_key(seed_url)
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def checkpoint_for(resume_state, target_id, seed_url):
+    """Recupera solo el checkpoint de la ficha y URL exactas."""
+    if not isinstance(resume_state,dict):
+        return None
+    checkpoints=resume_state.get("checkpoints")
+    if isinstance(checkpoints,dict):
+        return checkpoints.get(crawl_checkpoint_key(target_id,seed_url))
+    # Compatibilidad temporal con checkpoints planos anteriores.
+    if (str(resume_state.get("target_id") or "")==str(target_id)
+            and url_key(resume_state.get("seed_url") or "")==url_key(seed_url)):
+        return resume_state
+    return None
+
+
+def store_crawl_checkpoint(store, progress):
+    """Añade/actualiza un checkpoint sin sustituir los de otras webs."""
+    if not isinstance(store,dict):
+        store={}
+    checkpoints=store.setdefault("checkpoints",{})
+    if not isinstance(checkpoints,dict):
+        checkpoints={}
+        store["checkpoints"]=checkpoints
+    key=crawl_checkpoint_key(progress.get("target_id"),progress.get("seed_url"))
+    checkpoints[key]=progress
+    store["version"]=1
+    return store
+
+
 def crawl_official_site(target, seed_url, allow_single_email=False, resume_state=None, progress_callback=None):
     """Recorre todas las páginas internas y sitemaps; permite reanudar desde un checkpoint."""
     started=time.monotonic()
@@ -2095,9 +2140,8 @@ def crawl_official_site(target, seed_url, allow_single_email=False, resume_state
     records=[]
     seed_verified=False
     sitemap_loaded=False
-    if (isinstance(resume_state,dict)
-            and str(resume_state.get("target_id") or "")==target_id
-            and url_key(resume_state.get("seed_url") or "")==url_key(seed_url)):
+    resume_state=checkpoint_for(resume_state,target_id,seed_url)
+    if isinstance(resume_state,dict):
         queue=list(resume_state.get("queue") or [])
         visited=set(resume_state.get("visited") or [])
         records=list(resume_state.get("records") or [])
@@ -2403,13 +2447,19 @@ def main():
                     log_event("busqueda_general_error",buscador=engine.__name__,consulta=q,segundos=round(time.monotonic()-search_started,2),error=str(exc)[:240])
     links=list(dict.fromkeys(links))
     resume_state=data.get("rad_crawl_progress")
+    if not isinstance(resume_state,dict) or not isinstance(resume_state.get("checkpoints"),dict):
+        legacy=resume_state if isinstance(resume_state,dict) and resume_state.get("target_id") else None
+        resume_state={"version":1,"checkpoints":{}}
+        if legacy:
+            store_crawl_checkpoint(resume_state,legacy)
     def persist_crawl_progress(progress):
-        payload={"items":[],"rad_crawl_progress":progress}
+        store_crawl_checkpoint(resume_state,progress)
+        payload={"items":[],"rad_crawl_progress":resume_state}
         with tempfile.TemporaryDirectory(prefix="xiclana-rad-crawl-") as tmp:
             checkpoint_path=pathlib.Path(tmp)/"metadata.json"
             checkpoint_path.write_text(json.dumps(payload,ensure_ascii=False,separators=(",",":")),encoding="utf-8")
             catalog.sync_metadata(checkpoint_path,["rad_crawl_progress"])
-        log_event("checkpoint_web_guardado",ficha_id=progress.get("target_id"),paginas=progress.get("paginas_visitadas"),pendientes=len(progress.get("queue") or []),completado=progress.get("completed",False))
+        log_event("checkpoint_web_guardado",ficha_id=progress.get("target_id"),web=progress.get("seed_url"),paginas=progress.get("paginas_visitadas"),pendientes=len(progress.get("queue") or []),completado=progress.get("completed",False))
 
     official_records, official_domains, official_pages, registered_audit=discover_official_website_jobs(
         target_items,resume_state=resume_state,progress_callback=persist_crawl_progress
