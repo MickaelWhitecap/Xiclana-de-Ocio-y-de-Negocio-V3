@@ -118,11 +118,14 @@ class RadOfficialVerificationTests(unittest.TestCase):
         self.assertEqual(payload["data"]["v"],"2026-11-16")
         self.assertIsNotNone(payload["verified_at"])
 
-    def test_official_website_does_not_override_doubtful_listing(self):
+    def test_official_website_verifies_listing_even_if_previous_status_was_insufficient(self):
         result, request = self._run(status="insuficiente")
-        self.assertEqual(result["fichas_verificadas_desde_web_oficial"],0)
-        self.assertEqual(result["saltadas_por_no_verificadas_o_inactivas"],1)
-        request.assert_not_called()
+        self.assertEqual(result["fichas_verificadas_desde_web_oficial"],1)
+        self.assertEqual(result["fichas_actualizadas"],1)
+        payload = request.call_args.kwargs["payload"]
+        self.assertEqual(payload["data"]["estado_verificacion"],"verificada")
+        self.assertEqual(payload["data"]["f"],"https://establecimiento.example/")
+        self.assertIsNotNone(payload["verified_at"])
 
 
 class SingleSupabaseMasterTests(unittest.TestCase):
