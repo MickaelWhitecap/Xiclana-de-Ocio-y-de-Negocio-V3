@@ -16,7 +16,7 @@ permissions:
 
 concurrency:
   group: rad-descubrimiento-supabase-v2
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   discovery:
