@@ -2194,6 +2194,8 @@ def main():
     if args.self_test:
         self_test()
         return
+    if args.batch_ids_file is None:
+        raise SystemExit("La ejecución completa sin checkpoint está deshabilitada. Usa v3/rad_lotes.py para procesar lotes secuenciales de 50.")
     catalog_path=args.catalog
     if catalog_path is None:
         raise SystemExit("Debes indicar --catalog con una exportación temporal de Supabase; fichas_completas.json no es una fuente operativa.")
