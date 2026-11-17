@@ -40,9 +40,7 @@ class RadSafeEnrichmentTests(unittest.TestCase):
             after_path = Path(directory) / "after.json"
             before_path.write_text(json.dumps(before),encoding="utf-8")
             after_path.write_text(json.dumps(after),encoding="utf-8")
-            with patch.object(self.catalog,"connection",return_value=("https://example.supabase.co/rest/v1","secret")), \
-                 patch.object(self.catalog,"fetch_all",return_value=current), \
-                 patch.object(self.catalog,"request",return_value=([{"id":"listing-1"}],{})) as request:
+            with patch.object(self.catalog,"connection",return_value=("https://example.supabase.co/rest/v1","secret")), patch.object(self.catalog,"fetch_all",return_value=current), patch.object(self.catalog,"request",return_value=([{"id":"listing-1"}],{})) as request:
                 result = self.catalog.sync_enrichment(before_path,after_path)
         return result, request
 
