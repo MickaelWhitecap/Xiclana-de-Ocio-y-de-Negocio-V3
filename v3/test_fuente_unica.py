@@ -127,12 +127,12 @@ class RadOfficialVerificationTests(unittest.TestCase):
         self.assertEqual(payload["data"]["f"],"https://establecimiento.example/")
         self.assertIsNotNone(payload["verified_at"])
 
-    def test_official_website_verifies_unpublished_listing_without_publishing_it(self):
+    def test_official_website_does_not_update_unpublished_listing(self):
         result, request = self._run(published=False)
-        self.assertEqual(result["fichas_verificadas_desde_web_oficial"],1)
-        payload = request.call_args.kwargs["payload"]
-        self.assertEqual(payload["data"]["estado_verificacion"],"verificada")
-        self.assertNotIn("is_published", payload)
+        self.assertEqual(result["fichas_verificadas_desde_web_oficial"],0)
+        self.assertEqual(result["fichas_actualizadas"],0)
+        self.assertEqual(result["saltadas_por_no_verificadas_o_inactivas"],1)
+        request.assert_not_called()
 
 
 class SingleSupabaseMasterTests(unittest.TestCase):
@@ -187,16 +187,22 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertIn('"publicacion_automatica": False', source)
         self.assertIn('saltadas_por_cambio_concurrente', source)
 
-    def test_weekly_rad_exports_from_supabase_and_never_writes_catalog_json(self):
+    def test_weekly_rad_uses_sequential_supabase_batches_and_never_writes_catalog_json(self):
         workflow = (ROOT / ".github/workflows/rad-enrich-catalog.yml").read_text(encoding="utf-8")
-        self.assertIn("catalogo_supabase.py export", workflow)
-        self.assertIn("catalogo_supabase.py sync-metadata", workflow)
-        self.assertIn("catalogo_supabase.py sync-enrichment", workflow)
-        self.assertIn("Aplicar enriquecimientos seguros a fichas verificadas", workflow)
+        orchestrator = (ROOT / "v3/rad_lotes.py").read_text(encoding="utf-8")
+        crawler = (ROOT / "v3/rastreo_web_publico.py").read_text(encoding="utf-8")
+        helper = (ROOT / "v3/catalogo_supabase.py").read_text(encoding="utf-8")
+        self.assertIn("python v3/rad_lotes.py", workflow)
+        self.assertIn("catalog.export_catalog(catalog_path)", orchestrator)
+        self.assertIn("catalog.sync_enrichment(before_path, catalog_path, allowed_ids=batch_ids)", orchestrator)
+        self.assertIn("catalog.sync_metadata(path, keys)", orchestrator)
+        self.assertIn("resultados_por_ficha", orchestrator)
+        self.assertIn("resultados_por_ficha", crawler)
+        self.assertIn("allowed_ids=None", helper)
         self.assertIn('cron: "47 6 * * 1"', workflow)
         self.assertIn("workflow_dispatch:", workflow)
-        self.assertNotIn("\\n  push:", workflow)
-        self.assertIn("--catalog", workflow)
+        self.assertIn("\\n  push:", workflow)
+        self.assertIn("--catalog", orchestrator)
         self.assertNotIn("git add", workflow)
         self.assertNotIn("git push", workflow)
 
