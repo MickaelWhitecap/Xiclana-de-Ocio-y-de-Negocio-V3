@@ -70,6 +70,7 @@ def create_state(data):
         "batches_completed": 0,
         "batch_size": BATCH_SIZE,
         "total_fichas": len(items),
+        "resultados_por_ficha": {},
     }
 
 
@@ -147,23 +148,40 @@ def main():
         selection = select_batch(state, current_active_ids)
         while selection and not selection[1]:
             sector, _ids, start, end = selection
+            skipped_ids = state["manifest"][sector][start:end]
+            results = state.setdefault("resultados_por_ficha", {})
+            for ident in skipped_ids:
+                results[ident] = {
+                    "id": ident, "sector": sector, "resultado": "omitida_por_inactividad",
+                    "ficha_investigada": False, "motivo": "La ficha dejó de estar publicada o fue enviada a papelera antes de iniciar el lote.",
+                    "registrado_utc": utcnow(),
+                }
             state["cursor"][sector] = end
             data["rad_lotes"] = state
             persist_metadata(data, ["rad_lotes"])
             selection = select_batch(state, current_active_ids)
 
         if not selection:
+            expected_ids = set(state["manifest"].get("ocio", [])) | set(state["manifest"].get("negocio", []))
+            recorded_ids = set(state.setdefault("resultados_por_ficha", {}))
+            missing_ids = sorted(expected_ids - recorded_ids)
+            if missing_ids:
+                raise RuntimeError(f"No se cierra RAD: faltan resultados individuales para {len(missing_ids)} fichas; primera: {missing_ids[0]}")
             state["status"] = "completed"
             state["completed_utc"] = utcnow()
             data["rad_lotes"] = state
             data["rad_lotes_siguiente_inicio"] = "negocio" if state["start_sector"] == "ocio" else "ocio"
             persist_metadata(data, ["rad_lotes", "rad_lotes_siguiente_inicio"])
-            result = {"status": "completed", "run_id": state["run_id"], "batches_completed": state["batches_completed"]}
+            result = {"status": "completed", "run_id": state["run_id"], "batches_completed": state["batches_completed"],
+                      "fichas_con_resultado_individual": len(state.get("resultados_por_ficha", {})),
+                      "fichas_esperadas": state["total_fichas"]}
             pathlib.Path("rad-lotes-result.json").write_text(json.dumps(result, ensure_ascii=False), encoding="utf-8")
             print(json.dumps(result, ensure_ascii=False), flush=True)
             return
 
         sector, batch_ids, start, end = selection
+        manifest_slice = state["manifest"][sector][start:end]
+        skipped_ids = [ident for ident in manifest_slice if ident not in current_active_ids]
         batch_path.write_text("\n".join(batch_ids) + "\n", encoding="utf-8")
         before_path.write_text(catalog_path.read_text(encoding="utf-8"), encoding="utf-8")
         command = [
@@ -185,7 +203,7 @@ def main():
         }, ensure_ascii=False), flush=True)
         subprocess.run(command, check=True)
 
-        sync_summary = catalog.sync_enrichment(before_path, catalog_path)
+        sync_summary = catalog.sync_enrichment(before_path, catalog_path, allowed_ids=batch_ids)
         updated = json.loads(catalog_path.read_text(encoding="utf-8"))
         rad = updated.get("rad_ultima_ejecucion", {})
         rad.update({
@@ -207,6 +225,23 @@ def main():
 
         state["cursor"][sector] = end
         state["batches_completed"] = int(state.get("batches_completed", 0)) + 1
+        per_ficha = state.setdefault("resultados_por_ficha", {})
+        for result_row in rad.get("resultados_por_ficha", []):
+            ident = str(result_row.get("id") or "")
+            if ident not in batch_ids:
+                raise RuntimeError(f"El informe RAD contiene una ficha ajena al lote: {ident}")
+            per_ficha[ident] = {**result_row, "lote_numero": state["batches_completed"],
+                                "lote_sector": sector, "registrado_utc": utcnow()}
+        if set(batch_ids) - set(per_ficha):
+            raise RuntimeError("RAD no ha devuelto resultado individual para todas las fichas activas del lote.")
+        for ident in skipped_ids:
+            per_ficha[ident] = {
+                "id": ident, "sector": sector, "resultado": "omitida_por_inactividad",
+                "ficha_investigada": False,
+                "motivo": "La ficha dejó de estar publicada o fue enviada a papelera antes de iniciar el lote.",
+                "lote_numero": state["batches_completed"], "registrado_utc": utcnow(),
+            }
+        state["fichas_con_resultado_individual"] = len(per_ficha)
         state["global_discovery_done"] = True
         state["last_batch"] = {
             "sector": sector, "ids": batch_ids, "completed_utc": utcnow(),
@@ -229,6 +264,8 @@ def main():
             "fichas_actualizadas_en_supabase": sync_summary.get("fichas_actualizadas", 0),
             "candidatas_revision": len(updated.get("candidatas_revision", [])),
             "publicacion_automatica": False,
+            "fichas_con_resultado_individual": len(state.get("resultados_por_ficha", {})),
+            "fichas_esperadas_en_manifiesto": state["total_fichas"],
         }
         pathlib.Path("rad-lotes-result.json").write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
         print(json.dumps(result, ensure_ascii=False), flush=True)
