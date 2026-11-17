@@ -1908,6 +1908,55 @@ def official_fields_found(records):
     return {field for record in records if isinstance(record,dict) for field,key in field_map.items() if str(record.get(key) or "").strip()}
 
 
+def sitemap_page_urls(seed_url, site_host):
+    """Obtiene páginas HTML declaradas en los sitemaps del sitio, sin topes de cantidad."""
+    parsed=urllib.parse.urlsplit(seed_url)
+    origin=f"{parsed.scheme}://{parsed.netloc}"
+    robots_entry=CACHE_ROBOTS.get(origin)
+    sitemap_urls=[]
+    if robots_entry and robots_entry[0]:
+        try:
+            sitemap_urls.extend(robots_entry[0].site_maps() or [])
+        except Exception:
+            pass
+    if not sitemap_urls:
+        sitemap_urls=[origin+"/sitemap.xml"]
+    pending=list(dict.fromkeys(sitemap_urls))
+    seen_sitemaps=set()
+    pages=[]
+    import xml.etree.ElementTree as ET
+    while pending:
+        sitemap_url=pending.pop(0)
+        key=url_key(sitemap_url)
+        if key in seen_sitemaps:
+            continue
+        seen_sitemaps.add(key)
+        parsed_map=urllib.parse.urlsplit(sitemap_url)
+        if parsed_map.netloc.lower()!=site_host or not allowed(sitemap_url):
+            continue
+        try:
+            body,final_url,_ctype=get(sitemap_url,10000000)
+            root=ET.fromstring(body)
+        except Exception:
+            continue
+        root_type=str(root.tag).rsplit("}",1)[-1].lower()
+        locations=[
+            (element.text or "").strip()
+            for element in root.iter()
+            if str(element.tag).rsplit("}",1)[-1].lower()=="loc" and (element.text or "").strip()
+        ]
+        for location in locations:
+            candidate=urllib.parse.urljoin(final_url,location)
+            parsed_candidate=urllib.parse.urlsplit(candidate)
+            if parsed_candidate.scheme.lower() not in ("http","https") or parsed_candidate.netloc.lower()!=site_host:
+                continue
+            if root_type=="sitemapindex" or parsed_candidate.path.lower().endswith((".xml",".xml.gz")):
+                pending.append(candidate)
+            elif not parsed_candidate.path.lower().endswith((".pdf",".jpg",".jpeg",".png",".gif",".svg",".webp",".zip",".doc",".docx",".xls",".xlsx",".mp4",".mp3")):
+                pages.append(candidate)
+    return list(dict.fromkeys(pages))
+
+
 def crawl_official_site(target, seed_url, allow_single_email=False):
     """Recorre páginas internas sin máximo artificial; termina al hallar 6 datos o agotar la web."""
     seed_host=urllib.parse.urlsplit(seed_url).netloc.lower()
@@ -1917,6 +1966,7 @@ def crawl_official_site(target, seed_url, allow_single_email=False):
     visited=set()
     records=[]
     seed_verified=False
+    sitemap_loaded=False
     target_id=str(target.get("id") or record_value(target,"n","nombre","name"))
     while queue:
         page_url=queue.pop(0)
@@ -1946,6 +1996,12 @@ def crawl_official_site(target, seed_url, allow_single_email=False):
         record["_official_site"]=True
         record["_target_id"]=target_id
         records.append(record)
+        if not sitemap_loaded:
+            sitemap_loaded=True
+            try:
+                queue.extend(sitemap_page_urls(record.get("source_url") or page_url,seed_host))
+            except Exception as exc:
+                print(f"No se pudo leer el sitemap de {seed_host}: {exc}",flush=True)
         for candidate in record.pop("_internal_links",[]):
             if url_key(candidate) not in visited:
                 queue.append(candidate)
