@@ -22,7 +22,7 @@ jobs:
   discovery:
     name: Rastrear fuentes y guardar propuestas pendientes
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 360
     steps:
       - name: Descargar código de main
         uses: actions/checkout@v7
