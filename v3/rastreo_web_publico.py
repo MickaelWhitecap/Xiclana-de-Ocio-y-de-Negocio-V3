@@ -2186,6 +2186,10 @@ def main():
     parser.add_argument("--self-test",action="store_true")
     parser.add_argument("--catalog",type=pathlib.Path,default=None,
                         help="Copia temporal exportada desde Supabase; nunca usa el JSON histórico.")
+    parser.add_argument("--batch-ids-file",type=pathlib.Path,default=None,
+                        help="IDs de las fichas activas que debe investigar este lote.")
+    parser.add_argument("--global-discovery",action="store_true",
+                        help="Ejecuta una sola vez por ciclo las fuentes generales y el descubrimiento de candidatas.")
     args=parser.parse_args()
     if args.self_test:
         self_test()
@@ -2198,6 +2202,27 @@ def main():
     if not isinstance(data.get("items"),list) or not isinstance(data.get("candidatas_revision",[]),list):
         raise SystemExit("Estructura del catálogo no válida; se cancela sin modificar.")
     existing=data["items"]+data.get("candidatas_revision",[])
+    batch_ids=None
+    if args.batch_ids_file:
+        if not args.batch_ids_file.is_file():
+            raise SystemExit("No existe el fichero de IDs del lote.")
+        batch_ids={str(x).strip() for x in args.batch_ids_file.read_text(encoding="utf-8").splitlines() if str(x).strip()}
+        if not batch_ids or len(batch_ids)>50:
+            raise SystemExit("El lote debe contener entre 1 y 50 IDs.")
+        active_by_id={
+            str(x.get("id")):x for x in data["items"]
+            if isinstance(x,dict) and x.get("id") and x.get("is_published") is True
+            and not x.get("_xiclana_deleted") and str(x.get("t") or "").lower() in ("ocio","negocio")
+        }
+        missing=sorted(batch_ids-set(active_by_id))
+        if missing:
+            raise SystemExit("El lote contiene fichas inexistentes, inactivas o de la papelera: "+", ".join(missing[:5]))
+        target_items=[active_by_id[x] for x in sorted(batch_ids)]
+    else:
+        target_items=[
+            x for x in data["items"] if isinstance(x,dict) and x.get("is_published") is True
+            and not x.get("_xiclana_deleted") and str(x.get("t") or "").lower() in ("ocio","negocio")
+        ]
     existing_pairs=set()
     existing_name_addresses={}
     urls=set()
@@ -2216,12 +2241,13 @@ def main():
         addr=norm(item.get("a") or item.get("direccion") or item.get("address"))
         if name and addr: existing_pairs.add(name+"|"+addr)
         if name: existing_name_addresses.setdefault(name,set()).add(addr)
-    links=list(DIRECT_DETAIL_URLS)
-    # La búsqueda de webs propias se ejecuta individualmente para todas las fichas sin URL.
+    links=list(DIRECT_DETAIL_URLS) if args.global_discovery else []
+    # Las fuentes generales se consultan una sola vez por ciclo RAD; los lotes
+    # siguientes se concentran exclusivamente en las webs de sus 50 fichas.
     trusted_urls=set()
     # Fuentes locales directas: sus fichas individuales son una vía de detección
     # independiente de los buscadores. Solo se confía en rutas de detalle conocidas.
-    for seed in DIRECTORY_SEEDS:
+    for seed in (DIRECTORY_SEEDS if args.global_discovery else []):
         seed_host=urllib.parse.urlparse(seed).netloc.lower()
         seed_limit=450 if any(x in seed_host for x in ("chiclanaguiadempresas","cylex.es","paginasamarillas.es","qdq.com","tripadvisor.es")) else 160
         seed_queue=[seed]
@@ -2252,16 +2278,17 @@ def main():
         except Exception as exc:
             print(f"Fuente directa no disponible ({seed}): {exc}",flush=True)
     links.extend(balance_urls_by_host(trusted_urls))
-    for q in QUERIES:
-        for engine in (search_ddg,search_bing):
-            try: links.extend(engine(q))
-            except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
+    if args.global_discovery:
+        for q in QUERIES:
+            for engine in (search_ddg,search_bing):
+                try: links.extend(engine(q))
+                except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
     links=list(dict.fromkeys(links))
-    official_records, official_domains, official_pages=discover_official_website_jobs(data["items"])
-    unlinked_official_records, fichas_sin_web_consultadas, unlinked_pages=discover_unlinked_official_website_jobs(data["items"])
+    official_records, official_domains, official_pages=discover_official_website_jobs(target_items)
+    unlinked_official_records, fichas_sin_web_consultadas, unlinked_pages=discover_unlinked_official_website_jobs(target_items)
     official_pages+=unlinked_pages
     official_records.extend(unlinked_official_records)
-    openrta_records=fetch_openrta_records()
+    openrta_records=fetch_openrta_records() if args.global_discovery else []
     added=[]; seen_pairs=set(); seen_urls=set(); seen_unlocated_names=set()
     coincidencias=[]; registros_conocidos=existing[:]
     fichas_enriquecidas=set(); campos_actualizados=0; conflictos_no_sobrescritos=0
@@ -2409,7 +2436,7 @@ def main():
             if field in ("address","phone","email","website","hours","description")
         )
     registered_web_targets=[
-        x for x in data["items"]
+        x for x in target_items
         if isinstance(x,dict) and urllib.parse.urlsplit(record_value(x,"w","web","website")).scheme.lower() in ("http","https")
         and urllib.parse.urlsplit(record_value(x,"w","web","website")).netloc
     ]
@@ -2423,7 +2450,9 @@ def main():
        "fuente_registro_oficial":{"nombre":"OpenRTA - Junta de Andalucía","url":"https://datos.juntadeandalucia.es/api/v0/openrta/search","licencia":"CC BY 4.0"},
        "openrta_registros_validos":len(openrta_records),
        "consultas_fichas_existentes":fichas_sin_web_consultadas,
-       "total_fichas_en_catalogo":len(data["items"]),
+       "total_fichas_en_catalogo":len(target_items),
+       "tamano_lote":len(target_items) if batch_ids is None else len(batch_ids),
+       "ids_lote":sorted(batch_ids) if batch_ids is not None else [],
        "fichas_con_web_registrada_consultadas":len(registered_web_targets),
        "fichas_sin_web_registrada_consultadas":fichas_sin_web_consultadas,
        "fichas_con_web_oficial":sum(1 for x in data["items"] if record_value(x,"w","web","website")),
