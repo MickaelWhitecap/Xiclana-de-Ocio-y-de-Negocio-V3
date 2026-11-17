@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Ejecuta un lote RAD de hasta 50 fichas y confirma su checkpoint en Supabase."""
+import argparse
 import json
 import os
 import pathlib
@@ -84,7 +85,43 @@ def select_batch(state, current_active_ids):
     return None
 
 
+def self_test():
+    sample = {"items": [
+        {"id": "o-02", "t": "ocio", "is_published": True},
+        {"id": "o-01", "t": "ocio", "is_published": True},
+        {"id": "n-01", "t": "negocio", "is_published": True},
+        {"id": "deleted", "t": "ocio", "is_published": False, "_xiclana_deleted": True},
+        {"id": "unpublished", "t": "negocio", "is_published": False},
+    ]}
+    active = active_items(sample)
+    assert {x["id"] for x in active} == {"o-01", "o-02", "n-01"}
+    state = create_state(sample)
+    assert state["sector_order"] == ["ocio", "negocio"]
+    assert state["manifest"]["ocio"] == ["o-01", "o-02"]
+    batch = select_batch(state, {x["id"] for x in active})
+    assert batch == ("ocio", ["o-01", "o-02"], 0, 2), batch
+    state["cursor"]["ocio"] = 2
+    batch = select_batch(state, {x["id"] for x in active})
+    assert batch == ("negocio", ["n-01"], 0, 1), batch
+    alternate = create_state({**sample, "rad_lotes_siguiente_inicio": "negocio"})
+    assert alternate["sector_order"] == ["negocio", "ocio"]
+    many = {"items": [
+        {"id": f"o-{i:03}", "t": "ocio", "is_published": True}
+        for i in range(123)
+    ]}
+    large_state = create_state(many)
+    first = select_batch(large_state, {x["id"] for x in active_items(many)})
+    assert len(first[1]) == 50 and first[2:] == (0, 50)
+    print("RAD lotes self-test: OK", flush=True)
+
+
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--self-test", action="store_true")
+    args = parser.parse_args()
+    if args.self_test:
+        self_test()
+        return
     with tempfile.TemporaryDirectory(prefix="xiclana-rad-batch-") as tmp:
         tmp = pathlib.Path(tmp)
         catalog_path = tmp / "catalogo.json"
