@@ -2241,9 +2241,11 @@ def main():
                 changed,conflicts=merge_existing_record(old,record,source_url)
                 # Una web oficial propia basta para verificar la ficha cuando se ha
                 # extraído al menos uno de los seis datos; no se exige completitud mínima.
+                # _page_fields solo incluye datos detectados en esta página,
+                # no valores heredados de la ficha que se usan para comparar.
                 official_fields = [
-                    k for k in ("address","phone","email","website","hours","description")
-                    if str(record.get(k) or "").strip()
+                    k for k in record.get("_page_fields", [])
+                    if k in ("address","phone","email","website","hours","description")
                 ]
                 official_evidence = official_site and bool(official_fields)
                 current_status = norm(old.get("estado_verificacion"))
