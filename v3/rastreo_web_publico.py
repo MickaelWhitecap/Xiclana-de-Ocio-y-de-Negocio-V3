@@ -995,6 +995,17 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False, all
         )
         if hours_match and re.search(r"\b\d{1,2}[:.]\d{2}\b",hours_match.group(1)):
             hours=" ".join(hours_match.group(1).split())[:500]
+    if not hours:
+        # Horarios visibles en páginas de contacto/servicios aunque no exista JSON-LD.
+        schedule_blocks=p.paragraphs+p.headings
+        schedule_pattern=r"(?i)\b(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo|lun(?:es)?\s*[-a]\s*vie(?:rnes)?|mo\s*[-a]\s*fr)\b"
+        time_pattern=r"\b\d{1,2}[:.]\d{2}\b"
+        schedule_candidates=[
+            " ".join(str(block).split()) for block in schedule_blocks
+            if re.search(schedule_pattern,str(block)) and re.search(time_pattern,str(block))
+        ]
+        if schedule_candidates:
+            hours=max(schedule_candidates,key=len)[:500]
     if isinstance(hours,dict): hours=[hours]
     if isinstance(hours,list):
         parts=[]
