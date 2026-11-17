@@ -2048,7 +2048,7 @@ def sitemap_page_urls(seed_url, site_host):
 
 
 def crawl_official_site(target, seed_url, allow_single_email=False):
-    """Recorre páginas internas sin máximo artificial; termina al hallar 6 datos o agotar la web."""
+    """Recorre todas las páginas internas y sitemaps accesibles de la web oficial."""
     seed_host=urllib.parse.urlsplit(seed_url).netloc.lower()
     if not seed_host:
         return [],0
@@ -2102,10 +2102,11 @@ def crawl_official_site(target, seed_url, allow_single_email=False):
 
 
 def discover_official_website_jobs(records):
-    """Investiga la web de cada ficha que ya tiene una URL registrada."""
+    """Investiga y registra por ficha el resultado de cada web ya registrada."""
     official_records=[]
     domains=set()
     pages_total=0
+    audits={}
     seed_counts={}
     for item in records:
         if isinstance(item,dict):
@@ -2115,18 +2116,31 @@ def discover_official_website_jobs(records):
     for target in records:
         if not isinstance(target,dict):
             continue
+        ident=str(target.get("id") or record_value(target,"n","nombre","name"))
+        name=record_value(target,"n","nombre","name")
         website=record_value(target,"w","web","website")
         parsed=urllib.parse.urlsplit(website)
         if parsed.scheme.lower() not in ("http","https") or not parsed.netloc:
             continue
         domains.add(parsed.netloc.lower())
+        audit={"id":ident,"nombre":name,"sector":str(target.get("t") or ""),
+               "web_registrada":website,"web_oficial_confirmada":False,
+               "paginas_visitadas":0,"paginas_con_datos":0,"campos_detectados":[]}
         try:
             pages,visited=crawl_official_site(target,website,allow_single_email=seed_counts.get(website,0)==1)
             official_records.extend(pages)
             pages_total+=visited
+            audit["paginas_visitadas"]=visited
+            audit["paginas_con_datos"]=len(pages)
+            audit["web_oficial_confirmada"]=bool(pages)
+            audit["campos_detectados"]=sorted(official_fields_found(pages))
+            audit["resultado"]="web_oficial_investigada" if pages else ("web_no_confirmada" if visited else "sin_acceso")
         except Exception as exc:
-            print(f"Error al rastrear web oficial de {record_value(target,'n','nombre','name')}: {exc}",flush=True)
-    return official_records,len(domains),pages_total
+            audit["resultado"]="error_consulta"
+            audit["error"]=str(exc)[:300]
+            print(f"Error al rastrear web oficial de {name}: {exc}",flush=True)
+        audits[ident]=audit
+    return official_records,len(domains),pages_total,audits
 
 def discover_unlinked_official_website_jobs(records):
     """Busca web propia para todas las fichas sin URL y rastrea sus páginas internas."""
@@ -2148,6 +2162,7 @@ def discover_unlinked_official_website_jobs(records):
     official_records=[]
     fichas_consultadas=0
     paginas_consultadas=0
+    audits={}
     for _name_key,target in targets:
         name=record_value(target,"n","nombre","name")
         query=f'"{name}" "Chiclana de la Frontera" (web oficial OR página web OR contacto)'
@@ -2158,6 +2173,12 @@ def discover_unlinked_official_website_jobs(records):
             except Exception as exc:
                 print(f"Buscador de web propia no disponible ({engine.__name__}): {exc}",flush=True)
         fichas_consultadas+=1
+        ident=str(target.get("id") or name)
+        audit={"id":ident,"nombre":name,"sector":str(target.get("t") or ""),
+               "web_registrada":"","web_oficial_confirmada":False,
+               "busquedas_realizadas":2,"resultados_busqueda":len(set(results)),
+               "urls_candidatas_comprobadas":0,"paginas_visitadas":0,
+               "paginas_con_datos":0,"campos_detectados":[]}
         for candidate_url in list(dict.fromkeys(results)):
             parsed=urllib.parse.urlsplit(candidate_url)
             host=(parsed.hostname or "").lower().removeprefix("www.")
@@ -2167,9 +2188,11 @@ def discover_unlinked_official_website_jobs(records):
                 continue
             if any(x in host for x in ("facebook.","instagram.","tripadvisor.","cylex.","paginasamarillas.","qdq.","chiclanaguiadempresas","todociudad.")):
                 continue
+            audit["urls_candidatas_comprobadas"]+=1
             try:
                 pages,_visited=crawl_official_site(target,candidate_url,allow_single_email=True)
                 paginas_consultadas+=_visited
+                audit["paginas_visitadas"]+=_visited
             except Exception as exc:
                 print(f"Error al comprobar posible web propia {candidate_url}: {exc}",flush=True)
                 pages=[]
@@ -2177,8 +2200,16 @@ def discover_unlinked_official_website_jobs(records):
                 for record in pages:
                     record["website"]=record.get("website") or candidate_url
                 official_records.extend(pages)
+                audit["web_registrada"]=candidate_url
+                audit["web_oficial_confirmada"]=True
+                audit["paginas_con_datos"]=len(pages)
+                audit["campos_detectados"]=sorted(official_fields_found(pages))
+                audit["resultado"]="web_oficial_descubierta"
                 break
-    return official_records,fichas_consultadas,paginas_consultadas
+        if not audit.get("resultado"):
+            audit["resultado"]="candidatas_no_confirmadas" if audit["urls_candidatas_comprobadas"] else "web_no_localizada"
+        audits[ident]=audit
+    return official_records,fichas_consultadas,paginas_consultadas,audits
 
 
 def main():
@@ -2286,10 +2317,11 @@ def main():
                 try: links.extend(engine(q))
                 except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
     links=list(dict.fromkeys(links))
-    official_records, official_domains, official_pages=discover_official_website_jobs(target_items)
-    unlinked_official_records, fichas_sin_web_consultadas, unlinked_pages=discover_unlinked_official_website_jobs(target_items)
+    official_records, official_domains, official_pages, registered_audit=discover_official_website_jobs(target_items)
+    unlinked_official_records, fichas_sin_web_consultadas, unlinked_pages, unlinked_audit=discover_unlinked_official_website_jobs(target_items)
     official_pages+=unlinked_pages
     official_records.extend(unlinked_official_records)
+    target_audit={**registered_audit,**unlinked_audit}
     openrta_records=fetch_openrta_records() if args.global_discovery else []
     added=[]; seen_pairs=set(); seen_urls=set(); seen_unlocated_names=set()
     coincidencias=[]; registros_conocidos=existing[:]
@@ -2442,6 +2474,24 @@ def main():
         if isinstance(x,dict) and urllib.parse.urlsplit(record_value(x,"w","web","website")).scheme.lower() in ("http","https")
         and urllib.parse.urlsplit(record_value(x,"w","web","website")).netloc
     ]
+    resultados_por_ficha=[]
+    six_fields=("address","phone","email","website","hours","description")
+    for target in target_items:
+        ident=str(target.get("id") or record_value(target,"n","nombre","name"))
+        audit=dict(target_audit.get(ident) or {
+            "id":ident,"nombre":record_value(target,"n","nombre","name"),
+            "sector":str(target.get("t") or ""),"web_registrada":record_value(target,"w","web","website"),
+            "web_oficial_confirmada":False,"paginas_visitadas":0,"paginas_con_datos":0,
+            "campos_detectados":[],"resultado":"sin_resultado"
+        })
+        found=sorted(official_fields_by_target.get(ident,set()))
+        audit["campos_detectados"]=sorted(set(audit.get("campos_detectados",[]))|set(found))
+        audit["campos_faltantes"]=[field for field in six_fields if field not in audit["campos_detectados"]]
+        audit["datos_oficiales_detectados"]=len(audit["campos_detectados"])
+        audit["ficha_investigada"]=True
+        resultados_por_ficha.append(audit)
+    if len(resultados_por_ficha)!=len(target_items):
+        raise RuntimeError("RAD no ha generado un resultado individual para cada ficha del lote.")
     discovered_unlinked_targets=len({
         str(x.get("_target_id") or "") for x in unlinked_official_records
         if x.get("_target_id")
@@ -2458,12 +2508,14 @@ def main():
        "ids_lote":sorted(batch_ids) if batch_ids is not None else [],
        "fichas_con_web_registrada_consultadas":len(registered_web_targets),
        "fichas_sin_web_registrada_consultadas":fichas_sin_web_consultadas,
-       "fichas_con_web_oficial":sum(1 for x in target_items if record_value(x,"w","web","website")),
+       "fichas_con_web_oficial":sum(1 for x in resultados_por_ficha if x.get("web_oficial_confirmada")),
        "dominios_web_oficiales_consultados":official_domains,
        "paginas_web_oficiales_consultadas":official_pages,
        "consultas_por_ficha_y_pagina_oficial":official_pages,
        "fichas_sin_web_consultadas":fichas_sin_web_consultadas,
-       "fichas_web_oficiales_investigadas":len(official_fields_by_target),
+       "fichas_web_oficiales_investigadas":sum(1 for x in resultados_por_ficha if x.get("web_oficial_confirmada")),
+       "fichas_con_resultado_individual":len(resultados_por_ficha),
+       "resultados_por_ficha":resultados_por_ficha,
        "webs_propias_descubiertas_sin_url_previa":discovered_unlinked_targets,
        "fichas_web_oficiales_con_6_datos":sum(1 for fields in official_fields_by_target.values() if len(fields)==6),
        "fichas_web_oficiales_con_datos_incompletos":sum(1 for fields in official_fields_by_target.values() if len(fields)<6),
