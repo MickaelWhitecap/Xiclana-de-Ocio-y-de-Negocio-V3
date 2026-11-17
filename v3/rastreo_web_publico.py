@@ -1843,7 +1843,7 @@ def self_test():
         get = lambda url, limit=1200000: (nonlocal_sample, url, "text/html")
         assert extract("https://directorio.example/servicio-nacional") is None, "El filtro geográfico ha aceptado un negocio no local"
 
-        # La web se recorre más allá de cuatro páginas y termina al reunir los seis datos.
+        # La web se recorre más allá de cuatro páginas, incluso tras completar algunos campos.
         page_urls = [
             "https://aurora.example/",
             "https://aurora.example/pagina-2",
@@ -1877,6 +1877,24 @@ def self_test():
         assert audits["aurora"]["paginas_visitadas"] == 6
         assert set(audits["aurora"]["campos_detectados"]) == {"address","phone","email","website","hours","description"}
         assert any(x.get("description") for x in crawled), "No se ha recuperado la descripción de la sexta página"
+        # Simular una interrupción tras cinco páginas y comprobar que la sexta
+        # se recupera desde la cola persistida, sin repetir las anteriores.
+        checkpoint={}
+        def interrupt_after_five(progress):
+            checkpoint.update(progress)
+            if progress.get("paginas_visitadas")==5 and not progress.get("completed"):
+                raise RuntimeError("interrupción simulada")
+        target={"id":"aurora","n":"Comercio Aurora","w":"https://aurora.example/","t":"negocio"}
+        try:
+            crawl_official_site(target,"https://aurora.example/",resume_state=None,progress_callback=interrupt_after_five)
+            raise AssertionError("La interrupción simulada no se produjo")
+        except RuntimeError as exc:
+            assert str(exc)=="interrupción simulada"
+        assert checkpoint.get("paginas_visitadas")==5
+        resumed_records,resumed_pages=crawl_official_site(target,"https://aurora.example/",resume_state=checkpoint)
+        assert resumed_pages==6, f"Reanudación incorrecta: {resumed_pages} páginas"
+        assert len(resumed_records)==6, f"Se perdieron registros al reanudar: {len(resumed_records)}"
+
     finally:
         allowed, get, extract = original_allowed, original_get, original_extract
     print("RAD self-test: OK",flush=True)
