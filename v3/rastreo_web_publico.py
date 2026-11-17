@@ -523,7 +523,7 @@ def clean_address(value, locality="", postal=""):
     has_detail=bool(re.search(
         r"(?i)\b(?:calle|c\.?|avenida|avda?\.?|plaza|pza\.?|paseo|carretera|ctra\.?|"
         r"camino|traves[ií]a|ronda|urbanizaci[oó]n|urb\.?|pol[ií]gono|pol\.?|"
-        r"parque empresarial|centro comercial|edificio|edif\.?|bulevar|glorieta)\b", raw
+        r"parque empresarial|centro comercial|edificio|edif\.?|bulevar|glorieta|playa)\b", raw
     )) or bool(re.search(r"\b\d{1,4}\b", raw))
     if not raw or not has_detail:
         return ""
@@ -886,7 +886,7 @@ def is_chiclana(address, locality, postal, body, title, url, trusted_local=False
         if any(path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS[host]): return True
     return False
 
-def extract(url, trusted_local=False, target=None, allow_single_email=False):
+def extract(url, trusted_local=False, target=None, allow_single_email=False, allow_target_fields=False):
     if not allowed(url): return None
     try: body,final_url,ctype=get(url)
     except Exception: return None
@@ -937,6 +937,10 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False):
     website=clean_website(textval(obj.get("url")),final_url)
     if target:
         website=record_value(target,"w","web","website") or website
+        # Una URL descubierta para esta ficha ya ha superado la comprobación de
+        # identidad por nombre y contenido; no exigir que el JSON-LD repita la URL.
+        if allow_target_fields and not website:
+            website=final_url
     # En fichas de directorios, el enlace externo rotulado como web oficial
     # es más fiable que cualquier enlace genérico (mapas o redes sociales).
     if not website:
@@ -966,7 +970,7 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False):
         addr=next((x for x in p.paragraphs
                    if re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",x)
                    and "chiclana" in norm(x)
-                   and re.search(r"(?i)\b(calle|avenida|avda|camino|paseo|pol[ií]gono|carretera|plaza)\b",x)), "")
+                   and re.search(r"(?i)\b(calle|avenida|avda|camino|paseo|pol[ií]gono|carretera|plaza|urbanizaci[oó]n|urb\.?|playa|centro comercial|puerto|poblado)\b",x)), "")
     # No conservar direcciones que no acrediten Chiclana: una página de directorio
     # puede incluir la sede de otra ciudad o datos globales de la propia guía.
     addr=clean_address(addr,locality,postal)
@@ -1009,11 +1013,10 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False):
     if not phone:
         phone=" / ".join(extract_phones(blob))
     phone=" / ".join(sanitize_contact_phones(name,phone))
-    if target:
-        # La web puede representar varias sucursales: no se mezclan teléfonos,
-        # horarios ni descripciones generales. El correo estructurado JSON-LD
-        # ya ha sido asociado a esta página por choose_schema_entity; solo se
-        # sustituye cuando existe una coincidencia contextual más específica.
+    if target and not allow_target_fields:
+        # En una URL compartida por varias sucursales se evita mezclar contactos,
+        # horarios o descripciones. La búsqueda de una web propia sin URL previa
+        # habilita estos campos solo después de comprobar el nombre en la página.
         phone=""
         hours=""
         desc=""
@@ -1649,6 +1652,38 @@ def self_test():
             "Se ha perdido el correo JSON-LD del propio dominio."
         )
 
+        # Caso de control Arena Bay: al descubrir una web propia sin URL en la ficha,
+        # los datos publicados por esa página no deben descartarse como si fueran
+        # datos de una sede genérica compartida.
+        arena_sample = """<html><head><title>Arena Bay Club de Mar</title>
+        <meta name="description" content="Restaurante y club de playa en la Playa de la Barrosa, Chiclana.">
+        <script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"Restaurant","name":"Arena Bay Club de Mar",
+        "url":"https://arenabayclubdemar.com/","telephone":"644096389","email":"info@arenabayclubdemar.com",
+        "address":{"@type":"PostalAddress","streetAddress":"Urb. Novo Sancti Petri (a pie de la Playa de la Barrosa)",
+        "postalCode":"11139","addressLocality":"Chiclana de la Frontera"},
+        "openingHours":["Mo-Su 11:00-23:00"]}
+        </script></head><body><h1>Arena Bay Club de Mar</h1>
+        <p>Urb. Novo Sancti Petri (a pie de la Playa de la Barrosa), 11139, Chiclana de la Frontera, Cádiz.</p>
+        </body></html>"""
+        get = lambda url, limit=1200000: (arena_sample, url, "text/html")
+        arena_target = {"id":"osm:node:13888202351","n":"Arena Bay Club de mar"}
+        arena_conservative = extract("https://arenabayclubdemar.com/",target=arena_target)
+        assert arena_conservative is not None and arena_conservative["phone"] == "", (
+            "El extractor conservador debe seguir evitando contactos en páginas de sedes compartidas."
+        )
+        arena = extract(
+            "https://arenabayclubdemar.com/",
+            target=arena_target,
+            allow_target_fields=True
+        )
+        assert arena is not None, "No se ha reconocido la web oficial de Arena Bay."
+        assert arena["phone"] == "644096389", arena["phone"]
+        assert arena["email"] == "info@arenabayclubdemar.com", arena["email"]
+        assert "Novo Sancti Petri" in arena["address"] and "11139" in arena["address"], arena["address"]
+        assert "11:00" in arena["hours"], arena["hours"]
+        assert "Restaurante y club de playa" in arena["description"], arena["description"]
+
         multi_phone_sample = """<html><head><title>Agrojardín Reina</title>
         <meta name="description" content="Maquinaria de jardinería y suministros profesionales para el campo">
         </head><body><h1>Agrojardín Reina Maquinaria de jardinería, Ferretería, Suministros, Pellets</h1>
@@ -2055,7 +2090,7 @@ def discover_unlinked_official_website_jobs(records, limit=100, rotation=0):
                 continue
             seen.add(key)
             try:
-                record=extract(candidate_url,target=target)
+                record=extract(candidate_url,target=target,allow_target_fields=True)
             except Exception as exc:
                 print(f"Error al comprobar posible web propia {candidate_url}: {exc}",flush=True)
                 record=None
