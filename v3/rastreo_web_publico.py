@@ -903,19 +903,21 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False, all
     # Prioriza el nombre estructurado de la ficha; el H1 puede contener SEO del portal.
     raw_name=textval(obj.get("name")) or (p.headings[0] if p.headings else "") or title
     name=clean_business_name(raw_name)
-    if target and not trusted_target_site:
+    if target:
         target_name=record_value(target,"n","nombre","name")
         if target_name:
-            # Una búsqueda puede devolver resultados de homónimos o negocios
-            # de municipios próximos. Exigimos que el nombre de la ficha aparezca
-            # en el título, encabezados o texto visible antes de vincular la web.
-            evidence=norm(" ".join([title]+p.headings+p.text))
-            tokens=[x for x in norm(target_name).split() if x not in {"de","la","el","los","las","del","y","en"}]
-            evidence_tokens=set(evidence.split())
-            if len(tokens)>=2 and not all(x in evidence_tokens for x in tokens):
-                return None
-            if len(tokens)==1 and tokens[0] not in set(norm(title+" "+" ".join(p.headings)).split()):
-                return None
+            if not trusted_target_site:
+                # La página inicial debe identificar la ficha antes de confiar
+                # en los enlaces internos del mismo sitio.
+                evidence=norm(" ".join([title]+p.headings+p.text))
+                tokens=[x for x in norm(target_name).split() if x not in {"de","la","el","los","las","del","y","en"}]
+                evidence_tokens=set(evidence.split())
+                if len(tokens)>=2 and not all(x in evidence_tokens for x in tokens):
+                    return None
+                if len(tokens)==1 and tokens[0] not in set(norm(title+" "+" ".join(p.headings)).split()):
+                    return None
+            # Las páginas interiores pertenecen a la ficha ya identificada:
+            # mantener siempre el nombre de catálogo para que puedan enriquecerla.
             name=clean_business_name(target_name)
     if not name or not valid_business_name(name): return None
     # Compara JSON-LD, metadescripción y texto visible: algunos directorios
