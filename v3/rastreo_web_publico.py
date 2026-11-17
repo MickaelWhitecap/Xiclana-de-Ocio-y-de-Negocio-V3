@@ -2142,15 +2142,17 @@ def discover_official_website_jobs(records):
         audits[ident]=audit
     return official_records,len(domains),pages_total,audits
 
-def discover_unlinked_official_website_jobs(records):
-    """Busca web propia para todas las fichas sin URL y rastrea sus páginas internas."""
+def discover_unlinked_official_website_jobs(records, retry_ids=None):
+    """Busca web propia para fichas sin web oficial confirmada y rastrea sus páginas internas."""
+    retry_ids={str(x) for x in (retry_ids or set())}
     targets=[]
     for item in records:
         if not isinstance(item,dict):
             continue
         name=record_value(item,"n","nombre","name")
         website=record_value(item,"w","web","website")
-        if name and not website:
+        ident=str(item.get("id") or name)
+        if name and (not website or ident in retry_ids):
             targets.append((norm(name),item))
     targets.sort(key=lambda x:x[0])
     excluded_hosts=set(TRUSTED_DIRECTORY_PATHS)|{
@@ -2175,7 +2177,8 @@ def discover_unlinked_official_website_jobs(records):
         fichas_consultadas+=1
         ident=str(target.get("id") or name)
         audit={"id":ident,"nombre":name,"sector":str(target.get("t") or ""),
-               "web_registrada":"","web_oficial_confirmada":False,
+               "web_preexistente":record_value(target,"w","web","website"),
+               "web_registrada":record_value(target,"w","web","website"),"web_oficial_confirmada":False,
                "busquedas_realizadas":2,"resultados_busqueda":len(set(results)),
                "urls_candidatas_comprobadas":0,"paginas_visitadas":0,
                "paginas_con_datos":0,"campos_detectados":[]}
@@ -2318,10 +2321,24 @@ def main():
                 except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
     links=list(dict.fromkeys(links))
     official_records, official_domains, official_pages, registered_audit=discover_official_website_jobs(target_items)
-    unlinked_official_records, fichas_sin_web_consultadas, unlinked_pages, unlinked_audit=discover_unlinked_official_website_jobs(target_items)
+    retry_ids={
+        str(x.get("id") or record_value(x,"n","nombre","name"))
+        for x in target_items
+        if not registered_audit.get(str(x.get("id") or record_value(x,"n","nombre","name")),{}).get("web_oficial_confirmada")
+    }
+    unlinked_official_records, fichas_sin_web_consultadas, unlinked_pages, unlinked_audit=discover_unlinked_official_website_jobs(target_items,retry_ids)
     official_pages+=unlinked_pages
     official_records.extend(unlinked_official_records)
-    target_audit={**registered_audit,**unlinked_audit}
+    target_audit=dict(registered_audit)
+    for ident,audit in unlinked_audit.items():
+        previous=target_audit.get(ident,{})
+        if audit.get("web_oficial_confirmada"):
+            target_audit[ident]={**previous,**audit,
+                "web_preexistente":previous.get("web_registrada") or audit.get("web_preexistente")}
+        elif previous:
+            target_audit[ident]={**previous,"busqueda_web_propia":audit}
+        else:
+            target_audit[ident]=audit
     openrta_records=fetch_openrta_records() if args.global_discovery else []
     added=[]; seen_pairs=set(); seen_urls=set(); seen_unlocated_names=set()
     coincidencias=[]; registros_conocidos=existing[:]
