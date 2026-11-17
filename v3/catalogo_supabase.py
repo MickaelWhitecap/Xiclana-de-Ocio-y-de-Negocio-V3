@@ -119,8 +119,9 @@ def export_catalog(path):
 
 
 
-def sync_enrichment(before_path, after_path):
-    """Aplica enriquecimientos RAD y verifica fichas no borradas con datos de su web oficial."""
+def sync_enrichment(before_path, after_path, allowed_ids=None):
+    """Aplica enriquecimientos RAD solo a IDs autorizados y fichas aún publicadas."""
+    allowed_ids = None if allowed_ids is None else {str(x) for x in allowed_ids}
     base, key = connection()
     before = json.loads(pathlib.Path(before_path).read_text(encoding="utf-8"))
     after = json.loads(pathlib.Path(after_path).read_text(encoding="utf-8"))
@@ -140,6 +141,8 @@ def sync_enrichment(before_path, after_path):
         if not isinstance(item, dict) or not item.get("id"):
             continue
         ident = str(item["id"])
+        if allowed_ids is not None and ident not in allowed_ids:
+            continue
         original = before_by_id.get(ident)
         current = current_by_id.get(ident)
         if original is None:
@@ -160,7 +163,7 @@ def sync_enrichment(before_path, after_path):
             continue
         status = str(current_data.get("estado_verificacion") or "").strip().casefold()
         promote = verify_official and status != "verificada"
-        if current.get("is_deleted") or (status != "verificada" and not promote):
+        if current.get("is_deleted") or current.get("is_published") is not True or (status != "verificada" and not promote):
             inactive_count += 1
             continue
         if promote:
@@ -171,17 +174,28 @@ def sync_enrichment(before_path, after_path):
         unsafe = sorted(set(changed_keys) - allowed_fields)
         if unsafe:
             raise RuntimeError(f"RAD intentó modificar campos no autorizados en {ident}: {unsafe}")
-        verification_fields = sorted(set(changed_keys) & {"estado_verificacion", "f", "v"})
+        safe_changed_keys = []
+        for field in changed_keys:
+            new_value = after_data[field]
+            old_value = current_data.get(field)
+            new_is_empty = new_value is None or new_value == "" or new_value == [] or new_value == {}
+            old_is_present = old_value is not None and old_value != "" and old_value != [] and old_value != {}
+            if new_is_empty and old_is_present:
+                continue
+            safe_changed_keys.append(field)
+        verification_fields = sorted(set(safe_changed_keys) & {"estado_verificacion", "f", "v"})
         if verification_fields and not promote:
             raise RuntimeError(f"RAD intentó cambiar el estado o la procedencia de verificación sin prueba de web oficial en {ident}: {verification_fields}")
         current_clean = {k: v for k, v in current_data.items() if k not in meta_keys}
         if current_clean != before_data or current.get("updated_at") != original.get("_xiclana_updated_at"):
             conflict_count += 1
             continue
+        if not safe_changed_keys and not promote:
+            continue
         merged = dict(current_data)
-        for field in changed_keys:
+        for field in safe_changed_keys:
             merged[field] = after_data[field]
-        to_update.append((ident, current, merged, len(changed_keys), promote))
+        to_update.append((ident, current, merged, len(safe_changed_keys), promote))
 
     updated_count = field_count = 0
     for ident, current, merged, changed_count, promote in to_update:
