@@ -1938,7 +1938,11 @@ def crawl_official_site(target, seed_url, allow_single_email=False):
             if not seed_verified:
                 break
             continue
-        seed_verified=True
+        if not seed_verified:
+            seed_verified=True
+            # Si la URL inicial redirige (p. ej. dominio raíz a www), seguir
+            # el host final que ya ha superado la comprobación de identidad.
+            seed_host=urllib.parse.urlsplit(record.get("source_url") or page_url).netloc.lower() or seed_host
         record["_official_site"]=True
         record["_target_id"]=target_id
         records.append(record)
