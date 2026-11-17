@@ -937,6 +937,10 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False, all
     website=clean_website(textval(obj.get("url")),final_url)
     if target:
         website=record_value(target,"w","web","website") or website
+        # Una URL descubierta para esta ficha ya ha superado la comprobación de
+        # identidad por nombre y contenido; no exigir que el JSON-LD repita la URL.
+        if allow_target_fields and not website:
+            website=final_url
     # En fichas de directorios, el enlace externo rotulado como web oficial
     # es más fiable que cualquier enlace genérico (mapas o redes sociales).
     if not website:
@@ -1655,7 +1659,7 @@ def self_test():
         <meta name="description" content="Restaurante y club de playa en la Playa de la Barrosa, Chiclana.">
         <script type="application/ld+json">
         {"@context":"https://schema.org","@type":"Restaurant","name":"Arena Bay Club de Mar",
-        "telephone":"644096389","email":"info@arenabayclubdemar.com",
+        "url":"https://arenabayclubdemar.com/","telephone":"644096389","email":"info@arenabayclubdemar.com",
         "address":{"@type":"PostalAddress","streetAddress":"Urb. Novo Sancti Petri (a pie de la Playa de la Barrosa)",
         "postalCode":"11139","addressLocality":"Chiclana de la Frontera"},
         "openingHours":["Mo-Su 11:00-23:00"]}
