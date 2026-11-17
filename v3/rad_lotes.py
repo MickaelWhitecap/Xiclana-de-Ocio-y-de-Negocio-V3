@@ -75,6 +75,17 @@ def create_state(data):
 
 
 def select_batch(state, current_active_ids):
+    # Un lote abierto conserva sus límites aunque el proceso se interrumpa.
+    active = state.get("active_batch")
+    if isinstance(active, dict):
+        sector = active.get("sector")
+        start = int(active.get("start", 0))
+        end = int(active.get("end", 0))
+        if sector in SECTORS and 0 <= start < end <= len(state["manifest"].get(sector, [])):
+            ids = state["manifest"][sector][start:end]
+            selected = [ident for ident in ids if ident in current_active_ids]
+            return sector, selected, start, end
+
     for sector in state["sector_order"]:
         ids = state["manifest"].get(sector, [])
         cursor = int(state["cursor"].get(sector, 0))
@@ -82,8 +93,19 @@ def select_batch(state, current_active_ids):
             continue
         end = min(cursor + BATCH_SIZE, len(ids))
         selected = [ident for ident in ids[cursor:end] if ident in current_active_ids]
+        state["active_batch"] = {
+            "sector": sector, "start": cursor, "end": end,
+            "batch_number": int(state.get("batches_completed", 0)) + 1,
+        }
         return sector, selected, cursor, end
     return None
+
+
+def has_remaining(state):
+    return any(
+        int(state["cursor"].get(sector, 0)) < len(state["manifest"].get(sector, []))
+        for sector in state["sector_order"]
+    )
 
 
 def self_test():
@@ -111,8 +133,14 @@ def self_test():
         for i in range(123)
     ]}
     large_state = create_state(many)
-    first = select_batch(large_state, {x["id"] for x in active_items(many)})
+    many_ids = {x["id"] for x in active_items(many)}
+    first = select_batch(large_state, many_ids)
     assert len(first[1]) == 50 and first[2:] == (0, 50)
+    # Simular interrupción tras 17 fichas y restaurar el estado persistido.
+    large_state["cursor"]["ocio"] = 17
+    resumed = select_batch(large_state, many_ids)
+    assert resumed[2:] == (0, 50), resumed
+    assert large_state["active_batch"]["batch_number"] == 1
     print("RAD lotes self-test: OK", flush=True)
 
 
@@ -181,7 +209,11 @@ def main():
 
         sector, batch_ids, start, end = selection
         manifest_slice = state["manifest"][sector][start:end]
-        batch_number = int(state.get("batches_completed", 0)) + 1
+        batch_number = int(state["active_batch"]["batch_number"])
+        # El rango del lote queda confirmado en Supabase antes de investigar
+        # la primera ficha; una reanudación nunca recalcula start/end.
+        data["rad_lotes"] = state
+        persist_metadata(data, ["rad_lotes"])
         print(json.dumps({
             "evento": "inicio_lote",
             "run_id": state["run_id"],
@@ -295,6 +327,7 @@ def main():
             }, ensure_ascii=False), flush=True)
 
         state["batches_completed"] = batch_number
+        state["active_batch"] = None
         state["last_batch"] = {
             "sector": sector,
             "ids": manifest_slice,
@@ -309,7 +342,7 @@ def main():
         updated["rad_lotes"] = state
         persist_metadata(updated, ["rad_lotes"])
 
-        more = select_batch(state, current_active_ids) is not None
+        more = has_remaining(state)
         result = {
             "status": "more" if more else "last_batch",
             "run_id": state["run_id"],
