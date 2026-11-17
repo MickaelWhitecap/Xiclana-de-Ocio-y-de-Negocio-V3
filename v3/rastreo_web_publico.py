@@ -2396,20 +2396,47 @@ def main():
         registros_conocidos.append(candidate)
     data.setdefault("candidatas_revision",[]).extend(added)
     data["total_candidatas_revision"]=len(data["candidatas_revision"])
+    # Métricas de cobertura por ficha, no por página: permiten comprobar
+    # qué parte del catálogo se ha investigado y qué datos faltan realmente.
+    all_official_records=official_records+unlinked_official_records
+    official_fields_by_target={}
+    for page_record in all_official_records:
+        target_key=str(page_record.get("_target_id") or "")
+        if not target_key:
+            continue
+        official_fields_by_target.setdefault(target_key,set()).update(
+            field for field in page_record.get("_page_fields",[])
+            if field in ("address","phone","email","website","hours","description")
+        )
+    registered_web_targets=[
+        x for x in data["items"]
+        if isinstance(x,dict) and urllib.parse.urlsplit(record_value(x,"w","web","website")).scheme.lower() in ("http","https")
+        and urllib.parse.urlsplit(record_value(x,"w","web","website")).netloc
+    ]
+    discovered_unlinked_targets=len({
+        str(x.get("_target_id") or "") for x in unlinked_official_records
+        if x.get("_target_id")
+    })
     data["rad_ultima_ejecucion"]={"fecha_utc":datetime.now(timezone.utc).isoformat(),
        "buscadores":["DuckDuckGo HTML","Bing RSS"],"fuentes_directas":DIRECTORY_SEEDS,
        "fuentes_detalle_directo":DIRECT_DETAIL_URLS,"consultas":len(QUERIES),
        "fuente_registro_oficial":{"nombre":"OpenRTA - Junta de Andalucía","url":"https://datos.juntadeandalucia.es/api/v0/openrta/search","licencia":"CC BY 4.0"},
        "openrta_registros_validos":len(openrta_records),
        "consultas_fichas_existentes":fichas_sin_web_consultadas,
+       "total_fichas_en_catalogo":len(data["items"]),
+       "fichas_con_web_registrada_consultadas":len(registered_web_targets),
+       "fichas_sin_web_registrada_consultadas":fichas_sin_web_consultadas,
        "fichas_con_web_oficial":sum(1 for x in data["items"] if record_value(x,"w","web","website")),
        "dominios_web_oficiales_consultados":official_domains,
        "paginas_web_oficiales_consultadas":official_pages,
        "consultas_por_ficha_y_pagina_oficial":official_pages,
        "fichas_sin_web_consultadas":fichas_sin_web_consultadas,
-       "fichas_web_oficiales_investigadas":len({str(x.get("_target_id","")) for x in official_records}),
-       "webs_propias_descubiertas_sin_url_previa":len(unlinked_official_records),
-       "fichas_con_email_detectado_en_web_oficial":len({str(x.get("_target_id","")) for x in official_records if x.get("email")}),
+       "fichas_web_oficiales_investigadas":len(official_fields_by_target),
+       "webs_propias_descubiertas_sin_url_previa":discovered_unlinked_targets,
+       "fichas_web_oficiales_con_6_datos":sum(1 for fields in official_fields_by_target.values() if len(fields)==6),
+       "fichas_web_oficiales_con_datos_incompletos":sum(1 for fields in official_fields_by_target.values() if len(fields)<6),
+       "campos_oficiales_detectados":sum(len(fields) for fields in official_fields_by_target.values()),
+       "fichas_con_email_detectado_en_web_oficial":len({str(x.get("_target_id","")) for x in all_official_records if x.get("email")}),
        "correos_detectados_en_webs_oficiales":len({str(x.get("email","")).strip().lower() for x in official_records if x.get("email")}),
        "urls_encontradas":len(links),"candidatas_nuevas":len(added),
        "fichas_enriquecidas":len(fichas_enriquecidas),"campos_actualizados":campos_actualizados,
