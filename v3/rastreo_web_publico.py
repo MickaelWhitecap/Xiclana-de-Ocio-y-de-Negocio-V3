@@ -2157,7 +2157,8 @@ def main():
         if name and addr: existing_pairs.add(name+"|"+addr)
         if name: existing_name_addresses.setdefault(name,set()).add(addr)
     links=list(DIRECT_DETAIL_URLS)
-    # La búsqueda de webs propias se ejecuta individualmente para todas las fichas sin URL.\n    trusted_urls=set()
+    # La búsqueda de webs propias se ejecuta individualmente para todas las fichas sin URL.
+    trusted_urls=set()
     # Fuentes locales directas: sus fichas individuales son una vía de detección
     # independiente de los buscadores. Solo se confía en rutas de detalle conocidas.
     for seed in DIRECTORY_SEEDS:
