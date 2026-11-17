@@ -854,6 +854,31 @@ def compare_catalog_record(candidate, existing):
     return None
 
 
+
+def safe_to_enrich_catalog_match(match, record, old, records, official_site=False, trusted_local=False):
+    """Decide si una coincidencia puede enriquecer la ficha existente."""
+    if not match:
+        return False
+    exact_name=norm(record_value(record,"n","nombre","name"))==norm(record_value(old,"n","nombre","name"))
+    exact_name_matches=sum(
+        1 for item in records
+        if isinstance(item,dict) and
+        norm(record_value(record,"n","nombre","name"))==norm(record_value(item,"n","nombre","name"))
+    )
+    unique_exact_name=exact_name and exact_name_matches==1
+    if match.get("kind")=="duplicate":
+        return True
+    if match.get("kind")=="possible":
+        return unique_exact_name and (trusted_local or bool(record_value(record,"a","direccion","address")))
+    # Una dirección puede estar expresada de forma distinta en OSM y en la web.
+    # Si la web oficial está vinculada a esta ficha, el nombre exacto es único
+    # en todo el catálogo y la página ha superado la identificación, no es una
+    # sucursal distinta: es la misma ficha con una dirección más detallada.
+    if match.get("kind")=="branch":
+        return bool(official_site and unique_exact_name)
+    return False
+
+
 def find_catalog_match(candidate, records):
     best=None
     for old in records:
@@ -1561,6 +1586,15 @@ def self_test():
         {"n":"Casa Bernardo","a":"Calle Real 10","p":"956123456"},
         {"n":"Casa Bernarda","a":"Avenida Diputación 20","p":"956999999"}
     ) is None
+    # El Árbol Tapas: el domicilio OSM es menos detallado que el de la web
+    # oficial, pero el teléfono de reservas coincide y el nombre es único.
+    arbol_candidate={"n":"El Árbol Tapas","a":"Carretera la Barrosa, local 3, Cañadilla, 11139","p":"856525755","w":"https://elarboltapas.com"}
+    arbol_existing={"id":"osm:node:6403427204","n":"El Árbol Tapas","a":"Carretera de la Barrosa, 11139","p":"+34 629888152","w":""}
+    arbol_match=compare_catalog_record(arbol_candidate,arbol_existing)
+    assert arbol_match and arbol_match["kind"]=="branch"
+    assert safe_to_enrich_catalog_match(arbol_match,arbol_candidate,arbol_existing,[arbol_existing],official_site=True)
+    assert not safe_to_enrich_catalog_match(arbol_match,arbol_candidate,arbol_existing,[arbol_existing],official_site=False)
+    assert not safe_to_enrich_catalog_match(arbol_match,arbol_candidate,arbol_existing,[arbol_existing,dict(arbol_existing,id="otra")],official_site=True)
     assert compare_catalog_record(
         {"n":"Bodegas Primitivo Collantes","a":"Calle Real 10","p":"956400150 / 956531722"},
         {"n":"Bodegas Primitivo Collantes S.A.","a":"Avenida Diputación 20","p":"956531722 / 956400150"}
@@ -2229,15 +2263,12 @@ def main():
           "w":record["website"],"url_fuente_rastreo":source_url
         }
         match=find_catalog_match(candidate,registros_conocidos)
-        if match and match["kind"] in ("duplicate","possible"):
+        if match and safe_to_enrich_catalog_match(
+            match,record,match["record"],registros_conocidos,
+            official_site=official_site,trusted_local=trusted_local
+        ):
             old=match["record"]
-            exact_name=norm(record["name"])==norm(record_value(old,"n","nombre","name"))
-            exact_name_matches=sum(
-                1 for x in registros_conocidos
-                if isinstance(x,dict) and norm(record["name"])==norm(record_value(x,"n","nombre","name"))
-            )
-            safe_to_enrich=(match["kind"]=="duplicate" or (exact_name and exact_name_matches==1 and (trusted_local or bool(record["address"]))))
-            if safe_to_enrich:
+            if True:
                 changed,conflicts=merge_existing_record(old,record,source_url)
                 # Una web oficial propia basta para verificar la ficha cuando se ha
                 # extraído al menos uno de los seis datos; no se exige completitud mínima.
