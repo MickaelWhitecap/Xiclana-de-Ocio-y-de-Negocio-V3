@@ -1852,12 +1852,15 @@ def self_test():
             }
             return values
         extract=fake_official_extract
-        crawled, domains, pages_read = discover_official_website_jobs([
-            {"id":"aurora","n":"Comercio Aurora","w":"https://aurora.example/"}
+        crawled, domains, pages_read, audits = discover_official_website_jobs([
+            {"id":"aurora","n":"Comercio Aurora","w":"https://aurora.example/","t":"negocio"}
         ])
         assert domains == 1
         assert pages_read == 6, f"El rastreador no recorrió todas las páginas necesarias: {pages_read}"
         assert len(official_fields_found(crawled)) == 6, official_fields_found(crawled)
+        assert audits["aurora"]["web_oficial_confirmada"] is True
+        assert audits["aurora"]["paginas_visitadas"] == 6
+        assert set(audits["aurora"]["campos_detectados"]) == {"address","phone","email","website","hours","description"}
         assert any(x.get("description") for x in crawled), "No se ha recuperado la descripción de la sexta página"
     finally:
         allowed, get, extract = original_allowed, original_get, original_extract
