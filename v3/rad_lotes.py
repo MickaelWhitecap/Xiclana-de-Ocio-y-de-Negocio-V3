@@ -124,6 +124,7 @@ def self_test():
     batch = select_batch(state, {x["id"] for x in active})
     assert batch == ("ocio", ["o-01", "o-02"], 0, 2), batch
     state["cursor"]["ocio"] = 2
+    state["active_batch"] = None
     batch = select_batch(state, {x["id"] for x in active})
     assert batch == ("negocio", ["n-01"], 0, 1), batch
     alternate = create_state({**sample, "rad_lotes_siguiente_inicio": "negocio"})
