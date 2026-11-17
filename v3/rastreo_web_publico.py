@@ -2263,79 +2263,66 @@ def main():
           "w":record["website"],"url_fuente_rastreo":source_url
         }
         match=find_catalog_match(candidate,registros_conocidos)
-        if match and safe_to_enrich_catalog_match(
-            match,record,match["record"],registros_conocidos,
-            official_site=official_site,trusted_local=trusted_local
-        ):
+        if match:
             old=match["record"]
-            if True:
-                changed,conflicts=merge_existing_record(old,record,source_url)
-                # Una web oficial propia basta para verificar la ficha cuando se ha
-                # extraído al menos uno de los seis datos; no se exige completitud mínima.
-                # _page_fields solo incluye datos detectados en esta página,
-                # no valores heredados de la ficha que se usan para comparar.
-                official_fields = [
-                    k for k in record.get("_page_fields", [])
-                    if k in ("address","phone","email","website","hours","description")
-                ]
-                official_evidence = official_site and bool(official_fields)
-                current_status = norm(old.get("estado_verificacion"))
-                if official_evidence:
-                    verification_date = datetime.now(timezone.utc).date().isoformat()
-                    if current_status != "verificada":
-                        old["estado_verificacion"] = "verificada"
-                        old["f"] = source_url
-                        old["v"] = verification_date
-                        changed.extend(["estado_verificacion","f","v"])
-                    old["_rad_official_verified"] = True
-                    sources = old.setdefault("fuentes_datos", [])
-                    if not isinstance(sources, list):
-                        sources = []
-                        old["fuentes_datos"] = sources
-                    field_names = {
-                        "address":"direccion", "phone":"telefono", "email":"correo",
-                        "website":"web", "hours":"horario", "description":"descripcion"
-                    }
-                    source_fields = [field_names[k] for k in official_fields]
-                    existing_source = next(
-                        (x for x in sources if isinstance(x, dict) and url_key(x.get("url","")) == url_key(source_url)),
-                        None
-                    )
-                    if existing_source is None:
-                        sources.append({"url":source_url,"tipo":"web_oficial","campos":source_fields,"fecha":verification_date})
-                        changed.append("fuentes_datos")
-                    else:
-                        merged_fields = list(dict.fromkeys((existing_source.get("campos") or []) + source_fields))
-                        if merged_fields != existing_source.get("campos"):
-                            existing_source["campos"] = merged_fields
-                            changed.append("fuentes_datos")
-                if changed:
-                    fichas_enriquecidas.add(str(old.get("id") or record_value(old,"n","nombre","name")))
-                    campos_actualizados+=len(changed)
-                    conflictos_no_sobrescritos+=len(conflicts)
-                    coincidencias.append({
-                        "nombre_detectado":record["name"],
-                        "nombre_catalogo":record_value(old,"n","nombre","name"),
-                        "tipo":"ficha_enriquecida","campos":changed,
-                        "url_detectada":source_url
-                    })
+            if safe_to_enrich_catalog_match(
+                match,record,old,registros_conocidos,
+                official_site=official_site,trusted_local=trusted_local
+            ):
+            changed,conflicts=merge_existing_record(old,record,source_url)
+            # Una web oficial propia basta para verificar la ficha cuando se ha
+            # extraído al menos uno de los seis datos; no se exige completitud mínima.
+            # _page_fields solo incluye datos detectados en esta página,
+            # no valores heredados de la ficha que se usan para comparar.
+            official_fields = [
+                k for k in record.get("_page_fields", [])
+                if k in ("address","phone","email","website","hours","description")
+            ]
+            official_evidence = official_site and bool(official_fields)
+            current_status = norm(old.get("estado_verificacion"))
+            if official_evidence:
+                verification_date = datetime.now(timezone.utc).date().isoformat()
+                if current_status != "verificada":
+                    old["estado_verificacion"] = "verificada"
+                    old["f"] = source_url
+                    old["v"] = verification_date
+                    changed.extend(["estado_verificacion","f","v"])
+                old["_rad_official_verified"] = True
+                sources = old.setdefault("fuentes_datos", [])
+                if not isinstance(sources, list):
+                    sources = []
+                    old["fuentes_datos"] = sources
+                field_names = {
+                    "address":"direccion", "phone":"telefono", "email":"correo",
+                    "website":"web", "hours":"horario", "description":"descripcion"
+                }
+                source_fields = [field_names[k] for k in official_fields]
+                existing_source = next(
+                    (x for x in sources if isinstance(x, dict) and url_key(x.get("url","")) == url_key(source_url)),
+                    None
+                )
+                if existing_source is None:
+                    sources.append({"url":source_url,"tipo":"web_oficial","campos":source_fields,"fecha":verification_date})
+                    changed.append("fuentes_datos")
                 else:
-                    coincidencias.append({
-                        "nombre_detectado":record["name"],
-                        "nombre_catalogo":record_value(old,"n","nombre","name"),
-                        "tipo":match["kind"],"motivo":"Coincidencia confirmada; no había campos vacíos que completar.",
-                        "url_detectada":source_url
-                    })
+                    merged_fields = list(dict.fromkeys((existing_source.get("campos") or []) + source_fields))
+                    if merged_fields != existing_source.get("campos"):
+                        existing_source["campos"] = merged_fields
+                        changed.append("fuentes_datos")
+            if changed:
+                fichas_enriquecidas.add(str(old.get("id") or record_value(old,"n","nombre","name")))
+                campos_actualizados+=len(changed)
+                conflictos_no_sobrescritos+=len(conflicts)
+    
+            else:
+                coincidencias.append({
+                    "nombre_detectado":record["name"],
+                    "nombre_catalogo":record_value(old,"n","nombre","name"),
+                    "tipo":match["kind"],"motivo":match["reason"],
+                    "similitud":round(match["score"],3),"url_detectada":source_url
+                })
                 seen_urls.add(seen_key)
                 continue
-            coincidencias.append({
-                "nombre_detectado":record["name"],
-                "nombre_catalogo":record_value(old,"n","nombre","name"),
-                "tipo":match["kind"],"motivo":match["reason"],
-                "similitud":round(match["score"],3),"url_detectada":source_url
-            })
-            seen_urls.add(seen_key)
-            continue
         # Los directorios locales sin teléfono/web solo pueden completar una ficha
         # existente; no generan candidatas nuevas sin un canal de contacto.
         if not any((record["phone"],record["email"],record["website"])) and not record.get("registration_code"):
