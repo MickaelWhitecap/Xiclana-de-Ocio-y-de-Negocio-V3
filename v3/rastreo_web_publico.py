@@ -2366,7 +2366,19 @@ def main():
           "n":record["name"],"a":record["address"],"p":record["phone"],
           "w":record["website"],"url_fuente_rastreo":source_url
         }
-        match=find_catalog_match(candidate,registros_conocidos)
+        if official_site:
+            target_id=str(record.get("_target_id") or "")
+            target_record=next(
+                (x for x in target_items if str(x.get("id") or "")==target_id),
+                None
+            )
+            if target_record is None:
+                print(f"Se descarta dato de web oficial sin ficha objetivo exacta: {target_id}",flush=True)
+                continue
+            match={"kind":"duplicate","record":target_record,
+                   "reason":"Web oficial asociada por ID exacto de la ficha objetivo.","score":1.0}
+        else:
+            match=find_catalog_match(candidate,registros_conocidos)
         if match:
             old=match["record"]
             if safe_to_enrich_catalog_match(
