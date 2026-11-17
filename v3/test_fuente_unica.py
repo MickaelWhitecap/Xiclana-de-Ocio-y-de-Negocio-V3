@@ -16,15 +16,15 @@ class RadSafeEnrichmentTests(unittest.TestCase):
         cls.catalog = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cls.catalog)
 
-    def _run(self, status="Verificada", extra_field=None):
+    def _run(self, status="Verificada", extra_field=None, before_address="", after_address="Calle Real 10, Chiclana"):
         timestamp = "2026-11-12T12:00:00+00:00"
         before_item = {
-            "id": "listing-1", "n": "Empresa de prueba", "a": "", "p": "",
+            "id": "listing-1", "n": "Empresa de prueba", "a": before_address, "p": "",
             "estado_verificacion": status, "is_published": True,
             "verified_at": timestamp, "_xiclana_updated_at": timestamp
         }
         after_item = dict(before_item)
-        after_item["a"] = "Calle Real 10, Chiclana"
+        after_item["a"] = after_address
         if extra_field:
             after_item[extra_field] = "cambio no permitido"
         before = {"items": [before_item]}
@@ -58,6 +58,48 @@ class RadSafeEnrichmentTests(unittest.TestCase):
         self.assertEqual(result["fichas_actualizadas"],0)
         self.assertEqual(result["saltadas_por_no_verificadas_o_inactivas"],1)
         request.assert_not_called()
+
+    def test_rad_never_clears_an_existing_nonempty_field(self):
+        result, request = self._run(
+            before_address="Calle Real 10, Chiclana",
+            after_address=""
+        )
+        self.assertEqual(result["fichas_actualizadas"],0)
+        request.assert_not_called()
+
+    def test_sync_enrichment_updates_only_ids_in_current_batch(self):
+        timestamp = "2026-11-12T12:00:00+00:00"
+        before_items = [
+            {"id": ident, "n": ident, "a": "", "estado_verificacion": "Verificada",
+             "is_published": True, "verified_at": timestamp, "_xiclana_updated_at": timestamp}
+            for ident in ("listing-1", "listing-2")
+        ]
+        after_items = []
+        current = []
+        for item in before_items:
+            changed = dict(item)
+            changed["a"] = "Calle Real 10, Chiclana"
+            after_items.append(changed)
+            current.append({
+                "id": item["id"],
+                "data": {k:v for k,v in item.items() if k not in {"id","is_published","verified_at","_xiclana_updated_at"}},
+                "is_published": True, "is_deleted": False,
+                "verified_at": timestamp, "updated_at": timestamp
+            })
+        with tempfile.TemporaryDirectory() as directory:
+            before_path = Path(directory) / "before.json"
+            after_path = Path(directory) / "after.json"
+            before_path.write_text(json.dumps({"items":before_items}),encoding="utf-8")
+            after_path.write_text(json.dumps({"items":after_items}),encoding="utf-8")
+            with patch.object(self.catalog,"connection",return_value=("https://example.supabase.co/rest/v1","secret")), \\
+                 patch.object(self.catalog,"fetch_all",return_value=current), \\
+                 patch.object(self.catalog,"request",return_value=([{"id":"listing-1"}],{})) as request:
+                result = self.catalog.sync_enrichment(before_path,after_path,allowed_ids={"listing-1"})
+        self.assertEqual(result["fichas_detectadas"],1)
+        self.assertEqual(result["fichas_actualizadas"],1)
+        self.assertEqual(len(request.call_args_list),1)
+        self.assertIn("id=eq.listing-1",request.call_args.args[0])
+
 
     def test_missing_verification_status_is_not_overridden_by_verified_at(self):
         result, request = self._run(status=None)
