@@ -32,7 +32,6 @@ QUERIES = [
     f'{CITY} site:actualidadsur.es/pueblos/chiclana-de-la-frontera',
 ]
 MAX_RESULTS_PER_QUERY = 12
-MAX_PAGES = 2000
 TIMEOUT = 18
 DIRECTORY_SEEDS = [
     "https://aechiclana.org/directorio/",
@@ -1956,6 +1955,12 @@ def discover_official_website_jobs(records):
     official_records=[]
     domains=set()
     pages_total=0
+    seed_counts={}
+    for item in records:
+        if isinstance(item,dict):
+            seed=record_value(item,"w","web","website")
+            if seed:
+                seed_counts[seed]=seed_counts.get(seed,0)+1
     for target in records:
         if not isinstance(target,dict):
             continue
@@ -1965,7 +1970,7 @@ def discover_official_website_jobs(records):
             continue
         domains.add(parsed.netloc.lower())
         try:
-            pages,visited=crawl_official_site(target,website,allow_single_email=True)
+            pages,visited=crawl_official_site(target,website,allow_single_email=seed_counts.get(website,0)==1)
             official_records.extend(pages)
             pages_total+=visited
         except Exception as exc:
@@ -2119,7 +2124,7 @@ def main():
         for engine in (search_ddg,search_bing):
             try: links.extend(engine(q))
             except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
-    links=list(dict.fromkeys(links))[:MAX_PAGES]
+    links=list(dict.fromkeys(links))
     official_records, official_domains, official_pages=discover_official_website_jobs(data["items"])
     unlinked_official_records, fichas_sin_web_consultadas=discover_unlinked_official_website_jobs(data["items"])
     official_records.extend(unlinked_official_records)
