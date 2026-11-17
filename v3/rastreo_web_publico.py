@@ -3,10 +3,11 @@
 Usa resultados públicos de buscadores y páginas públicas; respeta robots.txt,
 limita peticiones y nunca publica: añade candidatos a candidatas_revision.
 """
-import argparse, hashlib, html, json, pathlib, re, time, urllib.error, urllib.parse, urllib.request
+import argparse, hashlib, html, json, pathlib, re, tempfile, time, urllib.error, urllib.parse, urllib.request
 import urllib.robotparser
 from html.parser import HTMLParser
 from datetime import datetime, timezone
+import catalogo_supabase as catalog
 
 ROOT = pathlib.Path(__file__).resolve().parent
 MASTER = None  # El catálogo debe exportarse desde Supabase y pasarse explícitamente con --catalog.
@@ -2149,7 +2150,7 @@ def crawl_official_site(target, seed_url, allow_single_email=False, resume_state
     return records,len(visited)
 
 
-def discover_official_website_jobs(records):
+def discover_official_website_jobs(records, resume_state=None, progress_callback=None):
     """Investiga y registra por ficha el resultado de cada web ya registrada."""
     official_records=[]
     domains=set()
@@ -2177,7 +2178,7 @@ def discover_official_website_jobs(records):
         try:
             ficha_started=time.monotonic()
             log_event("ficha_web_registrada_inicio",ficha_id=ident,nombre=name,web=website)
-            pages,visited=crawl_official_site(target,website,allow_single_email=seed_counts.get(website,0)==1)
+            pages,visited=crawl_official_site(target,website,allow_single_email=seed_counts.get(website,0)==1,resume_state=resume_state,progress_callback=progress_callback)
             official_records.extend(pages)
             pages_total+=visited
             audit["paginas_visitadas"]=visited
@@ -2193,7 +2194,7 @@ def discover_official_website_jobs(records):
         audits[ident]=audit
     return official_records,len(domains),pages_total,audits
 
-def discover_unlinked_official_website_jobs(records, retry_ids=None):
+def discover_unlinked_official_website_jobs(records, retry_ids=None, resume_state=None, progress_callback=None):
     """Busca web propia para fichas sin web oficial confirmada y rastrea sus páginas internas."""
     retry_ids={str(x) for x in (retry_ids or set())}
     targets=[]
@@ -2247,7 +2248,7 @@ def discover_unlinked_official_website_jobs(records, retry_ids=None):
                 continue
             audit["urls_candidatas_comprobadas"]+=1
             try:
-                pages,_visited=crawl_official_site(target,candidate_url,allow_single_email=True)
+                pages,_visited=crawl_official_site(target,candidate_url,allow_single_email=True,resume_state=resume_state,progress_callback=progress_callback)
                 paginas_consultadas+=_visited
                 audit["paginas_visitadas"]+=_visited
             except Exception as exc:
@@ -2383,13 +2384,24 @@ def main():
                 except Exception as exc:
                     log_event("busqueda_general_error",buscador=engine.__name__,consulta=q,segundos=round(time.monotonic()-search_started,2),error=str(exc)[:240])
     links=list(dict.fromkeys(links))
-    official_records, official_domains, official_pages, registered_audit=discover_official_website_jobs(target_items)
+    resume_state=data.get("rad_crawl_progress")
+    def persist_crawl_progress(progress):
+        payload={"items":[],"rad_crawl_progress":progress}
+        with tempfile.TemporaryDirectory(prefix="xiclana-rad-crawl-") as tmp:
+            checkpoint_path=pathlib.Path(tmp)/"metadata.json"
+            checkpoint_path.write_text(json.dumps(payload,ensure_ascii=False,separators=(",",":")),encoding="utf-8")
+            catalog.sync_metadata(checkpoint_path,["rad_crawl_progress"])
+        log_event("checkpoint_web_guardado",ficha_id=progress.get("target_id"),paginas=progress.get("paginas_visitadas"),pendientes=len(progress.get("queue") or []),completado=progress.get("completed",False))
+
+    official_records, official_domains, official_pages, registered_audit=discover_official_website_jobs(
+        target_items,resume_state=resume_state,progress_callback=persist_crawl_progress
+    )
     retry_ids={
         str(x.get("id") or record_value(x,"n","nombre","name"))
         for x in target_items
         if not registered_audit.get(str(x.get("id") or record_value(x,"n","nombre","name")),{}).get("web_oficial_confirmada")
     }
-    unlinked_official_records, fichas_sin_web_consultadas, unlinked_pages, unlinked_audit=discover_unlinked_official_website_jobs(target_items,retry_ids)
+    unlinked_official_records, fichas_sin_web_consultadas, unlinked_pages, unlinked_audit=discover_unlinked_official_website_jobs(target_items,retry_ids,resume_state=resume_state,progress_callback=persist_crawl_progress)
     official_pages+=unlinked_pages
     official_records.extend(unlinked_official_records)
     target_audit=dict(registered_audit)
@@ -2588,7 +2600,7 @@ def main():
         str(x.get("_target_id") or "") for x in unlinked_official_records
         if x.get("_target_id")
     })
-    data["rad_ultima_ejecucion"]={"fecha_utc":datetime.now(timezone.utc).isoformat(),
+    data["rad_crawl_progress"]=None  # La ficha terminó; el orquestador confirma el resultado individual.\n    data["rad_ultima_ejecucion"]={"fecha_utc":datetime.now(timezone.utc).isoformat(),
        "buscadores":["DuckDuckGo HTML","Bing RSS"],"fuentes_directas":DIRECTORY_SEEDS,
        "fuentes_detalle_directo":DIRECT_DETAIL_URLS,"consultas":len(QUERIES),
        "fuente_registro_oficial":{"nombre":"OpenRTA - Junta de Andalucía","url":"https://datos.juntadeandalucia.es/api/v0/openrta/search","licencia":"CC BY 4.0"},
