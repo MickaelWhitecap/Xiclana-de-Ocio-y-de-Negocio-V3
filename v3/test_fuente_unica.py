@@ -132,7 +132,7 @@ class RadOfficialVerificationTests(unittest.TestCase):
         self.assertEqual(result["fichas_verificadas_desde_web_oficial"],1)
         payload = request.call_args.kwargs["payload"]
         self.assertEqual(payload["data"]["estado_verificacion"],"verificada")
-        self.assertFalse(payload["is_published"])
+        self.assertNotIn("is_published", payload)
 
 
 class SingleSupabaseMasterTests(unittest.TestCase):
