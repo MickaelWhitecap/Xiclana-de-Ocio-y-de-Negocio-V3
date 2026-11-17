@@ -220,12 +220,18 @@ def main():
                 continue
 
             before_path.write_text(catalog_path.read_text(encoding="utf-8"), encoding="utf-8")
-            batch_path.write_text(ident + "\\n", encoding="utf-8")
+            batch_path.write_text(ident + "\n", encoding="utf-8")
             command = [
                 sys.executable, str(ROOT / "rastreo_web_publico.py"),
                 "--catalog", str(catalog_path),
                 "--batch-ids-file", str(batch_path),
             ]
+            state["ficha_actual"] = {
+                "id": ident, "sector": sector, "inicio_utc": utcnow(),
+                "posicion_sector": position + 1,
+            }
+            data["rad_lotes"] = state
+            persist_metadata(data, ["rad_lotes"])
             print(json.dumps({
                 "evento": "inicio_ficha",
                 "run_id": state["run_id"],
