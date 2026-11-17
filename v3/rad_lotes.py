@@ -181,72 +181,125 @@ def main():
 
         sector, batch_ids, start, end = selection
         manifest_slice = state["manifest"][sector][start:end]
-        skipped_ids = [ident for ident in manifest_slice if ident not in current_active_ids]
-        batch_path.write_text("\n".join(batch_ids) + "\n", encoding="utf-8")
-        before_path.write_text(catalog_path.read_text(encoding="utf-8"), encoding="utf-8")
-        command = [
-            sys.executable, str(ROOT / "rastreo_web_publico.py"),
-            "--catalog", str(catalog_path),
-            "--batch-ids-file", str(batch_path),
-        ]
-        global_discovery = not bool(state.get("global_discovery_done"))
-        if global_discovery:
-            command.append("--global-discovery")
+        batch_number = int(state.get("batches_completed", 0)) + 1
         print(json.dumps({
             "evento": "inicio_lote",
             "run_id": state["run_id"],
             "sector": sector,
-            "lote": state["batches_completed"] + 1,
-            "ids": len(batch_ids),
+            "lote": batch_number,
+            "ids": len(manifest_slice),
             "posicion": f"{start + 1}-{end}",
-            "descubrimiento_general": global_discovery,
+            "unidad_checkpoint": "ficha",
+            "descubrimiento_general": "separado_del_enriquecimiento",
         }, ensure_ascii=False), flush=True)
-        subprocess.run(command, check=True)
 
-        sync_summary = catalog.sync_enrichment(before_path, catalog_path, allowed_ids=batch_ids)
-        updated = json.loads(catalog_path.read_text(encoding="utf-8"))
-        rad = updated.get("rad_ultima_ejecucion", {})
-        rad.update({
-            "lote_sector": sector,
-            "lote_numero": state["batches_completed"] + 1,
-            "lote_tamano": len(batch_ids),
-            "lote_ids": batch_ids,
-            "fichas_modificadas_en_supabase": sync_summary.get("fichas_actualizadas", 0),
-            "campos_aplicados_en_supabase": sync_summary.get("campos_actualizados", 0),
-            "fichas_verificadas_desde_web_oficial": sync_summary.get("fichas_verificadas_desde_web_oficial", 0),
-            "fichas_omitidas_por_cambio_concurrente": sync_summary.get("saltadas_por_cambio_concurrente", 0),
-            "fichas_omitidas_por_no_verificadas_o_inactivas": sync_summary.get("saltadas_por_no_verificadas_o_inactivas", 0),
-            "publicacion_automatica": False,
-        })
-        updated["rad_ultima_ejecucion"] = rad
-        # Primero se guardan los datos y candidatas del lote. El checkpoint
-        # solo avanza después de confirmar ambas sincronizaciones.
-        persist_metadata(updated, ["candidatas_revision", "total_candidatas_revision", "rad_ultima_ejecucion"])
+        # Cada ficha se investiga y confirma individualmente. El cursor solo
+        # avanza después de sincronizar el enriquecimiento y guardar metadatos.
+        for position in range(start, end):
+            ident = state["manifest"][sector][position]
+            if ident in state.setdefault("resultados_por_ficha", {}):
+                state["cursor"][sector] = max(int(state["cursor"].get(sector, 0)), position + 1)
+                continue
 
-        state["cursor"][sector] = end
-        state["batches_completed"] = int(state.get("batches_completed", 0)) + 1
-        per_ficha = state.setdefault("resultados_por_ficha", {})
-        for result_row in rad.get("resultados_por_ficha", []):
-            ident = str(result_row.get("id") or "")
-            if ident not in batch_ids:
-                raise RuntimeError(f"El informe RAD contiene una ficha ajena al lote: {ident}")
-            per_ficha[ident] = {**result_row, "lote_numero": state["batches_completed"],
-                                "lote_sector": sector, "registrado_utc": utcnow()}
-        if set(batch_ids) - set(per_ficha):
-            raise RuntimeError("RAD no ha devuelto resultado individual para todas las fichas activas del lote.")
-        for ident in skipped_ids:
-            per_ficha[ident] = {
-                "id": ident, "sector": sector, "resultado": "omitida_por_inactividad",
-                "ficha_investigada": False,
-                "motivo": "La ficha dejó de estar publicada o fue enviada a papelera antes de iniciar el lote.",
-                "lote_numero": state["batches_completed"], "registrado_utc": utcnow(),
+            # Volver a exportar antes de cada ficha: respeta bajas, papelera y
+            # modificaciones administrativas realizadas durante el lote.
+            catalog.export_catalog(catalog_path)
+            data = json.loads(catalog_path.read_text(encoding="utf-8"))
+            active_now = {str(x["id"]): x for x in active_items(data)}
+            if ident not in active_now:
+                state["resultados_por_ficha"][ident] = {
+                    "id": ident, "sector": sector, "resultado": "omitida_por_inactividad",
+                    "ficha_investigada": False,
+                    "motivo": "La ficha dejó de estar publicada o fue enviada a papelera antes de iniciar su investigación.",
+                    "lote_numero": batch_number, "registrado_utc": utcnow(),
+                }
+                state["cursor"][sector] = position + 1
+                data["rad_lotes"] = state
+                persist_metadata(data, ["rad_lotes"])
+                print(json.dumps({"evento":"ficha_omitida","id":ident,"cursor":position+1},ensure_ascii=False),flush=True)
+                continue
+
+            before_path.write_text(catalog_path.read_text(encoding="utf-8"), encoding="utf-8")
+            batch_path.write_text(ident + "\\n", encoding="utf-8")
+            command = [
+                sys.executable, str(ROOT / "rastreo_web_publico.py"),
+                "--catalog", str(catalog_path),
+                "--batch-ids-file", str(batch_path),
+            ]
+            print(json.dumps({
+                "evento": "inicio_ficha",
+                "run_id": state["run_id"],
+                "sector": sector,
+                "lote": batch_number,
+                "id": ident,
+                "posicion_lote": position - start + 1,
+                "total_lote": len(manifest_slice),
+            }, ensure_ascii=False), flush=True)
+            subprocess.run(command, check=True)
+
+            sync_summary = catalog.sync_enrichment(before_path, catalog_path, allowed_ids={ident})
+            updated = json.loads(catalog_path.read_text(encoding="utf-8"))
+            rad = updated.get("rad_ultima_ejecucion", {})
+            rows = rad.get("resultados_por_ficha", [])
+            result_row = next((row for row in rows if str(row.get("id") or "") == ident), None)
+            if result_row is None:
+                raise RuntimeError(f"RAD no devolvió resultado individual para la ficha {ident}.")
+
+            rad.update({
+                "lote_sector": sector,
+                "lote_numero": batch_number,
+                "lote_tamano": 1,
+                "lote_ids": [ident],
+                "fichas_modificadas_en_supabase": sync_summary.get("fichas_actualizadas", 0),
+                "campos_aplicados_en_supabase": sync_summary.get("campos_actualizados", 0),
+                "fichas_verificadas_desde_web_oficial": sync_summary.get("fichas_verificadas_desde_web_oficial", 0),
+                "fichas_omitidas_por_cambio_concurrente": sync_summary.get("saltadas_por_cambio_concurrente", 0),
+                "fichas_omitidas_por_no_verificadas_o_inactivas": sync_summary.get("saltadas_por_no_verificadas_o_inactivas", 0),
+                "publicacion_automatica": False,
+            })
+            updated["rad_ultima_ejecucion"] = rad
+
+            state["cursor"][sector] = position + 1
+            state["resultados_por_ficha"][ident] = {
+                **result_row,
+                "lote_numero": batch_number,
+                "lote_sector": sector,
+                "registrado_utc": utcnow(),
+                "sincronizacion_supabase": sync_summary,
             }
-        state["fichas_con_resultado_individual"] = len(per_ficha)
-        state["global_discovery_done"] = True
+            state["fichas_con_resultado_individual"] = len(state["resultados_por_ficha"])
+            state["ficha_actual"] = None
+            state["ultima_ficha_confirmada"] = {
+                "id": ident, "sector": sector, "confirmada_utc": utcnow(),
+            }
+            updated["rad_lotes"] = state
+
+            # Persistir candidatos, auditoría y cursor tras CADA ficha.
+            persist_metadata(updated, [
+                "candidatas_revision", "total_candidatas_revision",
+                "rad_ultima_ejecucion", "rad_lotes",
+            ])
+            print(json.dumps({
+                "evento": "ficha_confirmada",
+                "id": ident,
+                "sector": sector,
+                "cursor": state["cursor"][sector],
+                "resultados_individuales": len(state["resultados_por_ficha"]),
+                "fichas_actualizadas": sync_summary.get("fichas_actualizadas", 0),
+            }, ensure_ascii=False), flush=True)
+
+        state["batches_completed"] = batch_number
         state["last_batch"] = {
-            "sector": sector, "ids": batch_ids, "completed_utc": utcnow(),
-            "fichas_actualizadas": sync_summary.get("fichas_actualizadas", 0),
+            "sector": sector,
+            "ids": manifest_slice,
+            "completed_utc": utcnow(),
+            "fichas_confirmadas": len(manifest_slice),
         }
+        # Marcar que el rastreo individual se ha separado del descubrimiento
+        # general: este último no debe bloquear ni repetirse dentro de cada ficha.
+        state["global_discovery_status"] = "pendiente_de_flujo_independiente"
+        catalog.export_catalog(catalog_path)
+        updated = json.loads(catalog_path.read_text(encoding="utf-8"))
         updated["rad_lotes"] = state
         persist_metadata(updated, ["rad_lotes"])
 
