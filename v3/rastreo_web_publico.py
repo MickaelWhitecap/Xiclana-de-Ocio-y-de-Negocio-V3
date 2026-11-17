@@ -1319,7 +1319,7 @@ def merge_existing_record(existing, record, source_url):
 
 
 def self_test():
-    global allowed, get
+    global allowed, get, extract
     assert classify("Restaurante y cafetería") == ("ocio","Restauración")
     assert classify("Tienda de muebles") == ("negocio","Muebles y decoración")
     assert classify("TopGea Topografía. Especialistas en el sector topográfico e ingeniería técnica") == ("negocio","Servicios y negocios")
@@ -1618,7 +1618,7 @@ def self_test():
     }))
 
     # Prueba de integración: extracción completa con HTML controlado.
-    original_allowed, original_get = allowed, get
+    original_allowed, original_get, original_extract = allowed, get, extract
     sample = """<html><head><title>Empresa de Prueba</title>
     <meta name="description" content="Descripción de prueba del establecimiento">
     <script type="application/ld+json">
@@ -1746,31 +1746,29 @@ def self_test():
         assert extract("https://directorio.example/servicio-nacional") is None, "El filtro geográfico ha aceptado un negocio no local"
 
         # La web se recorre más allá de cuatro páginas y termina al reunir los seis datos.
-        site_pages = {
-            "https://aurora.example/": """<html><head><title>Comercio Aurora</title>
-            <script type="application/ld+json">{"@type":"LocalBusiness","name":"Comercio Aurora",
-            "address":{"streetAddress":"Calle Real 1","postalCode":"11130","addressLocality":"Chiclana de la Frontera"},
-            "telephone":"956123456"}</script></head><body><h1>Comercio Aurora</h1>
-            <a href="/pagina-2">Siguiente</a></body></html>""",
-            "https://aurora.example/pagina-2": """<html><head><title>Comercio Aurora</title>
-            <script type="application/ld+json">{"@type":"LocalBusiness","name":"Comercio Aurora",
-            "email":"contacto@aurora.example"}</script></head><body><h1>Comercio Aurora</h1>
-            <a href="/pagina-3">Siguiente</a></body></html>""",
-            "https://aurora.example/pagina-3": """<html><head><title>Comercio Aurora</title>
-            <script type="application/ld+json">{"@type":"LocalBusiness","name":"Comercio Aurora",
-            "openingHours":"Mo-Fr 09:00-18:00"}</script></head><body><h1>Comercio Aurora</h1>
-            <a href="/pagina-4">Siguiente</a></body></html>""",
-            "https://aurora.example/pagina-4": """<html><head><title>Comercio Aurora</title></head><body>
-            <h1>Comercio Aurora</h1><a href="/pagina-5">Siguiente</a></body></html>""",
-            "https://aurora.example/pagina-5": """<html><head><title>Comercio Aurora</title></head><body>
-            <h1>Comercio Aurora</h1><a href="/pagina-6">Siguiente</a></body></html>""",
-            "https://aurora.example/pagina-6": """<html><head><title>Comercio Aurora</title>
-            <script type="application/ld+json">{"@type":"LocalBusiness","name":"Comercio Aurora",
-            "description":"Comercio local especializado en productos para el hogar, con atención personalizada y asesoramiento a sus clientes."}</script>
-            </head><body><h1>Comercio Aurora</h1></body></html>"""
-        }
-        get = lambda url, limit=1200000: (site_pages.get(url, "<html></html>"), url, "text/html")
-        allowed = lambda url: True
+        page_urls = [
+            "https://aurora.example/",
+            "https://aurora.example/pagina-2",
+            "https://aurora.example/pagina-3",
+            "https://aurora.example/pagina-4",
+            "https://aurora.example/pagina-5",
+            "https://aurora.example/pagina-6",
+        ]
+        def fake_official_extract(url, target=None, **kwargs):
+            index=page_urls.index(url)
+            values={
+                "name":"Comercio Aurora","type":"negocio","category":"Comercio",
+                "address":"Calle Real 1, 11130 Chiclana de la Frontera" if index==0 else "",
+                "phone":"956123456" if index==0 else "",
+                "email":"contacto@aurora.example" if index==1 else "",
+                "website":"https://aurora.example/",
+                "hours":"Lunes a viernes 09:00-18:00" if index==2 else "",
+                "description":"Comercio local especializado en productos para el hogar, con atención personalizada y asesoramiento a sus clientes." if index==5 else "",
+                "source_url":url,
+                "_internal_links":[page_urls[index+1]] if index+1<len(page_urls) else []
+            }
+            return values
+        extract=fake_official_extract
         crawled, domains, pages_read = discover_official_website_jobs([
             {"id":"aurora","n":"Comercio Aurora","w":"https://aurora.example/"}
         ])
@@ -1779,7 +1777,7 @@ def self_test():
         assert len(official_fields_found(crawled)) == 6, official_fields_found(crawled)
         assert any(x.get("description") for x in crawled), "No se ha recuperado la descripción de la sexta página"
     finally:
-        allowed, get = original_allowed, original_get
+        allowed, get, extract = original_allowed, original_get, original_extract
     print("RAD self-test: OK",flush=True)
 
 def candidate_review_notes(record):
