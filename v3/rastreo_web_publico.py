@@ -1975,28 +1975,6 @@ def discover_official_website_jobs(records):
             print(f"Error al rastrear web oficial de {record_value(target,'n','nombre','name')}: {exc}",flush=True)
     return official_records,len(domains),pages_total
 
-def targeted_catalog_queries(records, limit=50, rotation=0):
-    """Genera búsquedas rotativas para fichas existentes que no están completas en N/6."""
-    targets=[]
-    for record in records:
-        if not isinstance(record,dict):
-            continue
-        name=record_value(record,"n","nombre","name")
-        if len(norm(name)) < 4:
-            continue
-        present=sum(bool(str(record.get(key) or "").strip()) for key in ("a","p","e","w","h","d"))
-        if present < 6:
-            targets.append((present,norm(name),name))
-    targets.sort(key=lambda x:(x[0],x[1]))
-    if not targets or limit <= 0:
-        return []
-    start=(max(0,int(rotation))*limit)%len(targets)
-    ordered=targets[start:]+targets[:start]
-    selected=ordered[:min(limit,len(ordered))]
-    return [f'"{name}" "Chiclana de la Frontera" (email OR correo OR mailto OR teléfono OR dirección OR horario OR contacto OR sucursales OR reservas)'
-            for _,_,name in selected]
-
-
 def discover_unlinked_official_website_jobs(records):
     """Busca web propia para todas las fichas sin URL y rastrea sus páginas internas."""
     targets=[]
