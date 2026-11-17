@@ -181,18 +181,32 @@ class SearchLinks(HTMLParser):
         if tag=="a" and self.active:
             self.links.append(self.href); self.active=False; self.href=None
 
+def log_event(event, **fields):
+    payload={"rad_event":event,"utc":datetime.now(timezone.utc).isoformat(),**fields}
+    print(json.dumps(payload,ensure_ascii=False,default=str),flush=True)
+
+
 def get(url, limit=1200000):
     host=urllib.parse.urlparse(url).netloc.lower()
     now=time.time()
     wait=1.0-(now-LAST_REQUEST.get(host,0))
     if wait>0: time.sleep(wait)
     req=urllib.request.Request(url,headers={"User-Agent":UA,"Accept":"text/html,application/xhtml+xml,application/rss+xml"})
-    with urllib.request.urlopen(req,timeout=TIMEOUT) as r:
-        data=r.read(limit+1)
-        if len(data)>limit: data=data[:limit]
-        charset=r.headers.get_content_charset() or "utf-8"
-        LAST_REQUEST[host]=time.time()
-        return data.decode(charset,errors="replace"),r.geturl(),r.headers.get_content_type()
+    started=time.monotonic()
+    try:
+        with urllib.request.urlopen(req,timeout=TIMEOUT) as r:
+            data=r.read(limit+1)
+            if len(data)>limit: data=data[:limit]
+            charset=r.headers.get_content_charset() or "utf-8"
+            LAST_REQUEST[host]=time.time()
+            elapsed=round(time.monotonic()-started,2)
+            if elapsed>=8:
+                log_event("peticion_lenta",host=host,segundos=elapsed,url=r.geturl(),bytes=len(data))
+            return data.decode(charset,errors="replace"),r.geturl(),r.headers.get_content_type()
+    except Exception as exc:
+        elapsed=round(time.monotonic()-started,2)
+        log_event("peticion_fallida",host=host,segundos=elapsed,url=url,error=str(exc)[:240])
+        raise
 
 def allowed(url):
     """Consulta robots.txt con timeout; ante un fallo de red, no rastrea ese host."""
@@ -2052,15 +2066,17 @@ def sitemap_page_urls(seed_url, site_host):
 
 def crawl_official_site(target, seed_url, allow_single_email=False):
     """Recorre todas las páginas internas y sitemaps accesibles de la web oficial."""
+    started=time.monotonic()
     seed_host=urllib.parse.urlsplit(seed_url).netloc.lower()
+    target_id=str(target.get("id") or record_value(target,"n","nombre","name"))
     if not seed_host:
         return [],0
+    log_event("web_inicio",ficha_id=target_id,web=seed_url,host=seed_host)
     queue=[seed_url]
     visited=set()
     records=[]
     seed_verified=False
     sitemap_loaded=False
-    target_id=str(target.get("id") or record_value(target,"n","nombre","name"))
     while queue:
         page_url=queue.pop(0)
         page_key=url_key(page_url)
@@ -2070,6 +2086,8 @@ def crawl_official_site(target, seed_url, allow_single_email=False):
         if parsed.scheme.lower() not in ("http","https") or parsed.netloc.lower()!=seed_host:
             continue
         visited.add(page_key)
+        if len(visited)==1 or len(visited)%10==0:
+            log_event("web_progreso",ficha_id=target_id,host=seed_host,paginas_visitadas=len(visited),pendientes=len(queue),pagina=page_url)
         try:
             record=extract(page_url,target=target,
                 allow_single_email=allow_single_email and page_key==url_key(seed_url),
@@ -2101,6 +2119,7 @@ def crawl_official_site(target, seed_url, allow_single_email=False):
         # No detenerse al encontrar los seis campos: seguir recorriendo
         # todas las páginas internas y los sitemaps para detectar datos adicionales,
         # corregir fuentes incompletas y conservar la procedencia de cada dato.
+    log_event("web_fin",ficha_id=target_id,host=seed_host,paginas_visitadas=len(visited),paginas_con_datos=len(records),pendientes=0,segundos=round(time.monotonic()-started,2))
     return records,len(visited)
 
 
