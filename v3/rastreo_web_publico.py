@@ -2071,12 +2071,18 @@ def discover_unlinked_official_website_jobs(records, limit=100, rotation=0):
         name=record_value(target,"n","nombre","name")
         query=f'"{name}" "Chiclana de la Frontera" (web oficial OR página web OR contacto)'
         results=[]
+        # Consultar Bing solo como alternativa si DuckDuckGo no devuelve resultados.
+        # Evita duplicar llamadas de red para cada ficha del lote.
         for engine in (search_ddg,search_bing):
             try:
-                results.extend(engine(query,limit=4))
+                found=engine(query,limit=3)
+                results.extend(found)
+                if found:
+                    break
             except Exception as exc:
                 print(f"Buscador de web propia no disponible ({engine.__name__}): {exc}",flush=True)
-        for candidate_url in dict.fromkeys(results):
+        # Limitar las comprobaciones por ficha para que el lote semanal termine a tiempo.
+        for candidate_url in list(dict.fromkeys(results))[:3]:
             parsed=urllib.parse.urlsplit(candidate_url)
             host=(parsed.hostname or "").lower().removeprefix("www.")
             if parsed.scheme not in ("http","https") or not host or host in excluded_hosts:
@@ -2193,7 +2199,7 @@ def main():
     official_jobs, official_domains, official_pages=discover_official_website_jobs(data["items"])
     iso=datetime.now(timezone.utc).isocalendar()
     unlinked_official_records, fichas_sin_web_consultadas=discover_unlinked_official_website_jobs(
-        data["items"],limit=100,rotation=iso.year*53+iso.week
+        data["items"],limit=20,rotation=iso.year*53+iso.week
     )
     official_records=list(unlinked_official_records)
     for job in official_jobs:
