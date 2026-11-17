@@ -43,3 +43,7 @@ jobs:
         run: python v3/rastreo_web_publico.py --self-test
       - name: Probar reanudación de lotes RAD
         run: python v3/rad_lotes.py --self-test
+      - name: Probar persistencia real de checkpoints RAD en Supabase
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python v3/test_rad_checkpoint_supabase.py
