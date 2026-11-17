@@ -2618,7 +2618,8 @@ def main():
         str(x.get("_target_id") or "") for x in unlinked_official_records
         if x.get("_target_id")
     })
-    data["rad_crawl_progress"]=None  # La ficha terminó; el orquestador confirma el resultado individual.\n    data["rad_ultima_ejecucion"]={"fecha_utc":datetime.now(timezone.utc).isoformat(),
+    data["rad_crawl_progress"]=None  # La ficha terminó; el orquestador confirma el resultado individual.
+    data["rad_ultima_ejecucion"]={"fecha_utc":datetime.now(timezone.utc).isoformat(),
        "buscadores":["DuckDuckGo HTML","Bing RSS"],"fuentes_directas":DIRECTORY_SEEDS,
        "fuentes_detalle_directo":DIRECT_DETAIL_URLS,"consultas":len(QUERIES),
        "fuente_registro_oficial":{"nombre":"OpenRTA - Junta de Andalucía","url":"https://datos.juntadeandalucia.es/api/v0/openrta/search","licencia":"CC BY 4.0"},
