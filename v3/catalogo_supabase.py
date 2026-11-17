@@ -120,7 +120,7 @@ def export_catalog(path):
 
 
 def sync_enrichment(before_path, after_path):
-    """Aplica enriquecimientos RAD y verifica fichas activas con datos de su web oficial."""
+    """Aplica enriquecimientos RAD y verifica fichas no borradas con datos de su web oficial."""
     base, key = connection()
     before = json.loads(pathlib.Path(before_path).read_text(encoding="utf-8"))
     after = json.loads(pathlib.Path(after_path).read_text(encoding="utf-8"))
@@ -160,7 +160,7 @@ def sync_enrichment(before_path, after_path):
             continue
         status = str(current_data.get("estado_verificacion") or "").strip().casefold()
         promote = verify_official and status != "verificada"
-        if current.get("is_deleted") or not current.get("is_published") or (status != "verificada" and not promote):
+        if current.get("is_deleted") or (status != "verificada" and not promote):
             inactive_count += 1
             continue
         if promote:
