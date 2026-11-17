@@ -120,7 +120,7 @@ def export_catalog(path):
 
 
 def sync_enrichment(before_path, after_path):
-    """Aplica solo campos seguros añadidos por RAD a fichas verificadas y activas."""
+    """Aplica enriquecimientos RAD y verifica fichas no borradas con datos de su web oficial."""
     base, key = connection()
     before = json.loads(pathlib.Path(before_path).read_text(encoding="utf-8"))
     after = json.loads(pathlib.Path(after_path).read_text(encoding="utf-8"))
@@ -159,9 +159,8 @@ def sync_enrichment(before_path, after_path):
             conflict_count += 1
             continue
         status = str(current_data.get("estado_verificacion") or "").strip().casefold()
-        pending_status = status in ("", "pendiente", "pendiente de verificar")
-        promote = verify_official and pending_status
-        if current.get("is_deleted") or not current.get("is_published") or (status != "verificada" and not promote):
+        promote = verify_official and status != "verificada"
+        if current.get("is_deleted") or (status != "verificada" and not promote):
             inactive_count += 1
             continue
         if promote:
@@ -183,9 +182,6 @@ def sync_enrichment(before_path, after_path):
         for field in changed_keys:
             merged[field] = after_data[field]
         to_update.append((ident, current, merged, len(changed_keys), promote))
-
-    if len(to_update) > 500:
-        raise RuntimeError(f"RAD propone modificar {len(to_update)} fichas; se supera el límite defensivo de 500 y no se aplica ninguna.")
 
     updated_count = field_count = 0
     for ident, current, merged, changed_count, promote in to_update:

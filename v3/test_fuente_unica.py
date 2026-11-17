@@ -77,12 +77,12 @@ class RadOfficialVerificationTests(unittest.TestCase):
         cls.catalog = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cls.catalog)
 
-    def _run(self, status="pendiente"):
+    def _run(self, status="pendiente", published=True):
         timestamp = "2026-11-16T10:00:00+00:00"
         before_item = {
             "id": "listing-official", "n": "Establecimiento de prueba",
             "estado_verificacion": status, "f": None, "v": None,
-            "is_published": True, "verified_at": None,
+            "is_published": published, "verified_at": None,
             "_xiclana_updated_at": timestamp
         }
         after_item = dict(before_item)
@@ -95,7 +95,7 @@ class RadOfficialVerificationTests(unittest.TestCase):
         current = [{
             "id": "listing-official",
             "data": {k:v for k,v in before_item.items() if k not in {"id","is_published","verified_at","_xiclana_updated_at"}},
-            "is_published": True, "is_deleted": False,
+            "is_published": published, "is_deleted": False,
             "verified_at": None, "updated_at": timestamp
         }]
         with tempfile.TemporaryDirectory() as directory:
@@ -118,11 +118,21 @@ class RadOfficialVerificationTests(unittest.TestCase):
         self.assertEqual(payload["data"]["v"],"2026-11-16")
         self.assertIsNotNone(payload["verified_at"])
 
-    def test_official_website_does_not_override_doubtful_listing(self):
+    def test_official_website_verifies_listing_even_if_previous_status_was_insufficient(self):
         result, request = self._run(status="insuficiente")
-        self.assertEqual(result["fichas_verificadas_desde_web_oficial"],0)
-        self.assertEqual(result["saltadas_por_no_verificadas_o_inactivas"],1)
-        request.assert_not_called()
+        self.assertEqual(result["fichas_verificadas_desde_web_oficial"],1)
+        self.assertEqual(result["fichas_actualizadas"],1)
+        payload = request.call_args.kwargs["payload"]
+        self.assertEqual(payload["data"]["estado_verificacion"],"verificada")
+        self.assertEqual(payload["data"]["f"],"https://establecimiento.example/")
+        self.assertIsNotNone(payload["verified_at"])
+
+    def test_official_website_verifies_unpublished_listing_without_publishing_it(self):
+        result, request = self._run(published=False)
+        self.assertEqual(result["fichas_verificadas_desde_web_oficial"],1)
+        payload = request.call_args.kwargs["payload"]
+        self.assertEqual(payload["data"]["estado_verificacion"],"verificada")
+        self.assertNotIn("is_published", payload)
 
 
 class SingleSupabaseMasterTests(unittest.TestCase):

@@ -2239,25 +2239,45 @@ def main():
             safe_to_enrich=(match["kind"]=="duplicate" or (exact_name and exact_name_matches==1 and (trusted_local or bool(record["address"]))))
             if safe_to_enrich:
                 changed,conflicts=merge_existing_record(old,record,source_url)
-                # Una coincidencia con una web propia solo verifica la ficha si la página
-                # identifica inequívocamente al establecimiento y aporta datos comprobables.
-                official_evidence=official_site and any(str(record.get(k) or "").strip() for k in ("address","phone","email","hours","description"))
-                current_status=norm(old.get("estado_verificacion"))
-                if official_evidence and current_status in ("","pendiente","pendiente de verificar"):
-                    verification_date=datetime.now(timezone.utc).date().isoformat()
-                    old["estado_verificacion"]="verificada"
-                    old["f"]=source_url
-                    old["v"]=verification_date
-                    old["_rad_official_verified"]=True
-                    changed.extend(["estado_verificacion","f","v"])
-                    sources=old.setdefault("fuentes_datos",[])
-                    if not isinstance(sources,list):
-                        sources=[]
-                        old["fuentes_datos"]=sources
-                    if not any(isinstance(x,dict) and url_key(x.get("url",""))==url_key(source_url) for x in sources):
-                        sources.append({"url":source_url,"tipo":"web_oficial","campos":["verificacion"],"fecha":verification_date})
-                    if "fuentes_datos" not in changed:
+                # Una web oficial propia basta para verificar la ficha cuando se ha
+                # extraído al menos uno de los seis datos; no se exige completitud mínima.
+                # _page_fields solo incluye datos detectados en esta página,
+                # no valores heredados de la ficha que se usan para comparar.
+                official_fields = [
+                    k for k in record.get("_page_fields", [])
+                    if k in ("address","phone","email","website","hours","description")
+                ]
+                official_evidence = official_site and bool(official_fields)
+                current_status = norm(old.get("estado_verificacion"))
+                if official_evidence:
+                    verification_date = datetime.now(timezone.utc).date().isoformat()
+                    if current_status != "verificada":
+                        old["estado_verificacion"] = "verificada"
+                        old["f"] = source_url
+                        old["v"] = verification_date
+                        changed.extend(["estado_verificacion","f","v"])
+                    old["_rad_official_verified"] = True
+                    sources = old.setdefault("fuentes_datos", [])
+                    if not isinstance(sources, list):
+                        sources = []
+                        old["fuentes_datos"] = sources
+                    field_names = {
+                        "address":"direccion", "phone":"telefono", "email":"correo",
+                        "website":"web", "hours":"horario", "description":"descripcion"
+                    }
+                    source_fields = [field_names[k] for k in official_fields]
+                    existing_source = next(
+                        (x for x in sources if isinstance(x, dict) and url_key(x.get("url","")) == url_key(source_url)),
+                        None
+                    )
+                    if existing_source is None:
+                        sources.append({"url":source_url,"tipo":"web_oficial","campos":source_fields,"fecha":verification_date})
                         changed.append("fuentes_datos")
+                    else:
+                        merged_fields = list(dict.fromkeys((existing_source.get("campos") or []) + source_fields))
+                        if merged_fields != existing_source.get("campos"):
+                            existing_source["campos"] = merged_fields
+                            changed.append("fuentes_datos")
                 if changed:
                     fichas_enriquecidas.add(str(old.get("id") or record_value(old,"n","nombre","name")))
                     campos_actualizados+=len(changed)
