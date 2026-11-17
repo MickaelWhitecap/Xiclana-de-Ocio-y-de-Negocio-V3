@@ -2064,19 +2064,44 @@ def sitemap_page_urls(seed_url, site_host):
     return list(dict.fromkeys(pages))
 
 
-def crawl_official_site(target, seed_url, allow_single_email=False):
-    """Recorre todas las páginas internas y sitemaps accesibles de la web oficial."""
+def crawl_official_site(target, seed_url, allow_single_email=False, resume_state=None, progress_callback=None):
+    """Recorre todas las páginas internas y sitemaps; permite reanudar desde un checkpoint."""
     started=time.monotonic()
     seed_host=urllib.parse.urlsplit(seed_url).netloc.lower()
     target_id=str(target.get("id") or record_value(target,"n","nombre","name"))
     if not seed_host:
         return [],0
-    log_event("web_inicio",ficha_id=target_id,web=seed_url,host=seed_host)
     queue=[seed_url]
     visited=set()
     records=[]
     seed_verified=False
     sitemap_loaded=False
+    if (isinstance(resume_state,dict)
+            and str(resume_state.get("target_id") or "")==target_id
+            and url_key(resume_state.get("seed_url") or "")==url_key(seed_url)):
+        queue=list(resume_state.get("queue") or [])
+        visited=set(resume_state.get("visited") or [])
+        records=list(resume_state.get("records") or [])
+        seed_verified=bool(resume_state.get("seed_verified"))
+        sitemap_loaded=bool(resume_state.get("sitemap_loaded"))
+        seed_host=str(resume_state.get("seed_host") or seed_host)
+        if resume_state.get("completed"):
+            log_event("web_reanudada_completada",ficha_id=target_id,web=seed_url,paginas_visitadas=len(visited))
+            return records,len(visited)
+        log_event("web_reanudada",ficha_id=target_id,web=seed_url,paginas_visitadas=len(visited),pendientes=len(queue))
+    else:
+        log_event("web_inicio",ficha_id=target_id,web=seed_url,host=seed_host)
+
+    def save_progress(completed=False):
+        if progress_callback:
+            progress_callback({
+                "target_id":target_id,"seed_url":seed_url,"seed_host":seed_host,
+                "queue":list(queue),"visited":sorted(visited),"records":records,
+                "seed_verified":seed_verified,"sitemap_loaded":sitemap_loaded,
+                "completed":completed,"paginas_visitadas":len(visited),
+                "actualizado_utc":datetime.now(timezone.utc).isoformat(),
+            })
+
     while queue:
         page_url=queue.pop(0)
         page_key=url_key(page_url)
@@ -2098,11 +2123,11 @@ def crawl_official_site(target, seed_url, allow_single_email=False):
         if not record:
             if not seed_verified:
                 break
+            if len(visited)%5==0:
+                save_progress()
             continue
         if not seed_verified:
             seed_verified=True
-            # Si la URL inicial redirige (p. ej. dominio raíz a www), seguir
-            # el host final que ya ha superado la comprobación de identidad.
             seed_host=urllib.parse.urlsplit(record.get("source_url") or page_url).netloc.lower() or seed_host
         record["_official_site"]=True
         record["_target_id"]=target_id
@@ -2116,9 +2141,10 @@ def crawl_official_site(target, seed_url, allow_single_email=False):
         for candidate in record.pop("_internal_links",[]):
             if url_key(candidate) not in visited:
                 queue.append(candidate)
-        # No detenerse al encontrar los seis campos: seguir recorriendo
-        # todas las páginas internas y los sitemaps para detectar datos adicionales,
-        # corregir fuentes incompletas y conservar la procedencia de cada dato.
+        if len(visited)%5==0:
+            save_progress()
+        # No detenerse al encontrar los seis campos: se recorren todas las páginas internas.
+    save_progress(completed=True)
     log_event("web_fin",ficha_id=target_id,host=seed_host,paginas_visitadas=len(visited),paginas_con_datos=len(records),pendientes=0,segundos=round(time.monotonic()-started,2))
     return records,len(visited)
 
