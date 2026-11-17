@@ -975,6 +975,9 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False, all
     # No conservar direcciones que no acrediten Chiclana: una página de directorio
     # puede incluir la sede de otra ciudad o datos globales de la propia guía.
     addr=clean_address(addr,locality,postal)
+    # Registrar si la dirección procede realmente de esta página antes de
+    # aplicar como respaldo la dirección que ya existía en el catálogo.
+    page_address_found=bool(addr)
     if target:
         target_address=record_value(target,"a","direccion","address")
         if target_address:
@@ -1074,9 +1077,17 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False, all
         if any(x in parsed.path.lower() for x in ("/wp-admin","/wp-json","/cart","/checkout","/login","/buscar","/search","/tag/","/author/")):
             continue
         internal_links.append(candidate)
+    page_fields=set()
+    if page_address_found: page_fields.add("address")
+    if phone: page_fields.add("phone")
+    if email: page_fields.add("email")
+    if website: page_fields.add("website")
+    if hours: page_fields.add("hours")
+    if desc: page_fields.add("description")
     return {"name":name,"type":tipo,"address":addr,"phone":phone,"email":email,"website":website,
             "hours":str(hours)[:500],"description":desc[:700],"source_url":final_url,
-            "category":categoria,"_internal_links":list(dict.fromkeys(internal_links))}
+            "category":categoria,"_internal_links":list(dict.fromkeys(internal_links)),
+            "_page_fields":sorted(page_fields)}
 
 def rta_text(value):
     if isinstance(value,list):
@@ -1905,7 +1916,16 @@ def select_contextual_email(body, target, allow_single=False):
 def official_fields_found(records):
     """Campos de los seis datos que aparecen realmente en páginas de la web propia."""
     field_map={"address":"address","phone":"phone","email":"email","website":"website","hours":"hours","description":"description"}
-    return {field for record in records if isinstance(record,dict) for field,key in field_map.items() if str(record.get(key) or "").strip()}
+    found=set()
+    for record in records:
+        if not isinstance(record,dict):
+            continue
+        page_fields=record.get("_page_fields")
+        if isinstance(page_fields,(list,tuple,set)):
+            found.update(field for field in page_fields if field in field_map)
+        else:
+            found.update(field for field,key in field_map.items() if str(record.get(key) or "").strip())
+    return found
 
 
 def sitemap_page_urls(seed_url, site_host):
