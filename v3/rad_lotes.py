@@ -185,6 +185,7 @@ def main():
                     "registrado_utc": utcnow(),
                 }
             state["cursor"][sector] = end
+            state["active_batch"] = None
             data["rad_lotes"] = state
             persist_metadata(data, ["rad_lotes"])
             selection = select_batch(state, current_active_ids)
