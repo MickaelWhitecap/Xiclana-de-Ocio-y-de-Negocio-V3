@@ -283,7 +283,7 @@ def main():
             # Persistir candidatos, auditoría y cursor tras CADA ficha.
             persist_metadata(updated, [
                 "candidatas_revision", "total_candidatas_revision",
-                "rad_ultima_ejecucion", "rad_lotes",
+                "rad_ultima_ejecucion", "rad_lotes", "rad_crawl_progress",
             ])
             print(json.dumps({
                 "evento": "ficha_confirmada",
