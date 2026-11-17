@@ -3,13 +3,16 @@
 Usa resultados públicos de buscadores y páginas públicas; respeta robots.txt,
 limita peticiones y nunca publica: añade candidatos a candidatas_revision.
 """
-import argparse, hashlib, html, json, pathlib, re, tempfile, time, urllib.error, urllib.parse, urllib.request
+import argparse, hashlib, html, json, pathlib, re, tempfile, time, urllib.error, urllib.parse, urllib.request, sys
 import urllib.robotparser
 from html.parser import HTMLParser
 from datetime import datetime, timezone
-import catalogo_supabase as catalog
 
 ROOT = pathlib.Path(__file__).resolve().parent
+# Permite cargar este módulo tanto como script como mediante importlib desde los workflows.
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+import catalogo_supabase as catalog
 MASTER = None  # El catálogo debe exportarse desde Supabase y pasarse explícitamente con --catalog.
 UA = "Xiclana-RAD/1.0 (+https://mickaelwhitecap.github.io/Xiclana-de-Ocio-y-de-Negocio-V3/)"
 CITY = '"Chiclana de la Frontera"'
