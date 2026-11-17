@@ -42,7 +42,9 @@ jobs:
         with:
           python-version: "3.12"
       - name: Ejecutar pruebas internas RAD
-        run: python v3/rastreo_web_publico.py --self-test
+        run: |
+          python v3/rastreo_web_publico.py --self-test
+          python v3/rad_lotes.py --self-test
       - name: Investigar y confirmar un lote de hasta 50 fichas
         env:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
