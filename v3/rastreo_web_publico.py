@@ -2087,6 +2087,7 @@ def discover_unlinked_official_website_jobs(records):
     }
     official_records=[]
     fichas_consultadas=0
+    paginas_consultadas=0
     for _name_key,target in targets:
         name=record_value(target,"n","nombre","name")
         query=f'"{name}" "Chiclana de la Frontera" (web oficial OR página web OR contacto)'
@@ -2108,6 +2109,7 @@ def discover_unlinked_official_website_jobs(records):
                 continue
             try:
                 pages,_visited=crawl_official_site(target,candidate_url,allow_single_email=True)
+                paginas_consultadas+=_visited
             except Exception as exc:
                 print(f"Error al comprobar posible web propia {candidate_url}: {exc}",flush=True)
                 pages=[]
@@ -2116,7 +2118,7 @@ def discover_unlinked_official_website_jobs(records):
                     record["website"]=record.get("website") or candidate_url
                 official_records.extend(pages)
                 break
-    return official_records,fichas_consultadas
+    return official_records,fichas_consultadas,paginas_consultadas
 
 
 def main():
@@ -2195,7 +2197,8 @@ def main():
             except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
     links=list(dict.fromkeys(links))
     official_records, official_domains, official_pages=discover_official_website_jobs(data["items"])
-    unlinked_official_records, fichas_sin_web_consultadas=discover_unlinked_official_website_jobs(data["items"])
+    unlinked_official_records, fichas_sin_web_consultadas, unlinked_pages=discover_unlinked_official_website_jobs(data["items"])
+    official_pages+=unlinked_pages
     official_records.extend(unlinked_official_records)
     openrta_records=fetch_openrta_records()
     added=[]; seen_pairs=set(); seen_urls=set(); seen_unlocated_names=set()
