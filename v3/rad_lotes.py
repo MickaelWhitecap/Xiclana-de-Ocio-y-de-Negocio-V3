@@ -317,8 +317,11 @@ def main():
             # Persistir candidatos, auditoría y cursor tras CADA ficha.
             persist_metadata(updated, [
                 "candidatas_revision", "total_candidatas_revision",
-                "rad_ultima_ejecucion", "rad_lotes", "rad_crawl_progress",
+                "rad_ultima_ejecucion", "rad_lotes",
             ])
+            # El crawler hijo actualiza checkpoints directamente en Supabase.
+            # No volver a escribir aquí la copia local anterior.
+            catalog.clear_rad_crawl_progress(ident)
             print(json.dumps({
                 "evento": "ficha_confirmada",
                 "id": ident,
