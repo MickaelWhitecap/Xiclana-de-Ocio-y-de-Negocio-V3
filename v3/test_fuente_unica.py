@@ -201,7 +201,7 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertIn("allowed_ids=None", helper)
         self.assertIn('cron: "47 6 * * 1"', workflow)
         self.assertIn("workflow_dispatch:", workflow)
-        self.assertIn("\\n  push:", workflow)
+        self.assertIn("\n  push:", workflow)
         self.assertIn("--catalog", orchestrator)
         self.assertNotIn("git add", workflow)
         self.assertNotIn("git push", workflow)
