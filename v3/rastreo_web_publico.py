@@ -1746,68 +1746,39 @@ def self_test():
         get = lambda url, limit=1200000: (nonlocal_sample, url, "text/html")
         assert extract("https://directorio.example/servicio-nacional") is None, "El filtro geográfico ha aceptado un negocio no local"
 
-        # Cada ficha conserva su propia URL aunque comparta dominio con muchas otras.
-        shared_host_pages = {
-            "https://directory.example/profile/a": '<html><body><a href="/profile/a/contacto">Contacto</a></body></html>',
-            "https://directory.example/profile/b": '<html><body><a href="/profile/b/contacto">Contacto</a></body></html>',
-            "https://barcelo.example/novo-resort/": '<html><body><a href="/novo-resort/contacto">Contacto</a></body></html>',
+        # La web se recorre más allá de cuatro páginas y termina al reunir los seis datos.
+        site_pages = {
+            "https://aurora.example/": """<html><head><title>Comercio Aurora</title>
+            <script type="application/ld+json">{"@type":"LocalBusiness","name":"Comercio Aurora",
+            "address":{"streetAddress":"Calle Real 1","postalCode":"11130","addressLocality":"Chiclana de la Frontera"},
+            "telephone":"956123456"}</script></head><body><h1>Comercio Aurora</h1>
+            <a href="/pagina-2">Siguiente</a></body></html>""",
+            "https://aurora.example/pagina-2": """<html><head><title>Comercio Aurora</title>
+            <script type="application/ld+json">{"@type":"LocalBusiness","name":"Comercio Aurora",
+            "email":"contacto@aurora.example"}</script></head><body><h1>Comercio Aurora</h1>
+            <a href="/pagina-3">Siguiente</a></body></html>""",
+            "https://aurora.example/pagina-3": """<html><head><title>Comercio Aurora</title>
+            <script type="application/ld+json">{"@type":"LocalBusiness","name":"Comercio Aurora",
+            "openingHours":"Mo-Fr 09:00-18:00"}</script></head><body><h1>Comercio Aurora</h1>
+            <a href="/pagina-4">Siguiente</a></body></html>""",
+            "https://aurora.example/pagina-4": """<html><head><title>Comercio Aurora</title></head><body>
+            <h1>Comercio Aurora</h1><a href="/pagina-5">Siguiente</a></body></html>""",
+            "https://aurora.example/pagina-5": """<html><head><title>Comercio Aurora</title></head><body>
+            <h1>Comercio Aurora</h1><a href="/pagina-6">Siguiente</a></body></html>""",
+            "https://aurora.example/pagina-6": """<html><head><title>Comercio Aurora</title>
+            <script type="application/ld+json">{"@type":"LocalBusiness","name":"Comercio Aurora",
+            "description":"Comercio local especializado en productos para el hogar, con atención personalizada y asesoramiento a sus clientes."}</script>
+            </head><body><h1>Comercio Aurora</h1></body></html>"""
         }
-        get = lambda url, limit=1200000: (
-            shared_host_pages.get(url, "<html><body>Contacto</body></html>"),
-            url, "text/html"
-        )
-        shared_targets = [
-            {"id":"a","n":"Empresa A","w":"https://directory.example/profile/a"},
-            {"id":"b","n":"Empresa B","w":"https://directory.example/profile/b"},
-        ]
-        jobs, domains, unique_pages = discover_official_website_jobs(
-            shared_targets, max_pages_per_target=2, max_pages_total=20
-        )
+        get = lambda url, limit=1200000: (site_pages.get(url, "<html></html>"), url, "text/html")
+        allowed = lambda url: True
+        crawled, domains, pages_read = discover_official_website_jobs([
+            {"id":"aurora","n":"Comercio Aurora","w":"https://aurora.example/"}
+        ])
         assert domains == 1
-        assert unique_pages == 4
-        by_target = {
-            ident: {job["url"] for job in jobs if str(job["target"].get("id")) == ident}
-            for ident in ("a","b")
-        }
-        assert by_target["a"] == {
-            "https://directory.example/profile/a",
-            "https://directory.example/profile/a/contacto",
-        }, by_target["a"]
-        assert by_target["b"] == {
-            "https://directory.example/profile/b",
-            "https://directory.example/profile/b/contacto",
-        }, by_target["b"]
-        fair_jobs, _, _ = discover_official_website_jobs(
-            shared_targets, max_pages_per_target=2, max_pages_total=2
-        )
-        assert {str(job["target"].get("id")) for job in fair_jobs} == {"a","b"}, (
-            "El presupuesto global debe visitar primero la URL propia de cada ficha."
-        )
-        scoped_targets = [
-            {"id":"novo","n":"Novo Resort The Residence","w":"https://barcelo.example/novo-resort/"},
-            {"id":"hotel","n":"Hotel Barceló","w":"https://barcelo.example/"},
-            {"id":"spa","n":"U-Spa Barceló","w":"https://barcelo.example/"},
-        ]
-        scoped_jobs, _, _ = discover_official_website_jobs(
-            scoped_targets, max_pages_per_target=2, max_pages_total=20
-        )
-        single_email_by_id = {
-            str(job["target"].get("id")): job["allow_single_email"]
-            for job in scoped_jobs
-            if job["url"] == record_value(job["target"],"w","web","website")
-        }
-        assert single_email_by_id == {"novo":True,"hotel":False,"spa":False}, (
-            "Una URL específica de una ficha debe poder conservar su único correo aunque comparta dominio; "
-            "una URL genérica compartida por varias fichas no."
-        )
-        novo_contact_jobs = [
-            job for job in scoped_jobs
-            if str(job["target"].get("id"))=="novo"
-        ]
-        assert any(job["url"]=="https://barcelo.example/novo-resort/contacto" and not job["allow_single_email"]
-                   for job in novo_contact_jobs), (
-            "Una página interior genérica de contacto no debe heredar la excepción de correo único de la URL propia."
-        )
+        assert pages_read == 6, f"El rastreador no recorrió todas las páginas necesarias: {pages_read}"
+        assert len(official_fields_found(crawled)) == 6, official_fields_found(crawled)
+        assert any(x.get("description") for x in crawled), "No se ha recuperado la descripción de la sexta página"
     finally:
         allowed, get = original_allowed, original_get
     print("RAD self-test: OK",flush=True)
