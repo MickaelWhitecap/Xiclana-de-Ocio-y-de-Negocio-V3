@@ -31,7 +31,7 @@ QUERIES = [
     f'{CITY} asociación comerciantes empresas socios',
     f'{CITY} site:actualidadsur.es/pueblos/chiclana-de-la-frontera',
 ]
-MAX_RESULTS_PER_QUERY = 12
+MAX_RESULTS_PER_QUERY = 30
 TIMEOUT = 18
 DIRECTORY_SEEDS = [
     "https://aechiclana.org/directorio/",
@@ -1368,7 +1368,7 @@ def merge_existing_record(existing, record, source_url):
 
 
 def self_test():
-    global allowed, get, extract
+    global allowed, get, extract, sitemap_page_urls
     assert classify("Restaurante y cafetería") == ("ocio","Restauración")
     assert classify("Tienda de muebles") == ("negocio","Muebles y decoración")
     assert classify("TopGea Topografía. Especialistas en el sector topográfico e ingeniería técnica") == ("negocio","Servicios y negocios")
@@ -1485,6 +1485,31 @@ def self_test():
     page=Page(); page.feed('<h1>Empresa local</h1><a class="external" href="https://example.org">Página web</a>')
     assert page.links == [("external","https://example.org","Página web")]
     assert page.headings == ["Empresa local"]
+    # Aunque una página ya contenga los seis campos, el rastreo debe agotar
+    # los enlaces internos y sitemaps para no omitir información adicional.
+    original_allowed,original_extract,original_sitemap=allowed,extract,sitemap_page_urls
+    try:
+        allowed=lambda url: True
+        sitemap_page_urls=lambda seed,host: ["https://example.org/contacto"]
+        def fake_extract(url,**kwargs):
+            common={"name":"Negocio de prueba","address":"Calle Real 1, 11130 Chiclana",
+                    "phone":"956123456","email":"info@example.org","website":"https://example.org",
+                    "hours":"L-V 09:00-18:00","description":"Descripción oficial del negocio",
+                    "source_url":url,"_page_fields":["address","phone","email","website","hours","description"],
+                    "_internal_links":[]}
+            if url.endswith("/"):
+                common["_internal_links"]=["https://example.org/servicios"]
+            else:
+                common["_internal_links"]=[]
+            return common
+        extract=fake_extract
+        sitemap_page_urls=lambda seed,host: ["https://example.org/contacto"]
+        crawled,visited=crawl_official_site({"id":"test:1","n":"Negocio de prueba"},
+                                            "https://example.org/")
+        assert visited==3, (visited,[x["source_url"] for x in crawled])
+        assert len(crawled)==3
+    finally:
+        allowed,extract,sitemap_page_urls=original_allowed,original_extract,original_sitemap
     assert normalize_phone("856 10 20") == ""
     assert normalize_phone("956 40 16") == ""
     assert normalize_phone("956 402615") == "956402615"
@@ -2070,8 +2095,9 @@ def crawl_official_site(target, seed_url, allow_single_email=False):
         for candidate in record.pop("_internal_links",[]):
             if url_key(candidate) not in visited:
                 queue.append(candidate)
-        if len(official_fields_found(records))==6:
-            break
+        # No detenerse al encontrar los seis campos: seguir recorriendo
+        # todas las páginas internas y los sitemaps para detectar datos adicionales,
+        # corregir fuentes incompletas y conservar la procedencia de cada dato.
     return records,len(visited)
 
 
