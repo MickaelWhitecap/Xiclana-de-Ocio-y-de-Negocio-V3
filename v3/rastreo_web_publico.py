@@ -2149,6 +2149,8 @@ def discover_official_website_jobs(records):
                "web_registrada":website,"web_oficial_confirmada":False,
                "paginas_visitadas":0,"paginas_con_datos":0,"campos_detectados":[]}
         try:
+            ficha_started=time.monotonic()
+            log_event("ficha_web_registrada_inicio",ficha_id=ident,nombre=name,web=website)
             pages,visited=crawl_official_site(target,website,allow_single_email=seed_counts.get(website,0)==1)
             official_records.extend(pages)
             pages_total+=visited
@@ -2157,6 +2159,7 @@ def discover_official_website_jobs(records):
             audit["web_oficial_confirmada"]=bool(pages)
             audit["campos_detectados"]=sorted(official_fields_found(pages))
             audit["resultado"]="web_oficial_investigada" if pages else ("web_no_confirmada" if visited else "sin_acceso")
+            log_event("ficha_web_registrada_fin",ficha_id=ident,nombre=name,paginas=visited,campos=audit["campos_detectados"],segundos=round(time.monotonic()-ficha_started,2),resultado=audit["resultado"])
         except Exception as exc:
             audit["resultado"]="error_consulta"
             audit["error"]=str(exc)[:300]
@@ -2190,6 +2193,8 @@ def discover_unlinked_official_website_jobs(records, retry_ids=None):
     for _name_key,target in targets:
         name=record_value(target,"n","nombre","name")
         query=f'"{name}" "Chiclana de la Frontera" (web oficial OR página web OR contacto)'
+        ficha_started=time.monotonic()
+        log_event("busqueda_web_propia_inicio",ficha_id=ident,nombre=name)
         results=[]
         for engine in (search_ddg,search_bing):
             try:
@@ -2233,6 +2238,7 @@ def discover_unlinked_official_website_jobs(records, retry_ids=None):
                 break
         if not audit.get("resultado"):
             audit["resultado"]="candidatas_no_confirmadas" if audit["urls_candidatas_comprobadas"] else "web_no_localizada"
+        log_event("busqueda_web_propia_fin",ficha_id=ident,nombre=name,resultados=len(set(results)),candidatas=audit["urls_candidatas_comprobadas"],paginas=audit["paginas_visitadas"],segundos=round(time.monotonic()-ficha_started,2),resultado=audit["resultado"])
         audits[ident]=audit
     return official_records,fichas_consultadas,paginas_consultadas,audits
 
@@ -2306,7 +2312,9 @@ def main():
     # Fuentes locales directas: sus fichas individuales son una vía de detección
     # independiente de los buscadores. Solo se confía en rutas de detalle conocidas.
     for seed in (DIRECTORY_SEEDS if args.global_discovery else []):
+        seed_started=time.monotonic()
         seed_host=urllib.parse.urlparse(seed).netloc.lower()
+        log_event("directorio_inicio",url=seed)
         seed_limit=450 if any(x in seed_host for x in ("chiclanaguiadempresas","cylex.es","paginasamarillas.es","qdq.com","tripadvisor.es")) else 160
         seed_queue=[seed]
         seed_pages_seen=set()
@@ -2335,12 +2343,18 @@ def main():
                         if seed_count>=seed_limit: break
         except Exception as exc:
             print(f"Fuente directa no disponible ({seed}): {exc}",flush=True)
+        log_event("directorio_fin",url=seed,paginas=len(seed_pages_seen),perfiles=seed_count,segundos=round(time.monotonic()-seed_started,2))
     links.extend(balance_urls_by_host(trusted_urls))
     if args.global_discovery:
         for q in QUERIES:
             for engine in (search_ddg,search_bing):
-                try: links.extend(engine(q))
-                except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
+                search_started=time.monotonic()
+                try:
+                    found=engine(q)
+                    links.extend(found)
+                    log_event("busqueda_general_fin",buscador=engine.__name__,consulta=q,resultados=len(found),segundos=round(time.monotonic()-search_started,2))
+                except Exception as exc:
+                    log_event("busqueda_general_error",buscador=engine.__name__,consulta=q,segundos=round(time.monotonic()-search_started,2),error=str(exc)[:240])
     links=list(dict.fromkeys(links))
     official_records, official_domains, official_pages, registered_audit=discover_official_website_jobs(target_items)
     retry_ids={
