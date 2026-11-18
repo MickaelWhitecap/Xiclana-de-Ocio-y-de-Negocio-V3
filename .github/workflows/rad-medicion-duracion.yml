@@ -1,6 +1,10 @@
 name: RAD - medición controlada de duración
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rad-medicion-duracion.yml'
   workflow_dispatch:
     inputs:
       sample_size:
@@ -18,6 +22,7 @@ concurrency:
 
 jobs:
   benchmark:
+    if: github.event_name == 'workflow_dispatch'
     name: Medir rastreo real sin modificar fichas ni checkpoints de Supabase
     runs-on: ubuntu-latest
     timeout-minutes: 350
