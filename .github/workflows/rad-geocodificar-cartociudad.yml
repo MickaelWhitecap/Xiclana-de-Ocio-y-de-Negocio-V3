@@ -1,0 +1,94 @@
+name: RAD - geocodificación de direcciones con CartoCiudad
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "v3/geocodificar_cartociudad.py"
+      - "v3/test_geocodificar_cartociudad.py"
+      - ".github/workflows/rad-geocodificar-cartociudad.yml"
+  workflow_dispatch:
+    inputs:
+      max_fichas:
+        description: "Número de fichas a procesar (20 para prueba, 0 para todas)"
+        required: false
+        default: "20"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rad-geocodificacion-cartociudad
+  cancel-in-progress: false
+
+jobs:
+  geocode:
+    name: Proponer coordenadas CartoCiudad sin modificar Supabase
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      MAX_FICHAS: ${{ github.event.inputs.max_fichas || '20' }}
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validar sintaxis y pruebas locales
+        run: |
+          python -m py_compile v3/geocodificar_cartociudad.py v3/test_geocodificar_cartociudad.py
+          cd v3
+          python -m unittest -v test_geocodificar_cartociudad.py
+
+      - name: Exportar catálogo maestro en modo lectura
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python v3/catalogo_supabase.py export --output "$RUNNER_TEMP/catalogo-geocodificacion.json"
+
+      - name: Geocodificar fichas sin coordenadas válidas
+        run: |
+          python v3/geocodificar_cartociudad.py \
+            --catalog "$RUNNER_TEMP/catalogo-geocodificacion.json" \
+            --output "$RUNNER_TEMP/cartociudad_revision.csv" \
+            --candidates-output "$RUNNER_TEMP/cartociudad_candidatos.csv" \
+            --report-output "$RUNNER_TEMP/cartociudad_informe.json" \
+            --max "$MAX_FICHAS"
+
+      - name: Publicar resumen
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/cartociudad_informe.json" ]; then
+            python - <<'PY'
+          import json, os, pathlib
+          p=pathlib.Path(os.environ["RUNNER_TEMP"])/"cartociudad_informe.json"
+          data=json.loads(p.read_text(encoding="utf-8"))
+          with open(os.environ["GITHUB_STEP_SUMMARY"],"a",encoding="utf-8") as f:
+              f.write("## Geocodificación CartoCiudad\n\n")
+              f.write(f"- **Fichas elegibles:** {data.get('fichas_elegibles')}\n")
+              f.write(f"- **Fichas procesadas:** {data.get('fichas_procesadas')}\n")
+              f.write(f"- **Candidatos recibidos:** {data.get('candidatos_totales')}\n")
+              f.write(f"- **Resultados por estado:** {json.dumps(data.get('resultados_por_estado',{}),ensure_ascii=False)}\n")
+              f.write("\nSolo lectura: no se han aplicado coordenadas en Supabase.\n")
+          print(json.dumps(data,ensure_ascii=False))
+          PY
+          fi
+
+      - name: Guardar CSV e informe para revisión
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rad-cartociudad-revision-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/cartociudad_revision.csv
+            ${{ runner.temp }}/cartociudad_candidatos.csv
+            ${{ runner.temp }}/cartociudad_informe.json
+          if-no-files-found: warn
+          retention-days: 30
