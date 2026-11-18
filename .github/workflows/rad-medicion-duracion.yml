@@ -33,6 +33,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Validar sintaxis y pruebas internas
+        run: |
+          python -m py_compile v3/rastreo_web_publico.py v3/rad_lotes.py
+          python v3/rastreo_web_publico.py --self-test
+          python v3/rad_lotes.py --self-test
+
       - name: Exportar catálogo maestro desde Supabase
         env:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
