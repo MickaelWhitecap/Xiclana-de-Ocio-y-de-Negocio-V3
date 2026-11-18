@@ -1,0 +1,139 @@
+name: RAD - medición controlada de duración
+
+on:
+  workflow_dispatch:
+    inputs:
+      sample_size:
+        description: "Número de fichas a medir (1-50; recomendado 20)"
+        required: true
+        default: "20"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rad-medicion-controlada
+  cancel-in-progress: false
+
+jobs:
+  benchmark:
+    name: Medir rastreo real sin modificar fichas ni checkpoints de Supabase
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Descargar código de main
+        uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Preparar Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Exportar catálogo maestro desde Supabase
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python v3/catalogo_supabase.py export --output "$RUNNER_TEMP/catalogo-rad-medicion.json"
+
+      - name: Seleccionar muestra equilibrada y preparar cronómetro
+        env:
+          SAMPLE_SIZE: ${{ inputs.sample_size }}
+        run: |
+          python - <<'PY'
+          import json, os, pathlib
+          size=int(os.environ["SAMPLE_SIZE"])
+          if not 1 <= size <= 50:
+              raise SystemExit("sample_size debe estar entre 1 y 50")
+          path=pathlib.Path(os.environ["RUNNER_TEMP"])/"catalogo-rad-medicion.json"
+          data=json.loads(path.read_text(encoding="utf-8"))
+          buckets={(sector,has_web):[] for sector in ("ocio","negocio") for has_web in (True,False)}
+          for item in data.get("items",[]):
+              if not isinstance(item,dict) or not item.get("id") or item.get("is_published") is not True or item.get("_xiclana_deleted"):
+                  continue
+              sector=str(item.get("t") or "").strip().lower()
+              if sector not in ("ocio","negocio"):
+                  continue
+              web=str(item.get("w") or item.get("web") or item.get("website") or "").strip()
+              buckets[(sector,bool(web))].append(str(item["id"]))
+          for values in buckets.values():
+              values.sort()
+          chosen=[]
+          # Reparto equilibrado entre ocio/negocio y fichas con/sin web registrada.
+          while len(chosen)<size:
+              progressed=False
+              for key in buckets:
+                  values=buckets[key]
+                  already={x for x in chosen}
+                  remaining=[x for x in values if x not in already]
+                  if not remaining:
+                      continue
+                  position=0 if len(remaining)==1 else round((len(chosen)%max(1,size//4))*(len(remaining)-1)/max(1,size//4-1))
+                  chosen.append(remaining[min(position,len(remaining)-1)])
+                  progressed=True
+                  if len(chosen)>=size:
+                      break
+              if not progressed:
+                  break
+          if len(chosen)<size:
+              all_ids=sorted({str(x["id"]) for x in data.get("items",[]) if isinstance(x,dict) and x.get("id") and x.get("is_published") is True and not x.get("_xiclana_deleted")})
+              chosen.extend(x for x in all_ids if x not in chosen)
+              chosen=chosen[:size]
+          if not chosen:
+              raise SystemExit("No hay fichas activas para medir")
+          out=pathlib.Path(os.environ["RUNNER_TEMP"])/"rad-medicion-ids.txt"
+          out.write_text("\n".join(chosen)+"\n",encoding="utf-8")
+          print(json.dumps({"muestra_seleccionada":len(chosen),"distribucion":{str(k):len([x for x in chosen if x in v]) for k,v in buckets.items()}},ensure_ascii=False))
+          PY
+          echo "RAD_START_EPOCH=$(date +%s)" >> "$GITHUB_ENV"
+
+      - name: Ejecutar rastreo aislado de la muestra
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python v3/rastreo_web_publico.py \
+            --catalog "$RUNNER_TEMP/catalogo-rad-medicion.json" \
+            --batch-ids-file "$RUNNER_TEMP/rad-medicion-ids.txt" \
+            --local-checkpoints-only
+
+      - name: Calcular tiempos y extrapolación
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os, pathlib, time
+          root=pathlib.Path(os.environ["RUNNER_TEMP"])
+          catalog_path=root/"catalogo-rad-medicion.json"
+          ids_path=root/"rad-medicion-ids.txt"
+          ids=ids_path.read_text(encoding="utf-8").splitlines() if ids_path.exists() else []
+          elapsed=max(0,int(time.time())-int(os.environ.get("RAD_START_EPOCH","0") or 0))
+          data=json.loads(catalog_path.read_text(encoding="utf-8")) if catalog_path.exists() else {}
+          rad=data.get("rad_ultima_ejecucion",{})
+          rows=rad.get("resultados_por_ficha",[])
+          completed=len(rows)
+          seconds_per=round(elapsed/completed,1) if completed else None
+          estimate=round(seconds_per*1518/3600,2) if seconds_per is not None else None
+          report={
+            "muestra_solicitada":len(ids),
+            "fichas_con_resultado":completed,
+            "duracion_segundos":elapsed,
+            "segundos_por_ficha_media":seconds_per,
+            "extrapolacion_horas_1518_fichas":estimate,
+            "muestra_paginas_web_oficiales":rad.get("paginas_web_oficiales_consultadas"),
+            "muestra_fichas_con_web_oficial":rad.get("fichas_con_web_oficial"),
+            "resultados_por_ficha":rows,
+            "nota":"Prueba aislada: no sincroniza enriquecimientos ni checkpoints con Supabase y no publica fichas."
+          }
+          (pathlib.Path.cwd()/"rad-medicion-resultado.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False))
+          PY
+
+      - name: Publicar informe de medición
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rad-medicion-duracion-${{ github.run_id }}
+          path: rad-medicion-resultado.json
+          if-no-files-found: ignore
+          retention-days: 30
