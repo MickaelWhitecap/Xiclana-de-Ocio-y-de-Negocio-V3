@@ -172,7 +172,7 @@ def limpiar_direccion_busqueda(direccion):
         (r"(?i)^\s*c\s*/\s*", "Calle "),
         (r"(?i)^\s*c\.?\s+", "Calle "),
         (r"(?i)^\s*cjon\.?\s+", "Callejón "),
-        (r"(?i)^\s*avda?\.?\s+", "Avenida "),
+        (r"(?i)^\s*(?:avda?|av\.?)\s+", "Avenida "),
         (r"(?i)^\s*pza\.?\s+", "Plaza "),
         (r"(?i)^\s*ctra\.?\s+", "Carretera "),
         (r"(?i)^\s*urb\.?\s+", "Urbanización "),
