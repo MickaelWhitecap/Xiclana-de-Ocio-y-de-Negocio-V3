@@ -38,10 +38,10 @@ LAT_MIN, LAT_MAX = 36.25, 36.60
 LON_MIN, LON_MAX = -6.38, -5.90
 LAST_REQUEST = 0.0
 STOP_WORDS = {
-    "chiclana", "frontera", "cadiz", "andalucia", "espana", "municipio",
-    "provincia", "cp", "codigo", "postal", "11130", "11138", "11139",
+    "chiclana", "frontera", "espana", "municipio", "provincia",
+    "cp", "codigo", "postal", "11130", "11138", "11139",
     "centro", "casco", "historico", "zona", "ciudad", "cercanias",
-    "numero", "num", "sn", "s",
+    "numero", "num", "sn", "s", "de", "la", "del", "el",
 }
 
 
@@ -167,7 +167,9 @@ def limpiar_direccion_busqueda(direccion):
     text = re.sub(r"(?i)\b(?:e-?mail|correo electr[oó]nico|tel[eé]fono)\s*:?.*$", "", text)
     text = re.sub(r"(?<!\d)(11130|11138|11139)(?!\d)", " ", text)
     text = re.sub(r"(?i)\bchiclana(?:\s+de\s+la\s+frontera)?\b", " ", text)
-    text = re.sub(r"(?i)\b(c[aá]diz|andaluc[ií]a|espa[nñ]a)\b", " ", text)
+    # No eliminar Andalucía/Cádiz de forma global: pueden formar parte de un nombre de vía.
+    text = re.sub(r"(?i),\s*c[aá]diz(?:\s*,\s*(?:andaluc[ií]a|espa[nñ]a))?\s*$", " ", text)
+    text = re.sub(r"(?i),\s*(?:andaluc[ií]a|espa[nñ]a)\s*$", " ", text)
     replacements = [
         (r"(?i)^\s*c\s*/\s*", "Calle "),
         (r"(?i)^\s*c\.?\s+", "Calle "),
