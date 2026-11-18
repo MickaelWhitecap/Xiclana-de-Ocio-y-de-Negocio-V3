@@ -40,6 +40,8 @@ LAST_REQUEST = 0.0
 STOP_WORDS = {
     "chiclana", "frontera", "cadiz", "andalucia", "espana", "municipio",
     "provincia", "cp", "codigo", "postal", "11130", "11138", "11139",
+    "centro", "casco", "historico", "zona", "ciudad", "cercanias",
+    "numero", "num", "sn", "s",
 }
 
 
@@ -159,14 +161,78 @@ def get_json(endpoint, params):
     raise RuntimeError(f"Falló la consulta CartoCiudad: {last_error}")
 
 
-def consultar_candidatos(direccion, limit=MAX_CANDIDATES):
+def limpiar_direccion_busqueda(direccion):
+    """Quita ruido municipal/postal y normaliza abreviaturas habituales."""
+    text = str(direccion or "").strip()
+    text = re.sub(r"(?i)\b(?:e-?mail|correo electr[oó]nico|tel[eé]fono)\s*:?.*$", "", text)
+    text = re.sub(r"(?<!\d)(11130|11138|11139)(?!\d)", " ", text)
+    text = re.sub(r"(?i)\bchiclana(?:\s+de\s+la\s+frontera)?\b", " ", text)
+    text = re.sub(r"(?i)\b(c[aá]diz|andaluc[ií]a|espa[nñ]a)\b", " ", text)
+    replacements = [
+        (r"(?i)^\s*c\s*/\s*", "Calle "),
+        (r"(?i)^\s*c\.?\s+", "Calle "),
+        (r"(?i)^\s*cjon\.?\s+", "Callejón "),
+        (r"(?i)^\s*avda?\.?\s+", "Avenida "),
+        (r"(?i)^\s*pza\.?\s+", "Plaza "),
+        (r"(?i)^\s*ctra\.?\s+", "Carretera "),
+        (r"(?i)^\s*urb\.?\s+", "Urbanización "),
+        (r"(?i)^\s*pol\.?\s+", "Polígono "),
+        (r"(?i)^\s*cam\.?\s+", "Camino "),
+    ]
+    for pattern, replacement in replacements:
+        text = re.sub(pattern, replacement, text)
+    text = re.sub(r"(?i)\b(?:s\s*/\s*n|s\.?\s*n\.?)\b", " ", text)
+    text = re.sub(r"[\s,;]+", " ", text).strip(" ,;.-")
+    return text
+
+
+def direccion_especifica(direccion):
+    """Evita consultar CartoCiudad con valores genéricos que no son direcciones."""
+    text = limpiar_direccion_busqueda(direccion)
+    if not text:
+        return False
+    tokens = address_tokens(text)
+    useful = [x for x in tokens if x not in {
+        "calle", "callejon", "avenida", "av", "plaza", "paseo", "carretera",
+        "camino", "travesia", "ronda", "urbanizacion", "poligono", "parque",
+        "comercial", "residencial",
+    }]
+    has_road_type = bool(re.search(
+        r"(?i)\b(calle|callejon|avenida|avda|plaza|paseo|carretera|camino|"
+        r"travesia|ronda|urbanizacion|poligono|ctra)\b", text
+    ))
+    has_number = bool(extract_house_number(text))
+    return len(useful) >= 2 or (has_road_type and len(useful) >= 1) or (has_number and len(useful) >= 1)
+
+
+def variantes_consulta(direccion):
+    """Busca primero el portal exacto y después la vía sin número."""
+    base = limpiar_direccion_busqueda(direccion)
+    variants = []
+    if base:
+        variants.append(base)
+    without_number = re.sub(
+        r"(?i)\b(?:n(?:umero|[º°o.]?)|num\.?)\s*[:.]?\s*\d{1,4}[a-z]?\b",
+        " ", base
+    )
+    without_number = re.sub(r",?\s+\d{1,4}[a-z]?\s*$", "", without_number)
+    without_number = re.sub(r"(?i)\bkm\s*\d+(?:[.,]\d+)?\b", " ", without_number)
+    without_number = re.sub(r"[\s,;]+", " ", without_number).strip(" ,;.-")
+    if without_number and normalizar(without_number) != normalizar(base):
+        variants.append(without_number)
+    return list(dict.fromkeys(variants))
+
+
+def consultar_candidatos(direccion, limit=MAX_CANDIDATES, municipio_filter=True):
     query = f"{direccion}, {MUNICIPIO}"
-    payload = get_json("candidates", {
+    params = {
         "q": query,
         "limit": str(min(MAX_CANDIDATES, max(1, int(limit)))),
-        "municipio_filter": MUNICIPIO,
         "countrycodes": "es",
-    })
+    }
+    if municipio_filter:
+        params["municipio_filter"] = MUNICIPIO
+    payload = get_json("candidates", params)
     return [as_properties(x) for x in unpack_records(payload)]
 
 
@@ -339,19 +405,64 @@ def empty_result(row):
 def geocode_one(row):
     out = empty_result(row)
     address = out["direccion_origen"]
-    out["consulta"] = f"{address}, {MUNICIPIO}" if address else ""
     if not address:
         out.update(estado="SIN_DIRECCION", motivo="La ficha no contiene dirección.")
         return out, []
-    try:
-        candidates = consultar_candidatos(address)
-    except Exception as exc:
-        out.update(estado="ERROR_CONSULTA", motivo=f"{type(exc).__name__}: {str(exc)[:250]}")
+    if not direccion_especifica(address):
+        out.update(
+            estado="DIRECCION_NO_ESPECIFICA",
+            motivo="El dato de dirección es genérico, incompleto o no es una dirección postal consultable."
+        )
         return out, []
 
+    queries = variantes_consulta(address)
+    candidates_by_key = {}
+    query_attempts = []
+    query_errors = []
+    stop_search = False
+    for query_index, query_text in enumerate(queries):
+        for use_filter in (True, False):
+            try:
+                found = consultar_candidatos(query_text, municipio_filter=use_filter)
+                query_attempts.append(
+                    ("filtro municipal" if use_filter else "sin filtro") + ": " + query_text
+                )
+                for candidate in found:
+                    key = (
+                        str(candidate.get("id") or ""),
+                        str(candidate.get("type") or ""),
+                        normalizar(candidate.get("address") or ""),
+                        str(candidate.get("muniCode") or ""),
+                    )
+                    candidates_by_key.setdefault(key, candidate)
+                local_candidates = [x for x in candidates_by_key.values() if es_chiclana(x)]
+                local_portals = [x for x in local_candidates if candidate_type(x) == "portal"]
+                if local_portals:
+                    stop_search = True
+                    break
+                # Si el filtro municipal devolvió cualquier entidad local, el intento sin filtro
+                # para esta misma variante no añade seguridad; pasamos a la variante de vía.
+                if use_filter and local_candidates:
+                    break
+            except Exception as exc:
+                query_errors.append(f"{query_text} [{ 'filtro' if use_filter else 'sin filtro' }]: {type(exc).__name__}: {str(exc)[:180]}")
+        if stop_search:
+            break
+
+    candidates = list(candidates_by_key.values())
+    out["consulta"] = " || ".join(query_attempts)
     out["candidatos_encontrados"] = len(candidates)
     if not candidates:
-        out.update(estado="SIN_RESULTADO", motivo="CartoCiudad no devolvió candidatos para la dirección.")
+        if query_errors:
+            out.update(
+                estado="ERROR_CONSULTA",
+                motivo="No se obtuvieron candidatos tras los intentos alternativos. " + " | ".join(query_errors[:2])
+            )
+        else:
+            out.update(
+                estado="SIN_RESULTADO",
+                motivo="CartoCiudad no devolvió candidatos ni para la dirección normalizada ni para la vía sin número."
+            )
         return out, []
 
     candidate_rows, ranked = [], []
@@ -391,7 +502,14 @@ def geocode_one(row):
     portals = [entry for entry in local if entry[2]["tipo_normalizado"] == "portal"]
     portals.sort(key=lambda entry: entry[0], reverse=True)
     if not portals:
-        candidate = sorted(local, key=lambda entry: entry[0], reverse=True)[0][1]
+        best_local = sorted(local, key=lambda entry: entry[0], reverse=True)[0]
+        candidate, features = best_local[1], best_local[2]
+        if features["similaridad_direccion"] < 0.50:
+            out.update(
+                estado="SIN_COINCIDENCIA_UTIL",
+                motivo="CartoCiudad devolvió entidades del municipio, pero ninguna guarda relación textual suficiente con la dirección de la ficha."
+            )
+            return out, candidate_rows
         geometry_note = ""
         try:
             found = consultar_find(candidate)
