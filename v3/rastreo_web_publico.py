@@ -3,12 +3,16 @@
 Usa resultados públicos de buscadores y páginas públicas; respeta robots.txt,
 limita peticiones y nunca publica: añade candidatos a candidatas_revision.
 """
-import argparse, hashlib, html, json, pathlib, re, time, urllib.error, urllib.parse, urllib.request
+import argparse, hashlib, html, json, pathlib, re, tempfile, time, urllib.error, urllib.parse, urllib.request, sys
 import urllib.robotparser
 from html.parser import HTMLParser
 from datetime import datetime, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parent
+# Permite cargar este módulo tanto como script como mediante importlib desde los workflows.
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+import catalogo_supabase as catalog
 MASTER = None  # El catálogo debe exportarse desde Supabase y pasarse explícitamente con --catalog.
 UA = "Xiclana-RAD/1.0 (+https://mickaelwhitecap.github.io/Xiclana-de-Ocio-y-de-Negocio-V3/)"
 CITY = '"Chiclana de la Frontera"'
@@ -181,18 +185,32 @@ class SearchLinks(HTMLParser):
         if tag=="a" and self.active:
             self.links.append(self.href); self.active=False; self.href=None
 
+def log_event(event, **fields):
+    payload={"rad_event":event,"utc":datetime.now(timezone.utc).isoformat(),**fields}
+    print(json.dumps(payload,ensure_ascii=False,default=str),flush=True)
+
+
 def get(url, limit=1200000):
     host=urllib.parse.urlparse(url).netloc.lower()
     now=time.time()
     wait=1.0-(now-LAST_REQUEST.get(host,0))
     if wait>0: time.sleep(wait)
     req=urllib.request.Request(url,headers={"User-Agent":UA,"Accept":"text/html,application/xhtml+xml,application/rss+xml"})
-    with urllib.request.urlopen(req,timeout=TIMEOUT) as r:
-        data=r.read(limit+1)
-        if len(data)>limit: data=data[:limit]
-        charset=r.headers.get_content_charset() or "utf-8"
-        LAST_REQUEST[host]=time.time()
-        return data.decode(charset,errors="replace"),r.geturl(),r.headers.get_content_type()
+    started=time.monotonic()
+    try:
+        with urllib.request.urlopen(req,timeout=TIMEOUT) as r:
+            data=r.read(limit+1)
+            if len(data)>limit: data=data[:limit]
+            charset=r.headers.get_content_charset() or "utf-8"
+            LAST_REQUEST[host]=time.time()
+            elapsed=round(time.monotonic()-started,2)
+            if elapsed>=8:
+                log_event("peticion_lenta",host=host,segundos=elapsed,url=r.geturl(),bytes=len(data))
+            return data.decode(charset,errors="replace"),r.geturl(),r.headers.get_content_type()
+    except Exception as exc:
+        elapsed=round(time.monotonic()-started,2)
+        log_event("peticion_fallida",host=host,segundos=elapsed,url=url,error=str(exc)[:240])
+        raise
 
 def allowed(url):
     """Consulta robots.txt con timeout; ante un fallo de red, no rastrea ese host."""
@@ -1828,7 +1846,7 @@ def self_test():
         get = lambda url, limit=1200000: (nonlocal_sample, url, "text/html")
         assert extract("https://directorio.example/servicio-nacional") is None, "El filtro geográfico ha aceptado un negocio no local"
 
-        # La web se recorre más allá de cuatro páginas y termina al reunir los seis datos.
+        # La web se recorre más allá de cuatro páginas, incluso tras completar algunos campos.
         page_urls = [
             "https://aurora.example/",
             "https://aurora.example/pagina-2",
@@ -1862,8 +1880,38 @@ def self_test():
         assert audits["aurora"]["paginas_visitadas"] == 6
         assert set(audits["aurora"]["campos_detectados"]) == {"address","phone","email","website","hours","description"}
         assert any(x.get("description") for x in crawled), "No se ha recuperado la descripción de la sexta página"
+        # Simular una interrupción tras cinco páginas y comprobar que la sexta
+        # se recupera desde la cola persistida, sin repetir las anteriores.
+        checkpoint={}
+        def interrupt_after_five(progress):
+            checkpoint.update(progress)
+            if progress.get("paginas_visitadas")==5 and not progress.get("completed"):
+                raise RuntimeError("interrupción simulada")
+        target={"id":"aurora","n":"Comercio Aurora","w":"https://aurora.example/","t":"negocio"}
+        try:
+            crawl_official_site(target,"https://aurora.example/",resume_state=None,progress_callback=interrupt_after_five)
+            raise AssertionError("La interrupción simulada no se produjo")
+        except RuntimeError as exc:
+            assert str(exc)=="interrupción simulada"
+        assert checkpoint.get("paginas_visitadas")==5
+        resumed_records,resumed_pages=crawl_official_site(target,"https://aurora.example/",resume_state=checkpoint)
+        assert resumed_pages==6, f"Reanudación incorrecta: {resumed_pages} páginas"
+        assert len(resumed_records)==6, f"Se perdieron registros al reanudar: {len(resumed_records)}"
+
     finally:
         allowed, get, extract = original_allowed, original_get, original_extract
+    # Checkpoints independientes para varias fichas y URLs candidatas.
+    checkpoint_store={"version":1,"checkpoints":{}}
+    p1={"target_id":"aurora","seed_url":"https://aurora.example/","queue":["https://aurora.example/a"],"visited":["https://aurora.example/"],"records":[]}
+    p2={"target_id":"aurora","seed_url":"https://aurora-alt.example/","queue":[],"visited":[],"records":[]}
+    p3={"target_id":"bravo","seed_url":"https://bravo.example/","queue":[],"visited":[],"records":[]}
+    store_crawl_checkpoint(checkpoint_store,p1)
+    store_crawl_checkpoint(checkpoint_store,p2)
+    store_crawl_checkpoint(checkpoint_store,p3)
+    assert checkpoint_for(checkpoint_store,"aurora","https://aurora.example/") is p1
+    assert checkpoint_for(checkpoint_store,"aurora","https://aurora-alt.example/") is p2
+    assert checkpoint_for(checkpoint_store,"bravo","https://bravo.example/") is p3
+    assert checkpoint_for(checkpoint_store,"aurora","https://bravo.example/") is None
     print("RAD self-test: OK",flush=True)
 
 def candidate_review_notes(record):
@@ -2050,9 +2098,44 @@ def sitemap_page_urls(seed_url, site_host):
     return list(dict.fromkeys(pages))
 
 
-def crawl_official_site(target, seed_url, allow_single_email=False):
-    """Recorre todas las páginas internas y sitemaps accesibles de la web oficial."""
+def crawl_checkpoint_key(target_id, seed_url):
+    raw=str(target_id)+"\\n"+url_key(seed_url)
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def checkpoint_for(resume_state, target_id, seed_url):
+    """Recupera solo el checkpoint de la ficha y URL exactas."""
+    if not isinstance(resume_state,dict):
+        return None
+    checkpoints=resume_state.get("checkpoints")
+    if isinstance(checkpoints,dict):
+        return checkpoints.get(crawl_checkpoint_key(target_id,seed_url))
+    # Compatibilidad temporal con checkpoints planos anteriores.
+    if (str(resume_state.get("target_id") or "")==str(target_id)
+            and url_key(resume_state.get("seed_url") or "")==url_key(seed_url)):
+        return resume_state
+    return None
+
+
+def store_crawl_checkpoint(store, progress):
+    """Añade/actualiza un checkpoint sin sustituir los de otras webs."""
+    if not isinstance(store,dict):
+        store={}
+    checkpoints=store.setdefault("checkpoints",{})
+    if not isinstance(checkpoints,dict):
+        checkpoints={}
+        store["checkpoints"]=checkpoints
+    key=crawl_checkpoint_key(progress.get("target_id"),progress.get("seed_url"))
+    checkpoints[key]=progress
+    store["version"]=1
+    return store
+
+
+def crawl_official_site(target, seed_url, allow_single_email=False, resume_state=None, progress_callback=None):
+    """Recorre todas las páginas internas y sitemaps; permite reanudar desde un checkpoint."""
+    started=time.monotonic()
     seed_host=urllib.parse.urlsplit(seed_url).netloc.lower()
+    target_id=str(target.get("id") or record_value(target,"n","nombre","name"))
     if not seed_host:
         return [],0
     queue=[seed_url]
@@ -2060,7 +2143,31 @@ def crawl_official_site(target, seed_url, allow_single_email=False):
     records=[]
     seed_verified=False
     sitemap_loaded=False
-    target_id=str(target.get("id") or record_value(target,"n","nombre","name"))
+    resume_state=checkpoint_for(resume_state,target_id,seed_url)
+    if isinstance(resume_state,dict):
+        queue=list(resume_state.get("queue") or [])
+        visited=set(resume_state.get("visited") or [])
+        records=list(resume_state.get("records") or [])
+        seed_verified=bool(resume_state.get("seed_verified"))
+        sitemap_loaded=bool(resume_state.get("sitemap_loaded"))
+        seed_host=str(resume_state.get("seed_host") or seed_host)
+        if resume_state.get("completed"):
+            log_event("web_reanudada_completada",ficha_id=target_id,web=seed_url,paginas_visitadas=len(visited))
+            return records,len(visited)
+        log_event("web_reanudada",ficha_id=target_id,web=seed_url,paginas_visitadas=len(visited),pendientes=len(queue))
+    else:
+        log_event("web_inicio",ficha_id=target_id,web=seed_url,host=seed_host)
+
+    def save_progress(completed=False):
+        if progress_callback:
+            progress_callback({
+                "target_id":target_id,"seed_url":seed_url,"seed_host":seed_host,
+                "queue":list(queue),"visited":sorted(visited),"records":records,
+                "seed_verified":seed_verified,"sitemap_loaded":sitemap_loaded,
+                "completed":completed,"paginas_visitadas":len(visited),
+                "actualizado_utc":datetime.now(timezone.utc).isoformat(),
+            })
+
     while queue:
         page_url=queue.pop(0)
         page_key=url_key(page_url)
@@ -2070,6 +2177,8 @@ def crawl_official_site(target, seed_url, allow_single_email=False):
         if parsed.scheme.lower() not in ("http","https") or parsed.netloc.lower()!=seed_host:
             continue
         visited.add(page_key)
+        if len(visited)==1 or len(visited)%10==0:
+            log_event("web_progreso",ficha_id=target_id,host=seed_host,paginas_visitadas=len(visited),pendientes=len(queue),pagina=page_url)
         try:
             record=extract(page_url,target=target,
                 allow_single_email=allow_single_email and page_key==url_key(seed_url),
@@ -2080,11 +2189,11 @@ def crawl_official_site(target, seed_url, allow_single_email=False):
         if not record:
             if not seed_verified:
                 break
+            if len(visited)%5==0:
+                save_progress()
             continue
         if not seed_verified:
             seed_verified=True
-            # Si la URL inicial redirige (p. ej. dominio raíz a www), seguir
-            # el host final que ya ha superado la comprobación de identidad.
             seed_host=urllib.parse.urlsplit(record.get("source_url") or page_url).netloc.lower() or seed_host
         record["_official_site"]=True
         record["_target_id"]=target_id
@@ -2098,13 +2207,15 @@ def crawl_official_site(target, seed_url, allow_single_email=False):
         for candidate in record.pop("_internal_links",[]):
             if url_key(candidate) not in visited:
                 queue.append(candidate)
-        # No detenerse al encontrar los seis campos: seguir recorriendo
-        # todas las páginas internas y los sitemaps para detectar datos adicionales,
-        # corregir fuentes incompletas y conservar la procedencia de cada dato.
+        if len(visited)%5==0:
+            save_progress()
+        # No detenerse al encontrar los seis campos: se recorren todas las páginas internas.
+    save_progress(completed=True)
+    log_event("web_fin",ficha_id=target_id,host=seed_host,paginas_visitadas=len(visited),paginas_con_datos=len(records),pendientes=0,segundos=round(time.monotonic()-started,2))
     return records,len(visited)
 
 
-def discover_official_website_jobs(records):
+def discover_official_website_jobs(records, resume_state=None, progress_callback=None):
     """Investiga y registra por ficha el resultado de cada web ya registrada."""
     official_records=[]
     domains=set()
@@ -2130,7 +2241,9 @@ def discover_official_website_jobs(records):
                "web_registrada":website,"web_oficial_confirmada":False,
                "paginas_visitadas":0,"paginas_con_datos":0,"campos_detectados":[]}
         try:
-            pages,visited=crawl_official_site(target,website,allow_single_email=seed_counts.get(website,0)==1)
+            ficha_started=time.monotonic()
+            log_event("ficha_web_registrada_inicio",ficha_id=ident,nombre=name,web=website)
+            pages,visited=crawl_official_site(target,website,allow_single_email=seed_counts.get(website,0)==1,resume_state=resume_state,progress_callback=progress_callback)
             official_records.extend(pages)
             pages_total+=visited
             audit["paginas_visitadas"]=visited
@@ -2138,6 +2251,7 @@ def discover_official_website_jobs(records):
             audit["web_oficial_confirmada"]=bool(pages)
             audit["campos_detectados"]=sorted(official_fields_found(pages))
             audit["resultado"]="web_oficial_investigada" if pages else ("web_no_confirmada" if visited else "sin_acceso")
+            log_event("ficha_web_registrada_fin",ficha_id=ident,nombre=name,paginas=visited,campos=audit["campos_detectados"],segundos=round(time.monotonic()-ficha_started,2),resultado=audit["resultado"])
         except Exception as exc:
             audit["resultado"]="error_consulta"
             audit["error"]=str(exc)[:300]
@@ -2145,7 +2259,7 @@ def discover_official_website_jobs(records):
         audits[ident]=audit
     return official_records,len(domains),pages_total,audits
 
-def discover_unlinked_official_website_jobs(records, retry_ids=None):
+def discover_unlinked_official_website_jobs(records, retry_ids=None, resume_state=None, progress_callback=None):
     """Busca web propia para fichas sin web oficial confirmada y rastrea sus páginas internas."""
     retry_ids={str(x) for x in (retry_ids or set())}
     targets=[]
@@ -2170,7 +2284,10 @@ def discover_unlinked_official_website_jobs(records, retry_ids=None):
     audits={}
     for _name_key,target in targets:
         name=record_value(target,"n","nombre","name")
+        ident=str(target.get("id") or name)
         query=f'"{name}" "Chiclana de la Frontera" (web oficial OR página web OR contacto)'
+        ficha_started=time.monotonic()
+        log_event("busqueda_web_propia_inicio",ficha_id=ident,nombre=name)
         results=[]
         for engine in (search_ddg,search_bing):
             try:
@@ -2196,7 +2313,7 @@ def discover_unlinked_official_website_jobs(records, retry_ids=None):
                 continue
             audit["urls_candidatas_comprobadas"]+=1
             try:
-                pages,_visited=crawl_official_site(target,candidate_url,allow_single_email=True)
+                pages,_visited=crawl_official_site(target,candidate_url,allow_single_email=True,resume_state=resume_state,progress_callback=progress_callback)
                 paginas_consultadas+=_visited
                 audit["paginas_visitadas"]+=_visited
             except Exception as exc:
@@ -2214,6 +2331,7 @@ def discover_unlinked_official_website_jobs(records, retry_ids=None):
                 break
         if not audit.get("resultado"):
             audit["resultado"]="candidatas_no_confirmadas" if audit["urls_candidatas_comprobadas"] else "web_no_localizada"
+        log_event("busqueda_web_propia_fin",ficha_id=ident,nombre=name,resultados=len(set(results)),candidatas=audit["urls_candidatas_comprobadas"],paginas=audit["paginas_visitadas"],segundos=round(time.monotonic()-ficha_started,2),resultado=audit["resultado"])
         audits[ident]=audit
     return official_records,fichas_consultadas,paginas_consultadas,audits
 
@@ -2287,7 +2405,9 @@ def main():
     # Fuentes locales directas: sus fichas individuales son una vía de detección
     # independiente de los buscadores. Solo se confía en rutas de detalle conocidas.
     for seed in (DIRECTORY_SEEDS if args.global_discovery else []):
+        seed_started=time.monotonic()
         seed_host=urllib.parse.urlparse(seed).netloc.lower()
+        log_event("directorio_inicio",url=seed)
         seed_limit=450 if any(x in seed_host for x in ("chiclanaguiadempresas","cylex.es","paginasamarillas.es","qdq.com","tripadvisor.es")) else 160
         seed_queue=[seed]
         seed_pages_seen=set()
@@ -2316,20 +2436,43 @@ def main():
                         if seed_count>=seed_limit: break
         except Exception as exc:
             print(f"Fuente directa no disponible ({seed}): {exc}",flush=True)
+        log_event("directorio_fin",url=seed,paginas=len(seed_pages_seen),perfiles=seed_count,segundos=round(time.monotonic()-seed_started,2))
     links.extend(balance_urls_by_host(trusted_urls))
     if args.global_discovery:
         for q in QUERIES:
             for engine in (search_ddg,search_bing):
-                try: links.extend(engine(q))
-                except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
+                search_started=time.monotonic()
+                try:
+                    found=engine(q)
+                    links.extend(found)
+                    log_event("busqueda_general_fin",buscador=engine.__name__,consulta=q,resultados=len(found),segundos=round(time.monotonic()-search_started,2))
+                except Exception as exc:
+                    log_event("busqueda_general_error",buscador=engine.__name__,consulta=q,segundos=round(time.monotonic()-search_started,2),error=str(exc)[:240])
     links=list(dict.fromkeys(links))
-    official_records, official_domains, official_pages, registered_audit=discover_official_website_jobs(target_items)
+    resume_state=data.get("rad_crawl_progress")
+    if not isinstance(resume_state,dict) or not isinstance(resume_state.get("checkpoints"),dict):
+        legacy=resume_state if isinstance(resume_state,dict) and resume_state.get("target_id") else None
+        resume_state={"version":1,"checkpoints":{}}
+        if legacy:
+            store_crawl_checkpoint(resume_state,legacy)
+    def persist_crawl_progress(progress):
+        store_crawl_checkpoint(resume_state,progress)
+        payload={"items":[],"rad_crawl_progress":resume_state}
+        with tempfile.TemporaryDirectory(prefix="xiclana-rad-crawl-") as tmp:
+            checkpoint_path=pathlib.Path(tmp)/"metadata.json"
+            checkpoint_path.write_text(json.dumps(payload,ensure_ascii=False,separators=(",",":")),encoding="utf-8")
+            catalog.sync_metadata(checkpoint_path,["rad_crawl_progress"])
+        log_event("checkpoint_web_guardado",ficha_id=progress.get("target_id"),web=progress.get("seed_url"),paginas=progress.get("paginas_visitadas"),pendientes=len(progress.get("queue") or []),completado=progress.get("completed",False))
+
+    official_records, official_domains, official_pages, registered_audit=discover_official_website_jobs(
+        target_items,resume_state=resume_state,progress_callback=persist_crawl_progress
+    )
     retry_ids={
         str(x.get("id") or record_value(x,"n","nombre","name"))
         for x in target_items
         if not registered_audit.get(str(x.get("id") or record_value(x,"n","nombre","name")),{}).get("web_oficial_confirmada")
     }
-    unlinked_official_records, fichas_sin_web_consultadas, unlinked_pages, unlinked_audit=discover_unlinked_official_website_jobs(target_items,retry_ids)
+    unlinked_official_records, fichas_sin_web_consultadas, unlinked_pages, unlinked_audit=discover_unlinked_official_website_jobs(target_items,retry_ids,resume_state=resume_state,progress_callback=persist_crawl_progress)
     official_pages+=unlinked_pages
     official_records.extend(unlinked_official_records)
     target_audit=dict(registered_audit)
@@ -2528,6 +2671,7 @@ def main():
         str(x.get("_target_id") or "") for x in unlinked_official_records
         if x.get("_target_id")
     })
+    data["rad_crawl_progress"]=None  # La ficha terminó; el orquestador confirma el resultado individual.
     data["rad_ultima_ejecucion"]={"fecha_utc":datetime.now(timezone.utc).isoformat(),
        "buscadores":["DuckDuckGo HTML","Bing RSS"],"fuentes_directas":DIRECTORY_SEEDS,
        "fuentes_detalle_directo":DIRECT_DETAIL_URLS,"consultas":len(QUERIES),

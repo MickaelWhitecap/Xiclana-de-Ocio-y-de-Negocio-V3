@@ -261,6 +261,55 @@ def merge_candidate_lists(current, incoming):
     return merged
 
 
+def clear_rad_crawl_progress(target_id):
+    """Elimina checkpoints de una ficha leyendo el estado más reciente de Supabase."""
+    base, key = connection()
+    for attempt in range(3):
+        settings, _ = request(base + "/site_settings?select=id,data,updated_at&id=eq.catalogo", key)
+        if not isinstance(settings, list) or not settings:
+            raise RuntimeError("No existe public.site_settings(id='catalogo').")
+        current = settings[0].get("data") or {}
+        if not isinstance(current, dict):
+            raise RuntimeError("Los metadatos actuales de Supabase no son un objeto.")
+        progress = current.get("rad_crawl_progress")
+        if not isinstance(progress, dict):
+            return
+        checkpoints = progress.get("checkpoints")
+        if isinstance(checkpoints, dict):
+            remaining = {
+                k: v for k, v in checkpoints.items()
+                if not isinstance(v, dict) or str(v.get("target_id") or "") != str(target_id)
+            }
+            if len(remaining) == len(checkpoints):
+                return
+            if remaining:
+                updated_progress = dict(progress)
+                updated_progress["checkpoints"] = remaining
+            else:
+                updated_progress = None
+        elif str(progress.get("target_id") or "") == str(target_id):
+            updated_progress = None
+        else:
+            return
+        updated = dict(current)
+        if updated_progress is None:
+            updated.pop("rad_crawl_progress", None)
+        else:
+            updated["rad_crawl_progress"] = updated_progress
+        timestamp = settings[0].get("updated_at")
+        filters = {"id": "eq.catalogo", "updated_at": "eq." + timestamp if timestamp else "is.null"}
+        result, _ = request(
+            base + "/site_settings?" + urllib.parse.urlencode(filters),
+            key, method="PATCH",
+            payload={"data": updated, "updated_at": datetime.now(timezone.utc).isoformat()},
+            headers={"Prefer": "return=representation"},
+        )
+        if isinstance(result, list) and result:
+            print(json.dumps({"checkpoint_web_limpiado": True, "ficha_id": str(target_id)}, ensure_ascii=False))
+            return
+    raise RuntimeError("No se pudo limpiar el checkpoint RAD por conflicto concurrente.")
+
+
 def sync_metadata(path, keys):
     base, key = connection()
     working = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
