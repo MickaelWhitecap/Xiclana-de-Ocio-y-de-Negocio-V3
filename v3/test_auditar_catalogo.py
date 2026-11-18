@@ -89,11 +89,6 @@ class AuditDuplicateTests(unittest.TestCase):
         self.assertEqual(result["urls_invalidas"], [])
         self.assertEqual(result["coordenadas_invalidas"], [])
 
-    def test_legacy_json_updater_is_disabled(self):
-        source = (Path(__file__).with_name("actualizar.py")).read_text(encoding="utf-8")
-        self.assertIn("está retirado", source)
-        self.assertIn("public.listings", source)
- 
     def test_public_page_reads_fichas_from_the_single_supabase_catalog(self):
         page = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
         self.assertIn("async function cargarCatalogoSupabase()", page)

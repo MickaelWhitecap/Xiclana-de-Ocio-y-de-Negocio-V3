@@ -254,13 +254,6 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertIn("xiclana-catalogo.json", workflow)
         self.assertNotIn("fichas_completas.json", workflow)
 
-    def test_legacy_json_writers_are_retired(self):
-        for name in ("integrar-candidatas-rad.yml", "incorporar-auditoria-osm.yml", "auditar-bajas-catalogo.yml"):
-            workflow = (ROOT / ".github/workflows" / name).read_text(encoding="utf-8")
-            self.assertIn("retirad", workflow.lower())
-            self.assertNotIn("git push", workflow)
-            self.assertNotIn("git add", workflow)
-
     def test_backup_json_is_generated_from_supabase_not_repository_snapshot(self):
         workflow = (ROOT / ".github/workflows/backup-supabase.yml").read_text(encoding="utf-8")
         self.assertIn("catalogo_supabase.py export --output fichas_completas.json", workflow)
@@ -291,12 +284,6 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertIn('if(page.length<pageSize)break;', admin)
         self.assertIn('return {data:rows.map(row=>', admin)
 
-    def test_legacy_json_writing_scripts_are_disabled(self):
-        for name in ("actualizar.py", "ampliar_catalogo.py", "extraccion_inicial_osm.py",
-                     "incorporar_auditoria_osm.py", "recuperar_direcciones_osm.py"):
-            source = (ROOT / "v3" / name).read_text(encoding="utf-8")
-            self.assertIn("retirad", source.lower())
-
     def test_osm_and_audit_scripts_require_a_supabase_export_path(self):
         for name in ("auditar_osm_municipal.py", "incorporar_candidatas_osm.py",
                      "proponer_direcciones_osm.py", "auditar_catalogo.py"):
@@ -320,15 +307,15 @@ class SingleSupabaseMasterTests(unittest.TestCase):
             self.assertIn("catalogo_supabase.py export", workflow)
             self.assertNotIn("v3/fichas_completas.json", workflow)
 
-    def test_historical_import_and_extraction_workflows_are_retired(self):
-        for name in ("extraccion-inicial-osm.yml", "migrar-catalogo-supabase.yml",
-                     "rad-catalog-validation.yml", "recuperar-direcciones-osm.yml",
-                     "integrar-candidatas-rad.yml", "incorporar-auditoria-osm.yml",
-                     "auditar-bajas-catalogo.yml"):
-            workflow = (ROOT / ".github/workflows" / name).read_text(encoding="utf-8")
-            self.assertIn("retirad", workflow.lower())
-            self.assertNotIn("git push", workflow)
-            self.assertNotIn("git add", workflow)
+    def test_retired_legacy_files_stay_removed(self):
+        # Escritores históricos del JSON y workflows retirados: ya no deben existir.
+        for name in ("actualizar.py", "ampliar_catalogo.py", "extraccion_inicial_osm.py",
+                     "incorporar_auditoria_osm.py", "recuperar_direcciones_osm.py"):
+            self.assertFalse((ROOT / "v3" / name).exists(), name)
+        for name in ("auditar-bajas-catalogo", "extraccion-inicial-osm", "incorporar-auditoria-osm",
+                     "integrar-candidatas-rad", "migrar-catalogo-supabase", "rad-catalog-validation",
+                     "recuperar-direcciones-osm", "sincronizar-cambios-admin", "sync-admin-overrides"):
+            self.assertFalse((ROOT / ".github/workflows" / f"{name}.yml").exists(), name)
 
     def test_public_web_and_exporter_use_supabase_listings(self):
         public = (ROOT / "v3/index.html").read_text(encoding="utf-8")
