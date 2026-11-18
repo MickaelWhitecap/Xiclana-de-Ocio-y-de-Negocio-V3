@@ -2453,7 +2453,7 @@ def main():
                 except Exception as exc:
                     log_event("busqueda_general_error",buscador=engine.__name__,consulta=q,segundos=round(time.monotonic()-search_started,2),error=str(exc)[:240])
     links=list(dict.fromkeys(links))
-    resume_state=data.get("rad_crawl_progress")
+    resume_state={"version":1,"checkpoints":{}} if args.local_checkpoints_only else data.get("rad_crawl_progress")
     if not isinstance(resume_state,dict) or not isinstance(resume_state.get("checkpoints"),dict):
         legacy=resume_state if isinstance(resume_state,dict) and resume_state.get("target_id") else None
         resume_state={"version":1,"checkpoints":{}}
