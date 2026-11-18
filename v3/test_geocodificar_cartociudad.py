@@ -81,6 +81,17 @@ class CartoCiudadTests(unittest.TestCase):
         self.assertEqual(variants[0], "Avenida del Mueble 46B")
         self.assertEqual(variants[1], "Avenida del Mueble")
 
+    def test_preserva_andalucia_en_nombres_de_calles(self):
+        source = "Plaza de Andalucía, 1, 11130 Chiclana de la Frontera, Cádiz"
+        candidate_wrong = "CALLE PLAZA (DE LA 1, Chiclana de la Frontera"
+        candidate_right = "PLAZA ANDALUCIA (DE), 1, Chiclana de la Frontera"
+        self.assertLess(geo.similarity_address(source, candidate_wrong), 0.65)
+        self.assertGreaterEqual(geo.similarity_address(source, candidate_right), 0.80)
+        self.assertEqual(
+            geo.limpiar_direccion_busqueda(source),
+            "Plaza de Andalucía 1",
+        )
+
     def test_caja_geografica_solo_como_control(self):
         self.assertTrue(geo.in_sanity_bounds(36.42, -6.15))
         self.assertFalse(geo.in_sanity_bounds(40.42, -3.70))
