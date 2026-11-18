@@ -64,6 +64,23 @@ class CartoCiudadTests(unittest.TestCase):
             "22",
         )
 
+    def test_rechaza_direcciones_vagas(self):
+        self.assertFalse(geo.direccion_especifica("Centro"))
+        self.assertFalse(geo.direccion_especifica("Casco histórico"))
+        self.assertFalse(geo.direccion_especifica("Chiclana"))
+        self.assertFalse(geo.direccion_especifica("E-mail:"))
+        self.assertTrue(geo.direccion_especifica("C. San Alejandro, 24, 11130 Chiclana de la Frontera"))
+        self.assertTrue(geo.direccion_especifica("Calle Nueva, 20"))
+
+    def test_normaliza_abreviaturas_y_prepara_busqueda_alternativa(self):
+        self.assertEqual(
+            geo.limpiar_direccion_busqueda("C. San Alejandro, 24, 11130 Chiclana de la Frontera, Cádiz"),
+            "Calle San Alejandro 24",
+        )
+        variants = geo.variantes_consulta("Av. del Mueble, 46B, 11130 Chiclana de la Frontera")
+        self.assertEqual(variants[0], "Avenida del Mueble 46B")
+        self.assertEqual(variants[1], "Avenida del Mueble")
+
     def test_caja_geografica_solo_como_control(self):
         self.assertTrue(geo.in_sanity_bounds(36.42, -6.15))
         self.assertFalse(geo.in_sanity_bounds(40.42, -3.70))
