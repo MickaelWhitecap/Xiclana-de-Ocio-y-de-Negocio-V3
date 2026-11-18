@@ -215,7 +215,7 @@ def variantes_consulta(direccion):
         r"(?i)\b(?:n(?:umero|[º°o.]?)|num\.?)\s*[:.]?\s*\d{1,4}[a-z]?\b",
         " ", base
     )
-    without_number = re.sub(r",?\s+\d{1,4}[a-z]?\s*$", "", without_number)
+    without_number = re.sub(r"(?i),?\s+\d{1,4}[a-z]?\s*$", "", without_number)
     without_number = re.sub(r"(?i)\bkm\s*\d+(?:[.,]\d+)?\b", " ", without_number)
     without_number = re.sub(r"[\s,;]+", " ", without_number).strip(" ,;.-")
     if without_number and normalizar(without_number) != normalizar(base):
