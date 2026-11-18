@@ -2251,7 +2251,8 @@ def discover_official_website_jobs(records, resume_state=None, progress_callback
             audit["web_oficial_confirmada"]=bool(pages)
             audit["campos_detectados"]=sorted(official_fields_found(pages))
             audit["resultado"]="web_oficial_investigada" if pages else ("web_no_confirmada" if visited else "sin_acceso")
-            log_event("ficha_web_registrada_fin",ficha_id=ident,nombre=name,paginas=visited,campos=audit["campos_detectados"],segundos=round(time.monotonic()-ficha_started,2),resultado=audit["resultado"])
+            audit["segundos"]=round(time.monotonic()-ficha_started,2)
+            log_event("ficha_web_registrada_fin",ficha_id=ident,nombre=name,paginas=visited,campos=audit["campos_detectados"],segundos=audit["segundos"],resultado=audit["resultado"])
         except Exception as exc:
             audit["resultado"]="error_consulta"
             audit["error"]=str(exc)[:300]
@@ -2331,7 +2332,8 @@ def discover_unlinked_official_website_jobs(records, retry_ids=None, resume_stat
                 break
         if not audit.get("resultado"):
             audit["resultado"]="candidatas_no_confirmadas" if audit["urls_candidatas_comprobadas"] else "web_no_localizada"
-        log_event("busqueda_web_propia_fin",ficha_id=ident,nombre=name,resultados=len(set(results)),candidatas=audit["urls_candidatas_comprobadas"],paginas=audit["paginas_visitadas"],segundos=round(time.monotonic()-ficha_started,2),resultado=audit["resultado"])
+        audit["segundos"]=round(time.monotonic()-ficha_started,2)
+        log_event("busqueda_web_propia_fin",ficha_id=ident,nombre=name,resultados=len(set(results)),candidatas=audit["urls_candidatas_comprobadas"],paginas=audit["paginas_visitadas"],segundos=audit["segundos"],resultado=audit["resultado"])
         audits[ident]=audit
     return official_records,fichas_consultadas,paginas_consultadas,audits
 
@@ -2345,6 +2347,8 @@ def main():
                         help="IDs de las fichas activas que debe investigar este lote.")
     parser.add_argument("--global-discovery",action="store_true",
                         help="Ejecuta una sola vez por ciclo las fuentes generales y el descubrimiento de candidatas.")
+    parser.add_argument("--local-checkpoints-only",action="store_true",
+                        help="No escribe checkpoints en Supabase; reservado para pruebas aisladas de duración.")
     args=parser.parse_args()
     if args.self_test:
         self_test()
@@ -2457,12 +2461,13 @@ def main():
             store_crawl_checkpoint(resume_state,legacy)
     def persist_crawl_progress(progress):
         store_crawl_checkpoint(resume_state,progress)
-        payload={"items":[],"rad_crawl_progress":resume_state}
-        with tempfile.TemporaryDirectory(prefix="xiclana-rad-crawl-") as tmp:
-            checkpoint_path=pathlib.Path(tmp)/"metadata.json"
-            checkpoint_path.write_text(json.dumps(payload,ensure_ascii=False,separators=(",",":")),encoding="utf-8")
-            catalog.sync_metadata(checkpoint_path,["rad_crawl_progress"])
-        log_event("checkpoint_web_guardado",ficha_id=progress.get("target_id"),web=progress.get("seed_url"),paginas=progress.get("paginas_visitadas"),pendientes=len(progress.get("queue") or []),completado=progress.get("completed",False))
+        if not args.local_checkpoints_only:
+            payload={"items":[],"rad_crawl_progress":resume_state}
+            with tempfile.TemporaryDirectory(prefix="xiclana-rad-crawl-") as tmp:
+                checkpoint_path=pathlib.Path(tmp)/"metadata.json"
+                checkpoint_path.write_text(json.dumps(payload,ensure_ascii=False,separators=(",",":")),encoding="utf-8")
+                catalog.sync_metadata(checkpoint_path,["rad_crawl_progress"])
+        log_event("checkpoint_web_guardado",ficha_id=progress.get("target_id"),web=progress.get("seed_url"),paginas=progress.get("paginas_visitadas"),pendientes=len(progress.get("queue") or []),completado=progress.get("completed",False),destino="local" if args.local_checkpoints_only else "supabase")
 
     official_records, official_domains, official_pages, registered_audit=discover_official_website_jobs(
         target_items,resume_state=resume_state,progress_callback=persist_crawl_progress
