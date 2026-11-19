@@ -642,8 +642,10 @@ body{background-color:var(--bg)}
 }
 /* Nada debe salirse por la derecha: los adornos de Ocio/NegOcio quedan dentro del botón y la cabecera de los anuncios laterales se parte en dos líneas si no cabe. */
 #elige .dos>.op{overflow:hidden}
-.lado .sp-top{flex-wrap:wrap}
-.lado .sp-tag{white-space:normal}
+/* Anuncios laterales: la etiqueta y la cruz «ON» comparten fila y la cruz siempre queda dentro del recuadro. */
+.sp-top{flex-wrap:nowrap;align-items:flex-start}
+.sp-tag{min-width:0;flex:0 1 auto;white-space:normal}
+.lado .sp-logo{width:40px}
 /* Un correo, una web o un nombre muy largo sin espacios no ensancha la columna de fichas: se parte para caber. */
 .grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr))}
 .grid>.card,.card-details,.card .meta-line{min-width:0}
