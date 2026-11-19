@@ -3,12 +3,16 @@
 Usa resultados públicos de buscadores y páginas públicas; respeta robots.txt,
 limita peticiones y nunca publica: añade candidatos a candidatas_revision.
 """
-import argparse, hashlib, html, json, pathlib, re, time, urllib.error, urllib.parse, urllib.request
+import argparse, hashlib, html, json, pathlib, re, tempfile, time, urllib.error, urllib.parse, urllib.request, sys
 import urllib.robotparser
 from html.parser import HTMLParser
 from datetime import datetime, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parent
+# Permite cargar este módulo tanto como script como mediante importlib desde los workflows.
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+import catalogo_supabase as catalog
 MASTER = None  # El catálogo debe exportarse desde Supabase y pasarse explícitamente con --catalog.
 UA = "Xiclana-RAD/1.0 (+https://mickaelwhitecap.github.io/Xiclana-de-Ocio-y-de-Negocio-V3/)"
 CITY = '"Chiclana de la Frontera"'
@@ -31,8 +35,7 @@ QUERIES = [
     f'{CITY} asociación comerciantes empresas socios',
     f'{CITY} site:actualidadsur.es/pueblos/chiclana-de-la-frontera',
 ]
-MAX_RESULTS_PER_QUERY = 12
-MAX_PAGES = 2000
+MAX_RESULTS_PER_QUERY = 30
 TIMEOUT = 18
 DIRECTORY_SEEDS = [
     "https://aechiclana.org/directorio/",
@@ -182,18 +185,32 @@ class SearchLinks(HTMLParser):
         if tag=="a" and self.active:
             self.links.append(self.href); self.active=False; self.href=None
 
+def log_event(event, **fields):
+    payload={"rad_event":event,"utc":datetime.now(timezone.utc).isoformat(),**fields}
+    print(json.dumps(payload,ensure_ascii=False,default=str),flush=True)
+
+
 def get(url, limit=1200000):
     host=urllib.parse.urlparse(url).netloc.lower()
     now=time.time()
     wait=1.0-(now-LAST_REQUEST.get(host,0))
     if wait>0: time.sleep(wait)
     req=urllib.request.Request(url,headers={"User-Agent":UA,"Accept":"text/html,application/xhtml+xml,application/rss+xml"})
-    with urllib.request.urlopen(req,timeout=TIMEOUT) as r:
-        data=r.read(limit+1)
-        if len(data)>limit: data=data[:limit]
-        charset=r.headers.get_content_charset() or "utf-8"
-        LAST_REQUEST[host]=time.time()
-        return data.decode(charset,errors="replace"),r.geturl(),r.headers.get_content_type()
+    started=time.monotonic()
+    try:
+        with urllib.request.urlopen(req,timeout=TIMEOUT) as r:
+            data=r.read(limit+1)
+            if len(data)>limit: data=data[:limit]
+            charset=r.headers.get_content_charset() or "utf-8"
+            LAST_REQUEST[host]=time.time()
+            elapsed=round(time.monotonic()-started,2)
+            if elapsed>=8:
+                log_event("peticion_lenta",host=host,segundos=elapsed,url=r.geturl(),bytes=len(data))
+            return data.decode(charset,errors="replace"),r.geturl(),r.headers.get_content_type()
+    except Exception as exc:
+        elapsed=round(time.monotonic()-started,2)
+        log_event("peticion_fallida",host=host,segundos=elapsed,url=url,error=str(exc)[:240])
+        raise
 
 def allowed(url):
     """Consulta robots.txt con timeout; ante un fallo de red, no rastrea ese host."""
@@ -523,7 +540,7 @@ def clean_address(value, locality="", postal=""):
     has_detail=bool(re.search(
         r"(?i)\b(?:calle|c\.?|avenida|avda?\.?|plaza|pza\.?|paseo|carretera|ctra\.?|"
         r"camino|traves[ií]a|ronda|urbanizaci[oó]n|urb\.?|pol[ií]gono|pol\.?|"
-        r"parque empresarial|centro comercial|edificio|edif\.?|bulevar|glorieta)\b", raw
+        r"parque empresarial|centro comercial|edificio|edif\.?|bulevar|glorieta|playa)\b", raw
     )) or bool(re.search(r"\b\d{1,4}\b", raw))
     if not raw or not has_detail:
         return ""
@@ -587,13 +604,26 @@ def clean_description(value, business_name=""):
 
 
 def is_directory_email(value, page_url):
-    """Rechaza correos del propio portal/directorio, no del establecimiento."""
+    """Rechaza correos de directorios, pero conserva el correo del propio negocio."""
     email=str(value or "").strip().lower()
     if not email or "@" not in email: return False
-    domain=email.rsplit("@",1)[-1].rstrip(".")
-    source_host=(urllib.parse.urlparse(page_url).hostname or "").lower()
-    blocked={"chiclanaguiadempresas.com","www.chiclanaguiadempresas.com"}
-    return domain in blocked or domain==source_host or domain.removeprefix("www.")==source_host.removeprefix("www.")
+    domain=email.rsplit("@",1)[-1].rstrip(".").removeprefix("www.")
+    source_host=(urllib.parse.urlparse(page_url).hostname or "").lower().removeprefix("www.")
+    blocked={"chiclanaguiadempresas.com"}
+    directory_domains={
+        str(host).lower().removeprefix("www.")
+        for host in TRUSTED_DIRECTORY_PATHS
+    } | {"informa.es"}
+    known_directory=any(
+        source_host==host or source_host.endswith("."+host)
+        for host in directory_domains
+    )
+    same_domain=(
+        domain==source_host
+        or domain.endswith("."+source_host)
+        or source_host.endswith("."+domain)
+    )
+    return domain in blocked or (known_directory and same_domain)
 
 
 def clean_website(value, page_url):
@@ -842,6 +872,31 @@ def compare_catalog_record(candidate, existing):
     return None
 
 
+
+def safe_to_enrich_catalog_match(match, record, old, records, official_site=False, trusted_local=False):
+    """Decide si una coincidencia puede enriquecer la ficha existente."""
+    if not match:
+        return False
+    exact_name=norm(record_value(record,"n","nombre","name"))==norm(record_value(old,"n","nombre","name"))
+    exact_name_matches=sum(
+        1 for item in records
+        if isinstance(item,dict) and
+        norm(record_value(record,"n","nombre","name"))==norm(record_value(item,"n","nombre","name"))
+    )
+    unique_exact_name=exact_name and exact_name_matches==1
+    if match.get("kind")=="duplicate":
+        return True
+    if match.get("kind")=="possible":
+        return unique_exact_name and (trusted_local or bool(record_value(record,"a","direccion","address")))
+    # Una dirección puede estar expresada de forma distinta en OSM y en la web.
+    # Si la web oficial está vinculada a esta ficha, el nombre exacto es único
+    # en todo el catálogo y la página ha superado la identificación, no es una
+    # sucursal distinta: es la misma ficha con una dirección más detallada.
+    if match.get("kind")=="branch":
+        return bool(official_site and unique_exact_name)
+    return False
+
+
 def find_catalog_match(candidate, records):
     best=None
     for old in records:
@@ -873,7 +928,7 @@ def is_chiclana(address, locality, postal, body, title, url, trusted_local=False
         if any(path.startswith(prefix) for prefix in TRUSTED_DIRECTORY_PATHS[host]): return True
     return False
 
-def extract(url, trusted_local=False):
+def extract(url, trusted_local=False, target=None, allow_single_email=False, allow_target_fields=False, trusted_target_site=False, allow_partial_target=False):
     if not allowed(url): return None
     try: body,final_url,ctype=get(url)
     except Exception: return None
@@ -891,6 +946,22 @@ def extract(url, trusted_local=False):
     # Prioriza el nombre estructurado de la ficha; el H1 puede contener SEO del portal.
     raw_name=textval(obj.get("name")) or (p.headings[0] if p.headings else "") or title
     name=clean_business_name(raw_name)
+    if target:
+        target_name=record_value(target,"n","nombre","name")
+        if target_name:
+            if not trusted_target_site:
+                # La página inicial debe identificar la ficha antes de confiar
+                # en los enlaces internos del mismo sitio.
+                evidence=norm(" ".join([title]+p.headings+p.text))
+                tokens=[x for x in norm(target_name).split() if x not in {"de","la","el","los","las","del","y","en"}]
+                evidence_tokens=set(evidence.split())
+                if len(tokens)>=2 and not all(x in evidence_tokens for x in tokens):
+                    return None
+                if len(tokens)==1 and tokens[0] not in set(norm(title+" "+" ".join(p.headings)).split()):
+                    return None
+            # Las páginas interiores pertenecen a la ficha ya identificada:
+            # mantener siempre el nombre de catálogo para que puedan enriquecerla.
+            name=clean_business_name(target_name)
     if not name or not valid_business_name(name): return None
     # Compara JSON-LD, metadescripción y texto visible: algunos directorios
     # publican metadescripciones truncadas aunque el contenido completo esté en la ficha.
@@ -908,19 +979,25 @@ def extract(url, trusted_local=False):
     phone=" / ".join(dict.fromkeys(phone_values))
     email=textval(obj.get("email"))
     website=clean_website(textval(obj.get("url")),final_url)
+    if target:
+        website=record_value(target,"w","web","website") or website
+        # Una URL descubierta para esta ficha ya ha superado la comprobación de
+        # identidad por nombre y contenido; no exigir que el JSON-LD repita la URL.
+        if allow_target_fields and not website:
+            website=final_url
     # En fichas de directorios, el enlace externo rotulado como web oficial
     # es más fiable que cualquier enlace genérico (mapas o redes sociales).
     if not website:
         for _cls,href,label in p.links:
-            target=urllib.parse.urljoin(final_url,html.unescape(href))
-            host=urllib.parse.urlparse(target).netloc.lower()
+            link_target=urllib.parse.urljoin(final_url,html.unescape(href))
+            host=urllib.parse.urlparse(link_target).netloc.lower()
             label_n=norm(label)
             host_label=re.sub(r"^www\.", "", host)
             label_host=re.sub(r"^www\.", "", str(label or "").strip().lower()).rstrip("/")
             explicit_web=any(k in label_n for k in ("sitio web","web oficial","website","pagina web"))
             domain_label=bool(re.fullmatch(r"[a-z0-9.-]+\.[a-z]{2,}",label_host)) and label_host==host_label
             if host and host != urllib.parse.urlparse(final_url).netloc.lower() and (explicit_web or domain_label):
-                website=clean_website(target,final_url)
+                website=clean_website(link_target,final_url)
                 if website:
                     break
     if not addr:
@@ -937,10 +1014,20 @@ def extract(url, trusted_local=False):
         addr=next((x for x in p.paragraphs
                    if re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",x)
                    and "chiclana" in norm(x)
-                   and re.search(r"(?i)\b(calle|avenida|avda|camino|paseo|pol[ií]gono|carretera|plaza)\b",x)), "")
+                   and re.search(r"(?i)\b(calle|avenida|avda|camino|paseo|pol[ií]gono|carretera|plaza|urbanizaci[oó]n|urb\.?|playa|centro comercial|puerto|poblado)\b",x)), "")
     # No conservar direcciones que no acrediten Chiclana: una página de directorio
     # puede incluir la sede de otra ciudad o datos globales de la propia guía.
     addr=clean_address(addr,locality,postal)
+    # Registrar si la dirección procede realmente de esta página antes de
+    # aplicar como respaldo la dirección que ya existía en el catálogo.
+    page_address_found=bool(addr)
+    if target:
+        target_address=record_value(target,"a","direccion","address")
+        if target_address:
+            addr=target_address
+            locality="Chiclana de la Frontera"
+            postal_match=re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",target_address)
+            postal=postal_match.group(1) if postal_match else ""
     if addr and not re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",addr) and "chiclana" not in norm(addr):
         addr=""
     hours=obj.get("openingHours") or obj.get("openingHoursSpecification") or ""
@@ -951,6 +1038,17 @@ def extract(url, trusted_local=False):
         )
         if hours_match and re.search(r"\b\d{1,2}[:.]\d{2}\b",hours_match.group(1)):
             hours=" ".join(hours_match.group(1).split())[:500]
+    if not hours:
+        # Horarios visibles en páginas de contacto/servicios aunque no exista JSON-LD.
+        schedule_blocks=p.paragraphs+p.headings
+        schedule_pattern=r"(?i)\b(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo|lun(?:es)?\s*[-a]\s*vie(?:rnes)?|mo\s*[-a]\s*fr)\b"
+        time_pattern=r"\b\d{1,2}[:.]\d{2}\b"
+        schedule_candidates=[
+            " ".join(str(block).split()) for block in schedule_blocks
+            if re.search(schedule_pattern,str(block)) and re.search(time_pattern,str(block))
+        ]
+        if schedule_candidates:
+            hours=max(schedule_candidates,key=len)[:500]
     if isinstance(hours,dict): hours=[hours]
     if isinstance(hours,list):
         parts=[]
@@ -973,33 +1071,45 @@ def extract(url, trusted_local=False):
     if not phone:
         phone=" / ".join(extract_phones(blob))
     phone=" / ".join(sanitize_contact_phones(name,phone))
-    if not email:
-        mailto_values=[]
-        for _cls,href,_label in p.links:
-            if str(href).lower().startswith("mailto:"):
-                value=urllib.parse.unquote(str(href)[7:].split("?",1)[0]).strip()
-                if re.fullmatch(r"(?i)[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}",value):
-                    mailto_values.append(value)
-        mailto_values=list(dict.fromkeys(mailto_values))
-        if len(mailto_values)==1: email=mailto_values[0]
-    if not email:
-        email_values=list(dict.fromkeys(re.findall(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b",blob)))
-        if len(email_values)==1: email=email_values[0]
+    if target and not allow_target_fields:
+        # En una URL compartida por varias sucursales se evita mezclar contactos,
+        # horarios o descripciones. La búsqueda de una web propia sin URL previa
+        # habilita estos campos solo después de comprobar el nombre en la página.
+        phone=""
+        hours=""
+        desc=""
+    if target:
+        contextual_email=select_contextual_email(body,target,allow_single=allow_single_email)
+        if contextual_email:
+            email=contextual_email
+    else:
+        if not email:
+            mailto_values=[]
+            for _cls,href,_label in p.links:
+                if str(href).lower().startswith("mailto:"):
+                    value=urllib.parse.unquote(str(href)[7:].split("?",1)[0]).strip()
+                    if re.fullmatch(r"(?i)[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}",value):
+                        mailto_values.append(value)
+            mailto_values=list(dict.fromkeys(mailto_values))
+            if len(mailto_values)==1: email=mailto_values[0]
+        if not email:
+            email_values=list(dict.fromkeys(re.findall(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b",blob)))
+            if len(email_values)==1: email=email_values[0]
     # Nunca atribuir al negocio el correo corporativo del directorio que aloja la ficha.
     if is_directory_email(email,final_url): email=""
     # Una localidad aislada no constituye una dirección postal verificable.
     if norm(addr) in {"chiclana","chiclana de la frontera"}: addr=""
-    if not is_chiclana(addr,locality,postal,blob,title,final_url,trusted_local): return None
+    if not allow_partial_target and not is_chiclana(addr,locality,postal,blob,title,final_url,trusted_local): return None
     # Una localidad o un código postal aislados no identifican dónde está el negocio.
     # Exigimos una vía/dirección concreta, además de una referencia municipal.
     address_detail=norm(addr)
     address_detail=re.sub(r"\b(11130|11138|11139|chiclana|de|la|frontera)\b"," ",address_detail)
     address_detail=" ".join(address_detail.split())
-    if len(address_detail)<4 and not trusted_local: return None
-    if not trusted_local and not re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",addr) and "chiclana" not in norm(addr):
+    if len(address_detail)<4 and not trusted_local and not allow_partial_target: return None
+    if not allow_partial_target and not trusted_local and not re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",addr) and "chiclana" not in norm(addr):
         return None
     # Una dirección válida sin ningún canal de contacto tampoco es candidata accionable.
-    if not any((phone,email,website)) and not (trusted_local and addr): return None
+    if not allow_partial_target and not any((phone,email,website)) and not (trusted_local and addr): return None
     schema_type=obj.get("@type",[])
     schema_types=schema_type if isinstance(schema_type,list) else [schema_type]
     schema_types=" ".join(str(x).rsplit("/",1)[-1].rsplit("#",1)[-1] for x in schema_types)
@@ -1009,9 +1119,29 @@ def extract(url, trusted_local=False):
         # No usar menús ni pies de página del portal para decidir la actividad.
         # Los encabezados y el título pueden contener categorías del menú global.
         tipo,categoria=classify(" ".join((name,desc,schema_types)))
+    final_host=urllib.parse.urlsplit(final_url).netloc.lower()
+    internal_links=[]
+    for _cls,href,_label in p.links:
+        candidate=urllib.parse.urljoin(final_url,html.unescape(href))
+        parsed=urllib.parse.urlsplit(candidate)
+        if parsed.scheme.lower() not in ("http","https") or parsed.netloc.lower()!=final_host:
+            continue
+        if parsed.path.lower().endswith((".pdf",".jpg",".jpeg",".png",".gif",".svg",".webp",".zip",".doc",".docx",".xls",".xlsx",".mp4",".mp3")):
+            continue
+        if any(x in parsed.path.lower() for x in ("/wp-admin","/wp-json","/cart","/checkout","/login","/buscar","/search","/tag/","/author/")):
+            continue
+        internal_links.append(candidate)
+    page_fields=set()
+    if page_address_found: page_fields.add("address")
+    if phone: page_fields.add("phone")
+    if email: page_fields.add("email")
+    if website: page_fields.add("website")
+    if hours: page_fields.add("hours")
+    if desc: page_fields.add("description")
     return {"name":name,"type":tipo,"address":addr,"phone":phone,"email":email,"website":website,
             "hours":str(hours)[:500],"description":desc[:700],"source_url":final_url,
-            "category":categoria}
+            "category":categoria,"_internal_links":list(dict.fromkeys(internal_links)),
+            "_page_fields":sorted(page_fields)}
 
 def rta_text(value):
     if isinstance(value,list):
@@ -1256,7 +1386,7 @@ def merge_existing_record(existing, record, source_url):
 
 
 def self_test():
-    global allowed, get
+    global allowed, get, extract, sitemap_page_urls
     assert classify("Restaurante y cafetería") == ("ocio","Restauración")
     assert classify("Tienda de muebles") == ("negocio","Muebles y decoración")
     assert classify("TopGea Topografía. Especialistas en el sector topográfico e ingeniería técnica") == ("negocio","Servicios y negocios")
@@ -1288,6 +1418,9 @@ def self_test():
     assert clean_description("Lunes a Jueves de: 09.30 a 14.00h y 18:00 a 20:00 UN VIAJE SIEMPRE ES LA MEJOR OPCIÓN", "Viajes MMS Chiclana") == ""
     assert clean_description("Pinturas, Barnices y suministros. Disponemos de sistema tintométrico para todo tipo de", "Pinturas Hermanos Vicario") == ""
     assert clean_description("Nuestro objetivo es ofrecer a nuestros clientes la mejor atención en todos los sentidos: asesoramie", "Dualópticos") == ""
+    assert is_directory_email("info@cylex.es","https://www.cylex.es/chiclana-de-la-frontera/negocio.html")
+    assert is_directory_email("info@chiclanaguiadempresas.com","https://empresa.example/contacto")
+    assert not is_directory_email("sanctipetri@barcelo.com","https://www.barcelo.com/es-es/novo-resort/")
     assert clean_description("Somos una tienda online pero el respaldo en tiendas físicas,", "MundoPhone") == ""
     assert clean_business_name("Bar Cervecería D´Los Oliva Bares") == "Bar Cervecería D´Los Oliva"
     assert clean_business_name("Centros deportivos Amigos del Aerobic pilates Body Combat") == "Amigos del Aerobic"
@@ -1362,10 +1495,39 @@ def self_test():
     assert is_chiclana("Calle Real 1, 11130, Chiclana","", "11130", "", "", "https://example.org")
     assert is_chiclana("","Chiclana de la Frontera","", "", "", "https://example.org")
     assert not is_chiclana("","", "", "Servicio en Chiclana y alrededores", "Empresa", "https://example.org")
+    email_sample="""<html><body><h2>CHICLANA DE LA FRONTERA - LA BARROSA</h2><p>Calle El Bogavante, 12-10</p><p>Email: fmlabarrosa@elfogondemariana.com</p><h2>CÁDIZ - PASEO MARÍTIMO</h2><p>Calle Brasil, 1</p><p>Email: fmbrasil@elfogondemariana.com</p></body></html>"""
+    assert select_contextual_email(email_sample,{"n":"El Fogón de Mariana","a":"Calle El Bogavante 10, 11139 Chiclana de la Frontera"})=="fmlabarrosa@elfogondemariana.com"
+    assert select_contextual_email("<p>Correo: info@negocio.example</p>",{"n":"Negocio Local","a":"Calle Real 1, Chiclana"},allow_single=True)=="info@negocio.example"
+    assert select_contextual_email("<p>Correo: info@negocio.example</p>",{"n":"Negocio Local","a":"Calle Real 1, Chiclana"},allow_single=False)==""
     assert url_key("HTTPS://Example.COM/Ruta/ConMayusculas/") == "https://example.com/Ruta/ConMayusculas"
     page=Page(); page.feed('<h1>Empresa local</h1><a class="external" href="https://example.org">Página web</a>')
     assert page.links == [("external","https://example.org","Página web")]
     assert page.headings == ["Empresa local"]
+    # Aunque una página ya contenga los seis campos, el rastreo debe agotar
+    # los enlaces internos y sitemaps para no omitir información adicional.
+    original_allowed,original_extract,original_sitemap=allowed,extract,sitemap_page_urls
+    try:
+        allowed=lambda url: True
+        sitemap_page_urls=lambda seed,host: ["https://example.org/contacto"]
+        def fake_extract(url,**kwargs):
+            common={"name":"Negocio de prueba","address":"Calle Real 1, 11130 Chiclana",
+                    "phone":"956123456","email":"info@example.org","website":"https://example.org",
+                    "hours":"L-V 09:00-18:00","description":"Descripción oficial del negocio",
+                    "source_url":url,"_page_fields":["address","phone","email","website","hours","description"],
+                    "_internal_links":[]}
+            if url.endswith("/"):
+                common["_internal_links"]=["https://example.org/servicios"]
+            else:
+                common["_internal_links"]=[]
+            return common
+        extract=fake_extract
+        sitemap_page_urls=lambda seed,host: ["https://example.org/contacto"]
+        crawled,visited=crawl_official_site({"id":"test:1","n":"Negocio de prueba"},
+                                            "https://example.org/")
+        assert visited==3, (visited,[x["source_url"] for x in crawled])
+        assert len(crawled)==3
+    finally:
+        allowed,extract,sitemap_page_urls=original_allowed,original_extract,original_sitemap
     assert normalize_phone("856 10 20") == ""
     assert normalize_phone("956 40 16") == ""
     assert normalize_phone("956 402615") == "956402615"
@@ -1467,6 +1629,15 @@ def self_test():
         {"n":"Casa Bernardo","a":"Calle Real 10","p":"956123456"},
         {"n":"Casa Bernarda","a":"Avenida Diputación 20","p":"956999999"}
     ) is None
+    # El Árbol Tapas: el domicilio OSM es menos detallado que el de la web
+    # oficial, pero el teléfono de reservas coincide y el nombre es único.
+    arbol_candidate={"n":"El Árbol Tapas","a":"Carretera la Barrosa, local 3, Cañadilla, 11139","p":"856525755","w":"https://elarboltapas.com"}
+    arbol_existing={"id":"osm:node:6403427204","n":"El Árbol Tapas","a":"Carretera de la Barrosa, 11139","p":"+34 629888152","w":""}
+    arbol_match=compare_catalog_record(arbol_candidate,arbol_existing)
+    assert arbol_match and arbol_match["kind"]=="branch"
+    assert safe_to_enrich_catalog_match(arbol_match,arbol_candidate,arbol_existing,[arbol_existing],official_site=True)
+    assert not safe_to_enrich_catalog_match(arbol_match,arbol_candidate,arbol_existing,[arbol_existing],official_site=False)
+    assert not safe_to_enrich_catalog_match(arbol_match,arbol_candidate,arbol_existing,[arbol_existing,dict(arbol_existing,id="otra")],official_site=True)
     assert compare_catalog_record(
         {"n":"Bodegas Primitivo Collantes","a":"Calle Real 10","p":"956400150 / 956531722"},
         {"n":"Bodegas Primitivo Collantes S.A.","a":"Avenida Diputación 20","p":"956531722 / 956400150"}
@@ -1548,7 +1719,7 @@ def self_test():
     }))
 
     # Prueba de integración: extracción completa con HTML controlado.
-    original_allowed, original_get = allowed, get
+    original_allowed, original_get, original_extract = allowed, get, extract
     sample = """<html><head><title>Empresa de Prueba</title>
     <meta name="description" content="Descripción de prueba del establecimiento">
     <script type="application/ld+json">
@@ -1571,6 +1742,59 @@ def self_test():
         assert record["website"] == "https://empresa-prueba.es"
         assert record["hours"] == "Mo-Fr 09:00-18:00"
         assert record["description"] == "Descripción de prueba del establecimiento"
+
+        # El correo JSON-LD de la propia empresa no debe perderse por no aparecer
+        # en el texto visible ni rechazarse por compartir dominio con su web.
+        targeted_schema_sample = """<html><head><title>Empresa Oficial</title>
+        <script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"LocalBusiness","name":"Empresa Oficial",
+        "url":"https://empresa-oficial.example/","email":"info@empresa-oficial.example",
+        "address":{"@type":"PostalAddress","streetAddress":"Calle Real 10",
+        "postalCode":"11130","addressLocality":"Chiclana de la Frontera"}}
+        </script></head><body><h1>Empresa Oficial</h1><p>Establecimiento local.</p></body></html>"""
+        get = lambda url, limit=1200000: (targeted_schema_sample, url, "text/html")
+        targeted = extract(
+            "https://empresa-oficial.example/",
+            target={"id":"empresa","n":"Empresa Oficial","a":"Calle Real 10, 11130 Chiclana de la Frontera",
+                    "w":"https://empresa-oficial.example/"},
+            allow_single_email=False
+        )
+        assert targeted is not None, "No se ha extraído la ficha oficial con JSON-LD"
+        assert targeted["email"] == "info@empresa-oficial.example", (
+            "Se ha perdido el correo JSON-LD del propio dominio."
+        )
+
+        # Caso de control Arena Bay: al descubrir una web propia sin URL en la ficha,
+        # los datos publicados por esa página no deben descartarse como si fueran
+        # datos de una sede genérica compartida.
+        arena_sample = """<html><head><title>Arena Bay Club de Mar</title>
+        <meta name="description" content="Restaurante y club de playa en la Playa de la Barrosa, Chiclana.">
+        <script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"Restaurant","name":"Arena Bay Club de Mar",
+        "url":"https://arenabayclubdemar.com/","telephone":"644096389","email":"info@arenabayclubdemar.com",
+        "address":{"@type":"PostalAddress","streetAddress":"Urb. Novo Sancti Petri (a pie de la Playa de la Barrosa)",
+        "postalCode":"11139","addressLocality":"Chiclana de la Frontera"},
+        "openingHours":["Mo-Su 11:00-23:00"]}
+        </script></head><body><h1>Arena Bay Club de Mar</h1>
+        <p>Urb. Novo Sancti Petri (a pie de la Playa de la Barrosa), 11139, Chiclana de la Frontera, Cádiz.</p>
+        </body></html>"""
+        get = lambda url, limit=1200000: (arena_sample, url, "text/html")
+        arena_target = {"id":"osm:node:13888202351","n":"Arena Bay Club de mar"}
+        arena_conservative = extract("https://arenabayclubdemar.com/",target=arena_target)
+        assert arena_conservative is not None and arena_conservative["phone"] == "", (
+            "El extractor conservador debe seguir evitando contactos en páginas de sedes compartidas."
+        )
+        arena = extract(
+            "https://arenabayclubdemar.com/",
+            target=arena_target,
+            allow_target_fields=True
+        )
+        assert arena is not None, "No se ha reconocido la web oficial de Arena Bay."
+        assert arena["phone"] == "644096389", arena["phone"]
+        assert arena["email"] == "info@arenabayclubdemar.com", arena["email"]
+        assert "Novo Sancti Petri" in arena["address"] and "11139" in arena["address"], arena["address"]
+        assert "11:00" in arena["hours"], arena["hours"]
+        assert "Restaurante y club de playa" in arena["description"], arena["description"]
 
         multi_phone_sample = """<html><head><title>Agrojardín Reina</title>
         <meta name="description" content="Maquinaria de jardinería y suministros profesionales para el campo">
@@ -1621,8 +1845,73 @@ def self_test():
         </script></head><body>Servicio en Chiclana y alrededores</body></html>"""
         get = lambda url, limit=1200000: (nonlocal_sample, url, "text/html")
         assert extract("https://directorio.example/servicio-nacional") is None, "El filtro geográfico ha aceptado un negocio no local"
+
+        # La web se recorre más allá de cuatro páginas, incluso tras completar algunos campos.
+        page_urls = [
+            "https://aurora.example/",
+            "https://aurora.example/pagina-2",
+            "https://aurora.example/pagina-3",
+            "https://aurora.example/pagina-4",
+            "https://aurora.example/pagina-5",
+            "https://aurora.example/pagina-6",
+        ]
+        def fake_official_extract(url, target=None, **kwargs):
+            index=page_urls.index(url)
+            values={
+                "name":"Comercio Aurora","type":"negocio","category":"Comercio",
+                "address":"Calle Real 1, 11130 Chiclana de la Frontera" if index==0 else "",
+                "phone":"956123456" if index==0 else "",
+                "email":"contacto@aurora.example" if index==1 else "",
+                "website":"https://aurora.example/",
+                "hours":"Lunes a viernes 09:00-18:00" if index==2 else "",
+                "description":"Comercio local especializado en productos para el hogar, con atención personalizada y asesoramiento a sus clientes." if index==5 else "",
+                "source_url":url,
+                "_internal_links":[page_urls[index+1]] if index+1<len(page_urls) else []
+            }
+            return values
+        extract=fake_official_extract
+        crawled, domains, pages_read, audits = discover_official_website_jobs([
+            {"id":"aurora","n":"Comercio Aurora","w":"https://aurora.example/","t":"negocio"}
+        ])
+        assert domains == 1
+        assert pages_read == 6, f"El rastreador no recorrió todas las páginas necesarias: {pages_read}"
+        assert len(official_fields_found(crawled)) == 6, official_fields_found(crawled)
+        assert audits["aurora"]["web_oficial_confirmada"] is True
+        assert audits["aurora"]["paginas_visitadas"] == 6
+        assert set(audits["aurora"]["campos_detectados"]) == {"address","phone","email","website","hours","description"}
+        assert any(x.get("description") for x in crawled), "No se ha recuperado la descripción de la sexta página"
+        # Simular una interrupción tras cinco páginas y comprobar que la sexta
+        # se recupera desde la cola persistida, sin repetir las anteriores.
+        checkpoint={}
+        def interrupt_after_five(progress):
+            checkpoint.update(progress)
+            if progress.get("paginas_visitadas")==5 and not progress.get("completed"):
+                raise RuntimeError("interrupción simulada")
+        target={"id":"aurora","n":"Comercio Aurora","w":"https://aurora.example/","t":"negocio"}
+        try:
+            crawl_official_site(target,"https://aurora.example/",resume_state=None,progress_callback=interrupt_after_five)
+            raise AssertionError("La interrupción simulada no se produjo")
+        except RuntimeError as exc:
+            assert str(exc)=="interrupción simulada"
+        assert checkpoint.get("paginas_visitadas")==5
+        resumed_records,resumed_pages=crawl_official_site(target,"https://aurora.example/",resume_state=checkpoint)
+        assert resumed_pages==6, f"Reanudación incorrecta: {resumed_pages} páginas"
+        assert len(resumed_records)==6, f"Se perdieron registros al reanudar: {len(resumed_records)}"
+
     finally:
-        allowed, get = original_allowed, original_get
+        allowed, get, extract = original_allowed, original_get, original_extract
+    # Checkpoints independientes para varias fichas y URLs candidatas.
+    checkpoint_store={"version":1,"checkpoints":{}}
+    p1={"target_id":"aurora","seed_url":"https://aurora.example/","queue":["https://aurora.example/a"],"visited":["https://aurora.example/"],"records":[]}
+    p2={"target_id":"aurora","seed_url":"https://aurora-alt.example/","queue":[],"visited":[],"records":[]}
+    p3={"target_id":"bravo","seed_url":"https://bravo.example/","queue":[],"visited":[],"records":[]}
+    store_crawl_checkpoint(checkpoint_store,p1)
+    store_crawl_checkpoint(checkpoint_store,p2)
+    store_crawl_checkpoint(checkpoint_store,p3)
+    assert checkpoint_for(checkpoint_store,"aurora","https://aurora.example/") is p1
+    assert checkpoint_for(checkpoint_store,"aurora","https://aurora-alt.example/") is p2
+    assert checkpoint_for(checkpoint_store,"bravo","https://bravo.example/") is p3
+    assert checkpoint_for(checkpoint_store,"aurora","https://bravo.example/") is None
     print("RAD self-test: OK",flush=True)
 
 def candidate_review_notes(record):
@@ -1710,26 +1999,343 @@ def serialize_catalog(data):
     """Serializa el catálogo maestro en JSON compacto para respetar el límite de 100 MB de GitHub."""
     return json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n"
 
-def targeted_catalog_queries(records, limit=50, rotation=0):
-    """Genera búsquedas rotativas para fichas existentes que no están completas en N/6."""
-    targets=[]
+def select_contextual_email(body, target, allow_single=False):
+    """Asocia un correo a la ficha por proximidad textual; evita mezclar sucursales."""
+    raw=html.unescape(str(body or ""))
+    raw=re.sub(r"(?is)<(script|style).*?>.*?</\1>", " ", raw)
+    text=" ".join(re.sub(r"<[^>]*>", " ", raw).split())
+    candidates=list(dict.fromkeys(re.findall(
+        r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", raw
+    )))
+    if len(candidates)==1 and allow_single:
+        return candidates[0].strip().lower()
+    name=str((target or {}).get("n") or (target or {}).get("nombre") or (target or {}).get("name") or "")
+    address=str((target or {}).get("a") or (target or {}).get("direccion") or (target or {}).get("address") or "")
+    stop={"calle","avenida","avda","av","plaza","paseo","carretera","ctra","camino","chiclana","frontera","cadiz","espana","de","la","el","los","las","del","numero"}
+    address_tokens=[x for x in norm(address).split() if len(x)>3 and x not in stop and not x.isdigit() and x not in {"11130","11138","11139"}]
+    name_tokens=[x for x in norm(name).split() if len(x)>3 and x not in stop]
+    scored=[]
+    for candidate in candidates:
+        best=0
+        for match in re.finditer(re.escape(candidate),text,re.I):
+            context=text[max(0,match.start()-90):min(len(text),match.end()+90)]
+            context_n=norm(context)
+            street_hits=sum(1 for token in address_tokens if token in context_n)
+            name_hits=sum(1 for token in name_tokens if token in context_n)
+            score=street_hits*5 + (3 if name_hits>=2 else name_hits) + (1 if "chiclana" in context_n else 0)
+            best=max(best,score)
+        if best>=3:
+            scored.append((best,candidate.strip().lower()))
+    if not scored:
+        return ""
+    scored.sort(reverse=True)
+    if len(scored)>1 and scored[0][0]==scored[1][0]:
+        return ""
+    return scored[0][1]
+
+
+def official_fields_found(records):
+    """Campos de los seis datos que aparecen realmente en páginas de la web propia."""
+    field_map={"address":"address","phone":"phone","email":"email","website":"website","hours":"hours","description":"description"}
+    found=set()
     for record in records:
         if not isinstance(record,dict):
             continue
-        name=record_value(record,"n","nombre","name")
-        if len(norm(name)) < 4:
+        page_fields=record.get("_page_fields")
+        if isinstance(page_fields,(list,tuple,set)):
+            found.update(field for field in page_fields if field in field_map)
+        else:
+            found.update(field for field,key in field_map.items() if str(record.get(key) or "").strip())
+    return found
+
+
+def sitemap_page_urls(seed_url, site_host):
+    """Obtiene páginas HTML declaradas en los sitemaps del sitio, sin topes de cantidad."""
+    parsed=urllib.parse.urlsplit(seed_url)
+    origin=f"{parsed.scheme}://{parsed.netloc}"
+    robots_entry=CACHE_ROBOTS.get(origin)
+    sitemap_urls=[]
+    if robots_entry and robots_entry[0]:
+        try:
+            sitemap_urls.extend(robots_entry[0].site_maps() or [])
+        except Exception:
+            pass
+    if not sitemap_urls:
+        sitemap_urls=[origin+"/sitemap.xml"]
+    pending=list(dict.fromkeys(sitemap_urls))
+    seen_sitemaps=set()
+    pages=[]
+    import xml.etree.ElementTree as ET
+    while pending:
+        sitemap_url=pending.pop(0)
+        key=url_key(sitemap_url)
+        if key in seen_sitemaps:
             continue
-        present=sum(bool(str(record.get(key) or "").strip()) for key in ("a","p","e","w","h","d"))
-        if present < 6:
-            targets.append((present,norm(name),name))
-    targets.sort(key=lambda x:(x[0],x[1]))
-    if not targets or limit <= 0:
-        return []
-    start=(max(0,int(rotation))*limit)%len(targets)
-    ordered=targets[start:]+targets[:start]
-    selected=ordered[:min(limit,len(ordered))]
-    return [f'"{name}" "Chiclana de la Frontera" (teléfono OR dirección OR contacto)'
-            for _,_,name in selected]
+        seen_sitemaps.add(key)
+        parsed_map=urllib.parse.urlsplit(sitemap_url)
+        if parsed_map.netloc.lower()!=site_host or not allowed(sitemap_url):
+            continue
+        try:
+            body,final_url,_ctype=get(sitemap_url,10000000)
+            root=ET.fromstring(body)
+        except Exception:
+            continue
+        root_type=str(root.tag).rsplit("}",1)[-1].lower()
+        locations=[
+            (element.text or "").strip()
+            for element in root.iter()
+            if str(element.tag).rsplit("}",1)[-1].lower()=="loc" and (element.text or "").strip()
+        ]
+        for location in locations:
+            candidate=urllib.parse.urljoin(final_url,location)
+            parsed_candidate=urllib.parse.urlsplit(candidate)
+            if parsed_candidate.scheme.lower() not in ("http","https") or parsed_candidate.netloc.lower()!=site_host:
+                continue
+            if root_type=="sitemapindex" or parsed_candidate.path.lower().endswith((".xml",".xml.gz")):
+                pending.append(candidate)
+            elif not parsed_candidate.path.lower().endswith((".pdf",".jpg",".jpeg",".png",".gif",".svg",".webp",".zip",".doc",".docx",".xls",".xlsx",".mp4",".mp3")):
+                pages.append(candidate)
+    return list(dict.fromkeys(pages))
+
+
+def crawl_checkpoint_key(target_id, seed_url):
+    raw=str(target_id)+"\\n"+url_key(seed_url)
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def checkpoint_for(resume_state, target_id, seed_url):
+    """Recupera solo el checkpoint de la ficha y URL exactas."""
+    if not isinstance(resume_state,dict):
+        return None
+    checkpoints=resume_state.get("checkpoints")
+    if isinstance(checkpoints,dict):
+        return checkpoints.get(crawl_checkpoint_key(target_id,seed_url))
+    # Compatibilidad temporal con checkpoints planos anteriores.
+    if (str(resume_state.get("target_id") or "")==str(target_id)
+            and url_key(resume_state.get("seed_url") or "")==url_key(seed_url)):
+        return resume_state
+    return None
+
+
+def store_crawl_checkpoint(store, progress):
+    """Añade/actualiza un checkpoint sin sustituir los de otras webs."""
+    if not isinstance(store,dict):
+        store={}
+    checkpoints=store.setdefault("checkpoints",{})
+    if not isinstance(checkpoints,dict):
+        checkpoints={}
+        store["checkpoints"]=checkpoints
+    key=crawl_checkpoint_key(progress.get("target_id"),progress.get("seed_url"))
+    checkpoints[key]=progress
+    store["version"]=1
+    return store
+
+
+def crawl_official_site(target, seed_url, allow_single_email=False, resume_state=None, progress_callback=None):
+    """Recorre todas las páginas internas y sitemaps; permite reanudar desde un checkpoint."""
+    started=time.monotonic()
+    seed_host=urllib.parse.urlsplit(seed_url).netloc.lower()
+    target_id=str(target.get("id") or record_value(target,"n","nombre","name"))
+    if not seed_host:
+        return [],0
+    queue=[seed_url]
+    visited=set()
+    records=[]
+    seed_verified=False
+    sitemap_loaded=False
+    resume_state=checkpoint_for(resume_state,target_id,seed_url)
+    if isinstance(resume_state,dict):
+        queue=list(resume_state.get("queue") or [])
+        visited=set(resume_state.get("visited") or [])
+        records=list(resume_state.get("records") or [])
+        seed_verified=bool(resume_state.get("seed_verified"))
+        sitemap_loaded=bool(resume_state.get("sitemap_loaded"))
+        seed_host=str(resume_state.get("seed_host") or seed_host)
+        if resume_state.get("completed"):
+            log_event("web_reanudada_completada",ficha_id=target_id,web=seed_url,paginas_visitadas=len(visited))
+            return records,len(visited)
+        log_event("web_reanudada",ficha_id=target_id,web=seed_url,paginas_visitadas=len(visited),pendientes=len(queue))
+    else:
+        log_event("web_inicio",ficha_id=target_id,web=seed_url,host=seed_host)
+
+    def save_progress(completed=False):
+        if progress_callback:
+            progress_callback({
+                "target_id":target_id,"seed_url":seed_url,"seed_host":seed_host,
+                "queue":list(queue),"visited":sorted(visited),"records":records,
+                "seed_verified":seed_verified,"sitemap_loaded":sitemap_loaded,
+                "completed":completed,"paginas_visitadas":len(visited),
+                "actualizado_utc":datetime.now(timezone.utc).isoformat(),
+            })
+
+    while queue:
+        page_url=queue.pop(0)
+        page_key=url_key(page_url)
+        if page_key in visited:
+            continue
+        parsed=urllib.parse.urlsplit(page_url)
+        if parsed.scheme.lower() not in ("http","https") or parsed.netloc.lower()!=seed_host:
+            continue
+        visited.add(page_key)
+        if len(visited)==1 or len(visited)%10==0:
+            log_event("web_progreso",ficha_id=target_id,host=seed_host,paginas_visitadas=len(visited),pendientes=len(queue),pagina=page_url)
+        try:
+            record=extract(page_url,target=target,
+                allow_single_email=allow_single_email and page_key==url_key(seed_url),
+                allow_target_fields=True,trusted_target_site=seed_verified,allow_partial_target=True)
+        except Exception as exc:
+            print(f"Error al consultar página de web oficial {page_url}: {exc}",flush=True)
+            record=None
+        if not record:
+            if not seed_verified:
+                break
+            if len(visited)%5==0:
+                save_progress()
+            continue
+        if not seed_verified:
+            seed_verified=True
+            seed_host=urllib.parse.urlsplit(record.get("source_url") or page_url).netloc.lower() or seed_host
+        record["_official_site"]=True
+        record["_target_id"]=target_id
+        records.append(record)
+        if not sitemap_loaded:
+            sitemap_loaded=True
+            try:
+                queue.extend(sitemap_page_urls(record.get("source_url") or page_url,seed_host))
+            except Exception as exc:
+                print(f"No se pudo leer el sitemap de {seed_host}: {exc}",flush=True)
+        for candidate in record.pop("_internal_links",[]):
+            if url_key(candidate) not in visited:
+                queue.append(candidate)
+        if len(visited)%5==0:
+            save_progress()
+        # No detenerse al encontrar los seis campos: se recorren todas las páginas internas.
+    save_progress(completed=True)
+    log_event("web_fin",ficha_id=target_id,host=seed_host,paginas_visitadas=len(visited),paginas_con_datos=len(records),pendientes=0,segundos=round(time.monotonic()-started,2))
+    return records,len(visited)
+
+
+def discover_official_website_jobs(records, resume_state=None, progress_callback=None):
+    """Investiga y registra por ficha el resultado de cada web ya registrada."""
+    official_records=[]
+    domains=set()
+    pages_total=0
+    audits={}
+    seed_counts={}
+    for item in records:
+        if isinstance(item,dict):
+            seed=record_value(item,"w","web","website")
+            if seed:
+                seed_counts[seed]=seed_counts.get(seed,0)+1
+    for target in records:
+        if not isinstance(target,dict):
+            continue
+        ident=str(target.get("id") or record_value(target,"n","nombre","name"))
+        name=record_value(target,"n","nombre","name")
+        website=record_value(target,"w","web","website")
+        parsed=urllib.parse.urlsplit(website)
+        if parsed.scheme.lower() not in ("http","https") or not parsed.netloc:
+            continue
+        domains.add(parsed.netloc.lower())
+        audit={"id":ident,"nombre":name,"sector":str(target.get("t") or ""),
+               "web_registrada":website,"web_oficial_confirmada":False,
+               "paginas_visitadas":0,"paginas_con_datos":0,"campos_detectados":[]}
+        try:
+            ficha_started=time.monotonic()
+            log_event("ficha_web_registrada_inicio",ficha_id=ident,nombre=name,web=website)
+            pages,visited=crawl_official_site(target,website,allow_single_email=seed_counts.get(website,0)==1,resume_state=resume_state,progress_callback=progress_callback)
+            official_records.extend(pages)
+            pages_total+=visited
+            audit["paginas_visitadas"]=visited
+            audit["paginas_con_datos"]=len(pages)
+            audit["web_oficial_confirmada"]=bool(pages)
+            audit["campos_detectados"]=sorted(official_fields_found(pages))
+            audit["resultado"]="web_oficial_investigada" if pages else ("web_no_confirmada" if visited else "sin_acceso")
+            audit["segundos"]=round(time.monotonic()-ficha_started,2)
+            log_event("ficha_web_registrada_fin",ficha_id=ident,nombre=name,paginas=visited,campos=audit["campos_detectados"],segundos=audit["segundos"],resultado=audit["resultado"])
+        except Exception as exc:
+            audit["resultado"]="error_consulta"
+            audit["error"]=str(exc)[:300]
+            print(f"Error al rastrear web oficial de {name}: {exc}",flush=True)
+        audits[ident]=audit
+    return official_records,len(domains),pages_total,audits
+
+def discover_unlinked_official_website_jobs(records, retry_ids=None, resume_state=None, progress_callback=None):
+    """Busca web propia para fichas sin web oficial confirmada y rastrea sus páginas internas."""
+    retry_ids={str(x) for x in (retry_ids or set())}
+    targets=[]
+    for item in records:
+        if not isinstance(item,dict):
+            continue
+        name=record_value(item,"n","nombre","name")
+        website=record_value(item,"w","web","website")
+        ident=str(item.get("id") or name)
+        if name and (not website or ident in retry_ids):
+            targets.append((norm(name),item))
+    targets.sort(key=lambda x:x[0])
+    excluded_hosts=set(TRUSTED_DIRECTORY_PATHS)|{
+        "duckduckgo.com","www.bing.com","google.com","www.google.com",
+        "facebook.com","www.facebook.com","instagram.com","www.instagram.com",
+        "tripadvisor.es","www.tripadvisor.es","youtube.com","www.youtube.com",
+        "maps.google.com","linktr.ee","wa.me"
+    }
+    official_records=[]
+    fichas_consultadas=0
+    paginas_consultadas=0
+    audits={}
+    for _name_key,target in targets:
+        name=record_value(target,"n","nombre","name")
+        ident=str(target.get("id") or name)
+        query=f'"{name}" "Chiclana de la Frontera" (web oficial OR página web OR contacto)'
+        ficha_started=time.monotonic()
+        log_event("busqueda_web_propia_inicio",ficha_id=ident,nombre=name)
+        results=[]
+        for engine in (search_ddg,search_bing):
+            try:
+                results.extend(engine(query))
+            except Exception as exc:
+                print(f"Buscador de web propia no disponible ({engine.__name__}): {exc}",flush=True)
+        fichas_consultadas+=1
+        ident=str(target.get("id") or name)
+        audit={"id":ident,"nombre":name,"sector":str(target.get("t") or ""),
+               "web_preexistente":record_value(target,"w","web","website"),
+               "web_registrada":record_value(target,"w","web","website"),"web_oficial_confirmada":False,
+               "busquedas_realizadas":2,"resultados_busqueda":len(set(results)),
+               "urls_candidatas_comprobadas":0,"paginas_visitadas":0,
+               "paginas_con_datos":0,"campos_detectados":[]}
+        for candidate_url in list(dict.fromkeys(results)):
+            parsed=urllib.parse.urlsplit(candidate_url)
+            host=(parsed.hostname or "").lower().removeprefix("www.")
+            if parsed.scheme.lower() not in ("http","https") or not host or host in excluded_hosts:
+                continue
+            if any(host==x.removeprefix("www.") for x in excluded_hosts):
+                continue
+            if any(x in host for x in ("facebook.","instagram.","tripadvisor.","cylex.","paginasamarillas.","qdq.","chiclanaguiadempresas","todociudad.")):
+                continue
+            audit["urls_candidatas_comprobadas"]+=1
+            try:
+                pages,_visited=crawl_official_site(target,candidate_url,allow_single_email=True,resume_state=resume_state,progress_callback=progress_callback)
+                paginas_consultadas+=_visited
+                audit["paginas_visitadas"]+=_visited
+            except Exception as exc:
+                print(f"Error al comprobar posible web propia {candidate_url}: {exc}",flush=True)
+                pages=[]
+            if pages:
+                for record in pages:
+                    record["website"]=record.get("website") or candidate_url
+                official_records.extend(pages)
+                audit["web_registrada"]=candidate_url
+                audit["web_oficial_confirmada"]=True
+                audit["paginas_con_datos"]=len(pages)
+                audit["campos_detectados"]=sorted(official_fields_found(pages))
+                audit["resultado"]="web_oficial_descubierta"
+                break
+        if not audit.get("resultado"):
+            audit["resultado"]="candidatas_no_confirmadas" if audit["urls_candidatas_comprobadas"] else "web_no_localizada"
+        audit["segundos"]=round(time.monotonic()-ficha_started,2)
+        log_event("busqueda_web_propia_fin",ficha_id=ident,nombre=name,resultados=len(set(results)),candidatas=audit["urls_candidatas_comprobadas"],paginas=audit["paginas_visitadas"],segundos=audit["segundos"],resultado=audit["resultado"])
+        audits[ident]=audit
+    return official_records,fichas_consultadas,paginas_consultadas,audits
 
 
 def main():
@@ -1737,10 +2343,18 @@ def main():
     parser.add_argument("--self-test",action="store_true")
     parser.add_argument("--catalog",type=pathlib.Path,default=None,
                         help="Copia temporal exportada desde Supabase; nunca usa el JSON histórico.")
+    parser.add_argument("--batch-ids-file",type=pathlib.Path,default=None,
+                        help="IDs de las fichas activas que debe investigar este lote.")
+    parser.add_argument("--global-discovery",action="store_true",
+                        help="Ejecuta una sola vez por ciclo las fuentes generales y el descubrimiento de candidatas.")
+    parser.add_argument("--local-checkpoints-only",action="store_true",
+                        help="No escribe checkpoints en Supabase; reservado para pruebas aisladas de duración.")
     args=parser.parse_args()
     if args.self_test:
         self_test()
         return
+    if args.batch_ids_file is None:
+        raise SystemExit("La ejecución completa sin checkpoint está deshabilitada. Usa v3/rad_lotes.py para procesar lotes secuenciales de 50.")
     catalog_path=args.catalog
     if catalog_path is None:
         raise SystemExit("Debes indicar --catalog con una exportación temporal de Supabase; fichas_completas.json no es una fuente operativa.")
@@ -1749,6 +2363,27 @@ def main():
     if not isinstance(data.get("items"),list) or not isinstance(data.get("candidatas_revision",[]),list):
         raise SystemExit("Estructura del catálogo no válida; se cancela sin modificar.")
     existing=data["items"]+data.get("candidatas_revision",[])
+    batch_ids=None
+    if args.batch_ids_file:
+        if not args.batch_ids_file.is_file():
+            raise SystemExit("No existe el fichero de IDs del lote.")
+        batch_ids={str(x).strip() for x in args.batch_ids_file.read_text(encoding="utf-8").splitlines() if str(x).strip()}
+        if not batch_ids or len(batch_ids)>50:
+            raise SystemExit("El lote debe contener entre 1 y 50 IDs.")
+        active_by_id={
+            str(x.get("id")):x for x in data["items"]
+            if isinstance(x,dict) and x.get("id") and x.get("is_published") is True
+            and not x.get("_xiclana_deleted") and str(x.get("t") or "").lower() in ("ocio","negocio")
+        }
+        missing=sorted(batch_ids-set(active_by_id))
+        if missing:
+            raise SystemExit("El lote contiene fichas inexistentes, inactivas o de la papelera: "+", ".join(missing[:5]))
+        target_items=[active_by_id[x] for x in sorted(batch_ids)]
+    else:
+        target_items=[
+            x for x in data["items"] if isinstance(x,dict) and x.get("is_published") is True
+            and not x.get("_xiclana_deleted") and str(x.get("t") or "").lower() in ("ocio","negocio")
+        ]
     existing_pairs=set()
     existing_name_addresses={}
     urls=set()
@@ -1767,22 +2402,16 @@ def main():
         addr=norm(item.get("a") or item.get("direccion") or item.get("address"))
         if name and addr: existing_pairs.add(name+"|"+addr)
         if name: existing_name_addresses.setdefault(name,set()).add(addr)
-    links=list(DIRECT_DETAIL_URLS)
-    # Rota semanalmente un bloque acotado de fichas incompletas para buscar
-    # información de establecimientos concretos, no solo nuevos negocios.
-    iso=datetime.now(timezone.utc).isocalendar()
-    targeted_queries=targeted_catalog_queries(data["items"],limit=50,rotation=iso.year*53+iso.week)
-    for q in targeted_queries:
-        for engine in (search_ddg,search_bing):
-            try:
-                links.extend(engine(q,limit=4))
-            except Exception as exc:
-                print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
+    links=list(DIRECT_DETAIL_URLS) if args.global_discovery else []
+    # Las fuentes generales se consultan una sola vez por ciclo RAD; los lotes
+    # siguientes se concentran exclusivamente en las webs de sus 50 fichas.
     trusted_urls=set()
     # Fuentes locales directas: sus fichas individuales son una vía de detección
     # independiente de los buscadores. Solo se confía en rutas de detalle conocidas.
-    for seed in DIRECTORY_SEEDS:
+    for seed in (DIRECTORY_SEEDS if args.global_discovery else []):
+        seed_started=time.monotonic()
         seed_host=urllib.parse.urlparse(seed).netloc.lower()
+        log_event("directorio_inicio",url=seed)
         seed_limit=450 if any(x in seed_host for x in ("chiclanaguiadempresas","cylex.es","paginasamarillas.es","qdq.com","tripadvisor.es")) else 160
         seed_queue=[seed]
         seed_pages_seen=set()
@@ -1811,17 +2440,61 @@ def main():
                         if seed_count>=seed_limit: break
         except Exception as exc:
             print(f"Fuente directa no disponible ({seed}): {exc}",flush=True)
+        log_event("directorio_fin",url=seed,paginas=len(seed_pages_seen),perfiles=seed_count,segundos=round(time.monotonic()-seed_started,2))
     links.extend(balance_urls_by_host(trusted_urls))
-    for q in QUERIES:
-        for engine in (search_ddg,search_bing):
-            try: links.extend(engine(q))
-            except Exception as exc: print(f"Buscador no disponible ({engine.__name__}): {exc}",flush=True)
-    links=list(dict.fromkeys(links))[:MAX_PAGES]
-    openrta_records=fetch_openrta_records()
+    if args.global_discovery:
+        for q in QUERIES:
+            for engine in (search_ddg,search_bing):
+                search_started=time.monotonic()
+                try:
+                    found=engine(q)
+                    links.extend(found)
+                    log_event("busqueda_general_fin",buscador=engine.__name__,consulta=q,resultados=len(found),segundos=round(time.monotonic()-search_started,2))
+                except Exception as exc:
+                    log_event("busqueda_general_error",buscador=engine.__name__,consulta=q,segundos=round(time.monotonic()-search_started,2),error=str(exc)[:240])
+    links=list(dict.fromkeys(links))
+    resume_state={"version":1,"checkpoints":{}} if args.local_checkpoints_only else data.get("rad_crawl_progress")
+    if not isinstance(resume_state,dict) or not isinstance(resume_state.get("checkpoints"),dict):
+        legacy=resume_state if isinstance(resume_state,dict) and resume_state.get("target_id") else None
+        resume_state={"version":1,"checkpoints":{}}
+        if legacy:
+            store_crawl_checkpoint(resume_state,legacy)
+    def persist_crawl_progress(progress):
+        store_crawl_checkpoint(resume_state,progress)
+        if not args.local_checkpoints_only:
+            payload={"items":[],"rad_crawl_progress":resume_state}
+            with tempfile.TemporaryDirectory(prefix="xiclana-rad-crawl-") as tmp:
+                checkpoint_path=pathlib.Path(tmp)/"metadata.json"
+                checkpoint_path.write_text(json.dumps(payload,ensure_ascii=False,separators=(",",":")),encoding="utf-8")
+                catalog.sync_metadata(checkpoint_path,["rad_crawl_progress"])
+        log_event("checkpoint_web_guardado",ficha_id=progress.get("target_id"),web=progress.get("seed_url"),paginas=progress.get("paginas_visitadas"),pendientes=len(progress.get("queue") or []),completado=progress.get("completed",False),destino="local" if args.local_checkpoints_only else "supabase")
+
+    official_records, official_domains, official_pages, registered_audit=discover_official_website_jobs(
+        target_items,resume_state=resume_state,progress_callback=persist_crawl_progress
+    )
+    retry_ids={
+        str(x.get("id") or record_value(x,"n","nombre","name"))
+        for x in target_items
+        if not registered_audit.get(str(x.get("id") or record_value(x,"n","nombre","name")),{}).get("web_oficial_confirmada")
+    }
+    unlinked_official_records, fichas_sin_web_consultadas, unlinked_pages, unlinked_audit=discover_unlinked_official_website_jobs(target_items,retry_ids,resume_state=resume_state,progress_callback=persist_crawl_progress)
+    official_pages+=unlinked_pages
+    official_records.extend(unlinked_official_records)
+    target_audit=dict(registered_audit)
+    for ident,audit in unlinked_audit.items():
+        previous=target_audit.get(ident,{})
+        if audit.get("web_oficial_confirmada"):
+            target_audit[ident]={**previous,**audit,
+                "web_preexistente":previous.get("web_registrada") or audit.get("web_preexistente")}
+        elif previous:
+            target_audit[ident]={**previous,"busqueda_web_propia":audit}
+        else:
+            target_audit[ident]=audit
+    openrta_records=fetch_openrta_records() if args.global_discovery else []
     added=[]; seen_pairs=set(); seen_urls=set(); seen_unlocated_names=set()
     coincidencias=[]; registros_conocidos=existing[:]
     fichas_enriquecidas=set(); campos_actualizados=0; conflictos_no_sobrescritos=0
-    for source in links+openrta_records:
+    for source in links+official_records+openrta_records:
         if isinstance(source,dict):
             record=source
             url=record["source_url"]
@@ -1835,51 +2508,88 @@ def main():
         pair=name_key+"|"+addr_key if addr_key else ""
         source_url=record["source_url"]
         u_key=url_key(source_url)
-        if not name_key or u_key in urls or u_key in seen_urls: continue
+        official_site=bool(record.get("_official_site")) if isinstance(source,dict) else False
+        seen_key=u_key+"|"+str(record.get("_target_id","")) if official_site else u_key
+        if not name_key or (u_key in urls and not official_site) or seen_key in seen_urls: continue
         if pair and pair in seen_pairs: continue
         if not pair and name_key in seen_unlocated_names: continue
         candidate={
           "n":record["name"],"a":record["address"],"p":record["phone"],
           "w":record["website"],"url_fuente_rastreo":source_url
         }
-        match=find_catalog_match(candidate,registros_conocidos)
-        if match and match["kind"] in ("duplicate","possible"):
-            old=match["record"]
-            exact_name=norm(record["name"])==norm(record_value(old,"n","nombre","name"))
-            exact_name_matches=sum(
-                1 for x in registros_conocidos
-                if isinstance(x,dict) and norm(record["name"])==norm(record_value(x,"n","nombre","name"))
+        if official_site:
+            target_id=str(record.get("_target_id") or "")
+            target_record=next(
+                (x for x in target_items if str(x.get("id") or "")==target_id),
+                None
             )
-            safe_to_enrich=(match["kind"]=="duplicate" or (exact_name and exact_name_matches==1 and (trusted_local or bool(record["address"]))))
-            if safe_to_enrich:
+            if target_record is None:
+                print(f"Se descarta dato de web oficial sin ficha objetivo exacta: {target_id}",flush=True)
+                continue
+            match={"kind":"duplicate","record":target_record,
+                   "reason":"Web oficial asociada por ID exacto de la ficha objetivo.","score":1.0}
+        else:
+            match=find_catalog_match(candidate,registros_conocidos)
+        if match:
+            old=match["record"]
+            if safe_to_enrich_catalog_match(
+                match,record,old,registros_conocidos,
+                official_site=official_site,trusted_local=trusted_local
+            ):
                 changed,conflicts=merge_existing_record(old,record,source_url)
+                # Una web oficial propia basta para verificar la ficha cuando se ha
+                # extraído al menos uno de los seis datos; no se exige completitud mínima.
+                # _page_fields solo incluye datos detectados en esta página,
+                # no valores heredados de la ficha que se usan para comparar.
+                official_fields = [
+                    k for k in record.get("_page_fields", [])
+                    if k in ("address","phone","email","website","hours","description")
+                ]
+                official_evidence = official_site and bool(official_fields)
+                current_status = norm(old.get("estado_verificacion"))
+                if official_evidence:
+                    verification_date = datetime.now(timezone.utc).date().isoformat()
+                    if current_status != "verificada":
+                        old["estado_verificacion"] = "verificada"
+                        old["f"] = source_url
+                        old["v"] = verification_date
+                        changed.extend(["estado_verificacion","f","v"])
+                    old["_rad_official_verified"] = True
+                    sources = old.setdefault("fuentes_datos", [])
+                    if not isinstance(sources, list):
+                        sources = []
+                        old["fuentes_datos"] = sources
+                    field_names = {
+                        "address":"direccion", "phone":"telefono", "email":"correo",
+                        "website":"web", "hours":"horario", "description":"descripcion"
+                    }
+                    source_fields = [field_names[k] for k in official_fields]
+                    existing_source = next(
+                        (x for x in sources if isinstance(x, dict) and url_key(x.get("url","")) == url_key(source_url)),
+                        None
+                    )
+                    if existing_source is None:
+                        sources.append({"url":source_url,"tipo":"web_oficial","campos":source_fields,"fecha":verification_date})
+                        changed.append("fuentes_datos")
+                    else:
+                        merged_fields = list(dict.fromkeys((existing_source.get("campos") or []) + source_fields))
+                        if merged_fields != existing_source.get("campos"):
+                            existing_source["campos"] = merged_fields
+                            changed.append("fuentes_datos")
                 if changed:
                     fichas_enriquecidas.add(str(old.get("id") or record_value(old,"n","nombre","name")))
                     campos_actualizados+=len(changed)
                     conflictos_no_sobrescritos+=len(conflicts)
-                    coincidencias.append({
-                        "nombre_detectado":record["name"],
-                        "nombre_catalogo":record_value(old,"n","nombre","name"),
-                        "tipo":"ficha_enriquecida","campos":changed,
-                        "url_detectada":source_url
-                    })
-                else:
-                    coincidencias.append({
-                        "nombre_detectado":record["name"],
-                        "nombre_catalogo":record_value(old,"n","nombre","name"),
-                        "tipo":match["kind"],"motivo":"Coincidencia confirmada; no había campos vacíos que completar.",
-                        "url_detectada":source_url
-                    })
-                seen_urls.add(u_key)
+    
+            else:
+                coincidencias.append({
+                    "nombre_detectado":record["name"],
+                    "nombre_catalogo":record_value(old,"n","nombre","name"),
+                    "tipo":match["kind"],"motivo":match["reason"],
+                    "similitud":round(match["score"],3),"url_detectada":source_url
+                })
+                seen_urls.add(seen_key)
                 continue
-            coincidencias.append({
-                "nombre_detectado":record["name"],
-                "nombre_catalogo":record_value(old,"n","nombre","name"),
-                "tipo":match["kind"],"motivo":match["reason"],
-                "similitud":round(match["score"],3),"url_detectada":source_url
-            })
-            seen_urls.add(u_key)
-            continue
         # Los directorios locales sin teléfono/web solo pueden completar una ficha
         # existente; no generan candidatas nuevas sin un canal de contacto.
         if not any((record["phone"],record["email"],record["website"])) and not record.get("registration_code"):
@@ -1897,7 +2607,7 @@ def main():
             })
             seen_urls.add(u_key)
             continue
-        seen_urls.add(u_key)
+        seen_urls.add(seen_key)
         if pair: seen_pairs.add(pair)
         if not pair: seen_unlocated_names.add(name_key)
         digest=hashlib.sha256((name_key+"|"+addr_key+"|"+u_key).encode()).hexdigest()[:16]
@@ -1927,12 +2637,72 @@ def main():
         registros_conocidos.append(candidate)
     data.setdefault("candidatas_revision",[]).extend(added)
     data["total_candidatas_revision"]=len(data["candidatas_revision"])
+    # Métricas de cobertura por ficha, no por página: permiten comprobar
+    # qué parte del catálogo se ha investigado y qué datos faltan realmente.
+    all_official_records=official_records+unlinked_official_records
+    official_fields_by_target={}
+    for page_record in all_official_records:
+        target_key=str(page_record.get("_target_id") or "")
+        if not target_key:
+            continue
+        official_fields_by_target.setdefault(target_key,set()).update(
+            field for field in page_record.get("_page_fields",[])
+            if field in ("address","phone","email","website","hours","description")
+        )
+    registered_web_targets=[
+        x for x in target_items
+        if isinstance(x,dict) and urllib.parse.urlsplit(record_value(x,"w","web","website")).scheme.lower() in ("http","https")
+        and urllib.parse.urlsplit(record_value(x,"w","web","website")).netloc
+    ]
+    resultados_por_ficha=[]
+    six_fields=("address","phone","email","website","hours","description")
+    for target in target_items:
+        ident=str(target.get("id") or record_value(target,"n","nombre","name"))
+        audit=dict(target_audit.get(ident) or {
+            "id":ident,"nombre":record_value(target,"n","nombre","name"),
+            "sector":str(target.get("t") or ""),"web_registrada":record_value(target,"w","web","website"),
+            "web_oficial_confirmada":False,"paginas_visitadas":0,"paginas_con_datos":0,
+            "campos_detectados":[],"resultado":"sin_resultado"
+        })
+        found=sorted(official_fields_by_target.get(ident,set()))
+        audit["campos_detectados"]=sorted(set(audit.get("campos_detectados",[]))|set(found))
+        audit["campos_faltantes"]=[field for field in six_fields if field not in audit["campos_detectados"]]
+        audit["datos_oficiales_detectados"]=len(audit["campos_detectados"])
+        audit["ficha_investigada"]=True
+        resultados_por_ficha.append(audit)
+    if len(resultados_por_ficha)!=len(target_items):
+        raise RuntimeError("RAD no ha generado un resultado individual para cada ficha del lote.")
+    discovered_unlinked_targets=len({
+        str(x.get("_target_id") or "") for x in unlinked_official_records
+        if x.get("_target_id")
+    })
+    data["rad_crawl_progress"]=None  # La ficha terminó; el orquestador confirma el resultado individual.
     data["rad_ultima_ejecucion"]={"fecha_utc":datetime.now(timezone.utc).isoformat(),
        "buscadores":["DuckDuckGo HTML","Bing RSS"],"fuentes_directas":DIRECTORY_SEEDS,
        "fuentes_detalle_directo":DIRECT_DETAIL_URLS,"consultas":len(QUERIES),
        "fuente_registro_oficial":{"nombre":"OpenRTA - Junta de Andalucía","url":"https://datos.juntadeandalucia.es/api/v0/openrta/search","licencia":"CC BY 4.0"},
        "openrta_registros_validos":len(openrta_records),
-       "consultas_fichas_existentes":len(targeted_queries),
+       "consultas_fichas_existentes":fichas_sin_web_consultadas,
+       "total_fichas_en_catalogo":len(data["items"]),
+       "fichas_en_lote":len(target_items),
+       "tamano_lote":len(target_items) if batch_ids is None else len(batch_ids),
+       "ids_lote":sorted(batch_ids) if batch_ids is not None else [],
+       "fichas_con_web_registrada_consultadas":len(registered_web_targets),
+       "fichas_sin_web_registrada_consultadas":fichas_sin_web_consultadas,
+       "fichas_con_web_oficial":sum(1 for x in resultados_por_ficha if x.get("web_oficial_confirmada")),
+       "dominios_web_oficiales_consultados":official_domains,
+       "paginas_web_oficiales_consultadas":official_pages,
+       "consultas_por_ficha_y_pagina_oficial":official_pages,
+       "fichas_sin_web_consultadas":fichas_sin_web_consultadas,
+       "fichas_web_oficiales_investigadas":sum(1 for x in resultados_por_ficha if x.get("web_oficial_confirmada")),
+       "fichas_con_resultado_individual":len(resultados_por_ficha),
+       "resultados_por_ficha":resultados_por_ficha,
+       "webs_propias_descubiertas_sin_url_previa":discovered_unlinked_targets,
+       "fichas_web_oficiales_con_6_datos":sum(1 for fields in official_fields_by_target.values() if len(fields)==6),
+       "fichas_web_oficiales_con_datos_incompletos":sum(1 for fields in official_fields_by_target.values() if len(fields)<6),
+       "campos_oficiales_detectados":sum(len(fields) for fields in official_fields_by_target.values()),
+       "fichas_con_email_detectado_en_web_oficial":len({str(x.get("_target_id","")) for x in all_official_records if x.get("email")}),
+       "correos_detectados_en_webs_oficiales":len({str(x.get("email","")).strip().lower() for x in official_records if x.get("email")}),
        "urls_encontradas":len(links),"candidatas_nuevas":len(added),
        "fichas_enriquecidas":len(fichas_enriquecidas),"campos_actualizados":campos_actualizados,
        "conflictos_datos_no_sobrescritos":conflictos_no_sobrescritos,

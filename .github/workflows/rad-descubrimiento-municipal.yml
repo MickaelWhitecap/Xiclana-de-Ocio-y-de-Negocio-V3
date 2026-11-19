@@ -1,0 +1,74 @@
+name: RAD - descubrimiento municipal de webs (solo lectura)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "v3/rad_descubrimiento_municipal.py"
+      - ".github/workflows/rad-descubrimiento-municipal.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rad-descubrimiento-municipal
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    name: Localizar webs de establecimientos situados en Chiclana
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validar sintaxis y pruebas RAD existentes
+        run: |
+          python -m py_compile v3/rastreo_web_publico.py v3/rad_descubrimiento_municipal.py
+          python v3/rastreo_web_publico.py --self-test
+
+      - name: Descubrir webs y establecimientos del municipio
+        run: python v3/rad_descubrimiento_municipal.py
+
+      - name: Publicar resumen del descubrimiento
+        if: always()
+        run: |
+          if [ -f rad-descubrimiento-municipal.json ]; then
+            python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data=json.loads(Path("rad-descubrimiento-municipal.json").read_text(encoding="utf-8"))
+          keys=[
+            "estado","webs_unicas_identificadas",
+            "establecimientos_con_ubicacion_confirmada",
+            "paginas_de_directorio_recorridas","perfiles_de_directorio_identificados",
+            "urls_de_busqueda_unicas","urls_unicas_analizadas",
+            "paginas_sin_evidencia_local_suficiente","errores_consulta"
+          ]
+          with open(os.environ["GITHUB_STEP_SUMMARY"],"a",encoding="utf-8") as f:
+              f.write("## Descubrimiento municipal RAD\n\n")
+              for key in keys:
+                  f.write(f"- **{key}:** {data.get(key)}\n")
+              f.write("\nSolo lectura: el catálogo y Supabase no se han modificado.\n")
+          print(json.dumps({k:data.get(k) for k in keys},ensure_ascii=False))
+          PY
+          fi
+
+      - name: Guardar informe completo
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rad-descubrimiento-municipal-${{ github.run_id }}
+          path: rad-descubrimiento-municipal.json
+          if-no-files-found: ignore
+          retention-days: 30

@@ -3,6 +3,8 @@
 
 El JSON generado es una copia de trabajo/exportación; nunca es una fuente de escritura
 para las fichas. Las fichas se modifican exclusivamente en public.listings.
+
+Los cambios en este exportador disparan también la copia cifrada y su prueba de restauración.
 """
 import argparse
 import json
@@ -117,8 +119,9 @@ def export_catalog(path):
 
 
 
-def sync_enrichment(before_path, after_path):
-    """Aplica solo campos seguros añadidos por RAD a fichas verificadas y activas."""
+def sync_enrichment(before_path, after_path, allowed_ids=None):
+    """Aplica enriquecimientos RAD solo a IDs autorizados y fichas aún publicadas."""
+    allowed_ids = None if allowed_ids is None else {str(x) for x in allowed_ids}
     base, key = connection()
     before = json.loads(pathlib.Path(before_path).read_text(encoding="utf-8"))
     after = json.loads(pathlib.Path(after_path).read_text(encoding="utf-8"))
@@ -127,17 +130,19 @@ def sync_enrichment(before_path, after_path):
     before_by_id = {str(x.get("id")): x for x in before["items"] if isinstance(x, dict) and x.get("id")}
     current_rows = fetch_all(base, key, "listings", "id,data,is_published,is_deleted,verified_at,updated_at", "id.asc")
     current_by_id = {str(x.get("id")): x for x in current_rows}
-    meta_keys = {"id", "is_published", "_xiclana_deleted", "verified_at", "_xiclana_updated_at"}
+    meta_keys = {"id", "is_published", "_xiclana_deleted", "verified_at", "_xiclana_updated_at", "_rad_official_verified"}
     allowed_fields = {
         "a", "h", "d", "t", "c", "rta_registro", "direcciones_alternativas",
-        "p", "e", "w", "web_alternativas", "fuentes_datos",
+        "p", "e", "w", "web_alternativas", "fuentes_datos", "estado_verificacion", "f", "v",
     }
     to_update = []
-    detected_count = conflict_count = inactive_count = 0
+    detected_count = conflict_count = inactive_count = verification_count = 0
     for item in after["items"]:
         if not isinstance(item, dict) or not item.get("id"):
             continue
         ident = str(item["id"])
+        if allowed_ids is not None and ident not in allowed_ids:
+            continue
         original = before_by_id.get(ident)
         current = current_by_id.get(ident)
         if original is None:
@@ -145,7 +150,8 @@ def sync_enrichment(before_path, after_path):
         before_data = {k: v for k, v in original.items() if k not in meta_keys}
         after_data = {k: v for k, v in item.items() if k not in meta_keys}
         changed_keys = [k for k, v in after_data.items() if before_data.get(k) != v]
-        if not changed_keys:
+        verify_official = bool(item.get("_rad_official_verified"))
+        if not changed_keys and not verify_official:
             continue
         detected_count += 1
         if current is None:
@@ -156,38 +162,61 @@ def sync_enrichment(before_path, after_path):
             conflict_count += 1
             continue
         status = str(current_data.get("estado_verificacion") or "").strip().casefold()
-        if current.get("is_deleted") or not current.get("is_published") or status != "verificada":
+        promote = verify_official and status != "verificada"
+        if current.get("is_deleted") or current.get("is_published") is not True or (status != "verificada" and not promote):
             inactive_count += 1
             continue
+        if promote:
+            source = str(after_data.get("f") or "").strip()
+            date_value = str(after_data.get("v") or "").strip()
+            if after_data.get("estado_verificacion") != "verificada" or not source.startswith(("https://", "http://")) or not date_value:
+                raise RuntimeError(f"RAD intentó verificar {ident} sin estado, web oficial o fecha válidos.")
         unsafe = sorted(set(changed_keys) - allowed_fields)
         if unsafe:
             raise RuntimeError(f"RAD intentó modificar campos no autorizados en {ident}: {unsafe}")
+        safe_changed_keys = []
+        for field in changed_keys:
+            new_value = after_data[field]
+            old_value = current_data.get(field)
+            new_is_empty = new_value is None or new_value == "" or new_value == [] or new_value == {}
+            old_is_present = old_value is not None and old_value != "" and old_value != [] and old_value != {}
+            if new_is_empty and old_is_present:
+                continue
+            safe_changed_keys.append(field)
+        verification_fields = sorted(set(safe_changed_keys) & {"estado_verificacion", "f", "v"})
+        if verification_fields and not promote:
+            raise RuntimeError(f"RAD intentó cambiar el estado o la procedencia de verificación sin prueba de web oficial en {ident}: {verification_fields}")
         current_clean = {k: v for k, v in current_data.items() if k not in meta_keys}
         if current_clean != before_data or current.get("updated_at") != original.get("_xiclana_updated_at"):
             conflict_count += 1
             continue
+        if not safe_changed_keys and not promote:
+            continue
         merged = dict(current_data)
-        for field in changed_keys:
+        for field in safe_changed_keys:
             merged[field] = after_data[field]
-        to_update.append((ident, current, merged, len(changed_keys)))
-
-    if len(to_update) > 500:
-        raise RuntimeError(f"RAD propone modificar {len(to_update)} fichas; se supera el límite defensivo de 500 y no se aplica ninguna.")
+        to_update.append((ident, current, merged, len(safe_changed_keys), promote))
 
     updated_count = field_count = 0
-    for ident, current, merged, changed_count in to_update:
+    for ident, current, merged, changed_count, promote in to_update:
         timestamp = current.get("updated_at")
         filters = {"id": "eq." + ident, "updated_at": "eq." + timestamp if timestamp else "is.null"}
         result, _ = request(
             base + "/listings?" + urllib.parse.urlencode(filters),
             key,
             method="PATCH",
-            payload={"data": merged, "updated_at": datetime.now(timezone.utc).isoformat()},
+            payload={
+                "data": merged,
+                "verified_at": datetime.now(timezone.utc).isoformat() if promote else current.get("verified_at"),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            },
             headers={"Prefer": "return=representation"},
         )
         if isinstance(result, list) and result:
             updated_count += 1
             field_count += changed_count
+            if promote:
+                verification_count += 1
         else:
             conflict_count += 1
     summary = {
@@ -197,6 +226,7 @@ def sync_enrichment(before_path, after_path):
         "campos_actualizados": field_count,
         "saltadas_por_cambio_concurrente": conflict_count,
         "saltadas_por_no_verificadas_o_inactivas": inactive_count,
+        "fichas_verificadas_desde_web_oficial": verification_count,
         "publicacion_automatica": False,
     }
     print(json.dumps(summary, ensure_ascii=False))
@@ -229,6 +259,55 @@ def merge_candidate_lists(current, incoming):
         elif item not in merged:
             merged.append(item)
     return merged
+
+
+def clear_rad_crawl_progress(target_id):
+    """Elimina checkpoints de una ficha leyendo el estado más reciente de Supabase."""
+    base, key = connection()
+    for attempt in range(3):
+        settings, _ = request(base + "/site_settings?select=id,data,updated_at&id=eq.catalogo", key)
+        if not isinstance(settings, list) or not settings:
+            raise RuntimeError("No existe public.site_settings(id='catalogo').")
+        current = settings[0].get("data") or {}
+        if not isinstance(current, dict):
+            raise RuntimeError("Los metadatos actuales de Supabase no son un objeto.")
+        progress = current.get("rad_crawl_progress")
+        if not isinstance(progress, dict):
+            return
+        checkpoints = progress.get("checkpoints")
+        if isinstance(checkpoints, dict):
+            remaining = {
+                k: v for k, v in checkpoints.items()
+                if not isinstance(v, dict) or str(v.get("target_id") or "") != str(target_id)
+            }
+            if len(remaining) == len(checkpoints):
+                return
+            if remaining:
+                updated_progress = dict(progress)
+                updated_progress["checkpoints"] = remaining
+            else:
+                updated_progress = None
+        elif str(progress.get("target_id") or "") == str(target_id):
+            updated_progress = None
+        else:
+            return
+        updated = dict(current)
+        if updated_progress is None:
+            updated.pop("rad_crawl_progress", None)
+        else:
+            updated["rad_crawl_progress"] = updated_progress
+        timestamp = settings[0].get("updated_at")
+        filters = {"id": "eq.catalogo", "updated_at": "eq." + timestamp if timestamp else "is.null"}
+        result, _ = request(
+            base + "/site_settings?" + urllib.parse.urlencode(filters),
+            key, method="PATCH",
+            payload={"data": updated, "updated_at": datetime.now(timezone.utc).isoformat()},
+            headers={"Prefer": "return=representation"},
+        )
+        if isinstance(result, list) and result:
+            print(json.dumps({"checkpoint_web_limpiado": True, "ficha_id": str(target_id)}, ensure_ascii=False))
+            return
+    raise RuntimeError("No se pudo limpiar el checkpoint RAD por conflicto concurrente.")
 
 
 def sync_metadata(path, keys):

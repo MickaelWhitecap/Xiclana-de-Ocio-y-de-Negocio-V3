@@ -16,15 +16,15 @@ class RadSafeEnrichmentTests(unittest.TestCase):
         cls.catalog = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cls.catalog)
 
-    def _run(self, status="Verificada", extra_field=None):
+    def _run(self, status="Verificada", extra_field=None, before_address="", after_address="Calle Real 10, Chiclana"):
         timestamp = "2026-11-12T12:00:00+00:00"
         before_item = {
-            "id": "listing-1", "n": "Empresa de prueba", "a": "", "p": "",
+            "id": "listing-1", "n": "Empresa de prueba", "a": before_address, "p": "",
             "estado_verificacion": status, "is_published": True,
             "verified_at": timestamp, "_xiclana_updated_at": timestamp
         }
         after_item = dict(before_item)
-        after_item["a"] = "Calle Real 10, Chiclana"
+        after_item["a"] = after_address
         if extra_field:
             after_item[extra_field] = "cambio no permitido"
         before = {"items": [before_item]}
@@ -40,9 +40,7 @@ class RadSafeEnrichmentTests(unittest.TestCase):
             after_path = Path(directory) / "after.json"
             before_path.write_text(json.dumps(before),encoding="utf-8")
             after_path.write_text(json.dumps(after),encoding="utf-8")
-            with patch.object(self.catalog,"connection",return_value=("https://example.supabase.co/rest/v1","secret")), \
-                 patch.object(self.catalog,"fetch_all",return_value=current), \
-                 patch.object(self.catalog,"request",return_value=([{"id":"listing-1"}],{})) as request:
+            with patch.object(self.catalog,"connection",return_value=("https://example.supabase.co/rest/v1","secret")), patch.object(self.catalog,"fetch_all",return_value=current), patch.object(self.catalog,"request",return_value=([{"id":"listing-1"}],{})) as request:
                 result = self.catalog.sync_enrichment(before_path,after_path)
         return result, request
 
@@ -59,9 +57,120 @@ class RadSafeEnrichmentTests(unittest.TestCase):
         self.assertEqual(result["saltadas_por_no_verificadas_o_inactivas"],1)
         request.assert_not_called()
 
+    def test_rad_never_clears_an_existing_nonempty_field(self):
+        result, request = self._run(
+            before_address="Calle Real 10, Chiclana",
+            after_address=""
+        )
+        self.assertEqual(result["fichas_actualizadas"],0)
+        request.assert_not_called()
+
+    def test_sync_enrichment_updates_only_ids_in_current_batch(self):
+        timestamp = "2026-11-12T12:00:00+00:00"
+        before_items = [
+            {"id": ident, "n": ident, "a": "", "estado_verificacion": "Verificada",
+             "is_published": True, "verified_at": timestamp, "_xiclana_updated_at": timestamp}
+            for ident in ("listing-1", "listing-2")
+        ]
+        after_items = []
+        current = []
+        for item in before_items:
+            changed = dict(item)
+            changed["a"] = "Calle Real 10, Chiclana"
+            after_items.append(changed)
+            current.append({
+                "id": item["id"],
+                "data": {k:v for k,v in item.items() if k not in {"id","is_published","verified_at","_xiclana_updated_at"}},
+                "is_published": True, "is_deleted": False,
+                "verified_at": timestamp, "updated_at": timestamp
+            })
+        with tempfile.TemporaryDirectory() as directory:
+            before_path = Path(directory) / "before.json"
+            after_path = Path(directory) / "after.json"
+            before_path.write_text(json.dumps({"items":before_items}),encoding="utf-8")
+            after_path.write_text(json.dumps({"items":after_items}),encoding="utf-8")
+            with patch.object(self.catalog,"connection",return_value=("https://example.supabase.co/rest/v1","secret")), patch.object(self.catalog,"fetch_all",return_value=current), patch.object(self.catalog,"request",return_value=([{"id":"listing-1"}],{})) as request:
+                result = self.catalog.sync_enrichment(before_path,after_path,allowed_ids={"listing-1"})
+        self.assertEqual(result["fichas_detectadas"],1)
+        self.assertEqual(result["fichas_actualizadas"],1)
+        self.assertEqual(len(request.call_args_list),1)
+        self.assertIn("id=eq.listing-1",request.call_args.args[0])
+
+
+    def test_missing_verification_status_is_not_overridden_by_verified_at(self):
+        result, request = self._run(status=None)
+        self.assertEqual(result["fichas_actualizadas"],0)
+        self.assertEqual(result["saltadas_por_no_verificadas_o_inactivas"],1)
+        request.assert_not_called()
+
     def test_rad_cannot_change_verification_or_publication_fields(self):
         with self.assertRaises(RuntimeError):
             self._run(extra_field="estado_verificacion")
+
+
+class RadOfficialVerificationTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        spec = importlib.util.spec_from_file_location("catalogo_supabase_verification", ROOT / "v3/catalogo_supabase.py")
+        cls.catalog = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.catalog)
+
+    def _run(self, status="pendiente", published=True):
+        timestamp = "2026-11-16T10:00:00+00:00"
+        before_item = {
+            "id": "listing-official", "n": "Establecimiento de prueba",
+            "estado_verificacion": status, "f": None, "v": None,
+            "is_published": published, "verified_at": None,
+            "_xiclana_updated_at": timestamp
+        }
+        after_item = dict(before_item)
+        after_item.update({
+            "estado_verificacion": "verificada",
+            "f": "https://establecimiento.example/",
+            "v": "2026-11-16",
+            "_rad_official_verified": True
+        })
+        current = [{
+            "id": "listing-official",
+            "data": {k:v for k,v in before_item.items() if k not in {"id","is_published","verified_at","_xiclana_updated_at"}},
+            "is_published": published, "is_deleted": False,
+            "verified_at": None, "updated_at": timestamp
+        }]
+        with tempfile.TemporaryDirectory() as directory:
+            before_path = Path(directory) / "before.json"
+            after_path = Path(directory) / "after.json"
+            before_path.write_text(json.dumps({"items":[before_item]}),encoding="utf-8")
+            after_path.write_text(json.dumps({"items":[after_item]}),encoding="utf-8")
+            with patch.object(self.catalog,"connection",return_value=("https://example.supabase.co/rest/v1","secret")), \
+                 patch.object(self.catalog,"fetch_all",return_value=current), \
+                 patch.object(self.catalog,"request",return_value=([{"id":"listing-official"}],{})) as request:
+                result = self.catalog.sync_enrichment(before_path,after_path)
+        return result, request
+
+    def test_official_website_can_verify_published_pending_listing(self):
+        result, request = self._run()
+        self.assertEqual(result["fichas_verificadas_desde_web_oficial"],1)
+        payload = request.call_args.kwargs["payload"]
+        self.assertEqual(payload["data"]["estado_verificacion"],"verificada")
+        self.assertEqual(payload["data"]["f"],"https://establecimiento.example/")
+        self.assertEqual(payload["data"]["v"],"2026-11-16")
+        self.assertIsNotNone(payload["verified_at"])
+
+    def test_official_website_verifies_listing_even_if_previous_status_was_insufficient(self):
+        result, request = self._run(status="insuficiente")
+        self.assertEqual(result["fichas_verificadas_desde_web_oficial"],1)
+        self.assertEqual(result["fichas_actualizadas"],1)
+        payload = request.call_args.kwargs["payload"]
+        self.assertEqual(payload["data"]["estado_verificacion"],"verificada")
+        self.assertEqual(payload["data"]["f"],"https://establecimiento.example/")
+        self.assertIsNotNone(payload["verified_at"])
+
+    def test_official_website_does_not_update_unpublished_listing(self):
+        result, request = self._run(published=False)
+        self.assertEqual(result["fichas_verificadas_desde_web_oficial"],0)
+        self.assertEqual(result["fichas_actualizadas"],0)
+        self.assertEqual(result["saltadas_por_no_verificadas_o_inactivas"],1)
+        request.assert_not_called()
 
 
 class SingleSupabaseMasterTests(unittest.TestCase):
@@ -116,16 +225,26 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertIn('"publicacion_automatica": False', source)
         self.assertIn('saltadas_por_cambio_concurrente', source)
 
-    def test_weekly_rad_exports_from_supabase_and_never_writes_catalog_json(self):
+    def test_weekly_rad_uses_sequential_supabase_batches_and_never_writes_catalog_json(self):
         workflow = (ROOT / ".github/workflows/rad-enrich-catalog.yml").read_text(encoding="utf-8")
-        self.assertIn("catalogo_supabase.py export", workflow)
-        self.assertIn("catalogo_supabase.py sync-metadata", workflow)
-        self.assertIn("catalogo_supabase.py sync-enrichment", workflow)
-        self.assertIn("Aplicar enriquecimientos seguros a fichas verificadas", workflow)
+        orchestrator = (ROOT / "v3/rad_lotes.py").read_text(encoding="utf-8")
+        crawler = (ROOT / "v3/rastreo_web_publico.py").read_text(encoding="utf-8")
+        helper = (ROOT / "v3/catalogo_supabase.py").read_text(encoding="utf-8")
+        self.assertIn("python v3/rad_lotes.py", workflow)
+        self.assertIn("catalog.export_catalog(catalog_path)", orchestrator)
+        self.assertIn("catalog.sync_enrichment(before_path, catalog_path, allowed_ids={ident})", orchestrator)
+        self.assertIn('"evento": "ficha_confirmada"', orchestrator)
+        self.assertIn('"evento": "inicio_ficha"', orchestrator)
+        self.assertIn('"ficha_actual"', orchestrator)
+        self.assertIn('global_discovery_status', orchestrator)
+        self.assertIn("catalog.sync_metadata(path, keys)", orchestrator)
+        self.assertIn("resultados_por_ficha", orchestrator)
+        self.assertIn("resultados_por_ficha", crawler)
+        self.assertIn("allowed_ids=None", helper)
         self.assertIn('cron: "47 6 * * 1"', workflow)
         self.assertIn("workflow_dispatch:", workflow)
-        self.assertNotIn("\\n  push:", workflow)
-        self.assertIn("--catalog", workflow)
+        self.assertNotIn("\n  push:", workflow)
+        self.assertIn("--catalog", orchestrator)
         self.assertNotIn("git add", workflow)
         self.assertNotIn("git push", workflow)
 
@@ -134,13 +253,6 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertIn("catalogo_supabase.py export", workflow)
         self.assertIn("xiclana-catalogo.json", workflow)
         self.assertNotIn("fichas_completas.json", workflow)
-
-    def test_legacy_json_writers_are_retired(self):
-        for name in ("integrar-candidatas-rad.yml", "incorporar-auditoria-osm.yml", "auditar-bajas-catalogo.yml"):
-            workflow = (ROOT / ".github/workflows" / name).read_text(encoding="utf-8")
-            self.assertIn("retirad", workflow.lower())
-            self.assertNotIn("git push", workflow)
-            self.assertNotIn("git add", workflow)
 
     def test_backup_json_is_generated_from_supabase_not_repository_snapshot(self):
         workflow = (ROOT / ".github/workflows/backup-supabase.yml").read_text(encoding="utf-8")
@@ -157,13 +269,20 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertIn('return supabaseFrom("listings").upsert(prepared,{onConflict:"id"})', admin)
         self.assertIn('is_published:!deleted,is_deleted:deleted', admin)
 
+    def test_admin_verified_at_follows_explicit_verification_status(self):
+        admin = (ROOT / "v3/admin.html").read_text(encoding="utf-8")
+        self.assertIn('fields.estado_verificacion=allowedStatuses.includes(nextStatus)?nextStatus:"pendiente"', admin)
+        self.assertIn('const verifiedAt=fields.estado_verificacion==="verificada"', admin)
+        self.assertIn(':null;', admin)
 
 
-    def test_legacy_json_writing_scripts_are_disabled(self):
-        for name in ("actualizar.py", "ampliar_catalogo.py", "extraccion_inicial_osm.py",
-                     "incorporar_auditoria_osm.py", "recuperar_direcciones_osm.py"):
-            source = (ROOT / "v3" / name).read_text(encoding="utf-8")
-            self.assertIn("retirad", source.lower())
+
+    def test_admin_loads_the_entire_master_catalog_in_stable_pages(self):
+        admin = (ROOT / "v3/admin.html").read_text(encoding="utf-8")
+        self.assertIn('const pageSize=500;let offset=0;', admin)
+        self.assertIn('.order("id",{ascending:true}).range(offset,offset+pageSize-1)', admin)
+        self.assertIn('if(page.length<pageSize)break;', admin)
+        self.assertIn('return {data:rows.map(row=>', admin)
 
     def test_osm_and_audit_scripts_require_a_supabase_export_path(self):
         for name in ("auditar_osm_municipal.py", "incorporar_candidatas_osm.py",
@@ -188,15 +307,15 @@ class SingleSupabaseMasterTests(unittest.TestCase):
             self.assertIn("catalogo_supabase.py export", workflow)
             self.assertNotIn("v3/fichas_completas.json", workflow)
 
-    def test_historical_import_and_extraction_workflows_are_retired(self):
-        for name in ("extraccion-inicial-osm.yml", "migrar-catalogo-supabase.yml",
-                     "rad-catalog-validation.yml", "recuperar-direcciones-osm.yml",
-                     "integrar-candidatas-rad.yml", "incorporar-auditoria-osm.yml",
-                     "auditar-bajas-catalogo.yml"):
-            workflow = (ROOT / ".github/workflows" / name).read_text(encoding="utf-8")
-            self.assertIn("retirad", workflow.lower())
-            self.assertNotIn("git push", workflow)
-            self.assertNotIn("git add", workflow)
+    def test_retired_legacy_files_stay_removed(self):
+        # Escritores históricos del JSON y workflows retirados: ya no deben existir.
+        for name in ("actualizar.py", "ampliar_catalogo.py", "extraccion_inicial_osm.py",
+                     "incorporar_auditoria_osm.py", "recuperar_direcciones_osm.py"):
+            self.assertFalse((ROOT / "v3" / name).exists(), name)
+        for name in ("auditar-bajas-catalogo", "extraccion-inicial-osm", "incorporar-auditoria-osm",
+                     "integrar-candidatas-rad", "migrar-catalogo-supabase", "rad-catalog-validation",
+                     "recuperar-direcciones-osm", "sincronizar-cambios-admin", "sync-admin-overrides"):
+            self.assertFalse((ROOT / ".github/workflows" / f"{name}.yml").exists(), name)
 
     def test_public_web_and_exporter_use_supabase_listings(self):
         public = (ROOT / "v3/index.html").read_text(encoding="utf-8")

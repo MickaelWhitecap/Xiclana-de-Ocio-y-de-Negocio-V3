@@ -254,7 +254,8 @@ function refreshList(){
   if(!q)return true;
   // Buscar también por identificador, fuente y cualquier campo importado,
   // no solo por nombre/categoría/dirección/teléfono.
-  return Object.entries(x).some(([k,v])=>k!=="fields"&&normalize(typeof v==="object"?JSON.stringify(v):v).includes(q));
+  const searchableStatus=({verificada:"Verificada",pendiente:"Pendiente de verificar",insuficiente:"Datos Dudosos"}[String(x.estado_verificacion||"pendiente").toLowerCase()]||"");
+  return Object.entries(x).some(([k,v])=>k!=="fields"&&normalize(typeof v==="object"?JSON.stringify(v):v).includes(q))||normalize(searchableStatus).includes(q);
  }).sort((a,b)=>String(a.n||a.nombre||a.name||"").localeCompare(String(b.n||b.nombre||b.name||""),"es"));
  list.textContent="";$("#count").textContent=matches.length+" fichas";
  matches.forEach(x=>{const b=document.createElement("button");b.type="button";b.className="item"+(x.id===selectedId?" active":"");b.append(document.createTextNode(x.n||x.nombre||x.name||"Sin nombre"));const small=document.createElement("small");small.textContent=(x.c||"Sin categoría")+" · "+(x.a||"Sin dirección");b.append(small);const completeness=document.createElement("span");completeness.className="pill";completeness.textContent=visitorCompleteness(x)+"/6";completeness.title="Dirección, teléfono, correo, web, horario y descripción";b.append(completeness);const states={verificada:["Verificada","verified"],pendiente:["Pendiente de verificar","pending"],insuficiente:["Datos Dudosos","insufficient"]};const state=states[x.estado_verificacion||"pendiente"]||states.pendiente;const p=document.createElement("span");p.className="verification "+state[1];p.textContent=state[0];p.style.display="table";p.style.marginTop=".1rem";p.style.marginLeft="auto";p.style.fontWeight="400";b.append(p);b.onclick=()=>selectItem(x.id);list.append(b)});
@@ -371,30 +372,58 @@ function candidateKey(v){return String(v||"").normalize("NFD").replace(/[\u0300-
 function candidateNameSignature(value){
  return candidateKey(value).split(" ").filter(Boolean).sort().join(" ");
 }
+function candidateCoordinatesNear(left,right){
+ const hasCoords=left?.lat!=null&&left?.lon!=null&&right?.lat!=null&&right?.lon!=null;
+ if(!hasCoords)return false;
+ const lat1=Number(left.lat),lon1=Number(left.lon),lat2=Number(right.lat),lon2=Number(right.lon);
+ return [lat1,lon1,lat2,lon2].every(Number.isFinite)&&Math.abs(lat1-lat2)<0.00035&&Math.abs(lon1-lon2)<0.00045;
+}
+function candidateNameSimilarity(left,right){
+ const a=new Set(candidateKey(left).split(" ").filter(Boolean));
+ const b=new Set(candidateKey(right).split(" ").filter(Boolean));
+ const common=[...a].filter(token=>b.has(token)).length;
+ return common/Math.max(a.size,b.size,1);
+}
+function candidateNameClose(left,right){
+ if(candidateNameSimilarity(left,right)>=0.6)return true;
+ const a=candidateKey(left).replace(/\\s/g,"");
+ const b=candidateKey(right).replace(/\\s/g,"");
+ if(Math.abs(a.length-b.length)>2||Math.min(a.length,b.length)<8)return false;
+ let previous=Array.from({length:b.length+1},(_,i)=>i);
+ for(let i=1;i<=a.length;i++){
+  const current=[i];
+  for(let j=1;j<=b.length;j++){
+   current[j]=Math.min(current[j-1]+1,previous[j]+1,previous[j-1]+(a[i-1]===b[j-1]?0:1));
+  }
+  previous=current;
+ }
+ return previous[b.length]<=2;
+}
 function candidateAlreadyExists(candidate){
  const name=candidateNameSignature(candidate.n),address=candidateKey(candidate.a);
  if(!name)return null;
  return effectiveItems().find(x=>{
+  if(candidate.t&&x.t&&candidateKey(candidate.t)!==candidateKey(x.t))return false;
   const existingName=candidateNameSignature(x.n);
-  // Mismo conjunto de palabras aunque OSM y el catálogo inviertan el orden:
-  // «Charter Alcántara» = «Alcántara Charter».
+  const existingAddress=candidateKey(x.a);
+  const hasBothAddresses=Boolean(address&&existingAddress);
+  const sameAddress=hasBothAddresses&&address===existingAddress;
+  const hasBothCoords=candidate.lat!=null&&candidate.lon!=null&&x.lat!=null&&x.lon!=null;
+  const near=candidateCoordinatesNear(candidate,x);
   if(existingName===name){
-   if(candidate.t&&x.t&&candidateKey(candidate.t)!==candidateKey(x.t))return false;
+   // El mismo nombre no basta: cadenas como Covirán, Repsol o Correos
+   // pueden tener varios establecimientos. Exigir ubicación coincidente.
+   if(hasBothCoords)return near;
+   if(hasBothAddresses)return sameAddress;
+   // Si falta ubicación en una o ambas fichas, bloquear para revisión manual,
+   // sin afirmar que sean duplicados confirmados.
    return true;
   }
-  // Coincidencia geográfica muy próxima: solo se considera duplicado si
-  // también coincide el tipo y existe una dirección común o nombre muy parecido.
-  const hasCoords=candidate.lat!=null&&candidate.lon!=null&&x.lat!=null&&x.lon!=null;
-  const a=Number(candidate.lat),b=Number(candidate.lon),la=Number(x.lat),lo=Number(x.lon);
-  const near=hasCoords&&Number.isFinite(a)&&Number.isFinite(b)&&Number.isFinite(la)&&Number.isFinite(lo)&&Math.abs(a-la)<0.00035&&Math.abs(b-lo)<0.00045;
-  if(near&&candidate.t&&x.t&&candidateKey(candidate.t)===candidateKey(x.t)){
-   const left=new Set(candidateKey(candidate.n).split(" ").filter(Boolean));
-   const right=new Set(candidateKey(x.n).split(" ").filter(Boolean));
-   const common=[...left].filter(token=>right.has(token)).length;
-   const similarity=common/Math.max(left.size,right.size,1);
-   return similarity>=0.5;
-  }
-  return Boolean(address&&candidateKey(x.a)&&address===candidateKey(x.a)&&candidate.t&&x.t&&candidateKey(candidate.t)===candidateKey(x.t));
+  // Para nombres parecidos, exigir además proximidad o dirección coincidente.
+  if(!candidateNameClose(candidate.n,x.n))return false;
+  if(hasBothCoords)return near;
+  if(hasBothAddresses)return sameAddress;
+  return false;
  });
 }
 function renderAddressProposals(){
@@ -414,8 +443,8 @@ function renderAddressProposals(){
   fields.forEach(([label,value])=>{if(value===undefined||value===null||String(value).trim()==="")return;const row=document.createElement("p");row.style.cssText="margin:.35rem 0;overflow-wrap:anywhere";const strong=document.createElement("b");strong.textContent=label+": ";row.append(strong,document.createTextNode(String(value)));preview.append(row)});
   const sourceUrl=proposal.source_url||proposal.url_osm;if(sourceUrl){const source=document.createElement("a");source.href=sourceUrl;source.target="_blank";source.rel="noopener noreferrer";source.textContent=proposal.source_url?"Abrir fuente de la dirección":"Abrir objeto original en OpenStreetMap";source.style.display="inline-block";source.style.marginTop=".3rem";preview.append(source)}
   const actions=document.createElement("div");actions.className="actions";
-  const view=document.createElement("button");view.type="button";view.className="secondary";view.textContent="Ver comparación";view.setAttribute("aria-expanded","false");view.onclick=()=>{const open=preview.style.display==="none";preview.style.display=open?"block":"none";view.textContent=open?"Ocultar comparación":"Ver comparación";view.setAttribute("aria-expanded",String(open))};actions.append(view);
-  const approve=document.createElement("button");approve.type="button";approve.textContent="Aplicar dirección";approve.onclick=()=>approveAddressProposal(proposal);actions.append(approve);
+  const view=document.createElement("button");view.type="button";view.className="secondary";view.textContent="Ver comparación";view.setAttribute("aria-expanded","false");view.onclick=()=>{const open=preview.style.display==="none";preview.style.display=open?"block":"none";view.textContent=open?"Ocultar comparación":"Ver comparación";view.setAttribute("aria-expanded",String(open));approve.disabled=!open};actions.append(view);
+  const approve=document.createElement("button");approve.type="button";approve.disabled=true;approve.title="Abre primero la comparación para habilitar la aplicación.";approve.textContent="Aplicar dirección";approve.onclick=()=>approveAddressProposal(proposal);actions.append(approve);
   const reject=document.createElement("button");reject.type="button";reject.className="danger";reject.textContent="Descartar";reject.onclick=()=>rejectAddressProposal(proposal);actions.append(reject);
   card.append(actions,preview);root.append(card);
  });
@@ -477,13 +506,13 @@ function renderAutomaticCandidates(){
   if(extras.length){const details=document.createElement("details");details.style.marginTop=".7rem";const summary=document.createElement("summary");summary.textContent="Mostrar otros datos recibidos de OSM";details.append(summary);extras.forEach(([key,value])=>appendField(details,key,typeof value==="object"?JSON.stringify(value):value));preview.append(details)}
   const duplicate=candidateAlreadyExists(candidate);
   if(duplicate){const note=document.createElement("small");note.textContent="Coincidencia con la ficha existente «"+(duplicate.n||"ficha existente")+"» (se comparan también nombres con palabras en distinto orden). No se publicará otra ficha; revisa y completa la existente.";note.style.color="#8a4b12";card.append(note)}
-  const actions=document.createElement("div");actions.className="actions";
+  const actions=document.createElement("div");actions.className="actions";let reviewAction=null;
   const view=document.createElement("button");view.type="button";view.className="secondary";view.textContent="Ver ficha previa";view.setAttribute("aria-expanded","false");view.onclick=()=>{const open=preview.style.display==="none";preview.style.display=open?"block":"none";view.textContent=open?"Ocultar vista previa":"Ver ficha previa";view.setAttribute("aria-expanded",String(open))};actions.append(view);
   const completeness=document.createElement("span");completeness.className="pill";completeness.textContent=completed.length+"/6";completeness.title=missing.length?"Datos útiles pendientes: "+missing.join(", "):"Ficha completa en los seis datos útiles";completeness.setAttribute("aria-label",completed.length+" de 6 datos útiles completos");completeness.style.cssText="display:inline-flex;align-items:center;justify-content:center;min-width:2.8rem;font-weight:700";actions.append(completeness);
   if(duplicate){
-   const merge=document.createElement("button");merge.type="button";merge.textContent="Completar ficha existente";merge.onclick=()=>mergeAutomaticCandidate(candidate,duplicate);actions.append(merge);
+   const merge=document.createElement("button");merge.type="button";merge.textContent="Completar ficha existente";merge.title="La vista previa es opcional; revisa los datos antes de completar la ficha.";merge.onclick=()=>mergeAutomaticCandidate(candidate,duplicate);reviewAction=merge;actions.append(merge);
   }else{
-   const approve=document.createElement("button");approve.type="button";approve.textContent=String(candidate.estado_revision||"").startsWith("recuperada_de_baja")?"Recuperar y aprobar":"Aprobar y publicar";approve.onclick=()=>approveAutomaticCandidate(candidate);actions.append(approve);
+   const approve=document.createElement("button");approve.type="button";approve.textContent=String(candidate.estado_revision||"").startsWith("recuperada_de_baja")?"Recuperar y aprobar":"Aprobar y publicar";approve.title="La vista previa es opcional; la aprobación requiere confirmación.";approve.onclick=()=>approveAutomaticCandidate(candidate);reviewAction=approve;actions.append(approve);
   }
   const reject=document.createElement("button");reject.type="button";reject.className="danger";reject.textContent="Descartar";reject.onclick=()=>rejectAutomaticCandidate(candidate);actions.append(reject);
   card.append(actions,preview);root.append(card);
@@ -626,10 +655,16 @@ function renderProposals(){
   const detail=document.createElement("small");detail.textContent=[f._xiclana_update_target_id?"Actualización de ficha":"Nueva ficha",f.t==="ocio"?"Ocio":"Negocio",f.c||"Sin categoría",f.a||"Sin dirección",p.source_name||"Fuente no indicada",p.source_checked_at||"Sin fecha de comprobación"].join(" · ");card.append(detail);
   if(p.source_url){const a=document.createElement("a");a.href=p.source_url;a.target="_blank";a.rel="noopener noreferrer";a.textContent="Abrir fuente";a.style.display="inline-block";a.style.marginTop=".35rem";card.append(a)}
   if(p.notes){const n=document.createElement("small");n.textContent="Nota interna: "+p.notes;card.append(n)}
+  const preview=document.createElement("div");preview.style.cssText="display:none;margin-top:.65rem;padding:.7rem;border:1px solid var(--bd);border-radius:8px";
+  const previewFields=[["Dirección",f.a],["Teléfono",f.p],["Correo",f.e],["Web",f.w],["Horario",f.h],["Descripción",f.d],["Fuente",p.source_name],["Fecha de consulta",p.source_checked_at]];
+  previewFields.forEach(([label,value])=>{if(value===undefined||value===null||String(value).trim()==="")return;const line=document.createElement("p");line.style.cssText="margin:.25rem 0;overflow-wrap:anywhere";const strong=document.createElement("strong");strong.textContent=label+": ";line.append(strong,document.createTextNode(String(value)));preview.append(line)});
+  const useful=["a","p","e","w","h","d"].filter(k=>f[k]!==undefined&&f[k]!==null&&String(f[k]).trim()!=="").length;
   const actions=document.createElement("div");actions.className="actions";
-  const approve=document.createElement("button");approve.type="button";approve.textContent="Aprobar y publicar";approve.onclick=()=>reviewProposal(p,"approved");actions.append(approve);
+  const view=document.createElement("button");view.type="button";view.className="secondary";view.textContent="Ver ficha previa";view.setAttribute("aria-expanded","false");view.onclick=()=>{const open=preview.style.display==="none";preview.style.display=open?"block":"none";view.textContent=open?"Ocultar vista previa":"Ver ficha previa";view.setAttribute("aria-expanded",String(open));approve.disabled=!open};actions.append(view);
+  const completeness=document.createElement("span");completeness.className="pill";completeness.textContent=useful+"/6";completeness.title="Dirección, teléfono, correo, web, horario y descripción";actions.append(completeness);
+  const approve=document.createElement("button");approve.type="button";approve.disabled=true;approve.title="Abre primero la vista previa para habilitar la aprobación.";approve.textContent="Aprobar y publicar";approve.onclick=()=>reviewProposal(p,"approved");actions.append(approve);
   const reject=document.createElement("button");reject.type="button";reject.className="danger";reject.textContent="Descartar";reject.onclick=()=>reviewProposal(p,"rejected");actions.append(reject);
-  card.append(actions);root.append(card);
+  card.append(actions,preview);root.append(card);
  });
 }
 async function loadProposals(){
@@ -762,7 +797,7 @@ form.addEventListener("submit",async e=>{
  try{
   const fields={...(overrides.find(o=>String(o.listing_id)===String(selectedId))?.fields||{})};
   const original=effectiveItems().find(x=>String(x.id)===String(selectedId))||{};
-  fieldNames.forEach(k=>{const input=form.elements[k];if(!input)throw new Error("Falta el campo "+k+" en el formulario.");const raw=input.value;fields[k]=(["lat","lon"].includes(k)||raw.trim()==="")?(raw.trim()===""?null:Number(raw)):raw.trim()});
+  fieldNames.forEach(k=>{const input=form.elements[k];if(!input)throw new Error("Falta el campo "+k+" en el formulario.");const raw=input.value.trim();fields[k]=raw===""?null:(["lat","lon"].includes(k)?Number(raw):raw)});
   if(!fields.n||!fields.c)throw new Error("El nombre y la categoría son obligatorios.");
   // Validar correo y web solo si se han modificado; no bloquear la edición por datos heredados.
   if(fields.e&&String(fields.e)!==String(original.e||"")&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.e))throw new Error("El correo electrónico introducido no tiene un formato válido.");
@@ -847,10 +882,20 @@ async function init(){
  client.from=(table)=>{
   if(table!=="listing_overrides")return supabaseFrom(table);
   return {
-   select:()=>supabaseFrom("listings").select("id,data,is_deleted,verified_at,updated_at").then(result=>({
-    ...result,
-    data:(result.data||[]).map(row=>({listing_id:row.id,fields:{...(row.data||{}),...(row.is_deleted?{_xiclana_deleted:true}:{})},is_new:Boolean(row.data?.is_new),verified_at:row.verified_at,updated_at:row.updated_at,is_deleted:row.is_deleted}))
-   })),
+   // Supabase limita por defecto cada respuesta REST a 1.000 filas.
+   // Leer por páginas ordenadas evita que Administración pierda fichas del catálogo maestro.
+   select:async()=>{
+    const rows=[];const pageSize=500;let offset=0;
+    while(true){
+     const result=await supabaseFrom("listings").select("id,data,is_deleted,verified_at,updated_at")
+      .order("id",{ascending:true}).range(offset,offset+pageSize-1);
+     if(result.error)return {...result,data:null};
+     const page=result.data||[];rows.push(...page);
+     if(page.length<pageSize)break;
+     offset+=page.length;
+    }
+    return {data:rows.map(row=>({listing_id:row.id,fields:{...(row.data||{}),...(row.is_deleted?{_xiclana_deleted:true}:{})},is_new:Boolean(row.data?.is_new),verified_at:row.verified_at,updated_at:row.updated_at,is_deleted:row.is_deleted})),error:null};
+   },
    upsert:async(input)=>{
     const {data:userData,error:userError}=await client.auth.getUser();
     if(userError||!userData?.user?.id)return {data:null,error:userError||new Error("No hay una sesión administrativa válida.")};
@@ -859,15 +904,23 @@ async function init(){
      const id=String(row.listing_id);
      const existing=await supabaseFrom("listings").select("data,is_deleted,verified_at").eq("id",id).maybeSingle();
      if(existing.error)throw existing.error;
+     const previousStatus=String(existing.data?.data?.estado_verificacion||"pendiente").trim().toLowerCase();
      const fields={...(existing.data?.data||{}),...(row.fields||{})};
      if(fields._xiclana_restore_deleted===true)delete fields._xiclana_deleted;
      delete fields._xiclana_restore_deleted;
      delete fields._xiclana_address_proposal_rejected;
      fields.is_new=Boolean(row.is_new);
+     const allowedStatuses=["verificada","pendiente","insuficiente"];
+     const nextStatus=String(fields.estado_verificacion||"pendiente").trim().toLowerCase();
+     fields.estado_verificacion=allowedStatuses.includes(nextStatus)?nextStatus:"pendiente";
      const deleted=fields._xiclana_deleted===true;
+     const now=new Date().toISOString();
+     const verifiedAt=fields.estado_verificacion==="verificada"
+      ?(previousStatus==="verificada"?(existing.data?.verified_at||row.verified_at||now):now)
+      :null;
      return {id,data:fields,is_published:!deleted,is_deleted:deleted,
-      verified_at:row.verified_at||existing.data?.verified_at||null,
-      updated_at:new Date().toISOString(),updated_by:userData.user.id};
+      verified_at:verifiedAt,
+      updated_at:now,updated_by:userData.user.id};
     }));
     return supabaseFrom("listings").upsert(prepared,{onConflict:"id"});
    }

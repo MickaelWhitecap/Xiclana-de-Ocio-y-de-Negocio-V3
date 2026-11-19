@@ -1,11 +1,26 @@
 name: Pruebas unitarias de auditoría V3
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "v3/admin.html"
+      - "v3/index.html"
+      - "v3/auditar_catalogo.py"
+      - "v3/test_auditar_catalogo.py"
+      - "v3/test_fuente_unica.py"
+      - "v3/rastreo_web_publico.py"
+      - "v3/rad_lotes.py"
+      - ".github/workflows/pruebas-auditoria-v3.yml"
   pull_request:
     branches: [main]
     paths:
+      - "v3/admin.html"
       - "v3/auditar_catalogo.py"
       - "v3/test_auditar_catalogo.py"
+      - "v3/test_fuente_unica.py"
+      - "v3/rastreo_web_publico.py"
+      - "v3/rad_lotes.py"
       - ".github/workflows/pruebas-auditoria-v3.yml"
   workflow_dispatch:
 
@@ -23,4 +38,12 @@ jobs:
         with:
           python-version: "3.12"
       - name: Ejecutar pruebas unitarias
-        run: python -m unittest discover -s v3 -p "test_auditar_catalogo.py" -v
+        run: python -m unittest discover -s v3 -p "test_*.py" -v
+      - name: Probar rastreador web RAD y correos por sucursal
+        run: python v3/rastreo_web_publico.py --self-test
+      - name: Probar reanudación de lotes RAD
+        run: python v3/rad_lotes.py --self-test
+      - name: Probar persistencia real de checkpoints RAD en Supabase
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python v3/test_rad_checkpoint_supabase.py

@@ -116,7 +116,7 @@ def resumen_completitud_y_verificacion(items):
             estados["verificada"] += 1
         elif estado in {"pendiente", "pendiente de verificar"}:
             estados["pendiente"] += 1
-        elif estado in {"insuficiente", "incompleta", "datos dudosos", "dudosa", "dudoso"}:
+        elif estado in {"insuficiente", "datos dudosos", "dudosa", "dudoso"}:
             estados["insuficiente"] += 1
         else:
             estados["otros"] += 1

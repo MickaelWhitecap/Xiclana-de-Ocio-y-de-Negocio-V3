@@ -32,6 +32,16 @@ class AuditDuplicateTests(unittest.TestCase):
 
 
 
+    def test_admin_duplicate_detection_requires_location_for_same_name_branches(self):
+        page = (Path(__file__).with_name("admin.html")).read_text(encoding="utf-8")
+        self.assertIn("function candidateCoordinatesNear(left,right)", page)
+        self.assertIn("if(existingName===name)", page)
+        self.assertIn("if(hasBothCoords)return near", page)
+        self.assertIn("if(hasBothAddresses)return sameAddress", page)
+        self.assertIn("function candidateNameSimilarity(left,right)", page)
+        self.assertIn("function candidateNameClose(left,right)", page)
+        self.assertIn("candidateNameSimilarity(left,right)>=0.6", page)
+
     def test_different_types_are_not_duplicates_but_same_type_is(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -79,16 +89,11 @@ class AuditDuplicateTests(unittest.TestCase):
         self.assertEqual(result["urls_invalidas"], [])
         self.assertEqual(result["coordenadas_invalidas"], [])
 
-    def test_legacy_json_updater_is_disabled(self):
-        source = (Path(__file__).with_name("actualizar.py")).read_text(encoding="utf-8")
-        self.assertIn("está retirado", source)
-        self.assertIn("public.listings", source)
- 
     def test_public_page_reads_fichas_from_the_single_supabase_catalog(self):
         page = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
         self.assertIn("async function cargarCatalogoSupabase()", page)
         self.assertIn('listings?select=id,data,verified_at', page)
-        self.assertIn('site_settings?select=data&id=eq.catalogo', page)
+        self.assertIn('site_settings?select=id,public_data&id=eq.catalogo', page)
         self.assertIn("await aplicarCambios(", page)
         self.assertNotIn('fetch("fichas_completas.json', page)
         self.assertNotIn('sb.from("listing_overrides")', page)
@@ -169,6 +174,27 @@ class UsefulCompletenessAndVerificationTests(unittest.TestCase):
             "0": 1, "1": 0, "2": 0, "3": 1, "4": 0, "5": 0, "6": 1
         })
         self.assertEqual(result["total_fichas"], 3)
+
+    def test_legacy_incompleta_is_not_a_verification_state(self):
+        result = audit.resumen_completitud_y_verificacion([
+            {"id": "legacy", "estado_verificacion": "incompleta"}
+        ])
+        self.assertEqual(result["estados_verificacion"], {
+            "verificada": 0, "pendiente": 0, "insuficiente": 0, "otros": 1
+        })
+
+    def test_admin_and_public_page_share_the_same_six_fields_and_status_labels(self):
+        root = Path(__file__).parent
+        admin = (root / "admin.html").read_text(encoding="utf-8")
+        public = (root / "index.html").read_text(encoding="utf-8")
+        six_fields = '["a","p","e","w","h","d"]'
+        self.assertIn(six_fields, admin)
+        self.assertIn('const camposUtiles=["a","p","e","w","h","d"]', public)
+        for label in ("Verificada", "Pendiente de verificar", "Datos Dudosos"):
+            self.assertIn(label, admin)
+            self.assertIn(label, public)
+        self.assertNotIn("Incompleta", admin)
+        self.assertNotIn("Incompleta", public)
 
     def test_verification_is_independent_from_completeness(self):
         items = [
