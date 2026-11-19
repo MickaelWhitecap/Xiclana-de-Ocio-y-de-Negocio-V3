@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Ctext%20y%3D%27.9em%27%20font-size%3D%2790%27%3E%F0%9F%8F%96%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <link rel="preload" as="image" href="cabecera.webp" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f4f7f6;--card:#fff;--ink:#0d2238;--mut:#566879;--ocio:#d6456b;--neg:#1b5fa8;--sol:#f6b93b;--bd:#d5e0e4;--nav:#0d2238;--acc:var(--neg);--dsp:"Manrope","Trebuchet MS",system-ui,sans-serif;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#09182a;--card:#10263d;--ink:#e9f1f7;--mut:#9db2c3;--ocio:#ff7a98;--neg:#6aaef2;--bd:#223a52;--nav:#050f1b}}
@@ -679,7 +679,7 @@ const GROUPS={
 let cat="",grupo="",modo="";
 const IC=[[/playa/i,"🏖️"],[/^bar|discoteca|baile/i,"🍹"],[/restaur|comida/i,"🍽️"],[/cafe/i,"☕"],[/helad/i,"🍦"],[/hotel|hostal|aloja|apartam|camping/i,"🏨"],[/supermerc|tienda|comercio|bazar/i,"🛒"],[/farmac|clínica|dentist|médic|veterin/i,"⚕️"],[/museo|galer|cultura|teatro|cine|bibliot/i,"🎭"],[/patrimonio|mirador|atracc/i,"🏰"],[/natur|parque|marisma/i,"🌿"],[/golf/i,"⛳"],[/gimnas|deporte|estadio|piscina|puerto/i,"🏊"],[/mercado|panader|carnic|fruter|pescad|bodega|vino/i,"🧺"],[/banco|gestor|asesor|abogado|seguros|financ/i,"🏦"],[/taller|neum|recamb|concesion|gasolin|lavado|alquiler|autoescuela/i,"🚗"],[/peluq|estética|ropa|calzado|joy|óptica/i,"✂️"],[/inmobil/i,"🏠"],[/colegio|guarder/i,"🎓"],[/plaza|paseo/i,"⛲"]];
 function ico(x){const k=IC.find(i=>i[0].test(x.c));return k?k[1]:(x.t==="ocio"?"✨":"🏪")}
-let DEST={};
+let DEST={},ESPACIOS=null;
 function activos(){const h=new Date().toISOString().slice(0,10);return((DEST&&DEST.espacios)||[]).filter(d=>d&&d.n&&(!d.desde||d.desde<=h)&&(!d.hasta||d.hasta>=h))}
 const LOGO="logo-on.webp";
 function logo(t){const i=el("img","sp-logo");i.src=LOGO;i.alt="ON: "+t;i.title=t;i.width=56;return i}
@@ -707,8 +707,8 @@ async function loadAdvertisingSlotsPublic(){
   const data=await response.json();
   const today=new Date().toISOString().slice(0,10);
   const rows=(data||[]).filter(x=>x.status==="active"&&x.listing_name&&(!x.starts_at||x.starts_at<=today)&&(!x.ends_at||x.ends_at>=today));
-  DEST=DEST||{};DEST.espacios=rows.map(x=>({n:x.listing_name,p:x.phone,ubicacion:x.location,promo:x.promotion,lema:x.hook_text,w:x.target_url,imagen:x.image_url,lado:x.slot_id===1?"i":"d",desde:x.starts_at,hasta:x.ends_at}));
-  pintarDest();
+  ESPACIOS=rows.map(x=>({n:x.listing_name,p:x.phone,ubicacion:x.location,promo:x.promotion,lema:x.hook_text,w:x.target_url,imagen:x.image_url,lado:x.slot_id===1?"i":"d",desde:x.starts_at,hasta:x.ends_at}));
+  DEST={...(DEST||{}),espacios:ESPACIOS};pintarDest();
  }catch(err){console.warn("No se pudieron cargar los espacios publicitarios; las fichas siguen disponibles:",err)}
  finally{clearTimeout(timeout)}
 }
@@ -770,9 +770,6 @@ async function aplicarCambios(j){
   let items=(j.items||[]).filter(x=>x&&x._xiclana_deleted!==true&&!esAguaGenerica(x.n||x.nombre||x.name||x.title)).map(x=>({...x,seed:1}));
   // Las correcciones administrativas ya se sincronizan al catálogo durante la publicación.
   // La web pública no consulta listing_overrides ni listing_categories.
-  SEED=items;DEST=j.destacados||{};pintarDest();loadAdvertisingSlotsPublic();
-  $("#fecha").textContent="Datos actualizados: "+j.actualizado+" · "+items.length+" fichas";
-  render();
   // Oculta duplicados exactos solo en la vista pública; conserva todos los IDs en el catálogo maestro y en Supabase.
   // Prioridad: ficha manual verificada > oficial > consolidado > propuesta. Solo agrupa si coinciden nombre, categoría, tipo y dirección.
   const claveExacta=x=>{
@@ -817,29 +814,54 @@ async function aplicarCambios(j){
   // Camping y Nautica pertenecen a Ocio: evitar que aparezcan en Negocio.
   const normalizarCategoria=v=>String(v||"").normalize("NFD").replace(/\p{Diacritic}/gu,"").toLowerCase().trim();
   items=items.map(x=>["camping","nautica"].includes(normalizarCategoria(x.c))?({...x,t:"ocio"}):x);
-  SEED=items;pintarDest();
-  $("#fecha").textContent="Datos actualizados: "+j.actualizado+" · "+items.length+" fichas";
+  SEED=items;DEST={...(j.destacados||{}),...(ESPACIOS?{espacios:ESPACIOS}:{})};pintarDest();
+  $("#fecha").textContent="Datos actualizados: "+j.actualizado+" · "+items.length+" fichas"+(j.deCache?" (copia guardada, comprobando novedades…)":"");
   render();
  }
+ // Solo se piden los campos que muestra la web pública (no todo el JSON interno de cada ficha).
+ const CAMPOS_PUBLICOS=["n","t","c","a","p","e","w","h","d","s","f","m","lat","lon","contactos_alternativos","estado_verificacion","_xiclana_deleted"];
+ const SELECT_LISTINGS="id,verified_at,"+CAMPOS_PUBLICOS.map(k=>k+":data->"+k).join(",");
+ const CACHE_CATALOGO="xiclana-catalogo-v1";
+ function leerCatalogoGuardado(){try{const c=JSON.parse(localStorage.getItem(CACHE_CATALOGO)||"null");return c&&Array.isArray(c.items)?c:null}catch(e){return null}}
+ function guardarCatalogo(c){try{localStorage.setItem(CACHE_CATALOGO,JSON.stringify(c))}catch(e){try{localStorage.removeItem(CACHE_CATALOGO)}catch(_){}}}
  async function cargarCatalogoSupabase(){
  const cfg=window.XICLANA_SUPABASE||{};
  if(!cfg.url||!cfg.anonKey)throw new Error("Falta la configuración pública de Supabase.");
  const base=cfg.url.replace(/\/+$/,"")+"/rest/v1/";
  const headers={apikey:cfg.anonKey,Authorization:"Bearer "+cfg.anonKey};
- const pageSize=500;let rows=[],offset=0;
- while(true){
-  const url=base+"listings?select=id,data,verified_at&is_published=eq.true&is_deleted=eq.false&order=id.asc&limit="+pageSize+"&offset="+offset;
-  const response=await fetch(url,{headers,cache:"no-store"});
+ const pageSize=500;
+ const pagina=async(offset,conTotal)=>{
+  const url=base+"listings?select="+SELECT_LISTINGS+"&is_published=eq.true&is_deleted=eq.false&order=id.asc&limit="+pageSize+"&offset="+offset;
+  const response=await fetch(url,{headers:conTotal?{...headers,Prefer:"count=exact"}:headers,cache:"no-store"});
   if(!response.ok)throw new Error("Supabase no ha permitido cargar el catálogo ("+response.status+").");
   const page=await response.json();if(!Array.isArray(page))throw new Error("Formato de catálogo inesperado en Supabase.");
-  rows.push(...page);if(page.length<pageSize)break;offset+=page.length;
+  const total=Number(String(response.headers.get("content-range")||"").split("/")[1]);
+  return {page,total:Number.isFinite(total)?total:null};
+ };
+ // Primera página, metadatos y espacios publicitarios a la vez.
+ const ajustes=fetch(base+"site_settings?select=id,public_data&id=eq.catalogo",{headers,cache:"no-store"}).then(r=>{if(!r.ok)throw new Error("No se pudieron cargar los datos generales del catálogo.");return r.json()});
+ ajustes.catch(()=>{});
+ const primera=await pagina(0,true);
+ const rows=[...primera.page];
+ if(primera.page.length===pageSize){
+  if(primera.total!=null){
+   // Con el total conocido, el resto de páginas se piden en paralelo.
+   const offsets=[];for(let o=pageSize;o<primera.total;o+=pageSize)offsets.push(o);
+   (await Promise.all(offsets.map(o=>pagina(o,false)))).forEach(r=>rows.push(...r.page));
+  }else{
+   for(let offset=pageSize;;offset+=pageSize){const r=await pagina(offset,false);rows.push(...r.page);if(r.page.length<pageSize)break}
+  }
  }
- const settingResponse=await fetch(base+"site_settings?select=id,public_data&id=eq.catalogo",{headers,cache:"no-store"});
- if(!settingResponse.ok)throw new Error("No se pudieron cargar los datos generales del catálogo.");
- const settings=await settingResponse.json();
- const items=rows.map(row=>({...row.data,id:row.id,verified_at:row.verified_at,seed:1}));
- await aplicarCambios({...((settings?.[0]?.public_data)||{}),items,destacados:settings?.[0]?.public_data?.destacados||{}});
+ const settings=await ajustes;
+ const items=rows.map(row=>{const x={id:row.id,verified_at:row.verified_at,seed:1};CAMPOS_PUBLICOS.forEach(k=>{if(row[k]!==null&&row[k]!==undefined)x[k]=row[k]});return x});
+ const publico=(settings?.[0]?.public_data)||{};
+ const catalogo={actualizado:publico.actualizado,destacados:publico.destacados||{},items};
+ await aplicarCambios(catalogo);
+ guardarCatalogo(catalogo);
  }
-cargarCatalogoSupabase().catch(err=>{console.error(err);$("#fecha").textContent="No se pudo conectar con la base de datos central de Xiclana.";render()});
+// Pinta al instante la última copia guardada en este navegador y después la sustituye por la versión de Supabase.
+{const guardado=leerCatalogoGuardado();if(guardado)aplicarCambios({...guardado,deCache:true}).catch(err=>console.warn("No se pudo pintar la copia guardada:",err))}
+loadAdvertisingSlotsPublic();
+cargarCatalogoSupabase().catch(err=>{console.error(err);if(!leerCatalogoGuardado())$("#fecha").textContent="No se pudo conectar con la base de datos central de Xiclana.";else $("#fecha").textContent+=" · sin conexión con la base de datos, mostrando la copia guardada";render()});
 
 </script></body></html>
