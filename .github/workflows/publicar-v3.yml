@@ -25,7 +25,7 @@ jobs:
         run: |
           python - <<'PY'
           import pathlib, re
-          for page in ("v3/index.html", "v3/admin.html", "v3/exportar-fichas.html"):
+          for page in ("v3/index.html", "v3/admin.html", "v3/exportar-fichas.html", "v3/completar-ficha.html"):
               html=pathlib.Path(page).read_text(encoding="utf-8")
               scripts=re.findall(r'<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>',html,re.I)
               pathlib.Path("/tmp/"+pathlib.Path(page).stem+".js").write_text("\n".join(scripts),encoding="utf-8")
@@ -33,20 +33,21 @@ jobs:
           node --check /tmp/index.js
           node --check /tmp/admin.js
           node --check /tmp/exportar-fichas.js
+          node --check /tmp/completar-ficha.js
       - name: Preparar sitio sin catálogo JSON local
         env:
           BUILD_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           set -euo pipefail
           mkdir -p _site
-          cp v3/index.html v3/admin.html v3/exportar-fichas.html v3/supabase-config.js _site/
+          cp v3/index.html v3/admin.html v3/exportar-fichas.html v3/completar-ficha.html v3/supabase-config.js _site/
           cp v3/espacio-1-flamenca.jpg _site/
           cp README.md _site/README.md
           python - <<'PY'
           import os
           from pathlib import Path
           build=os.environ["BUILD_ID"]
-          for name in ("index.html","admin.html","exportar-fichas.html"):
+          for name in ("index.html","admin.html","exportar-fichas.html","completar-ficha.html"):
               p=Path("_site")/name
               html=p.read_text(encoding="utf-8")
               html=html.replace("</head>",f"<!-- XICLANA_BUILD_ID={build} -->\\n</head>",1)

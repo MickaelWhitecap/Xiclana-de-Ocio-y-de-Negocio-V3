@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d2238">
+<title>Completar ficha · Xiclana</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Bricolage+Grotesque:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;--bg:#f5f6f2;--card:#fff;--ink:#172f42;--mut:#61727d;--bd:#dbe3e2;--nav:#123247;--acc:#3479B9;--ok:#246a4a;--err:#a83343}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,sans-serif}
+header{background:var(--nav);color:white;padding:1.2rem max(1rem,calc((100% - 760px)/2))}
+header h1{font:800 1.5rem/1.15 "Bricolage Grotesque",system-ui;margin:0}
+header p{margin:.35rem 0 0;color:#d8e5ec}
+main{max-width:760px;margin:1.5rem auto;padding:0 1rem 3rem}
+.panel{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:1.2rem;margin-bottom:1rem;box-shadow:0 5px 20px #173f4308}
+h2{font:800 1.3rem/1.2 "Bricolage Grotesque",system-ui;margin:.1rem 0 .5rem}
+.muted{color:var(--mut);font-size:.94rem}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem}
+.wide{grid-column:1/-1}
+label{display:block;font-weight:700;font-size:.9rem;margin-bottom:.25rem}
+input,textarea{width:100%;font:inherit;color:#155A9C;border:1px solid var(--bd);border-radius:9px;padding:.72rem;background:white;min-width:0}
+input:focus,textarea:focus{outline:2px solid var(--acc);border-color:var(--acc);outline-offset:1px}
+textarea{resize:vertical}
+button{font:inherit;font-weight:700;border:0;border-radius:9px;background:var(--nav);color:white;padding:.75rem 1rem;cursor:pointer}
+button:disabled{opacity:.5;cursor:wait}
+.status{padding:.85rem 1rem;border-radius:10px;background:#eaf0f1;margin:.8rem 0}
+.status.error{background:#fff0f1;color:var(--err)}.status.ok{background:#e8f5ed;color:var(--ok)}
+#listing-name{font-weight:800;font-size:1.15rem}
+@media(max-width:620px){.fields{grid-template-columns:1fr}.wide{grid-column:auto}}
+</style>
+</head>
+<body>
+<header><h1>Xiclana de Ocio y de NegOcio</h1><p>Colaboración privada · Completar o corregir una ficha</p></header>
+<main>
+<div id="status" class="status">Comprobando el enlace privado…</div>
+<section id="portal" class="panel" hidden>
+<div id="listing-name"></div>
+<p id="listing-category" class="muted"></p>
+<p class="muted">Puedes completar o corregir los datos de tu establecimiento. El nombre y la clasificación los mantiene Xiclana para evitar cambios accidentales. Tu propuesta será revisada antes de aparecer en la web.</p>
+<form id="form" class="fields">
+<div><label for="a">Dirección</label><input id="a" name="a" maxlength="240"></div>
+<div><label for="p">Teléfono</label><input id="p" name="p" maxlength="100"></div>
+<div class="wide"><label for="e">Correo electrónico</label><input id="e" name="e" type="email" maxlength="180"></div>
+<div class="wide"><label for="w">Página web</label><input id="w" name="w" type="url" maxlength="500" placeholder="https://…"></div>
+<div class="wide"><label for="h">Horario</label><input id="h" name="h" maxlength="300"></div>
+<div class="wide"><label for="s">Dato destacado (opcional)</label><input id="s" name="s" maxlength="500"></div>
+<div class="wide"><label for="d">Descripción</label><textarea id="d" name="d" rows="5" maxlength="3000"></textarea></div>
+<div class="wide"><button id="submit" type="submit">Enviar propuesta de actualización</button></div>
+</form>
+<p class="muted">Los cambios no se publican automáticamente. La ficha actual seguirá visible hasta que Administración revise y apruebe la propuesta.</p>
+</section>
+</main>
+<script src="./supabase-config.js"></script>
+<script>
+(function(){
+"use strict";
+const status=document.querySelector("#status"),portal=document.querySelector("#portal"),form=document.querySelector("#form"),button=document.querySelector("#submit");
+const config=window.XICLANA_SUPABASE||{};
+const token=new URLSearchParams(location.search).get("token")||"";
+const endpoint=(config.url||"").replace(/\/$/,"")+"/functions/v1/public-listing-portal";
+const allowed=["a","p","e","w","h","s","d"];
+let listing=null;
+function message(text,type){status.textContent=text;status.className="status"+(type?" "+type:"")}
+async function call(payload){
+ const response=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json","apikey":config.anonKey||""},body:JSON.stringify({...payload,token})});
+ const result=await response.json().catch(()=>({}));
+ if(!response.ok)throw new Error(result.error||"No se ha podido procesar la solicitud.");
+ return result;
+}
+function fill(data){
+ listing=data;
+ document.querySelector("#listing-name").textContent=data.n||"Establecimiento";
+ document.querySelector("#listing-category").textContent=[data.t==="ocio"?"Ocio":"Negocio",data.c||""].filter(Boolean).join(" · ");
+ allowed.forEach(key=>{form.elements[key].value=data[key]??""});
+ portal.hidden=false;
+}
+async function init(){
+ if(!token){message("El enlace no contiene un código de acceso. Solicita uno nuevo a Xiclana.","error");return}
+ if(!config.url||!config.anonKey){message("No se ha podido conectar con el servicio. Inténtalo más tarde.","error");return}
+ try{const result=await call({action:"read"});fill(result.listing);message("Enlace válido. Puedes revisar los datos de tu ficha.","ok")}
+ catch(error){message(error.message||"El enlace no es válido, ha caducado o ha sido revocado.","error")}
+}
+form.addEventListener("submit",async event=>{
+ event.preventDefault();if(!listing)return;
+ const fields={};allowed.forEach(key=>fields[key]=String(form.elements[key].value||"").trim());
+ button.disabled=true;button.textContent="Enviando…";
+ try{await call({action:"submit",fields});form.querySelectorAll("input,textarea,button").forEach(el=>el.disabled=true);message("Propuesta recibida. Xiclana la revisará antes de modificar la ficha pública.","ok")}
+ catch(error){message(error.message||"No se ha podido enviar la propuesta.","error")}
+ finally{button.textContent="Propuesta enviada";if(!form.querySelector("input:disabled")){button.disabled=false;button.textContent="Enviar propuesta de actualización"}}
+});
+init();
+})();
+</script>
+</body>
+</html>

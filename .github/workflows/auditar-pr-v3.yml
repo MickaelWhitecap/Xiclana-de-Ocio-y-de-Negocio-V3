@@ -6,6 +6,7 @@ on:
       - "v3/index.html"
       - "v3/admin.html"
       - "v3/exportar-fichas.html"
+      - "v3/completar-ficha.html"
       - "v3/test_auditar_catalogo.py"
       - "v3/migrar_catalogo_supabase.py"
       - "v3/auditar_catalogo.py"
@@ -46,7 +47,7 @@ jobs:
         run: |
           python - <<'PY'
           import re, pathlib
-          for page in ("v3/index.html", "v3/admin.html", "v3/exportar-fichas.html"):
+          for page in ("v3/index.html", "v3/admin.html", "v3/exportar-fichas.html", "v3/completar-ficha.html"):
               html = pathlib.Path(page).read_text(encoding="utf-8")
               scripts = re.findall(r'<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>', html, re.I)
               pathlib.Path("/tmp/" + pathlib.Path(page).stem + ".js").write_text("\n".join(scripts), encoding="utf-8")
@@ -54,6 +55,7 @@ jobs:
           node --check /tmp/index.js
           node --check /tmp/admin.js
           node --check /tmp/exportar-fichas.js
+          node --check /tmp/completar-ficha.js
       - name: Probar reglas de catálogo y fuente única
         run: |
           python -m unittest v3/test_auditar_catalogo.py v3/test_fuente_unica.py
