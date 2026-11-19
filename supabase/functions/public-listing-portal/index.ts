@@ -41,8 +41,8 @@ function adminClient() {
 }
 
 const MAX_PENDING_PER_LISTING = 3;
-const editableFields =new Set(["a", "p", "e", "w", "h", "s", "d"]);
-const limits: Record<string, number> = { a: 240, p: 100, e: 180, w: 500, h: 300, s: 500, d: 3000 };
+const editableFields =new Set(["a", "p", "e", "w", "h", "r", "s", "d"]);
+const limits: Record<string, number> = { a: 240, p: 100, e: 180, w: 500, h: 300, r: 500, s: 500, d: 3000 };
 
 function cleanPatch(input: unknown): Record<string, string | null> {
   if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Los datos enviados no son válidos.");
@@ -59,6 +59,16 @@ function cleanPatch(input: unknown): Record<string, string | null> {
     let url: URL;
     try { url = new URL(patch.w); } catch { throw new Error("La página web debe ser una URL completa."); }
     if (!["http:", "https:"].includes(url.protocol)) throw new Error("La página web debe comenzar por http:// o https://.");
+  }
+  if (patch.r) {
+    // Redes sociales: uno o varios enlaces completos separados por espacios, comas o saltos de línea.
+    const links = patch.r.split(/[\s,;]+/).filter(Boolean);
+    for (const link of links) {
+      let url: URL;
+      try { url = new URL(link); } catch { throw new Error("Las redes sociales deben ser enlaces completos (https://…)."); }
+      if (!["http:", "https:"].includes(url.protocol)) throw new Error("Las redes sociales deben comenzar por http:// o https://.");
+    }
+    patch.r = links.join(" ");
   }
   if (!Object.keys(patch).length) throw new Error("No se han recibido campos para actualizar.");
   return patch;
@@ -98,7 +108,7 @@ Deno.serve(async (req: Request) => {
 
     if (body.action === "read") {
       const data = listing.data || {};
-      const safe = Object.fromEntries(["n", "t", "c", "a", "p", "e", "w", "h", "s", "d"].map((key) => [key, data[key] ?? ""]));
+      const safe = Object.fromEntries(["n", "t", "c", "a", "p", "e", "w", "h", "r", "s", "d"].map((key) => [key, data[key] ?? ""]));
       return response(req, { listing: safe });
     }
 
