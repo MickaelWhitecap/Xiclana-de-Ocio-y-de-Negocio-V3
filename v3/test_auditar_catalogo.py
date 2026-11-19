@@ -184,13 +184,16 @@ class UsefulCompletenessAndVerificationTests(unittest.TestCase):
             "verificada": 0, "pendiente": 0, "insuficiente": 0, "otros": 1
         })
 
-    def test_admin_and_public_page_share_the_same_six_fields_and_status_labels(self):
+    def test_admin_and_public_page_share_the_same_seven_fields_and_status_labels(self):
         root = Path(__file__).parent
         admin = (root / "admin.html").read_text(encoding="utf-8")
         public = (root / "index.html").read_text(encoding="utf-8")
-        six_fields = '["a","p","e","w","h","d"]'
-        self.assertIn(six_fields, admin)
-        self.assertIn('const camposUtiles=["a","p","e","w","h","d"]', public)
+        # Los 7 datos útiles: dirección, teléfono, correo, web, horario, descripción y redes sociales.
+        seven_fields = '["a","p","e","w","h","d","r"]'
+        self.assertIn(seven_fields, admin)
+        self.assertIn('const camposUtiles=["a","p","e","w","h","d","r"]', public)
+        self.assertNotIn('["a","p","e","w","h","d"]', admin)
+        self.assertNotIn('"/6"', admin)
         for label in ("Verificada", "Pendiente de verificar", "Datos Dudosos"):
             self.assertIn(label, admin)
             self.assertIn(label, public)

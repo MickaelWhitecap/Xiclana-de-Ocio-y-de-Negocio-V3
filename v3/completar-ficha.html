@@ -45,6 +45,7 @@ button:disabled{opacity:.5;cursor:wait}
 <div class="wide"><label for="e">Correo electrónico</label><input id="e" name="e" type="email" maxlength="180"></div>
 <div class="wide"><label for="w">Página web</label><input id="w" name="w" type="url" maxlength="500" placeholder="https://…"></div>
 <div class="wide"><label for="h">Horario</label><input id="h" name="h" maxlength="300"></div>
+<div class="wide" id="r-row"><label for="r">Redes sociales</label><input id="r" name="r" maxlength="500" placeholder="https://www.instagram.com/… https://www.facebook.com/…"><small class="muted">Pega los enlaces completos de tus perfiles, separados por un espacio.</small></div>
 <div class="wide"><label for="s">Dato destacado (opcional)</label><input id="s" name="s" maxlength="500"></div>
 <div class="wide"><label for="d">Descripción</label><textarea id="d" name="d" rows="5" maxlength="3000"></textarea></div>
 <div class="wide"><button id="submit" type="submit">Enviar propuesta de actualización</button></div>
@@ -60,7 +61,7 @@ const status=document.querySelector("#status"),portal=document.querySelector("#p
 const config=window.XICLANA_SUPABASE||{};
 const token=new URLSearchParams(location.search).get("token")||"";
 const endpoint=(config.url||"").replace(/\/$/,"")+"/functions/v1/public-listing-portal";
-const allowed=["a","p","e","w","h","s","d"];
+let allowed=["a","p","e","w","h","r","s","d"];
 let listing=null;
 function message(text,type){status.textContent=text;status.className="status"+(type?" "+type:"")}
 async function call(payload){
@@ -73,6 +74,8 @@ function fill(data){
  listing=data;
  document.querySelector("#listing-name").textContent=data.n||"Establecimiento";
  document.querySelector("#listing-category").textContent=[data.t==="ocio"?"Ocio":"Negocio",data.c||""].filter(Boolean).join(" · ");
+ // Si el servicio aún no admite redes sociales, se oculta el campo para no enviar un dato que rechazaría.
+ if(!Object.prototype.hasOwnProperty.call(data,"r")){allowed=allowed.filter(key=>key!=="r");document.querySelector("#r-row").hidden=true}
  allowed.forEach(key=>{form.elements[key].value=data[key]??""});
  portal.hidden=false;
 }
