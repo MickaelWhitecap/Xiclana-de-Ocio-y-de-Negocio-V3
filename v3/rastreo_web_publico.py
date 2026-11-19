@@ -626,8 +626,29 @@ def is_directory_email(value, page_url):
     return domain in blocked or (known_directory and same_domain)
 
 
+# Dominios que nunca son la web propia de un negocio: directorios, agregadores,
+# reseñas y redes sociales. En noviembre de 2026 se guardaron 67 portadas de
+# todociudad.es como si fueran la web de la ficha.
+HOSTS_NO_WEB_PROPIA = (
+    "todociudad.es", "paginasamarillas.es", "qdq.com", "cylex.es", "informa.es",
+    "einforma.com", "empresite.eleconomista.es", "chiclanaguiadempresas.com",
+    "tripadvisor.es", "tripadvisor.com", "gastroranking.es", "wanderlog.com",
+    "booking.com", "airbnb.com", "airbnb.es", "yelp.com", "yelp.es", "trustlocal.es",
+    "habitissimo.es", "cronoshare.com", "doctoralia.es", "micole.net", "buscocolegio.com",
+    "mercadillos.org", "woohands.com", "google.com", "google.es", "goo.gl",
+    "facebook.com", "instagram.com", "tiktok.com", "twitter.com", "x.com",
+    "linkedin.com", "youtube.com", "youtu.be", "linktr.ee", "wa.me",
+)
+
+
+def _same_site(host_a, host_b):
+    a, b = host_a.removeprefix("www."), host_b.removeprefix("www.")
+    return a == b or a.endswith("." + b) or b.endswith("." + a)
+
+
 def clean_website(value, page_url):
-    """Acepta solo URL web HTTP(S) con host válido; no correos disfrazados de URL."""
+    """Acepta solo URL web HTTP(S) con host válido; no correos disfrazados de URL
+    ni enlaces al propio directorio de origen o a otros directorios y redes."""
     raw=str(value or "").strip()
     if not raw:
         return ""
@@ -637,7 +658,9 @@ def clean_website(value, page_url):
     source_host=(urllib.parse.urlsplit(page_url).hostname or "").lower()
     if parsed.scheme.lower() not in ("http","https") or not host or "@" in parsed.netloc:
         return ""
-    if "." not in host or host==source_host or host.removeprefix("www.")==source_host.removeprefix("www."):
+    if "." not in host or _same_site(host, source_host):
+        return ""
+    if any(_same_site(host, blocked) for blocked in HOSTS_NO_WEB_PROPIA):
         return ""
     return urllib.parse.urlunsplit((parsed.scheme.lower(),parsed.netloc,parsed.path,parsed.query,""))
 
@@ -1578,6 +1601,11 @@ def self_test():
     assert classify("Inoxidables Chiclana, S.L.") == ("negocio","Servicios y negocios")
     assert clean_website("http://info@pedenetti.com/","https://directorio.example/ficha") == ""
     assert clean_website("https://empresa.es/","https://directorio.example/ficha") == "https://empresa.es/"
+    # La portada del directorio de origen (aunque esté en otro subdominio) no es la web del negocio.
+    assert clean_website("https://todociudad.es","https://chiclana-de-la-frontera.todociudad.es/negocio/x") == ""
+    assert clean_website("https://www.paginasamarillas.es/","https://www.cylex.es/chiclana/x.html") == ""
+    assert clean_website("https://www.instagram.com/negocio","https://directorio.example/ficha") == ""
+    assert clean_website("https://salinasdechiclana.es/","https://chiclana-de-la-frontera.todociudad.es/negocio/x") == "https://salinasdechiclana.es/"
     assert clean_address("Avenida Bahía 23, 11100, Chiclana","Chiclana de la Frontera","11100") == "Avenida Bahía 23, Chiclana de la Frontera"
     assert "11130" in clean_address("Callejón de la Rosa, nº 2 11.130 Chiclana de la Fra. (Cádiz)")
     assert clean_business_name("INVERAIR FACTORY CHICLANA") == "Inverair Factory"
