@@ -66,7 +66,7 @@ jobs:
           for name, source in (("web pública",public),("Administración",admin),("exportador",exporter)):
               if 'fetch("./fichas_completas.json' in source or 'fetch("fichas_completas.json' in source:
                   raise SystemExit(f"{name} aún depende del JSON local.")
-          if "listings?select=id,data,verified_at" not in public:
+          if '"listings?select="+SELECT_LISTINGS' not in public or 'const SELECT_LISTINGS="id,verified_at,"' not in public:
               raise SystemExit("La web pública no lee la tabla canónica listings.")
           if 'client.from("site_settings")' not in admin or 'supabaseFrom("listings")' not in admin:
               raise SystemExit("Administración no está conectada a la base canónica.")
