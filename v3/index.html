@@ -623,12 +623,14 @@ body{background-color:var(--bg)}
 <style id="etiquetas-compactas-movil">
 /* Móvil: grupos y categorías en una sola fila deslizable cada una, para que las fichas aparezcan enseguida. */
 @media(max-width:650px){
- #main .chips{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:.45rem -1rem .5rem;padding:.15rem 1rem .35rem;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 2.2rem),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 2.2rem),transparent)}
+ #main .chips{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:.45rem 0 .5rem;padding:.15rem 0 .35rem;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 2.2rem),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 2.2rem),transparent)}
  #main .chips::-webkit-scrollbar{display:none}
  #main .chips .chip{flex:0 0 auto;white-space:nowrap;scroll-snap-align:start;padding:.28rem .7rem;font-size:.86rem;line-height:1.2;border-radius:8px;box-shadow:none}
  #main .chips{gap:.35rem}
  #main #chips{margin-bottom:.9rem}
  #main .chips .chip:hover{transform:none}
+ .hero,#elige .dos>.op{overflow:hidden}
+ .hero .t h1{font-size:min(4.4vw,1.9rem);transform:none;white-space:normal;text-wrap:balance}
  #main #maps{flex-wrap:wrap;overflow:visible;-webkit-mask-image:none;mask-image:none;margin:.5rem 0 1rem;padding:0}
 }
 </style>
@@ -746,7 +748,7 @@ function render(){
   const cs=[...new Set(all.filter(x=>x.t===modo&&(!allowed||allowed.has(x.c))).map(x=>x.c))].sort((a,b)=>a.localeCompare(b,"es"));const ch=$("#chips");ch.textContent="";
   [["", "Todas las categorías"],...cs.map(c=>[c,c])].forEach(([v,l])=>{const b=el("button","chip"+(cat===v?" on":""),(cat===v?"✓ ":"")+l);b.onclick=()=>{cat=v;render()};ch.append(b)});
  // En móvil las filas de etiquetas se deslizan: al redibujarlas, dejar visible la etiqueta elegida.
- [gr,ch].forEach(fila=>{const on=fila.querySelector(".chip.on");if(on&&fila.scrollWidth>fila.clientWidth)fila.scrollLeft+=on.getBoundingClientRect().left-fila.getBoundingClientRect().left-16});
+ [gr,ch].forEach(fila=>{const on=fila.querySelector(".chip.on");if(on&&fila.scrollWidth>fila.clientWidth)fila.scrollLeft+=on.getBoundingClientRect().left-fila.getBoundingClientRect().left-8});
  const g=$("#grid");g.textContent="";let n=0;
  const candidatos=all.filter(x=>(!t||x.t===t)&&(!allowed||allowed.has(x.c))&&(!cat||x.c===cat));
  buscarPrioritario(candidatos,q).forEach((x,i)=>{
