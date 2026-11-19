@@ -842,6 +842,45 @@ def name_similarity(left, right):
     return max(seq, token, containment*0.94)
 
 
+ADDRESS_ABBREVIATIONS={
+    "av":"avenida","avd":"avenida","avda":"avenida","avenida":"avenida",
+    "c":"calle","cl":"calle","cll":"calle","calle":"calle",
+    "ctra":"carretera","crta":"carretera","carr":"carretera","cra":"carretera","carretera":"carretera",
+    "pl":"plaza","pza":"plaza","plz":"plaza","plaza":"plaza",
+    "urb":"urbanizacion","urbanizacion":"urbanizacion",
+    "pol":"poligono","poligono":"poligono","ind":"industrial",
+    "cmno":"camino","camino":"camino",
+}
+# Palabras que no distinguen una dirección de otra dentro del municipio.
+ADDRESS_NOISE={
+    "de","del","la","las","el","los","y","n","o","no","num","numero","nro",
+    "chiclana","frontera","cadiz","spain","espana","provincia","andalucia",
+}
+
+
+def address_key(value):
+    """Clave de dirección comparable entre fuentes.
+
+    «Avenida de los Pescadores N.º 1, 11130, Chiclana de la Frontera» y
+    «Av. de los Pescadores, 1, 11139 Chiclana de la Frontera, Cádiz, Spain»
+    son el mismo sitio: se expanden abreviaturas y se quitan código postal,
+    municipio, provincia, país y artículos.
+    """
+    tokens=[]
+    for token in norm(value).split():
+        if re.fullmatch(r"11\d{3}",token):
+            continue
+        token=ADDRESS_ABBREVIATIONS.get(token,token)
+        if token in ADDRESS_NOISE:
+            continue
+        tokens.append(token)
+    return " ".join(tokens)
+
+
+def extract_emails(value):
+    return list(dict.fromkeys(x.casefold() for x in re.findall(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+",str(value or ""))))
+
+
 def record_value(record, *keys):
     for key in keys:
         value=record.get(key)
@@ -855,15 +894,18 @@ def compare_catalog_record(candidate, existing):
     new_name=record_value(candidate,"n","nombre","name")
     old_name=record_value(existing,"n","nombre","name")
     score=name_similarity(new_name,old_name)
-    new_addr=norm(record_value(candidate,"a","direccion","address"))
-    old_addr=norm(record_value(existing,"a","direccion","address"))
+    new_addr=address_key(record_value(candidate,"a","direccion","address"))
+    old_addr=address_key(record_value(existing,"a","direccion","address"))
     new_phones=set(extract_phones(record_value(candidate,"p","telefono","phone")))
     old_phones=set(extract_phones(record_value(existing,"p","telefono","phone")))
     new_web=url_key(record_value(candidate,"w","web","website"))
     old_web=url_key(record_value(existing,"w","web","website"))
     same_address=bool(new_addr and old_addr and new_addr==old_addr)
     different_addresses=bool(new_addr and old_addr and new_addr!=old_addr)
+    new_emails=set(extract_emails(record_value(candidate,"e","email","correo")))
+    old_emails=set(extract_emails(record_value(existing,"e","email","correo")))
     same_contact=bool((new_phones and old_phones and new_phones.intersection(old_phones)) or
+                      (new_emails and old_emails and new_emails.intersection(old_emails)) or
                       (new_web and old_web and new_web==old_web))
     exact_name=norm(new_name)==norm(old_name)
     # Acepta descriptores añadidos solo si el nombre distintivo coincide
@@ -1653,6 +1695,18 @@ def self_test():
         {"n":"Pub El Anticuario","a":"Calle Arrecife 20, 11139 Chiclana","p":"651008282"},
         {"n":"Anticuario","a":"Calle Arrecife 20, 11139 Chiclana","p":""}
     )["kind"] == "duplicate"
+    # Atrípiko (19-nov-2026): la misma dirección escrita de dos formas
+    # no debe tratarse como sucursal distinta.
+    assert compare_catalog_record(
+        {"n":"Atrípiko-Gastro Bar","a":"Avenida de los Pescadores N.º 1, 11130, Chiclana de la Frontera","p":"956406355 / 622156420"},
+        {"n":"Atrípiko - Gastro Bar","a":"Av. de los Pescadores, 1, 11139 Chiclana de la Frontera, Cádiz, Spain, 11130","p":""}
+    )["kind"] == "duplicate"
+    assert compare_catalog_record(
+        {"n":"Atrípiko Gastro Bar","a":"Avenida de los Pescadores 1","e":"atripiko.gastrobar@gmail.com"},
+        {"n":"Atrípiko - Gastro Bar","a":"Calle Otra 5","e":"Atripiko.Gastrobar@gmail.com"}
+    )["kind"] == "duplicate"
+    assert address_key("C/ Severo Ochoa, 34, 11130 Chiclana de la Frontera (Cádiz)") == address_key("Calle Severo Ochoa 34")
+    assert address_key("Calle Real 10") != address_key("Calle Real 12")
     assert compare_catalog_record(
         {"n":"Casa Bernardo","a":"Calle Real 10","p":"956123456"},
         {"n":"Casa Bernarda","a":"Avenida Diputación 20","p":"956999999"}

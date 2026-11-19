@@ -437,6 +437,23 @@ $("#estado-verificacion").addEventListener("change",()=>{if($("#estado-verificac
 function startNew(){selectedId="new:"+crypto.randomUUID();isNew=true;$("#collab-panel").classList.add("hidden");$("#alternate-contacts").classList.add("hidden");$("#form-title").textContent="Nueva ficha";$("#record-meta").textContent="Se añadirá al directorio público";$("#delete-button").disabled=true;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");form.reset();$("#t").value="negocio";$("#estado-verificacion").value="pendiente";$("#v").value=new Date().toISOString().slice(0,10);refreshList()}
 function cancelEdit(){selectedId=null;isNew=false;$("#collab-panel").classList.add("hidden");form.classList.add("hidden");$("#alternate-contacts").classList.add("hidden");$("#empty-editor").classList.remove("hidden");$("#form-title").textContent="Selecciona una ficha";$("#record-meta").textContent="";refreshList()}
 function candidateKey(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
+// Misma regla que address_key() en rastreo_web_publico.py: «Av.» y «Avenida»,
+// código postal, municipio o país no convierten una ficha en sucursal distinta.
+const CANDIDATE_ADDRESS_ABBR={av:"avenida",avd:"avenida",avda:"avenida",c:"calle",cl:"calle",cll:"calle",ctra:"carretera",crta:"carretera",carr:"carretera",cra:"carretera",pl:"plaza",pza:"plaza",plz:"plaza",urb:"urbanizacion",pol:"poligono",ind:"industrial",cmno:"camino"};
+const CANDIDATE_ADDRESS_NOISE=new Set(["de","del","la","las","el","los","y","n","o","no","num","numero","nro","chiclana","frontera","cadiz","spain","espana","provincia","andalucia"]);
+function candidateAddressKey(v){
+ return candidateKey(v).split(" ").filter(t=>t&&!/^11\d{3}$/.test(t)).map(t=>CANDIDATE_ADDRESS_ABBR[t]||t).filter(t=>!CANDIDATE_ADDRESS_NOISE.has(t)).join(" ");
+}
+function candidateContacts(item){
+ const phones=String(item?.p||"").split(/[\/;,|]/).map(x=>x.replace(/\D/g,"")).filter(x=>x.length>=9).map(x=>x.slice(-9));
+ const emails=(String(item?.e||"").match(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g)||[]).map(x=>x.toLowerCase());
+ return new Set([...phones,...emails]);
+}
+function candidateSharesContact(left,right){
+ const a=candidateContacts(left);if(!a.size)return false;
+ for(const x of candidateContacts(right))if(a.has(x))return true;
+ return false;
+}
 function candidateNameSignature(value){
  return candidateKey(value).split(" ").filter(Boolean).sort().join(" ");
 }
@@ -468,16 +485,19 @@ function candidateNameClose(left,right){
  return previous[b.length]<=2;
 }
 function candidateAlreadyExists(candidate){
- const name=candidateNameSignature(candidate.n),address=candidateKey(candidate.a);
+ const name=candidateNameSignature(candidate.n),address=candidateAddressKey(candidate.a);
  if(!name)return null;
  return effectiveItems().find(x=>{
   if(candidate.t&&x.t&&candidateKey(candidate.t)!==candidateKey(x.t))return false;
   const existingName=candidateNameSignature(x.n);
-  const existingAddress=candidateKey(x.a);
+  const existingAddress=candidateAddressKey(x.a);
   const hasBothAddresses=Boolean(address&&existingAddress);
   const sameAddress=hasBothAddresses&&address===existingAddress;
   const hasBothCoords=candidate.lat!=null&&candidate.lon!=null&&x.lat!=null&&x.lon!=null;
   const near=candidateCoordinatesNear(candidate,x);
+  // Nombre igual o parecido y mismo teléfono o correo: es el mismo negocio
+  // aunque las fuentes escriban la dirección o sitúen el punto de otra forma.
+  if((existingName===name||candidateNameClose(candidate.n,x.n))&&candidateSharesContact(candidate,x))return true;
   if(existingName===name){
    // El mismo nombre no basta: cadenas como Covirán, Repsol o Correos
    // pueden tener varios establecimientos. Exigir ubicación coincidente.
