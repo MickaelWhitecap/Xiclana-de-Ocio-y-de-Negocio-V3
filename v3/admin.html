@@ -263,9 +263,10 @@ function renderCategories(){
  $("#category-options").textContent="";all.forEach(c=>{const o=document.createElement("option");o.value=c.name;$("#category-options").append(o)});
  $("#category-list").textContent=all.length?all.map(c=>c.name+(c.type?" ("+(c.type==="ocio"?"Ocio":"Negocio")+")":"")).join(" · "):"Todavía no hay categorías.";
 }
-// Contador de datos: 7 datos útiles por ficha. La línea base se midió en Supabase el 19-nov-2026 (1.518 fichas publicadas).
+// Contador de datos: 7 datos útiles por ficha. La línea base se midió en Supabase el 19-nov-2026 (1.518 fichas publicadas),
+// después de vaciar 71 webs erróneas (portadas de todociudad.es y similares): por eso la web de partida es 361 y no 429.
 const COUNTER_FIELDS=[["a","Dirección"],["p","Teléfono"],["e","Correo electrónico"],["w","Página web"],["h","Horario"],["d","Descripción"],["r","Redes sociales"]];
-const COUNTER_BASELINE={fecha:"2026-11-19",fichas:1518,campos:{a:856,p:607,e:460,w:429,h:107,d:449,r:0},completas:0,vacias:560,verificadas:310};
+const COUNTER_BASELINE={fecha:"2026-11-19",fichas:1518,campos:{a:856,p:607,e:460,w:361,h:107,d:449,r:0},completas:0,vacias:560,verificadas:310};
 function hasValue(v){return v!==undefined&&v!==null&&String(v).trim()!==""}
 function counterStats(){
  const items=effectiveItems().filter(x=>x._xiclana_deleted!==true),campos={};
