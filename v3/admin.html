@@ -657,12 +657,20 @@ function renderProposals(){
   if(p.notes){const n=document.createElement("small");n.textContent="Nota interna: "+p.notes;card.append(n)}
   const preview=document.createElement("div");preview.style.cssText="display:none;margin-top:.65rem;padding:.7rem;border:1px solid var(--bd);border-radius:8px";
   const previewFields=[["Dirección",f.a],["Teléfono",f.p],["Correo",f.e],["Web",f.w],["Horario",f.h],["Descripción",f.d],["Fuente",p.source_name],["Fecha de consulta",p.source_checked_at]];
-  previewFields.forEach(([label,value])=>{if(value===undefined||value===null||String(value).trim()==="")return;const line=document.createElement("p");line.style.cssText="margin:.25rem 0;overflow-wrap:anywhere";const strong=document.createElement("strong");strong.textContent=label+": ";line.append(strong,document.createTextNode(String(value)));preview.append(line)});
-  const useful=["a","p","e","w","h","d"].filter(k=>f[k]!==undefined&&f[k]!==null&&String(f[k]).trim()!=="").length;
+  const updatePatch=f._xiclana_update_target_id&&f._xiclana_update_patch&&typeof f._xiclana_update_patch==="object"?f._xiclana_update_patch:null;
+  const updateTarget=updatePatch?activeListings.find(x=>String(x.id)===String(f._xiclana_update_target_id)):null;
+  if(updatePatch){
+   // Propuesta de actualización: mostrar cada campo con el valor actual y el propuesto.
+   const labels={a:"Dirección",p:"Teléfono",e:"Correo",w:"Web",h:"Horario",s:"Dato destacado",d:"Descripción"};
+   if(!updateTarget){const warn=document.createElement("p");warn.style.cssText="margin:.25rem 0;color:#a83343";warn.textContent="La ficha original ya no está disponible.";preview.append(warn)}
+   Object.entries(updatePatch).forEach(([key,value])=>{const line=document.createElement("p");line.style.cssText="margin:.35rem 0;overflow-wrap:anywhere";const strong=document.createElement("strong");strong.textContent=(labels[key]||key)+": ";const before=String(updateTarget?.[key]??"").trim()||"(vacío)",after=value===null||String(value).trim()===""?"(borrar)":String(value);line.append(strong,document.createTextNode(before+" → "+after));preview.append(line)});
+  }else previewFields.forEach(([label,value])=>{if(value===undefined||value===null||String(value).trim()==="")return;const line=document.createElement("p");line.style.cssText="margin:.25rem 0;overflow-wrap:anywhere";const strong=document.createElement("strong");strong.textContent=label+": ";line.append(strong,document.createTextNode(String(value)));preview.append(line)});
+  const merged=updatePatch?{...(updateTarget||{}),...updatePatch}:f;
+  const useful=["a","p","e","w","h","d"].filter(k=>merged[k]!==undefined&&merged[k]!==null&&String(merged[k]).trim()!=="").length;
   const actions=document.createElement("div");actions.className="actions";
-  const view=document.createElement("button");view.type="button";view.className="secondary";view.textContent="Ver ficha previa";view.setAttribute("aria-expanded","false");view.onclick=()=>{const open=preview.style.display==="none";preview.style.display=open?"block":"none";view.textContent=open?"Ocultar vista previa":"Ver ficha previa";view.setAttribute("aria-expanded",String(open));approve.disabled=!open};actions.append(view);
+  const view=document.createElement("button");view.type="button";view.className="secondary";view.textContent=updatePatch?"Ver cambios propuestos":"Ver ficha previa";view.setAttribute("aria-expanded","false");view.onclick=()=>{const open=preview.style.display==="none";preview.style.display=open?"block":"none";view.textContent=open?"Ocultar vista previa":(updatePatch?"Ver cambios propuestos":"Ver ficha previa");view.setAttribute("aria-expanded",String(open));approve.disabled=!open};actions.append(view);
   const completeness=document.createElement("span");completeness.className="pill";completeness.textContent=useful+"/6";completeness.title="Dirección, teléfono, correo, web, horario y descripción";actions.append(completeness);
-  const approve=document.createElement("button");approve.type="button";approve.disabled=true;approve.title="Abre primero la vista previa para habilitar la aprobación.";approve.textContent="Aprobar y publicar";approve.onclick=()=>reviewProposal(p,"approved");actions.append(approve);
+  const approve=document.createElement("button");approve.type="button";approve.disabled=true;approve.title="Abre primero la vista previa para habilitar la aprobación.";approve.textContent=updatePatch?"Aprobar y aplicar cambios":"Aprobar y publicar";approve.onclick=()=>reviewProposal(p,"approved");actions.append(approve);
   const reject=document.createElement("button");reject.type="button";reject.className="danger";reject.textContent="Descartar";reject.onclick=()=>reviewProposal(p,"rejected");actions.append(reject);
   card.append(actions,preview);root.append(card);
  });

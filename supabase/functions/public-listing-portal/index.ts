@@ -40,7 +40,8 @@ function adminClient() {
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }
 
-const editableFields = new Set(["a", "p", "e", "w", "h", "s", "d"]);
+const MAX_PENDING_PER_LISTING = 3;
+const editableFields =new Set(["a", "p", "e", "w", "h", "s", "d"]);
 const limits: Record<string, number> = { a: 240, p: 100, e: 180, w: 500, h: 300, s: 500, d: 3000 };
 
 function cleanPatch(input: unknown): Record<string, string | null> {
@@ -107,6 +108,16 @@ Deno.serve(async (req: Request) => {
       catch (error) { return response(req, { error: error instanceof Error ? error.message : "Los datos enviados no son válidos." }, 400); }
       const changed = Object.entries(patch).filter(([key, value]) => String(listing.data?.[key] ?? "").trim() !== String(value ?? "").trim());
       if (!changed.length) return response(req, { error: "No hay cambios nuevos que enviar." }, 400);
+      // Evita que un enlace filtrado llene la cola de revisión.
+      const { count: pendingCount, error: pendingError } = await supabase
+        .from("listing_proposals")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending")
+        .eq("fields->>_xiclana_update_target_id", listing.id);
+      if (pendingError) throw pendingError;
+      if ((pendingCount ?? 0) >= MAX_PENDING_PER_LISTING) {
+        return response(req, { error: "Ya hay propuestas pendientes de revisión para esta ficha. Espera a que Xiclana las revise." }, 429);
+      }
       const safePatch = Object.fromEntries(changed);
       const fields = {
         n: String(listing.data?.n || ""),
