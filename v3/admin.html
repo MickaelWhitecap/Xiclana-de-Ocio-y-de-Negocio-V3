@@ -5,32 +5,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Administración · Xiclana</title>
+<script>/* Aplica el modo guardado antes de pintar la página (por defecto, modo noche). */try{document.documentElement.dataset.theme=localStorage.getItem("admin-theme")==="light"?"light":"dark"}catch(e){document.documentElement.dataset.theme="dark"}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Bricolage+Grotesque:wght@700;800&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:light;--bg:#f5f6f2;--card:#fff;--ink:#172f42;--mut:#61727d;--bd:#dbe3e2;--nav:#123247;--acc:#17658a;--ok:#246a4a;--err:#a83343}
+:root{color-scheme:light;--bg:#f5f6f2;--card:#fff;--ink:#172f42;--mut:#61727d;--bd:#dbe3e2;--nav:#123247;--acc:#17658a;--ok:#246a4a;--err:#a83343;--btn:#123247;--field:#fff;--field-ink:#155A9C;--soft:#f8faf9;--chip:#e7f0f5;--status:#eaf0f1;--err-bg:#fff0f1;--err-bd:#f0cbd0;--ok-bg:#e8f5ed;--warn:#8a4b12;--muted:var(--mut);--border:var(--bd)}
+/* Modo noche: colores oscuros suaves para descansar la vista. Se activa con el botón de la cabecera y se recuerda en este navegador. */
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0f1a22;--card:#16242f;--ink:#e3ebf0;--mut:#9fb1bc;--bd:#2b3d4a;--nav:#0a141b;--acc:#5fb3dc;--ok:#79d4a0;--err:#ff8f9b;--btn:#2a6f96;--field:#0f1c25;--field-ink:#8cc4ff;--soft:#1b2b37;--chip:#22394a;--status:#1d2e3a;--err-bg:#3a1d24;--err-bd:#6b3340;--ok-bg:#183326;--warn:#f0b46a}
+:root[data-theme="dark"] .panel{box-shadow:0 5px 20px #0006}
+.theme-toggle{background:transparent;color:white;border:1px solid #ffffff55}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,sans-serif}
 header{background:var(--nav);color:white;padding:1rem max(1rem,calc((100% - 1180px)/2));display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 header a{color:white}h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.15}h1{font-size:1.5rem;margin:0}main{max-width:1180px;margin:1.5rem auto;padding:0 1rem 3rem}
 .panel{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:1.1rem;margin-bottom:1rem;box-shadow:0 5px 20px #173f4308}
-label{display:block;font-weight:700;font-size:.9rem;margin-bottom:.25rem}input,select,textarea{width:100%;font:inherit;color:var(--ink);border:1px solid var(--bd);border-radius:9px;padding:.7rem;background:white;min-width:0;caret-color:#155A9C}input:focus,select:focus,textarea:focus{outline:2px solid #3479B9;border-color:#3479B9;outline-offset:1px}
+label{display:block;font-weight:700;font-size:.9rem;margin-bottom:.25rem}input,select,textarea{width:100%;font:inherit;color:var(--ink);border:1px solid var(--bd);border-radius:9px;padding:.7rem;background:var(--field);min-width:0;caret-color:var(--field-ink)}input:focus,select:focus,textarea:focus{outline:2px solid #3479B9;border-color:#3479B9;outline-offset:1px}
 /* Texto introducido en campos editables: azul corporativo para mejorar lectura y localización. */
-input:not([type="checkbox"]):not([type="radio"]),textarea{color:#155A9C}input::selection,textarea::selection{background:#3479B9;color:white}textarea{resize:vertical}
-button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;background:var(--nav);color:white;padding:.7rem 1rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:.4rem}button.secondary{background:white;color:var(--ink);border:1px solid var(--bd)}button.danger{background:#fff0f1;color:var(--err);border:1px solid #f0cbd0}button:disabled{opacity:.5;cursor:wait}
+input:not([type="checkbox"]):not([type="radio"]),textarea{color:var(--field-ink)}input::selection,textarea::selection{background:#3479B9;color:white}textarea{resize:vertical}
+button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;background:var(--btn);color:white;padding:.7rem 1rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:.4rem}button.secondary{background:var(--field);color:var(--ink);border:1px solid var(--bd)}button.danger{background:var(--err-bg);color:var(--err);border:1px solid var(--err-bd)}button:disabled{opacity:.5;cursor:wait}
 .grid{display:grid;grid-template-columns:minmax(230px,.85fr) minmax(0,1.5fr);gap:1rem;align-items:start}
 /* Los dos espacios publicitarios tienen la misma anchura y superficie. */
 #advertising-panel > .grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
 #advertising-panel > .grid > .panel{height:100%;min-width:0}
 .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}.wide{grid-column:1/-1}
-.actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem}.muted{color:var(--mut);font-size:.92rem}.status{padding:.75rem 1rem;border-radius:10px;background:#eaf0f1;margin:.8rem 0}.status.error{background:#fff0f1;color:var(--err)}.status.ok{background:#e8f5ed;color:var(--ok)}
-#list{display:flex;flex-direction:column;gap:.4rem;max-height:65vh;overflow:auto;margin-top:.7rem}.item{width:100%;text-align:left;background:white;color:var(--ink);border:1px solid var(--bd);padding:.7rem;border-radius:9px;display:block}.item.active{border-color:var(--acc);box-shadow:0 0 0 2px #17658a22}.item small{display:block;color:var(--mut);font-weight:400}.pill{font-size:.75rem;border-radius:999px;background:#e7f0f5;padding:.15rem .5rem;display:inline-block;margin-top:.3rem}.verification{display:inline-flex;align-items:center;border-radius:999px;padding:.015rem .16rem;font:400 .49rem/1 Figtree,system-ui,sans-serif;font-weight:400;white-space:nowrap;margin:.1rem 0 0 auto;border:1px solid transparent}.verification.verified{background:#279653;color:#fff;border-color:#279653}.verification.pending{background:#f2c94c;color:#594300;border-color:#f2c94c}.verification.insufficient{background:#d94b45;color:#fff;border-color:#d94b45}
+.actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem}.muted{color:var(--mut);font-size:.92rem}.status{padding:.75rem 1rem;border-radius:10px;background:var(--status);margin:.8rem 0}.status.error{background:var(--err-bg);color:var(--err)}.status.ok{background:var(--ok-bg);color:var(--ok)}
+#list{display:flex;flex-direction:column;gap:.4rem;max-height:65vh;overflow:auto;margin-top:.7rem}.item{width:100%;text-align:left;background:var(--field);color:var(--ink);border:1px solid var(--bd);padding:.7rem;border-radius:9px;display:block}.item.active{border-color:var(--acc);box-shadow:0 0 0 2px #17658a22}.item small{display:block;color:var(--mut);font-weight:400}.pill{font-size:.75rem;border-radius:999px;background:var(--chip);padding:.15rem .5rem;display:inline-block;margin-top:.3rem}.verification{display:inline-flex;align-items:center;border-radius:999px;padding:.015rem .16rem;font:400 .49rem/1 Figtree,system-ui,sans-serif;font-weight:400;white-space:nowrap;margin:.1rem 0 0 auto;border:1px solid transparent}.verification.verified{background:#279653;color:#fff;border-color:#279653}.verification.pending{background:#f2c94c;color:#594300;border-color:#f2c94c}.verification.insufficient{background:#d94b45;color:#fff;border-color:#d94b45}
 .hidden{display:none!important}.topline{display:flex;align-items:center;justify-content:space-between;gap:.7rem;flex-wrap:wrap}
 @media(max-width:760px){.grid{grid-template-columns:1fr}#advertising-panel > .grid{grid-template-columns:1fr}.fields{grid-template-columns:1fr}#list{max-height:32vh}.wide{grid-column:auto}}
-.counter-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem;margin:.8rem 0}.counter-grid div{border:1px solid var(--bd);border-radius:10px;padding:.6rem .75rem;background:#f8faf9}.counter-grid strong{display:block;font-size:1.35rem}.counter-grid small{color:var(--mut)}.counter-table{width:100%;border-collapse:collapse;font-size:.95rem}.counter-table th,.counter-table td{text-align:left;padding:.45rem .5rem;border-bottom:1px solid var(--bd)}.counter-table td.up{color:var(--ok);font-weight:700}.counter-table td.down{color:var(--err);font-weight:700}
+.counter-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem;margin:.8rem 0}.counter-grid div{border:1px solid var(--bd);border-radius:10px;padding:.6rem .75rem;background:var(--soft)}.counter-grid strong{display:block;font-size:1.35rem}.counter-grid small{color:var(--mut)}.counter-table{width:100%;border-collapse:collapse;font-size:.95rem}.counter-table th,.counter-table td{text-align:left;padding:.45rem .5rem;border-bottom:1px solid var(--bd)}.counter-table td.up{color:var(--ok);font-weight:700}.counter-table td.down{color:var(--err);font-weight:700}
 </style>
 </head>
 <body>
-<header><div><h1>Administración de Xiclana</h1><div class="muted" style="color:#d8e5ec">Panel privado · Ocio y de NegOcio</div></div><div class="actions" style="margin:0"><a class="button" href="./">Ver web pública</a><button id="logout" class="secondary hidden">Cerrar sesión</button></div></header>
+<header><div><h1>Administración de Xiclana</h1><div class="muted" style="color:#d8e5ec">Panel privado · Ocio y de NegOcio</div></div><div class="actions" style="margin:0"><button id="theme-toggle" type="button" class="theme-toggle" aria-pressed="true">☀️ Modo día</button><a class="button" href="./">Ver web pública</a><button id="logout" class="secondary hidden">Cerrar sesión</button></div></header>
 <main>
 <div id="status" class="status">Comprobando configuración…</div>
 <section id="login" class="panel hidden">
@@ -61,7 +66,7 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
 <section class="panel" id="advertising-panel">
  <div class="topline"><div><h2 style="margin:.2rem 0">Gestión de los dos espacios publicitarios</h2><div class="muted">Cada espacio se administra por separado. Solo las campañas activas y dentro de sus fechas se mostrarán en la web pública.</div></div><button type="button" id="ads-refresh" class="secondary">Actualizar espacios</button></div>
  <div class="grid" style="margin-top:1rem">
-  <section class="panel" style="margin:0;background:#f8faf9"><h3>Espacio 1 · Patrocinador principal</h3><form class="fields ad-form" data-slot="1">
+  <section class="panel" style="margin:0;background:var(--soft)"><h3>Espacio 1 · Patrocinador principal</h3><form class="fields ad-form" data-slot="1">
   <div class="wide"><label for="ad1-source">Establecimiento del directorio (opcional)</label><select id="ad1-source" data-key="source"><option value="">Nuevo anunciante / introducir datos manualmente</option></select><small class="muted">Si eliges una ficha, se recuperarán sus datos disponibles y podrás editarlos para el anuncio.</small></div>
   <div class="wide"><label for="ad1-name">Nombre de la ficha / anunciante *</label><input id="ad1-name" data-key="listing_name" required maxlength="180"></div>
   <div><label for="ad1-phone">Teléfono</label><input id="ad1-phone" data-key="phone" maxlength="100"></div><div><label for="ad1-location">Ubicación</label><input id="ad1-location" data-key="location" maxlength="240"></div>
@@ -72,7 +77,7 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
   <div><label for="ad1-status">Estado</label><select id="ad1-status" data-key="status"><option value="available">Disponible</option><option value="draft">En preparación</option><option value="active">Activo / publicado</option><option value="expired">Caducado</option></select></div>
   <div><label for="ad1-start">Inicio de publicación</label><input id="ad1-start" data-key="starts_at" type="date"></div><div><label for="ad1-end">Fin de publicación</label><input id="ad1-end" data-key="ends_at" type="date"></div>
   <div class="wide"><label style="display:flex;gap:.5rem;align-items:center"><input type="checkbox" data-key="create_listing" style="width:auto"> Crear también una ficha en el directorio público</label><small class="muted">Desactivado por defecto. Si se marca, se solicitará confirmación al guardar.</small></div>
-  <div class="wide actions"><button type="submit">Guardar espacio 1</button></div></form></section><section class="panel" style="margin:0;background:#f8faf9"><h3>Espacio 2 · Oferta destacada</h3><form class="fields ad-form" data-slot="2">
+  <div class="wide actions"><button type="submit">Guardar espacio 1</button></div></form></section><section class="panel" style="margin:0;background:var(--soft)"><h3>Espacio 2 · Oferta destacada</h3><form class="fields ad-form" data-slot="2">
   <div class="wide"><label for="ad2-source">Establecimiento del directorio (opcional)</label><select id="ad2-source" data-key="source"><option value="">Nuevo anunciante / introducir datos manualmente</option></select><small class="muted">Si eliges una ficha, se recuperarán sus datos disponibles y podrás editarlos para el anuncio.</small></div>
   <div class="wide"><label for="ad2-name">Nombre de la ficha / anunciante *</label><input id="ad2-name" data-key="listing_name" required maxlength="180"></div>
   <div><label for="ad2-phone">Teléfono</label><input id="ad2-phone" data-key="phone" maxlength="100"></div><div><label for="ad2-location">Ubicación</label><input id="ad2-location" data-key="location" maxlength="240"></div>
@@ -120,7 +125,7 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
   <div><label for="pr-notes">Notas internas</label><input id="pr-notes" maxlength="1000" placeholder="Qué falta verificar"></div>
   <div class="wide actions"><button id="proposal-save" type="submit">Guardar como provisional</button></div>
  </form>
- <div class="panel" style="margin-top:1rem;background:#f8faf9">
+ <div class="panel" style="margin-top:1rem;background:var(--soft)">
   <h3>Importar lote de fichas provisionales</h3>
   <p class="muted">Pega un array JSON de negocios o lugares de ocio. Se guardarán como propuestas privadas pendientes; nunca se publican automáticamente. Máximo 100 fichas por lote. Campos: n (nombre), c (categoría), t (negocio/ocio), a (dirección), p (teléfono), e (correo), w (web), h (horario), s (destacado), d (descripción), source_name, source_url, source_checked_at, notes.</p>
   <label for="proposal-json">Lote JSON</label>
@@ -136,7 +141,7 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
 <aside class="panel"><label for="search">Buscar ficha por nombre, categoría o dirección</label><input id="search" type="search" placeholder="Ej. restaurante, calle…"><div id="count" class="muted"></div><div class="muted" style="margin:.65rem 0;padding:.65rem;border:1px solid var(--border,#ddd);border-radius:10px"><strong style="display:block;font-size:1rem;color:var(--ink)">Completitud de información útil (1–6)</strong><ol style="list-style:none;margin:.4rem 0 0;padding:0"><li><strong>1.</strong> Dirección</li><li><strong>2.</strong> Teléfono</li><li><strong>3.</strong> Correo electrónico</li><li><strong>4.</strong> Página web</li><li><strong>5.</strong> Horario</li><li><strong>6.</strong> Descripción</li></ol><small>Tipo, categoría, dato destacado y coordenadas no cuentan. El nombre tampoco.</small></div><div id="list"></div></aside>
 <section class="panel">
 <div class="topline"><div><h2 id="form-title">Selecciona una ficha</h2><div id="record-meta" class="muted"></div></div></div>
-<div id="collab-panel" class="panel wide hidden" style="margin:.8rem 0;background:#f8faf9">
+<div id="collab-panel" class="panel wide hidden" style="margin:.8rem 0;background:var(--soft)">
  <strong>Enlace privado para completar la ficha</strong>
  <p class="muted">Genera un enlace temporal de 30 días. Solo permite proponer cambios en esta ficha; la publicación siempre requiere aprobación administrativa.</p>
  <div class="actions">
@@ -172,6 +177,11 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
 </section>
 <p class="muted">Consejo de seguridad: no compartas la contraseña y no introduzcas nunca una clave service_role en esta página ni en el repositorio.</p>
 </main>
+<script>
+(function(){const btn=document.getElementById("theme-toggle"),root=document.documentElement;
+ function paint(){const dark=root.dataset.theme==="dark";btn.textContent=dark?"☀️ Modo día":"🌙 Modo noche";btn.setAttribute("aria-pressed",String(dark));btn.title=dark?"Cambiar a fondo claro":"Cambiar a fondo oscuro"}
+ btn.addEventListener("click",()=>{root.dataset.theme=root.dataset.theme==="dark"?"light":"dark";try{localStorage.setItem("admin-theme",root.dataset.theme)}catch(e){}paint()});paint()})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0"></script>
 <script src="./supabase-config.js"></script>
 <script>
@@ -479,7 +489,7 @@ function renderAddressProposals(){
   const card=document.createElement("div");card.className="item";card.style.marginBottom=".65rem";
   const title=document.createElement("strong");title.textContent=item.n||proposal.nombre||"Ficha sin nombre";card.append(title);
   const detail=document.createElement("small");detail.textContent=["Dirección propuesta: "+(proposal.direccion_propuesta||"Sin dirección propuesta"),"Confianza "+(proposal.confianza||"no indicada"),proposal.fuente||"OpenStreetMap"].join(" · ");card.append(detail);
-  const preview=document.createElement("div");preview.className="address-proposal-preview";preview.style.cssText="display:none;margin-top:.7rem;padding:.75rem;background:#f5f7f7;border:1px solid var(--bd);border-radius:8px";
+  const preview=document.createElement("div");preview.className="address-proposal-preview";preview.style.cssText="display:none;margin-top:.7rem;padding:.75rem;background:var(--soft);border:1px solid var(--bd);border-radius:8px";
   const heading=document.createElement("strong");heading.textContent="Comparación antes de aprobar";preview.append(heading);
   const fields=[["Nombre",item.n||proposal.nombre],["Tipo",item.t],["Categoría",item.c],["Dirección actual",item.a||"Sin dirección registrada"],["Dirección propuesta",proposal.direccion_propuesta],["Teléfono",item.p],["Correo",item.e],["Web",item.w],["Horario",item.h],["Descripción",item.d],["Redes sociales",item.r],["Confianza",proposal.confianza],["Fuente",proposal.fuente||"OpenStreetMap"],["Identificador de ficha",proposal.id_ficha]];
   fields.forEach(([label,value])=>{if(value===undefined||value===null||String(value).trim()==="")return;const row=document.createElement("p");row.style.cssText="margin:.35rem 0;overflow-wrap:anywhere";const strong=document.createElement("b");strong.textContent=label+": ";row.append(strong,document.createTextNode(String(value)));preview.append(row)});
@@ -530,7 +540,7 @@ function renderAutomaticCandidates(){
   const card=document.createElement("div");card.className="item";card.style.marginBottom=".8rem";
   const title=document.createElement("strong");title.textContent=candidate.n||"Candidata sin nombre";card.append(title);
   const detail=document.createElement("small");detail.textContent=[candidate.c||"Sin categoría",candidate.t||"Sin tipo",candidate.a||"Sin dirección",candidate.f||"OpenStreetMap"].filter(Boolean).join(" · ");card.append(detail);
-  const preview=document.createElement("div");preview.style.cssText="display:none;margin-top:.75rem;padding:.85rem;background:var(--soft,#f5f7f7);border:1px solid var(--bd);border-radius:9px";
+  const preview=document.createElement("div");preview.style.cssText="display:none;margin-top:.75rem;padding:.85rem;background:var(--soft);border:1px solid var(--bd);border-radius:9px";
   const heading=document.createElement("h3");heading.textContent="Vista previa de la ficha que se incorporaría";heading.style.margin="0 0 .55rem";preview.append(heading);
   // Cálculo idéntico al indicador 1-7 del catálogo; se muestra junto al acceso a la vista previa.
   const completenessFields=[["a","Dirección"],["p","Teléfono"],["e","Correo electrónico"],["w","Página web"],["h","Horario"],["d","Descripción"],["r","Redes sociales"]];
@@ -547,7 +557,7 @@ function renderAutomaticCandidates(){
   const extras=Object.entries(candidate).filter(([key,value])=>!["n","t","c","a","p","e","w","h","d","r","lat","lon","f","id","osm_id","osm_type","url_osm"].includes(key)&&value!==undefined&&value!==null&&String(value).trim()!=="");
   if(extras.length){const details=document.createElement("details");details.style.marginTop=".7rem";const summary=document.createElement("summary");summary.textContent="Mostrar otros datos recibidos de OSM";details.append(summary);extras.forEach(([key,value])=>appendField(details,key,typeof value==="object"?JSON.stringify(value):value));preview.append(details)}
   const duplicate=candidateAlreadyExists(candidate);
-  if(duplicate){const note=document.createElement("small");note.textContent="Coincidencia con la ficha existente «"+(duplicate.n||"ficha existente")+"» (se comparan también nombres con palabras en distinto orden). No se publicará otra ficha; revisa y completa la existente.";note.style.color="#8a4b12";card.append(note)}
+  if(duplicate){const note=document.createElement("small");note.textContent="Coincidencia con la ficha existente «"+(duplicate.n||"ficha existente")+"» (se comparan también nombres con palabras en distinto orden). No se publicará otra ficha; revisa y completa la existente.";note.style.color="var(--warn)";card.append(note)}
   const actions=document.createElement("div");actions.className="actions";let reviewAction=null;
   const view=document.createElement("button");view.type="button";view.className="secondary";view.textContent="Ver ficha previa";view.setAttribute("aria-expanded","false");view.onclick=()=>{const open=preview.style.display==="none";preview.style.display=open?"block":"none";view.textContent=open?"Ocultar vista previa":"Ver ficha previa";view.setAttribute("aria-expanded",String(open))};actions.append(view);
   const completeness=document.createElement("span");completeness.className="pill";completeness.textContent=completed.length+"/7";completeness.title=missing.length?"Datos útiles pendientes: "+missing.join(", "):"Ficha completa en los siete datos útiles";completeness.setAttribute("aria-label",completed.length+" de 7 datos útiles completos");completeness.style.cssText="display:inline-flex;align-items:center;justify-content:center;min-width:2.8rem;font-weight:700";actions.append(completeness);
@@ -704,7 +714,7 @@ function renderProposals(){
   if(updatePatch){
    // Propuesta de actualización: mostrar cada campo con el valor actual y el propuesto.
    const labels={a:"Dirección",p:"Teléfono",e:"Correo",w:"Web",h:"Horario",r:"Redes sociales",s:"Dato destacado",d:"Descripción"};
-   if(!updateTarget){const warn=document.createElement("p");warn.style.cssText="margin:.25rem 0;color:#a83343";warn.textContent="La ficha original ya no está disponible.";preview.append(warn)}
+   if(!updateTarget){const warn=document.createElement("p");warn.style.cssText="margin:.25rem 0;color:var(--err)";warn.textContent="La ficha original ya no está disponible.";preview.append(warn)}
    Object.entries(updatePatch).forEach(([key,value])=>{const line=document.createElement("p");line.style.cssText="margin:.35rem 0;overflow-wrap:anywhere";const strong=document.createElement("strong");strong.textContent=(labels[key]||key)+": ";const before=String(updateTarget?.[key]??"").trim()||"(vacío)",after=value===null||String(value).trim()===""?"(borrar)":String(value);line.append(strong,document.createTextNode(before+" → "+after));preview.append(line)});
   }else previewFields.forEach(([label,value])=>{if(value===undefined||value===null||String(value).trim()==="")return;const line=document.createElement("p");line.style.cssText="margin:.25rem 0;overflow-wrap:anywhere";const strong=document.createElement("strong");strong.textContent=label+": ";line.append(strong,document.createTextNode(String(value)));preview.append(line)});
   const merged=updatePatch?{...(updateTarget||{}),...updatePatch}:f;
