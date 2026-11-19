@@ -92,7 +92,8 @@ class AuditDuplicateTests(unittest.TestCase):
     def test_public_page_reads_fichas_from_the_single_supabase_catalog(self):
         page = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
         self.assertIn("async function cargarCatalogoSupabase()", page)
-        self.assertIn('listings?select=id,data,verified_at', page)
+        self.assertIn('"listings?select="+SELECT_LISTINGS', page)
+        self.assertIn('const SELECT_LISTINGS="id,verified_at,"', page)
         self.assertIn('site_settings?select=id,public_data&id=eq.catalogo', page)
         self.assertIn("await aplicarCambios(", page)
         self.assertNotIn('fetch("fichas_completas.json', page)

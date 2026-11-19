@@ -320,7 +320,7 @@ class SingleSupabaseMasterTests(unittest.TestCase):
     def test_public_web_and_exporter_use_supabase_listings(self):
         public = (ROOT / "v3/index.html").read_text(encoding="utf-8")
         exporter = (ROOT / "v3/exportar-fichas.html").read_text(encoding="utf-8")
-        self.assertIn('listings?select=id,data,verified_at', public)
+        self.assertIn('"listings?select="+SELECT_LISTINGS', public)
         self.assertIn('listings?select=id,data,verified_at', exporter)
         self.assertNotIn('fetch("fichas_completas.json', public)
         self.assertNotIn('fetch("fichas_completas.json', exporter)
