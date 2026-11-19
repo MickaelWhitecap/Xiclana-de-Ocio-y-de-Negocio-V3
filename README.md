@@ -10,6 +10,7 @@ V3 utiliza **Supabase como fuente única de datos operativa**. La web pública, 
 - **`public.listings`**: fuente maestra única de las fichas. Contiene los datos de cada establecimiento y sus estados de publicación, baja y verificación. Crear, editar, publicar, ocultar o restaurar una ficha se realiza sobre esta tabla.
 - **`public.site_settings`**, registro `id='catalogo'`: metadatos generales del directorio, destacados y propuestas de revisión RAD/OSM. No es un segundo catálogo. La columna `data` conserva los metadatos administrativos; `public_data` contiene únicamente `actualizado` y `destacados`, se mantiene mediante un trigger y es la única información de esta tabla legible por el rol público.
 - **`public.listing_categories`**, **`public.listing_proposals`** y **`public.advertising_slots`**: tablas auxiliares para categorías, propuestas administrativas y publicidad. No sustituyen ni duplican la fuente maestra `public.listings`.
+- **`public.web_stats_daily`**: contadores diarios anónimos (visitas a la web, vistas y clics de cada espacio publicitario). No guarda cookies, IP ni datos del visitante; la web pública solo puede sumar mediante la función `registrar_evento_web` y solo el administrador puede leer las cifras, en el panel «Visitas y resultados de los anuncios».
 - **`public.listing_overrides`**: tabla histórica conservada, sin uso operativo. La compatibilidad de Administración redirige las llamadas antiguas a `public.listings`; no se deben crear ni sincronizar datos en esta tabla.
 
 ### Papel de los ficheros JSON

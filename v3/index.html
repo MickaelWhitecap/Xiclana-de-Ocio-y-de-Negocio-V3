@@ -683,7 +683,7 @@ let DEST={},ESPACIOS=null;
 function activos(){const h=new Date().toISOString().slice(0,10);return((DEST&&DEST.espacios)||[]).filter(d=>d&&d.n&&(!d.desde||d.desde<=h)&&(!d.hasta||d.hasta>=h))}
 const LOGO="logo-on.webp";
 function logo(t){const i=el("img","sp-logo");i.src=LOGO;i.alt="ON: "+t;i.title=t;i.width=56;return i}
-function tarjetaSp(d){const c=el("div","sp");const tp=el("div","sp-top");tp.append(el("span","sp-tag","Destacados · Publicidad"),logo("Promoción especial"));c.append(tp);
+function tarjetaSp(d){const c=el("div","sp");if(d.slot)c.dataset.slot=d.slot;const tp=el("div","sp-top");tp.append(el("span","sp-tag","Destacados · Publicidad"),logo("Promoción especial"));c.append(tp);
 if(d.imagen&&/^https?:\/\//i.test(d.imagen)){const im=el("img","sp-ad-image");im.src=d.imagen;im.alt="Imagen de "+(d.n||"anunciante");im.loading="lazy";c.append(im)}
 c.append(el("h4","",d.n));
 if(d.ubicacion)c.append(el("p","sp-c","📍 "+d.ubicacion));if(d.lema)c.append(el("p","sp-l",d.lema));if(d.promo){const q=el("p","sp-promo");q.append(el("b","","Promoción especial: "),String(d.promo));c.append(q)}const a=el("div","sp-a");
@@ -693,8 +693,16 @@ c.append(a);return c}
 function hueco(){const k=(DEST&&DEST.contacto)||"";const c=el("div","sp libre");const tp=el("div","sp-top");tp.append(el("span","sp-tag","Espacio disponible"),logo("Espacio para promociones especiales"));c.append(tp,el("h4","","Tu negocio aquí"),el("p","sp-l","Anuncia tu negocio en este espacio durante un mes."));if(k){const l=el("a","","Reservar este espacio");l.href=/^(https?:|mailto:)/.test(k)?k:"mailto:"+k;c.append(l)}return c}
 function pintarDest(){const a=activos().map((d,i)=>({d,l:d.lado?String(d.lado).toLowerCase()[0]:(i%2?"d":"i")}));
 ["i","d"].forEach(k=>{const box=$("#lado-"+k);box.textContent="";const m=a.filter(x=>x.l===k);m.slice(0,1).forEach(x=>box.append(tarjetaSp(x.d)));if(k==="i"){const img=el("img","espacio1-foto");img.src="espacio-1-flamenca.webp?v=20261119";img.width=840;img.height=1126;img.decoding="async";img.alt="Figura flamenca del Centro de Interpretación del Vino y la Sal de Chiclana";img.loading="lazy";box.append(img)}if(!m.length){const q=hueco();if(q)box.append(q)}});
-const s=$("#dest-strip");s.textContent="";a.forEach(x=>s.append(tarjetaSp(x.d)));s.hidden=!a.length}
+const s=$("#dest-strip");s.textContent="";a.forEach(x=>s.append(tarjetaSp(x.d)));s.hidden=!a.length;a.forEach(x=>{const k=Number(x.d.slot);if((k===1||k===2)&&!VISTOS.has(k)){VISTOS.add(k);contar("vista_anuncio",k)}})}
 
+// Estadísticas anónimas: solo suman contadores diarios en Supabase. Sin cookies ni datos del visitante.
+const VISTOS=new Set();
+function contar(metrica,espacio){
+ const cfg=window.XICLANA_SUPABASE||{};
+ if(!cfg.url||!cfg.anonKey||/^(localhost|127\.)/.test(location.hostname))return;
+ try{fetch(cfg.url.replace(/\/+$/,"")+"/rest/v1/rpc/registrar_evento_web",{method:"POST",keepalive:true,headers:{apikey:cfg.anonKey,Authorization:"Bearer "+cfg.anonKey,"Content-Type":"application/json"},body:JSON.stringify({p_metric:metrica,p_slot:espacio||0})}).catch(()=>{})}catch(e){}
+}
+document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest(".sp[data-slot] a");if(a)contar("clic_anuncio",Number(a.closest(".sp").dataset.slot))});
 async function loadAdvertisingSlotsPublic(){
  const cfg=window.XICLANA_SUPABASE||{};
  if(!cfg.url||!cfg.anonKey)return;
@@ -707,7 +715,7 @@ async function loadAdvertisingSlotsPublic(){
   const data=await response.json();
   const today=new Date().toISOString().slice(0,10);
   const rows=(data||[]).filter(x=>x.status==="active"&&x.listing_name&&(!x.starts_at||x.starts_at<=today)&&(!x.ends_at||x.ends_at>=today));
-  ESPACIOS=rows.map(x=>({n:x.listing_name,p:x.phone,ubicacion:x.location,promo:x.promotion,lema:x.hook_text,w:x.target_url,imagen:x.image_url,lado:x.slot_id===1?"i":"d",desde:x.starts_at,hasta:x.ends_at}));
+  ESPACIOS=rows.map(x=>({n:x.listing_name,p:x.phone,ubicacion:x.location,promo:x.promotion,lema:x.hook_text,w:x.target_url,imagen:x.image_url,slot:x.slot_id,lado:x.slot_id===1?"i":"d",desde:x.starts_at,hasta:x.ends_at}));
   DEST={...(DEST||{}),espacios:ESPACIOS};pintarDest();
  }catch(err){console.warn("No se pudieron cargar los espacios publicitarios; las fichas siguen disponibles:",err)}
  finally{clearTimeout(timeout)}
@@ -863,6 +871,7 @@ async function aplicarCambios(j){
  }
 // Pinta al instante la última copia guardada en este navegador y después la sustituye por la versión de Supabase.
 {const guardado=leerCatalogoGuardado();if(guardado)aplicarCambios({...guardado,deCache:true}).catch(err=>console.warn("No se pudo pintar la copia guardada:",err))}
+contar("visita");
 loadAdvertisingSlotsPublic();
 cargarCatalogoSupabase().catch(err=>{console.error(err);if(!leerCatalogoGuardado())$("#fecha").textContent="No se pudo conectar con la base de datos central de Xiclana.";else $("#fecha").textContent+=" · sin conexión con la base de datos, mostrando la copia guardada";render()});
 

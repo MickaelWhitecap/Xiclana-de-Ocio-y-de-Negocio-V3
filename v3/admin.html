@@ -93,6 +93,14 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
  <p class="muted">El texto gancho debe ser corto; la promoción describe el beneficio concreto. El estado «Activo» no publica la campaña fuera de las fechas indicadas.</p>
 </section>
 
+<section class="panel" id="stats-panel">
+ <div class="topline"><div><h2 style="margin:.2rem 0">Visitas y resultados de los anuncios</h2><div class="muted">Cifras anónimas, sin cookies: la web solo suma contadores por día. Úsalas para enseñar a los anunciantes cuánta gente ve su anuncio.</div></div>
+ <div class="actions" style="margin:0"><select id="stats-days" aria-label="Periodo"><option value="7">Últimos 7 días</option><option value="30" selected>Últimos 30 días</option><option value="90">Últimos 90 días</option></select><button type="button" id="stats-refresh" class="secondary">Actualizar cifras</button></div></div>
+ <div class="counter-grid" id="stats-summary"></div>
+ <table class="counter-table"><thead><tr><th>Espacio</th><th>Veces visto</th><th>Clics</th><th>% de clics</th></tr></thead><tbody id="stats-slots"></tbody></table>
+ <p class="muted" id="stats-note">Las cifras empiezan a contar desde el día en que se publicó este contador.</p>
+</section>
+
 <section class="panel" id="trash-panel">
 <div class="topline"><div><h2 style="margin:.2rem 0">Papelera de fichas</h2><div class="muted">Las fichas eliminadas se conservan aquí y se pueden restaurar sin reconstruirlas.</div></div><button id="trash-refresh" type="button" class="secondary">Actualizar papelera</button></div>
 <div id="trash-list" style="margin-top:.7rem"><span class="muted">Cargando papelera…</span></div>
@@ -675,7 +683,7 @@ async function loadData(){
  addressProposals=normalizedAddressProposals.filter(x=>x&&typeof x==="object").map(x=>({...x}));
  const categoryRes=await client.from("listing_categories").select("slug,name,type,created_at").order("name");
  if(categoryRes.error)throw new Error("No se pudieron cargar las categorías: "+categoryRes.error.message);
- categories=categoryRes.data||[];renderCategories();refreshList();renderTrash();renderAutomaticCandidates();renderAddressProposals();await loadProposals();await loadAdvertisingSlots();
+ categories=categoryRes.data||[];renderCategories();refreshList();renderTrash();renderAutomaticCandidates();renderAddressProposals();await loadProposals();await loadAdvertisingSlots();loadWebStats().catch(err=>{$("#stats-note").textContent=err.message+" (si es la primera vez, falta crear la tabla de estadísticas en Supabase)."});
 }
 
 
@@ -691,6 +699,21 @@ if(v.create_listing&&!listingId){const newId="advertiser:"+crypto.randomUUID(),f
 if(v.create_listing){const {error:clearErr}=await client.from("advertising_slots").update({create_listing:false,updated_at:new Date().toISOString(),updated_by:user.id}).eq("slot_id",slot);if(clearErr)throw clearErr}
 await loadAdvertisingSlots();message("Espacio "+slot+" guardado en Supabase. La web pública mostrará la campaña cuando esté activa y dentro de fechas.","ok");
 }catch(err){message("No se pudo guardar el espacio "+slot+": "+(err.message||"error desconocido"),"error")}finally{btn.disabled=false;btn.textContent="Guardar espacio "+slot}})})}
+async function loadWebStats(){
+ const days=Number($("#stats-days").value)||30,since=new Date(Date.now()-(days-1)*864e5).toISOString().slice(0,10);
+ const {data,error}=await client.from("web_stats_daily").select("day,metric,slot_id,total").gte("day",since);
+ if(error)throw new Error("No se pudieron cargar las estadísticas: "+error.message);
+ const sum=(m,k)=>(data||[]).filter(r=>r.metric===m&&(k==null||r.slot_id===k)).reduce((a,r)=>a+r.total,0);
+ const visitas=sum("visita"),diasConDatos=new Set((data||[]).filter(r=>r.metric==="visita").map(r=>r.day)).size;
+ const fmt=n=>n.toLocaleString("es-ES"),pct=(c,v)=>v?(100*c/v).toLocaleString("es-ES",{maximumFractionDigits:1})+" %":"—";
+ const box=$("#stats-summary");box.textContent="";
+ [["Visitas a la web",fmt(visitas)],["Media de visitas al día",diasConDatos?fmt(Math.round(visitas/diasConDatos)):"—"],["Anuncios vistos",fmt(sum("vista_anuncio"))],["Clics en anuncios",fmt(sum("clic_anuncio"))]].forEach(([t,v])=>{const d=document.createElement("div"),b=document.createElement("strong"),m=document.createElement("small");b.textContent=v;m.textContent=t;d.append(b,m);box.append(d)});
+ const tb=$("#stats-slots");tb.textContent="";
+ [[1,"Espacio 1 · Patrocinador principal"],[2,"Espacio 2 · Oferta destacada"]].forEach(([k,n])=>{const v=sum("vista_anuncio",k),c=sum("clic_anuncio",k),tr=document.createElement("tr");[n,fmt(v),fmt(c),pct(c,v)].forEach(x=>{const td=document.createElement("td");td.textContent=x;tr.append(td)});tb.append(tr)});
+ $("#stats-note").textContent=diasConDatos<days?"Hay datos de "+diasConDatos+" de los "+days+" días del periodo: el contador empezó a funcionar hace poco.":"Periodo completo de "+days+" días.";
+}
+$("#stats-refresh").addEventListener("click",()=>loadWebStats().then(()=>message("Estadísticas actualizadas.","ok")).catch(err=>message(err.message,"error")));
+$("#stats-days").addEventListener("change",()=>loadWebStats().catch(err=>message(err.message,"error")));
 $("#ads-refresh").addEventListener("click",async()=>{try{await loadAdvertisingSlots();message("Espacios publicitarios actualizados.","ok")}catch(err){message(err.message,"error")}});
 
 function proposalFields(p){return p.fields&&typeof p.fields==="object"?p.fields:{}}
