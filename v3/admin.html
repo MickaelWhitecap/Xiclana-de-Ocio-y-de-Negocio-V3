@@ -32,6 +32,12 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
 .hidden{display:none!important}.topline{display:flex;align-items:center;justify-content:space-between;gap:.7rem;flex-wrap:wrap}
 @media(max-width:760px){.grid{grid-template-columns:1fr}#advertising-panel > .grid{grid-template-columns:1fr}.fields{grid-template-columns:1fr}#list{max-height:32vh}.wide{grid-column:auto}}
 .counter-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem;margin:.8rem 0}.counter-grid div{border:1px solid var(--bd);border-radius:10px;padding:.6rem .75rem;background:var(--soft)}.counter-grid strong{display:block;font-size:1.35rem}.counter-grid small{color:var(--mut)}.counter-table{width:100%;border-collapse:collapse;font-size:.95rem}.counter-table th,.counter-table td{text-align:left;padding:.45rem .5rem;border-bottom:1px solid var(--bd)}.counter-table td.up{color:var(--ok);font-weight:700}.counter-table td.down{color:var(--err);font-weight:700}
+
+/* Títulos de sección destacados: se distinguen a simple vista del resto del texto. */
+:root{--tit:#0d5a86;--tit-bar:#d9a441}
+:root[data-theme="dark"]{--tit:#ffd166;--tit-bar:#ffd166}
+h2{color:var(--tit);font-size:1.5rem;font-weight:800;letter-spacing:-.01em;border-left:5px solid var(--tit-bar);padding-left:.65rem}
+h3{color:var(--acc)}
 </style>
 </head>
 <body>
