@@ -178,6 +178,8 @@ def main():
     ap.add_argument("--celda", type=float, default=250, help="Lado de la celda en metros")
     ap.add_argument("--salida", default="informe-places.csv")
     ap.add_argument("--max-consultas", type=int, default=MAX_LLAMADAS)
+    ap.add_argument("--excluir", default="",
+                    help="Zona ya barrida que se salta: sur,norte,oeste,este")
     ap.add_argument("--solo-chiclana", action="store_true",
                     help="Descarta lugares cuya dirección no sea de Chiclana (el rectángulo toca San Fernando, Conil y Medina)")
     args = ap.parse_args()
@@ -193,7 +195,9 @@ def main():
     print(f"Consultas este mes: {usadas_mes}. Tope de esta ejecución: {tope}.", file=sys.stderr)
     fichas = cargar_catalogo(args.catalog)
     lugares, llamadas = {}, 0
-    pendientes = [(lat, lon, args.celda) for lat, lon in rejilla(args.sur, args.norte, args.oeste, args.este, args.celda)]
+    excl = [float(x) for x in args.excluir.split(",")] if args.excluir else None
+    pendientes = [(lat, lon, args.celda) for lat, lon in rejilla(args.sur, args.norte, args.oeste, args.este, args.celda)
+                  if not (excl and excl[0] <= lat <= excl[1] and excl[2] <= lon <= excl[3])]
     while pendientes:
         lat, lon, lado = pendientes.pop(0)
         if llamadas >= tope:
