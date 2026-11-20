@@ -585,6 +585,11 @@ def clean_description(value, business_name=""):
         "informacion sobre la empresa ver direccion",
         "chiclana de la frontera cadiz espana",
         "chiclana de la frontera cadiz",
+        # Metadescripción genérica de todociudad.es (noviembre de 2026): es el
+        # texto de su propia herramienta de pedidos y se copió en 72 fichas.
+        "frutas y verduras necesitas","la fruteria lo gestiona y confirma",
+        # Aviso de la plantilla web de varios hoteles, no describe el negocio.
+        "gira tu dispositivo",
     )
     if len(raw)<35 or any(x in n for x in generic_phrases):
         return ""
@@ -1616,6 +1621,8 @@ def self_test():
     assert clean_address("Avda. Fernando de Magallanes 36, 11130 Chiclana de la Fra., 11130 Chiclana de la Fra.") == "Avda. Fernando de Magallanes 36, 11130 Chiclana de la Frontera"
     assert clean_address("Calle Real 10, 11130, Chiclana de la Frontera, 11130, Chiclana de la Frontera") == "Calle Real 10, 11130, Chiclana de la Frontera"
     assert clean_description("Directorio de empresas de Chiclana | La Guía de Chiclana") == ""
+    assert clean_description("Escribe en lenguaje natural qué frutas y verduras necesitas. Calculamos el pedido y un importe orientativo; la frutería lo gestiona y confirma.", "Bankinter") == ""
+    assert clean_description("Gira tu dispositivo para una experiencia óptima", "Hostal Noli") == ""
     assert clean_description("Motos Mondiña, concesionario oficial... Tel. 956 000 000") == ""
     assert clean_description("Piscina Rueda Piscinas... especialistas en piscinas") == ""
     assert clean_description("Q2 Cocinas | Cocinas a medida... Tel.") == ""
