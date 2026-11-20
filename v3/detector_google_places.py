@@ -51,7 +51,8 @@ PALABRAS_GENERICAS = {
     "las", "de", "del", "y", "the", "chiclana", "frontera", "tienda", "casa", "cerveceria",
     "taberna", "freiduria", "heladeria", "pizzeria", "peluqueria", "farmacia", "clinica",
 }
-MAX_LLAMADAS = 400  # tope de seguridad: muy por debajo del cupo gratuito mensual
+MAX_LLAMADAS = 400  # tope por defecto; el cupo gratuito de Nearby Search Pro es de 5.000 al mes
+CP_CHICLANA = ("11130", "11138", "11139")
 
 
 def norm(value):
@@ -160,6 +161,9 @@ def main():
     ap.add_argument("--este", type=float, required=True)
     ap.add_argument("--celda", type=float, default=250, help="Lado de la celda en metros")
     ap.add_argument("--salida", default="informe-places.csv")
+    ap.add_argument("--max-consultas", type=int, default=MAX_LLAMADAS)
+    ap.add_argument("--solo-chiclana", action="store_true",
+                    help="Descarta lugares cuya dirección no sea de Chiclana (el rectángulo toca San Fernando, Conil y Medina)")
     args = ap.parse_args()
 
     clave = os.environ.get("GOOGLE_PLACES_API_KEY", "")
@@ -168,8 +172,8 @@ def main():
     pendientes = [(lat, lon, args.celda) for lat, lon in rejilla(args.sur, args.norte, args.oeste, args.este, args.celda)]
     while pendientes:
         lat, lon, lado = pendientes.pop(0)
-        if llamadas >= MAX_LLAMADAS:
-            print(f"Tope de {MAX_LLAMADAS} consultas alcanzado; quedan {len(pendientes)+1} celdas.", file=sys.stderr)
+        if llamadas >= args.max_consultas:
+            print(f"Tope de {args.max_consultas} consultas alcanzado; quedan {len(pendientes)+1} celdas.", file=sys.stderr)
             break
         radio = lado * 0.75  # el círculo cubre el cuadrado de la celda
         try:
@@ -201,6 +205,10 @@ def main():
         if lugar["lat"] is None or not (args.sur <= lugar["lat"] <= args.norte and args.oeste <= lugar["lon"] <= args.este):
             continue
         if lugar["estado_google"] == "CLOSED_PERMANENTLY":
+            continue
+        if args.solo_chiclana and not (
+            any(cp in lugar["direccion"] for cp in CP_CHICLANA) or "chiclana" in norm(lugar["direccion"])
+        ):
             continue
         estado, ficha = buscar_en_catalogo(lugar, fichas)
         filas.append({**lugar, "estado": estado,
