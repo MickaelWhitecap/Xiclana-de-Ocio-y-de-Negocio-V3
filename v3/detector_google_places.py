@@ -80,10 +80,12 @@ def parecido(nombre_a, nombre_b):
     if juntos_a == juntos_b:
         return 1.0
     comunes = a & b
-    # Con nombres de varias palabras, una sola en común («Santa») no basta.
-    if len(comunes) < 2 and min(len(a), len(b)) >= 2:
-        return 0.0
-    return len(comunes) / min(len(a), len(b))
+    if len(comunes) >= 2:
+        return len(comunes) / min(len(a), len(b))
+    # Una sola palabra en común («Santa», «Plaza») solo cuenta si es casi todo
+    # el nombre de los dos lados: «El Sitio» = «Bar el Sitio», pero
+    # «Farmacia La Plaza» ≠ «Cantina Plaza de Abastos».
+    return len(comunes) / max(len(a), len(b))
 
 
 def cargar_catalogo(path):
