@@ -670,6 +670,113 @@ def clean_website(value, page_url):
     return urllib.parse.urlunsplit((parsed.scheme.lower(),parsed.netloc,parsed.path,parsed.query,""))
 
 
+# Redes sociales (campo "r"). Hasta noviembre de 2026 el rastreo descartaba
+# los enlaces de Instagram, Facebook y TikTok porque no son la web propia, y
+# así se escapaban los negocios que solo existen en redes (caso Cantina Santa
+# Mónica). Ahora se guarda el ENLACE al perfil, nunca su contenido.
+SOCIAL_HOSTS = {
+    "instagram.com": "instagram", "facebook.com": "facebook",
+    "fb.com": "facebook", "tiktok.com": "tiktok",
+}
+SOCIAL_RESERVED_PATHS = {
+    "p", "reel", "reels", "explore", "stories", "accounts", "tv", "share",
+    "sharer", "sharer.php", "dialog", "plugins", "login", "login.php", "tr",
+    "events", "watch", "groups", "hashtag", "help", "policies", "privacy",
+    "legal", "about", "directory", "pages", "marketplace", "gaming", "story.php",
+    "photo.php", "photo", "photos", "video", "videos", "permalink.php", "home.php",
+    "search", "tag", "discover", "music", "embed", "intent",
+}
+SOCIAL_GENERIC_WORDS = {
+    "chiclana", "frontera", "cadiz", "bar", "bares", "restaurante", "restaurant",
+    "cafeteria", "cafe", "tienda", "shop", "the", "los", "las", "del", "and",
+    "spain", "espana", "oficial", "official", "sl", "slu", "sa",
+}
+
+
+def social_profile_url(url):
+    """Devuelve la URL canónica de un perfil de red social o "" si no lo es
+    (publicaciones sueltas, botones de compartir, páginas de ayuda...)."""
+    try:
+        parsed=urllib.parse.urlsplit(str(url or "").strip())
+    except ValueError:
+        return ""
+    if parsed.scheme.lower() not in ("http","https"):
+        return ""
+    host=(parsed.hostname or "").lower()
+    for prefix in ("www.","m.","web.","es-es.","es-la.","business."):
+        host=host.removeprefix(prefix)
+    network=SOCIAL_HOSTS.get(host)
+    if not network:
+        return ""
+    parts=[x for x in parsed.path.split("/") if x]
+    if network=="facebook" and parts[:1]==["profile.php"]:
+        page_id=urllib.parse.parse_qs(parsed.query).get("id",[""])[0]
+        return f"https://www.facebook.com/profile.php?id={page_id}" if page_id.isdigit() else ""
+    if network=="facebook" and parts[:1]==["people"] and len(parts)>=3:
+        return "https://www.facebook.com/people/"+"/".join(parts[1:3])+"/"
+    if not parts or parts[0].lower() in SOCIAL_RESERVED_PATHS:
+        return ""
+    handle=parts[0]
+    if network=="tiktok":
+        if not handle.startswith("@") or len(handle)<3:
+            return ""
+        return f"https://www.tiktok.com/{handle}"
+    if not re.fullmatch(r"[A-Za-z0-9._-]{2,80}",handle):
+        return ""
+    return f"https://www.{network}.com/{handle}/"
+
+
+def social_handle(url):
+    canonical=social_profile_url(url)
+    if not canonical:
+        return ""
+    path=urllib.parse.urlsplit(canonical).path.strip("/")
+    return re.sub(r"[^a-z0-9]","",norm(path.split("/")[-1] if "people/" in path else path))
+
+
+def social_matches_name(url, name):
+    """El usuario del perfil debe contener las palabras distintivas del nombre.
+    Evita atribuir al negocio las redes del directorio o de otro comercio."""
+    handle=social_handle(url)
+    if not handle:
+        return False
+    words=[w for w in norm(name).split() if len(w)>=3 and w not in SOCIAL_GENERIC_WORDS]
+    if not words:
+        return False
+    if "".join(words) in handle:
+        return True
+    present=[w for w in words if w in handle]
+    if len(words)==1:
+        return len(words[0])>=5 and bool(present)
+    return len(present)>=2
+
+
+def extract_social_links(links, page_url, name, own_site=False):
+    """Perfiles sociales enlazados en una página. En la web propia del negocio
+    se aceptan todos; en un directorio solo los que coinciden con el nombre."""
+    found=[]
+    for _cls,href,_label in links:
+        target=urllib.parse.urljoin(page_url,html.unescape(str(href or "")))
+        canonical=social_profile_url(target)
+        if not canonical or canonical in found:
+            continue
+        if own_site or social_matches_name(canonical,name):
+            found.append(canonical)
+    return found[:4]
+
+
+def merge_social_value(old_value, links):
+    """Añade enlaces nuevos al campo "r" (separados por espacios) sin duplicar."""
+    current=[x for x in re.split(r"[\s,]+",str(old_value or "").strip()) if x]
+    keys={social_profile_url(x) or x for x in current}
+    added=[]
+    for link in links:
+        key=social_profile_url(link) or link
+        if key and key not in keys:
+            keys.add(key); current.append(key); added.append(key)
+    return " ".join(current),added
+
+
 def choose_schema_entity(candidates, page_url, headings=(), title=""):
     """Evita usar el primer JSON-LD global cuando pertenece a otra ficha."""
     page=url_key(page_url)
@@ -1178,8 +1285,12 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False, all
     if len(address_detail)<4 and not trusted_local and not allow_partial_target: return None
     if not allow_partial_target and not trusted_local and not re.search(r"(?<!\d)(11130|11138|11139)(?!\d)",addr) and "chiclana" not in norm(addr):
         return None
+    page_host=urllib.parse.urlsplit(final_url).netloc.lower().removeprefix("www.")
+    own_site=bool(target) and not any(_same_site(page_host,blocked) for blocked in HOSTS_NO_WEB_PROPIA)
+    social=extract_social_links(p.links,final_url,name,own_site=own_site)
     # Una dirección válida sin ningún canal de contacto tampoco es candidata accionable.
-    if not allow_partial_target and not any((phone,email,website)) and not (trusted_local and addr): return None
+    # Un perfil de Instagram o Facebook del propio negocio cuenta como canal.
+    if not allow_partial_target and not any((phone,email,website,social)) and not (trusted_local and addr): return None
     schema_type=obj.get("@type",[])
     schema_types=schema_type if isinstance(schema_type,list) else [schema_type]
     schema_types=" ".join(str(x).rsplit("/",1)[-1].rsplit("#",1)[-1] for x in schema_types)
@@ -1202,6 +1313,7 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False, all
             continue
         internal_links.append(candidate)
     page_fields=set()
+    if social: page_fields.add("social")
     if page_address_found: page_fields.add("address")
     if phone: page_fields.add("phone")
     if email: page_fields.add("email")
@@ -1209,7 +1321,7 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False, all
     if hours: page_fields.add("hours")
     if desc: page_fields.add("description")
     return {"name":name,"type":tipo,"address":addr,"phone":phone,"email":email,"website":website,
-            "hours":str(hours)[:500],"description":desc[:700],"source_url":final_url,
+            "hours":str(hours)[:500],"description":desc[:700],"social":" ".join(social),"source_url":final_url,
             "category":categoria,"_internal_links":list(dict.fromkeys(internal_links)),
             "_page_fields":sorted(page_fields)}
 
@@ -1442,6 +1554,12 @@ def merge_existing_record(existing, record, source_url):
             alternatives.append(incoming_web)
             changed.append("web_alternativas")
             conflicts.append("La fuente aporta una web distinta; se conserva la web principal.")
+    incoming_social=[x for x in str(record.get("social") or "").split() if x]
+    if incoming_social:
+        merged_social,added_social=merge_social_value(existing.get("r"),incoming_social)
+        if added_social:
+            existing["r"]=merged_social
+            changed.append("r")
     if changed:
         sources=existing.setdefault("fuentes_datos",[])
         if not isinstance(sources,list):
@@ -1457,6 +1575,25 @@ def merge_existing_record(existing, record, source_url):
 
 def self_test():
     global allowed, get, extract, sitemap_page_urls
+    assert social_profile_url("https://instagram.com/santamonicacantina?igsh=x") == "https://www.instagram.com/santamonicacantina/"
+    assert social_profile_url("https://www.instagram.com/p/ABC123/") == ""
+    assert social_profile_url("https://www.facebook.com/sharer/sharer.php?u=x") == ""
+    assert social_profile_url("https://m.facebook.com/profile.php?id=1234") == "https://www.facebook.com/profile.php?id=1234"
+    assert social_profile_url("https://www.tiktok.com/@cantina") == "https://www.tiktok.com/@cantina"
+    assert social_profile_url("https://www.cantina.es/") == ""
+    assert social_matches_name("https://www.instagram.com/santamonicacantina/","Cantina Santa Mónica")
+    assert not social_matches_name("https://www.instagram.com/chiclanaguiadempresas/","Cantina Santa Mónica")
+    assert not social_matches_name("https://www.instagram.com/barchiclana/","Bar Chiclana")
+    assert social_matches_name("https://www.facebook.com/VentaZacarias/","Venta Zacarías")
+    assert extract_social_links([("", "https://www.instagram.com/directorio_oficial/", ""),
+        ("", "https://www.instagram.com/santamonicacantina/", "")],
+        "https://directorio.example/ficha","Cantina Santa Mónica") == ["https://www.instagram.com/santamonicacantina/"]
+    assert extract_social_links([("", "https://www.facebook.com/miempresa/", "")],
+        "https://empresa.example/","Empresa", own_site=True) == ["https://www.facebook.com/miempresa/"]
+    social_existing={"n":"Cantina Santa Mónica","r":"https://www.instagram.com/santamonicacantina/"}
+    changed,_=merge_existing_record(social_existing,{"social":"https://instagram.com/santamonicacantina https://www.facebook.com/santamonicacantina/"},"https://example.org/x")
+    assert changed==["r"] and social_existing["r"]=="https://www.instagram.com/santamonicacantina/ https://www.facebook.com/santamonicacantina/"
+    assert merge_existing_record(social_existing,{"social":"https://www.facebook.com/santamonicacantina/"},"https://example.org/x")[0]==[]
     assert classify("Restaurante y cafetería") == ("ocio","Restauración")
     assert classify("Tienda de muebles") == ("negocio","Muebles y decoración")
     assert classify("TopGea Topografía. Especialistas en el sector topográfico e ingeniería técnica") == ("negocio","Servicios y negocios")
@@ -2392,6 +2529,16 @@ def discover_unlinked_official_website_jobs(records, retry_ids=None, resume_stat
                "busquedas_realizadas":2,"resultados_busqueda":len(set(results)),
                "urls_candidatas_comprobadas":0,"paginas_visitadas":0,
                "paginas_con_datos":0,"campos_detectados":[]}
+        # Los perfiles de Instagram/Facebook/TikTok de los resultados no son web
+        # propia, pero sí el enlace de redes de la ficha si el usuario coincide.
+        social_found=[]
+        for candidate_url in dict.fromkeys(results):
+            canonical=social_profile_url(candidate_url)
+            if canonical and canonical not in social_found and social_matches_name(canonical,name):
+                social_found.append(canonical)
+        social_found=social_found[:4]
+        if social_found:
+            audit["redes_detectadas"]=social_found
         for candidate_url in list(dict.fromkeys(results)):
             parsed=urllib.parse.urlsplit(candidate_url)
             host=(parsed.hostname or "").lower().removeprefix("www.")
@@ -2412,6 +2559,9 @@ def discover_unlinked_official_website_jobs(records, retry_ids=None, resume_stat
             if pages:
                 for record in pages:
                     record["website"]=record.get("website") or candidate_url
+                if social_found:
+                    pages[0]["social"]=merge_social_value(pages[0].get("social"),social_found)[0]
+                    social_found=[]
                 official_records.extend(pages)
                 audit["web_registrada"]=candidate_url
                 audit["web_oficial_confirmada"]=True
@@ -2419,6 +2569,15 @@ def discover_unlinked_official_website_jobs(records, retry_ids=None, resume_stat
                 audit["campos_detectados"]=sorted(official_fields_found(pages))
                 audit["resultado"]="web_oficial_descubierta"
                 break
+        if social_found:
+            # Sin web propia: se emite un registro mínimo ligado por ID a la ficha
+            # para guardar solo el enlace de redes (no verifica la ficha).
+            official_records.append({
+                "name":name,"type":"","address":record_value(target,"a","direccion","address"),
+                "phone":"","email":"","website":"","hours":"","description":"",
+                "social":" ".join(social_found),"source_url":social_found[0],"category":"",
+                "_official_site":True,"_target_id":ident,"_page_fields":["social"],
+            })
         if not audit.get("resultado"):
             audit["resultado"]="candidatas_no_confirmadas" if audit["urls_candidatas_comprobadas"] else "web_no_localizada"
         audit["segundos"]=round(time.monotonic()-ficha_started,2)
@@ -2702,13 +2861,14 @@ def main():
         digest=hashlib.sha256((name_key+"|"+addr_key+"|"+u_key).encode()).hexdigest()[:16]
         fields_present=["nombre"]+[k for k,v in [
             ("direccion",record["address"]),("telefono",record["phone"]),("correo",record["email"]),
-            ("web",record["website"]),("horario",record["hours"]),("descripcion",record["description"])
+            ("web",record["website"]),("horario",record["hours"]),("descripcion",record["description"]),
+            ("redes",record.get("social"))
         ] if v]
         if record.get("registration_code"): fields_present.append("registro_turismo")
         candidate={
           "id":"rad:"+digest,"n":record["name"],"t":record["type"],"c":record["category"],
           "a":record["address"],"p":record["phone"],"e":record["email"],
-          "w":record["website"],"h":record["hours"],"d":record["description"],
+          "w":record["website"],"h":record["hours"],"d":record["description"],"r":record.get("social",""),
           "f":"Rastreo web público (RAD)","url_fuente_rastreo":source_url,
           "fuentes_datos":[{"url":source_url,"campos":fields_present,**({"licencia":"CC BY 4.0"} if record.get("source_license") else {})}],
           "estado_revision":"pendiente","fuente_estado":"Candidato detectado en fuente web pública; pendiente de validación manual",
