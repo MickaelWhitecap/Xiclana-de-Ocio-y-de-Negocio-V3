@@ -250,6 +250,11 @@ def main():
         if name:
             active_by_name[name].append(item)
     all_ids = {str(x.get("id")) for x in items if isinstance(x, dict) and x.get("id")}
+    # Las candidatas fusionadas a mano en Administración quedan guardadas en
+    # ids_alternativos de la ficha que se queda: no deben volver como nuevas.
+    for x in items:
+        if isinstance(x, dict) and isinstance(x.get("ids_alternativos"), list):
+            all_ids.update(str(v) for v in x["ids_alternativos"] if v)
 
     recovered, skipped_recovered = [], collections.Counter()
     for item in items:

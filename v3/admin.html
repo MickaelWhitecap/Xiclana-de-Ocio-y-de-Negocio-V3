@@ -39,6 +39,15 @@ button,.button{font:inherit;font-weight:700;border:0;border-radius:9px;backgroun
 h2{color:var(--tit);font-size:1.5rem;font-weight:800;letter-spacing:-.01em;border-left:5px solid var(--tit-bar);padding-left:.65rem}
 h3{color:var(--acc)}
 .panel{border:1.5px solid var(--tit)}
+/* Selector de fusión de candidatas: mismo filete dorado/azul que los títulos. */
+.merge-picker{margin-top:.75rem;padding:.85rem;background:var(--soft);border:1px solid var(--bd);border-left:4px solid var(--tit-bar);border-radius:9px}
+.merge-picker h3{margin:0 0 .35rem}
+.merge-option{display:flex;gap:.7rem;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:.55rem 0;border-bottom:1px solid var(--bd)}
+.merge-option:last-child{border-bottom:0}
+.merge-option div{min-width:0;flex:1 1 220px;overflow-wrap:anywhere}
+.merge-option small{display:block;color:var(--mut)}
+.merge-option .why{color:var(--tit);font-size:.85rem}
+.merge-option button{padding:.5rem .85rem}
 </style>
 </head>
 <body>
@@ -471,8 +480,8 @@ function candidateNameSimilarity(left,right){
 }
 function candidateNameClose(left,right){
  if(candidateNameSimilarity(left,right)>=0.6)return true;
- const a=candidateKey(left).replace(/\\s/g,"");
- const b=candidateKey(right).replace(/\\s/g,"");
+ const a=candidateKey(left).replace(/\s/g,"");
+ const b=candidateKey(right).replace(/\s/g,"");
  if(Math.abs(a.length-b.length)>2||Math.min(a.length,b.length)<8)return false;
  let previous=Array.from({length:b.length+1},(_,i)=>i);
  for(let i=1;i<=a.length;i++){
@@ -559,13 +568,86 @@ async function rejectAddressProposal(proposal){
  await loadData();message("Propuesta descartada; la ficha no se ha modificado.","ok");
 }
 
+// Posibles fichas existentes para fusionar una candidata, aunque los nombres
+// no coincidan del todo (p. ej. «Manuel Aragón Bodega…» y «Bodega El Sanatorio»).
+function candidateDistanceMeters(left,right){
+ const vals=[left?.lat,left?.lon,right?.lat,right?.lon].map(v=>v==null||v===""?NaN:Number(v));
+ if(!vals.every(Number.isFinite))return null;
+ const [lat1,lon1,lat2,lon2]=vals,rad=Math.PI/180;
+ const x=(lon2-lon1)*rad*Math.cos((lat1+lat2)/2*rad),y=(lat2-lat1)*rad;
+ return Math.sqrt(x*x+y*y)*6371000;
+}
+function candidateWebKey(v){const m=String(v||"").toLowerCase().match(/^(?:https?:\/\/)?(?:www\.)?([^\/?#\s]+)/);return m?m[1]:""}
+function candidateMergeSuggestions(candidate,limit=5){
+ const reasons=[];
+ const candAddress=candidateAddressKey(candidate.a),candWeb=candidateWebKey(candidate.w);
+ const candTokens=new Set(candidateKey(candidate.n).split(" ").filter(t=>t.length>=5));
+ effectiveItems().forEach(x=>{
+  if(!x||stableId(x)===String(candidate.id))return;
+  let score=0;const why=[];
+  if(candidateSharesContact(candidate,x)){score+=3;why.push("mismo teléfono o correo")}
+  if(candWeb&&candWeb===candidateWebKey(x.w)){score+=2;why.push("misma web")}
+  const names=[x.n,...(Array.isArray(x.nombres_alternativos)?x.nombres_alternativos:[])];
+  const sim=Math.max(...names.map(n=>candidateNameSimilarity(candidate.n,n)));
+  if(sim>=0.34){score+=2*sim;why.push("nombre parecido")}
+  else if(names.some(n=>candidateKey(n).split(" ").some(t=>candTokens.has(t)))){score+=0.8;why.push("comparten una palabra del nombre")}
+  const address=candidateAddressKey(x.a);
+  if(candAddress&&address){
+   if(candAddress===address){score+=2;why.push("misma dirección")}
+   else{const [shortA,longA]=candAddress.length<address.length?[candAddress,address]:[address,candAddress];
+    if(shortA.split(" ").length>=3&&longA.startsWith(shortA+" ")){score+=1.5;why.push("dirección casi igual")}}
+  }
+  const meters=candidateDistanceMeters(candidate,x);
+  if(meters!=null&&meters<=60){score+=2;why.push("a "+Math.round(meters)+" m")}
+  else if(meters!=null&&meters<=250){score+=1;why.push("a "+Math.round(meters)+" m")}
+  if(score>=1.5)reasons.push({item:x,score,why});
+ });
+ return reasons.sort((a,b)=>b.score-a.score).slice(0,limit);
+}
+function buildMergePicker(candidate){
+ const box=document.createElement("div");box.className="merge-picker";box.style.display="none";
+ const heading=document.createElement("h3");heading.textContent="¿Con qué ficha la quieres fusionar?";box.append(heading);
+ const help=document.createElement("p");help.className="muted";help.style.margin="0 0 .6rem";help.textContent="Elige la ficha que ya existe para ese establecimiento. Se completará con los datos que le falten y la candidata no volverá a aparecer. No se borra ningún dato de la ficha.";box.append(help);
+ const optionRow=(x,why)=>{
+  const row=document.createElement("div");row.className="merge-option";
+  const info=document.createElement("div");
+  const name=document.createElement("strong");name.textContent=x.n||"Ficha sin nombre";info.append(name);
+  const meta=document.createElement("small");meta.textContent=[x.c,x.a,x.p].filter(v=>v&&String(v).trim()).join(" · ")||"Sin más datos";info.append(meta);
+  if(why&&why.length){const w=document.createElement("span");w.className="why";w.textContent="Motivo: "+why.join(", ");info.append(w)}
+  const go=document.createElement("button");go.type="button";go.textContent="Fusionar con esta";go.onclick=()=>mergeAutomaticCandidate(candidate,x);
+  row.append(info,go);return row;
+ };
+ const suggestedTitle=document.createElement("strong");suggestedTitle.textContent="Sugerencias";box.append(suggestedTitle);
+ const suggested=document.createElement("div");box.append(suggested);
+ const fill=()=>{suggested.textContent="";const list=candidateMergeSuggestions(candidate);
+  if(!list.length){const none=document.createElement("p");none.className="muted";none.textContent="No hay sugerencias claras. Busca la ficha por su nombre aquí abajo.";suggested.append(none)}
+  list.forEach(s=>suggested.append(optionRow(s.item,s.why)));};
+ const searchLabel=document.createElement("label");searchLabel.textContent="Buscar otra ficha por nombre";searchLabel.style.marginTop=".7rem";
+ const search=document.createElement("input");search.type="search";search.placeholder="Escribe al menos 3 letras, por ejemplo «sanatorio»";search.setAttribute("aria-label","Buscar ficha para fusionar");
+ const id="merge-search-"+String(candidate.id).replace(/[^a-z0-9]/gi,"-");search.id=id;searchLabel.htmlFor=id;
+ const results=document.createElement("div");
+ search.oninput=()=>{results.textContent="";const q=candidateKey(search.value);if(q.length<3)return;
+  const found=effectiveItems().filter(x=>stableId(x)!==String(candidate.id)&&[x.n,...(Array.isArray(x.nombres_alternativos)?x.nombres_alternativos:[])].some(n=>candidateKey(n).includes(q))).slice(0,8);
+  if(!found.length){const none=document.createElement("p");none.className="muted";none.textContent="No se encuentra ninguna ficha con ese nombre.";results.append(none);return}
+  found.forEach(x=>results.append(optionRow(x,null)));};
+ box.append(searchLabel,search,results);
+ box.fill=fill;return box;
+}
 function renderAutomaticCandidates(){
  const root=$("#automatic-candidates-list");if(!root)return;root.textContent="";
  const approved=new Set(overrides.filter(o=>o.fields?._xiclana_deleted!==true).map(o=>String(o.listing_id)));
  const deletedOverrides=new Set(overrides.filter(o=>o.fields?._xiclana_deleted===true).map(o=>String(o.listing_id)));
  const rejected=new Set(proposals.filter(p=>p.status==="rejected"&&p.source_name==="OpenStreetMap").map(p=>String(proposalFields(p).id||"")));
  const baseIds=new Set(baseItems.filter(x=>x._xiclana_deleted!==true).map(stableId));
- const pending=reviewCandidates.filter(x=>{const id=String(x?.id||"");const recovery=String(x?.estado_revision||"").startsWith("recuperada_de_baja")&&x._xiclana_recovery_review_batch==="2026-11-05";return x&&id&&!approved.has(id)&&(!deletedOverrides.has(id)||recovery)&&!rejected.has(id)&&!baseIds.has(id)&&x.estado_revision!=="descartada"});
+ // Candidatas ya fusionadas en otra ficha (por esta pantalla o por la limpieza de duplicados):
+ // su identificador queda guardado en la ficha que se quedó y no deben volver a salir.
+ const absorbed=new Set();
+ effectiveItems().forEach(x=>{
+  (Array.isArray(x.ids_alternativos)?x.ids_alternativos:[]).forEach(v=>absorbed.add(String(v)));
+  (Array.isArray(x.historial_fusiones_osm)?x.historial_fusiones_osm:[]).forEach(h=>h?.candidata_id&&absorbed.add(String(h.candidata_id)));
+  (Array.isArray(x.historial_fusiones)?x.historial_fusiones:[]).forEach(h=>h?.id_ficha_fusionada&&absorbed.add(String(h.id_ficha_fusionada)));
+ });
+ const pending=reviewCandidates.filter(x=>{const id=String(x?.id||"");if(absorbed.has(id))return false;const recovery=String(x?.estado_revision||"").startsWith("recuperada_de_baja")&&x._xiclana_recovery_review_batch==="2026-11-05";return x&&id&&!approved.has(id)&&(!deletedOverrides.has(id)||recovery)&&!rejected.has(id)&&!baseIds.has(id)&&x.estado_revision!=="descartada"});
  if(!pending.length){root.textContent="No hay candidatas automáticas pendientes de revisión.";return}
  const appendField=(container,label,value)=>{
   if(value===undefined||value===null||String(value).trim()==="")return;
@@ -597,13 +679,16 @@ function renderAutomaticCandidates(){
   const actions=document.createElement("div");actions.className="actions";let reviewAction=null;
   const view=document.createElement("button");view.type="button";view.className="secondary";view.textContent="Ver ficha previa";view.setAttribute("aria-expanded","false");view.onclick=()=>{const open=preview.style.display==="none";preview.style.display=open?"block":"none";view.textContent=open?"Ocultar vista previa":"Ver ficha previa";view.setAttribute("aria-expanded",String(open))};actions.append(view);
   const completeness=document.createElement("span");completeness.className="pill";completeness.textContent=completed.length+"/7";completeness.title=missing.length?"Datos útiles pendientes: "+missing.join(", "):"Ficha completa en los siete datos útiles";completeness.setAttribute("aria-label",completed.length+" de 7 datos útiles completos");completeness.style.cssText="display:inline-flex;align-items:center;justify-content:center;min-width:2.8rem;font-weight:700";actions.append(completeness);
+  const picker=buildMergePicker(candidate);
   if(duplicate){
-   const merge=document.createElement("button");merge.type="button";merge.textContent="Completar ficha existente";merge.title="La vista previa es opcional; revisa los datos antes de completar la ficha.";merge.onclick=()=>mergeAutomaticCandidate(candidate,duplicate);reviewAction=merge;actions.append(merge);
+   const merge=document.createElement("button");merge.type="button";merge.textContent="Fusionar con «"+(duplicate.n||"ficha existente")+"»";merge.title="Completa la ficha existente con los datos que le falten; no se crea otra ficha.";merge.onclick=()=>mergeAutomaticCandidate(candidate,duplicate);reviewAction=merge;actions.append(merge);
   }else{
    const approve=document.createElement("button");approve.type="button";approve.textContent=String(candidate.estado_revision||"").startsWith("recuperada_de_baja")?"Recuperar y aprobar":"Aprobar y publicar";approve.title="La vista previa es opcional; la aprobación requiere confirmación.";approve.onclick=()=>approveAutomaticCandidate(candidate);reviewAction=approve;actions.append(approve);
   }
+  const choose=document.createElement("button");choose.type="button";choose.className="secondary";choose.textContent=duplicate?"Fusionar con otra ficha":"Fusionar con una ficha";choose.title="Une esta candidata con una ficha que ya existe y es el mismo establecimiento.";choose.setAttribute("aria-expanded","false");
+  choose.onclick=()=>{const open=picker.style.display==="none";if(open)picker.fill();picker.style.display=open?"block":"none";choose.textContent=open?"Cerrar fusión":(duplicate?"Fusionar con otra ficha":"Fusionar con una ficha");choose.setAttribute("aria-expanded",String(open));if(open)picker.querySelector("input")?.focus()};actions.append(choose);
   const reject=document.createElement("button");reject.type="button";reject.className="danger";reject.textContent="Descartar";reject.onclick=()=>rejectAutomaticCandidate(candidate);actions.append(reject);
-  card.append(actions,preview);root.append(card);
+  card.append(actions,picker,preview);root.append(card);
  });
 }
 async function mergeAutomaticCandidate(candidate, existing){
@@ -648,17 +733,28 @@ async function mergeAutomaticCandidate(candidate, existing){
   historial_fusiones_osm:[...history,{candidata_id:String(candidate.id),candidata_nombre:String(candidate.n||""),fecha:now}],
   ultima_fusion_osm:now
  };
- const fields={...mergedFields,...metadata,contactos_alternativos:contactosAlternativos};
+ const previousNames=Array.isArray(mergedFields.nombres_alternativos)?mergedFields.nombres_alternativos:(Array.isArray(existing.nombres_alternativos)?existing.nombres_alternativos:[]);
+ const candidateName=String(candidate.n||"").trim();
+ const nombresAlternativos=candidateName&&candidateKey(candidateName)!==candidateKey(existing.n)&&!previousNames.some(n=>candidateKey(n)===candidateKey(candidateName))?[...previousNames,candidateName]:previousNames;
+ const previousIds=Array.isArray(mergedFields.ids_alternativos)?mergedFields.ids_alternativos:(Array.isArray(existing.ids_alternativos)?existing.ids_alternativos:[]);
+ const idsAlternativos=[...new Set([...previousIds.map(String),String(candidate.id)])];
+ const fields={...mergedFields,...metadata,contactos_alternativos:contactosAlternativos,nombres_alternativos:nombresAlternativos,ids_alternativos:idsAlternativos};
+ if((existing.lat==null||existing.lon==null||existing.lat===""||existing.lon==="")&&candidate.lat!=null&&candidate.lon!=null&&candidate.lat!==""&&candidate.lon!==""){fields.lat=candidate.lat;fields.lon=candidate.lon}
  const {error:mergeError}=await client.from("listing_overrides").upsert({
   listing_id:String(id),fields,is_new:Boolean(currentOverride?.is_new),verified_at:now,updated_at:now,updated_by:user.id
  },{onConflict:"listing_id"});
  if(mergeError){message("No se pudo completar la ficha existente: "+mergeError.message,"error");return}
- const {error:markError}=await client.from("listing_overrides").upsert({
-  listing_id:String(candidate.id),fields:{estado_revision:"fusionada",fusionada_en:String(id),fusionada_el:now,fuente_estado:"Candidata OSM fusionada manualmente en ficha existente"},is_new:false,verified_at:now,updated_at:now,updated_by:user.id
- },{onConflict:"listing_id"});
- if(markError){message("Los datos se incorporaron a la ficha existente, pero no se pudo marcar la candidata como fusionada: "+markError.message,"error");await loadData();return}
+ // La candidata queda resuelta porque su identificador se guarda en ids_alternativos
+ // de la ficha que se queda. Solo si la candidata ya tenía fila propia (p. ej. una
+ // ficha en la papelera) se marca esa fila como fusionada y fuera de la web.
+ if(baseItems.some(x=>stableId(x)===String(candidate.id))){
+  const {error:markError}=await client.from("listing_overrides").upsert({
+   listing_id:String(candidate.id),fields:{_xiclana_deleted:true,estado_revision:"fusionada",fusionada_en:String(id),fusionada_el:now,fuente_estado:"Candidata fusionada manualmente en ficha existente"},is_new:false,verified_at:now,updated_at:now,updated_by:user.id
+  },{onConflict:"listing_id"});
+  if(markError){message("Los datos se incorporaron a la ficha existente, pero no se pudo marcar la candidata como fusionada: "+markError.message,"error");await loadData();return}
+ }
  await loadData();
- message(additions.length?"Ficha existente completada con "+additions.length+" campo(s); no se creó otra ficha.":"Candidata marcada como fusionada; no se creó otra ficha.", "ok");
+ message(additions.length?"Fusión hecha: «"+(existing.n||"la ficha")+"» se ha completado con "+additions.length+" dato(s) y la candidata ya no aparecerá.":"Fusión hecha: la candidata queda unida a «"+(existing.n||"la ficha")+"» y ya no aparecerá.", "ok");
 }
 async function approveAutomaticCandidate(candidate){
  const duplicate=candidateAlreadyExists(candidate);
