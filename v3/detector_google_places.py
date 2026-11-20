@@ -51,7 +51,12 @@ PALABRAS_GENERICAS = {
     "las", "de", "del", "y", "the", "chiclana", "frontera", "tienda", "casa", "cerveceria",
     "taberna", "freiduria", "heladeria", "pizzeria", "peluqueria", "farmacia", "clinica",
 }
-MAX_LLAMADAS = 400  # tope por defecto; el cupo gratuito de Nearby Search Pro es de 5.000 al mes
+MAX_LLAMADAS = 400  # tope por defecto de una ejecución
+# NORMA DE MIGUEL (20-nov-2026): no gastar nada, nunca. El cupo gratuito de
+# Nearby Search Pro es de 5.000 consultas al mes; nos quedamos en 4.000 para
+# tener margen. El contador del mes se guarda en CONSUMO (hay que hacer commit).
+TOPE_MENSUAL_GRATIS = 4000
+CONSUMO = pathlib.Path(__file__).with_name("consumo_google_places.json")
 CP_CHICLANA = ("11130", "11138", "11139")
 
 
@@ -152,6 +157,17 @@ def rejilla(sur, norte, oeste, este, celda_m):
         lat += dlat
 
 
+def leer_consumo():
+    try:
+        return json.loads(CONSUMO.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def guardar_consumo(datos):
+    CONSUMO.write_text(json.dumps(datos, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--catalog", required=True, help="Exportación JSON de las fichas activas")
@@ -167,13 +183,21 @@ def main():
     args = ap.parse_args()
 
     clave = os.environ.get("GOOGLE_PLACES_API_KEY", "")
+    mes = time.strftime("%Y-%m", time.gmtime())
+    consumo = leer_consumo()
+    usadas_mes = int((consumo.get(mes) or {}).get("nearby_search", 0))
+    disponibles = TOPE_MENSUAL_GRATIS - usadas_mes
+    if disponibles <= 0:
+        raise SystemExit(f"Cupo gratuito agotado este mes ({usadas_mes} de {TOPE_MENSUAL_GRATIS}). No se consulta nada.")
+    tope = min(args.max_consultas, disponibles)
+    print(f"Consultas este mes: {usadas_mes}. Tope de esta ejecución: {tope}.", file=sys.stderr)
     fichas = cargar_catalogo(args.catalog)
     lugares, llamadas = {}, 0
     pendientes = [(lat, lon, args.celda) for lat, lon in rejilla(args.sur, args.norte, args.oeste, args.este, args.celda)]
     while pendientes:
         lat, lon, lado = pendientes.pop(0)
-        if llamadas >= args.max_consultas:
-            print(f"Tope de {args.max_consultas} consultas alcanzado; quedan {len(pendientes)+1} celdas.", file=sys.stderr)
+        if llamadas >= tope:
+            print(f"Tope de {tope} consultas alcanzado; quedan {len(pendientes)+1} celdas.", file=sys.stderr)
             break
         radio = lado * 0.75  # el círculo cubre el cuadrado de la celda
         try:
@@ -181,6 +205,8 @@ def main():
         except urllib.error.HTTPError as exc:
             raise SystemExit(f"Google respondió {exc.code}: {exc.read().decode()[:400]}")
         llamadas += 1
+        consumo.setdefault(mes, {})["nearby_search"] = usadas_mes + llamadas
+        guardar_consumo(consumo)
         if len(resultado) >= 20 and lado > 60:
             # Celda saturada: se divide en cuatro para no perder negocios.
             q = lado / 4
