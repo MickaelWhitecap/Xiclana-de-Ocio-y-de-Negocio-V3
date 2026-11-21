@@ -93,16 +93,20 @@ def aplicar(base, key, ident, campos, paginas):
         return [], "ficha_inactiva"
     datos = fila.get("data") or {}
     nuevo, añadidos = lector.completar(datos, campos)
-    if not añadidos:
+    verificada = str(datos.get("estado_verificacion") or "").lower() == "verificada"
+    if not añadidos and verificada:
         return [], "sin_datos_nuevos"
     hoy = ahora().date().isoformat()
     fuentes = list(nuevo.get("fuentes_datos") or []) if isinstance(nuevo.get("fuentes_datos"), list) else []
     fuentes.append({"url": paginas[0] if paginas else nuevo.get("w"), "tipo": "web_oficial",
                     "campos": [NOMBRES_CAMPO[k] for k in añadidos], "fecha": hoy,
                     "paginas_leidas": paginas[:5]})
+    if not añadidos:
+        # La web confirma la ficha aunque no aporte nada que falte: también la verifica.
+        fuentes[-1]["nota"] = "La web propia confirma la ficha aunque no aporta datos nuevos"
     nuevo["fuentes_datos"] = fuentes
     cuerpo = {"data": nuevo, "updated_at": ahora().isoformat()}
-    if str(datos.get("estado_verificacion") or "").lower() != "verificada":
+    if not verificada:
         # La propia web del negocio lo nombra y lo sitúa en Chiclana.
         nuevo["estado_verificacion"] = "verificada"
         nuevo["f"] = paginas[0] if paginas else nuevo.get("w")
@@ -113,7 +117,7 @@ def aplicar(base, key, ident, campos, paginas):
                              payload=cuerpo, headers={"Prefer": "return=representation"})
     if not res:
         return [], "cambio_concurrente"
-    return añadidos, "completada"
+    return añadidos, "completada" if añadidos else "verificada_sin_datos_nuevos"
 
 
 def self_test():
