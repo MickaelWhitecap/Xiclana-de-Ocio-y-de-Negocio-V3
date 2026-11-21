@@ -14,6 +14,11 @@ on:
         required: false
         default: ""
         type: string
+      simular:
+        description: "Solo leer y mostrar lo que se añadiría, sin guardar nada"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -37,14 +42,13 @@ jobs:
         with:
           python-version: "3.12"
       - name: Pruebas internas
-        run: |
-          python v3/rastreo_web_publico.py --self-test
-          python v3/rastreo_fichas_con_web.py --self-test
+        run: python v3/rastreo_fichas_con_web.py --self-test
       - name: Leer webs y completar fichas en Supabase
         env:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
           IDS: ${{ inputs.ids }}
-        run: python v3/rastreo_fichas_con_web.py --minutos 300 --ids "$IDS"
+          SIMULAR: ${{ inputs.simular && '--simular' || '' }}
+        run: python v3/rastreo_fichas_con_web.py --minutos 300 --ids "$IDS" $SIMULAR
       - name: Resumen
         if: always()
         run: |
@@ -54,7 +58,7 @@ jobs:
           r = json.load(open("rastreo-fichas-web-result.json", encoding="utf-8"))
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
               f.write("## Lectura de webs de fichas\n\n")
-              for k in ("pendientes_al_empezar", "fichas_leidas", "fichas_mejoradas", "datos_anadidos", "web_no_confirmada", "errores", "pendientes_al_terminar"):
+              for k in ("pendientes_al_empezar", "fichas_leidas", "fichas_mejoradas", "datos_anadidos", "motivos", "pendientes_al_terminar"):
                   f.write(f"- **{k}:** {r.get(k)}\n")
           PY
           fi
