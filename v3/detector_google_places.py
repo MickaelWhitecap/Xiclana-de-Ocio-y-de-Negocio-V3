@@ -50,6 +50,11 @@ PALABRAS_GENERICAS = {
     "bar", "bares", "restaurante", "restaurant", "cafeteria", "cafe", "la", "el", "los",
     "las", "de", "del", "y", "the", "chiclana", "frontera", "tienda", "casa", "cerveceria",
     "taberna", "freiduria", "heladeria", "pizzeria", "peluqueria", "farmacia", "clinica",
+    # Tipos de local que no distinguen un negocio de otro (21-nov-2026: «Venta
+    # Bonilla» se daba por la misma que «Venta Zacarías» solo por «venta»).
+    "venta", "meson", "asador", "bodega", "bodeguita", "kiosco", "chiringuito", "gastrobar",
+    "tasca", "tapas", "pub", "hotel", "hostal", "apartamentos", "panaderia", "pasteleria",
+    "carniceria", "fruteria", "restaurantes", "cafe-bar", "beach", "club",
 }
 MAX_LLAMADAS = 400  # tope por defecto de una ejecución
 # NORMA DE MIGUEL (20-nov-2026): no gastar nada, nunca. El cupo gratuito de
@@ -78,6 +83,34 @@ def distancia_m(lat1, lon1, lat2, lon2):
     return 2 * r * math.asin(math.sqrt(a))
 
 
+# Peso de cada palabra (21-nov-2026, idea de Miguel): una palabra que aparece en
+# muchos nombres del catálogo («venta», «inmobiliaria», «Barrosa») pesa poco y
+# una que aparece en pocos («Bonilla», «Zacarías») pesa mucho. Es el mismo
+# criterio que usan los buscadores (IDF). Sin catálogo cargado, todas pesan 1.
+PESOS = {}
+PESO_DESCONOCIDA = 1.0
+
+
+def preparar_pesos(nombres):
+    """Calcula el peso de cada palabra según en cuántos nombres aparece."""
+    global PESOS, PESO_DESCONOCIDA
+    total = 0
+    veces = {}
+    for nombre in nombres:
+        total += 1
+        for w in palabras(nombre):
+            veces[w] = veces.get(w, 0) + 1
+    PESOS = {w: max(0.1, math.log((total + 1) / (n + 1))) for w, n in veces.items()}
+    # Una palabra que no está en el catálogo suele ser una variante o una errata
+    # («Labarrosa»): cuenta como una palabra normal, no como la más rara.
+    valores = sorted(PESOS.values())
+    PESO_DESCONOCIDA = valores[len(valores) // 2] if valores else 1.0
+
+
+def peso(conjunto):
+    return sum(PESOS.get(w, PESO_DESCONOCIDA) for w in conjunto)
+
+
 def parecido(nombre_a, nombre_b):
     a, b = palabras(nombre_a), palabras(nombre_b)
     if not a or not b:
@@ -86,12 +119,18 @@ def parecido(nombre_a, nombre_b):
     if juntos_a == juntos_b:
         return 1.0
     comunes = a & b
+    if not comunes:
+        return 0.0
+    # Si cada nombre tiene una palabra propia que el otro no tiene y solo
+    # comparten una, son negocios distintos («Venta Bonilla» ≠ «Venta Zacarías»).
+    if len(comunes) == 1 and (a - comunes) and (b - comunes):
+        return 0.0
     if len(comunes) >= 2:
-        return len(comunes) / min(len(a), len(b))
+        return peso(comunes) / min(peso(a), peso(b))
     # Una sola palabra en común («Santa», «Plaza») solo cuenta si es casi todo
     # el nombre de los dos lados: «El Sitio» = «Bar el Sitio», pero
     # «Farmacia La Plaza» ≠ «Cantina Plaza de Abastos».
-    return len(comunes) / max(len(a), len(b))
+    return peso(comunes) / max(peso(a), peso(b))
 
 
 def cargar_catalogo(path):
@@ -107,6 +146,7 @@ def cargar_catalogo(path):
             lat = lon = None
         fichas.append({"id": x.get("id"), "nombres": [n for n in nombres if n],
                        "a": x.get("a") or "", "lat": lat, "lon": lon})
+    preparar_pesos(f["nombres"][0] for f in fichas if f["nombres"])
     return fichas
 
 
