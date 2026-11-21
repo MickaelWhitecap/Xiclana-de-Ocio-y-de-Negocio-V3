@@ -155,7 +155,11 @@ def horario_jsonld(jsonld):
                 txt = e
                 for en, es in sorted(DIAS_EN.items(), key=lambda x: -len(x[0])):
                     txt = re.sub(rf"(?i)\b{en}\b", es, txt)
-                partes.append(txt.replace(",", ", "))
+                txt = re.sub(r"\s*,\s*", ", ", txt)
+                txt = txt.replace("lunes, martes, miércoles, jueves, viernes, sábado, domingo", "lunes a domingo")
+                txt = txt.replace("lunes, martes, miércoles, jueves, viernes, sábado", "lunes a sábado")
+                txt = txt.replace("lunes, martes, miércoles, jueves, viernes", "lunes a viernes")
+                partes.append(txt[:1].upper() + txt[1:])
     return "; ".join(dict.fromkeys(partes))[:200]
 
 
@@ -196,6 +200,11 @@ def descripcion_de(pagina, jsonld, nombre):
             continue
         if re.search(r"@|https?://|\b[6789]\d{2}\s?\d{3}\s?\d{3}\b", d):
             continue
+        if re.search(r"(\.\.\.|…|\[…\]|\[\.\.\.\])\s*$", d):  # recortada por la plantilla
+            continue
+        palabras = len(d.split())
+        if d.count(",") >= 5 and palabras / (d.count(",") + 1) < 4:  # lista de palabras clave
+            continue
         return d
     return ""
 
@@ -207,7 +216,7 @@ def redes_de(pagina, host):
         if not canon:
             continue
         red = host_de(canon).split(".")[0]
-        usuario = urllib.parse.urlsplit(canon).path.strip("/").lower()
+        usuario = urllib.parse.urlsplit(canon).path.strip("/").lower().lstrip("@")
         if usuario in ("wix", "wordpress", "squarespace", "share.php", "sharer", "sharer.php", "godaddy", "webnode", "jimdo"):
             continue
         actual = por_red.get(red)
@@ -345,7 +354,17 @@ def self_test():
     p = rad.Page()
     p.feed("<p>Horario: Lunes a domingo de 7:00 a 23:00</p><p>El próximo lunes, 7 de noviembre, a partir de las 9:15 horas, charla.</p>")
     assert horario_texto(p) == "Lunes a domingo de 7:00 a 23:00", horario_texto(p)
-    assert horario_jsonld([{"openingHours": "Mo-Su 12:00-16:00"}]) == "lunes-domingo 12:00-16:00"
+    assert horario_jsonld([{"openingHours": "Mo-Su 12:00-16:00"}]) == "Lunes-domingo 12:00-16:00"
+    assert horario_jsonld([{"openingHours": ["Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday 12:00-16:00"]}]) == "Lunes a domingo 12:00-16:00"
+    p = rad.Page()
+    p.feed('<meta name="description" content="LM INMOBILIARIA - Chiclana con multitud de propiedades, pisos y casas en toda la provincia de Cád...">')
+    assert descripcion_de(p, [], "x") == ""
+    p = rad.Page()
+    p.feed('<meta name="description" content="clinica veterinaria chiclana, clinica veterinaria, veterinarios chiclana, rocio, clinica en la barrosa, veterinarios en la barrosa">')
+    assert descripcion_de(p, [], "x") == ""
+    p = rad.Page()
+    p.feed('<a href="https://www.tiktok.com/@wix">t</a><a href="https://www.tiktok.com/@minegocio">t</a>')
+    assert redes_de(p, "x.es") == ["https://www.tiktok.com/@minegocio"], redes_de(p, "x.es")
     assert horario_jsonld([{"openingHoursSpecification": [{"dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "09:00", "closes": "21:00"}]}]) == "Lunes a viernes 09:00-21:00"
     p = rad.Page()
     p.feed('<a href="https://facebook.com/203330216480504">f</a><a href="https://facebook.com/AgricentroGarola/">f</a><a href="https://www.instagram.com/wix/">i</a><a href="https://www.facebook.com/sharer.php?u=x">s</a>')
