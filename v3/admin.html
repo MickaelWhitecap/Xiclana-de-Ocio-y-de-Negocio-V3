@@ -82,7 +82,7 @@ h3{color:var(--acc)}
  <div id="today-summary" class="counter-grid"><span class="muted">Cargando…</span></div>
 </section>
 <section class="panel" id="queue-panel" style="margin-bottom:.6rem">
- <div class="topline"><div><h2 style="margin:.2rem 0">Cola de verificación</h2><div class="muted">Filtra las fichas, abre una, compruébala y pulsa «Verificada y siguiente» o «Dudosa y siguiente». La siguiente se abre sola.</div></div><div id="queue-progress" class="queue-progress"></div></div>
+ <div class="topline"><div><h2 style="margin:.2rem 0">Editar y verificar fichas</h2><div class="muted">Busca cualquier ficha para modificarla, o usa los filtros como cola de trabajo: abre una, compruébala y pulsa «Verificada y siguiente» o «Dudosa y siguiente». La siguiente se abre sola.</div></div><div id="queue-progress" class="queue-progress"></div></div>
 </section>
 <datalist id="category-options"></datalist>
 <div class="grid">
@@ -402,7 +402,8 @@ function fillQueueFilters(items){
 function queueMatches(items=visibleItems){
  const q=queueNorm($("#search").value),estado=queueValue("q-estado"),fuente=queueValue("q-fuente"),tipo=queueValue("q-tipo"),zona=queueValue("q-zona"),cat=queueValue("q-cat"),orden=queueValue("q-orden")||"facil",contacto=$("#q-contacto").checked;
  const out=items.filter(x=>{
-  if(estado&&estadoDe(x)!==estado)return false;
+  // Al escribir en el buscador se busca en todos los estados, para encontrar siempre cualquier ficha.
+  if(estado&&!q&&estadoDe(x)!==estado)return false;
   if(fuente&&fuenteDe(x)!==fuente)return false;
   if(tipo&&String(x.t||"")!==tipo)return false;
   if(cat&&String(x.c||"Sin categoría")!==cat)return false;
@@ -447,7 +448,7 @@ function refreshList(){
  try{renderCounter()}catch(error){console.warn("Contador de datos no disponible",error)}
  try{fillQueueFilters(visibleItems);renderQueueProgress(visibleItems);renderSummary()}catch(error){console.warn("Cola de verificación",error)}
  const matches=queueMatches(visibleItems),shown=matches.slice(0,queueLimit);
- list.textContent="";$("#count").textContent=matches.length.toLocaleString("es-ES")+" fichas"+(matches.length>shown.length?" · se ven "+shown.length:"");
+ list.textContent="";$("#count").textContent=matches.length.toLocaleString("es-ES")+" fichas"+(matches.length>shown.length?" · se ven "+shown.length:"")+(queueNorm($("#search").value)&&queueValue("q-estado")?" · buscando en todos los estados":"");
  shown.forEach(x=>{const b=document.createElement("button");b.type="button";b.className="item"+(x.id===selectedId?" active":"");b.append(document.createTextNode(x.n||x.nombre||x.name||"Sin nombre"));const small=document.createElement("small");small.textContent=(x.c||"Sin categoría")+" · "+(x.a||"Sin dirección");b.append(small);const completeness=document.createElement("span");completeness.className="pill";completeness.textContent=visitorCompleteness(x)+"/7";completeness.title="Dirección, teléfono, correo, web, horario, descripción y redes sociales";b.append(completeness);const states={verificada:["Verificada","verified"],pendiente:["Pendiente de verificar","pending"],insuficiente:["Datos Dudosos","insufficient"]};const state=states[x.estado_verificacion||"pendiente"]||states.pendiente;const p=document.createElement("span");p.className="verification "+state[1];p.textContent=state[0];p.style.display="table";p.style.marginTop=".1rem";p.style.marginLeft="auto";p.style.fontWeight="400";b.append(p);b.onclick=()=>selectItem(x.id);list.append(b)});
  if(matches.length>shown.length){const more=document.createElement("button");more.type="button";more.className="secondary more";more.textContent="Ver "+Math.min(QUEUE_PAGE,matches.length-shown.length)+" más";more.onclick=()=>{queueLimit+=QUEUE_PAGE;refreshList()};list.append(more)}
  if(!matches.length){const empty=document.createElement("p");empty.className="muted";empty.textContent="No hay fichas con estos filtros.";list.append(empty)}
