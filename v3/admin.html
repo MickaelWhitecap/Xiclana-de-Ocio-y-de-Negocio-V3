@@ -48,6 +48,20 @@ h3{color:var(--acc)}
 .merge-option small{display:block;color:var(--mut)}
 .merge-option .why{color:var(--tit);font-size:.85rem}
 .merge-option button{padding:.5rem .85rem}
+/* Cola de verificación y resumen del día. */
+.queue-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin:.7rem 0}
+.queue-filters .wide{grid-column:1/-1}
+.queue-filters select{padding:.5rem}
+.queue-check{display:flex;gap:.45rem;align-items:center;font-weight:600;grid-column:1/-1;margin:0}
+.queue-check input{width:auto}
+.queue-legend{margin:.5rem 0;font-size:.88rem}.queue-legend summary{cursor:pointer;font-weight:700}.queue-legend ol{margin:.3rem 0 .2rem;padding-left:1.2rem}
+.queue-progress{min-width:min(100%,260px)}.queue-progress strong{display:block}
+.progress{height:9px;background:var(--chip);border-radius:99px;overflow:hidden;margin-top:.3rem}.progress span{display:block;height:100%;background:var(--ok)}
+.counter-grid button.tile{display:block;width:100%;text-align:left;background:var(--soft);color:var(--ink);border:1px solid var(--bd);border-radius:10px;padding:.6rem .75rem;font-weight:400}
+.counter-grid button.tile:hover{border-color:var(--acc)}
+.counter-grid button.tile strong{display:block;font-size:1.35rem}.counter-grid button.tile small{display:block;color:var(--mut)}
+.queue-actions{border-top:1px solid var(--bd);padding-top:.9rem}
+#list .more{margin-top:.3rem}
 </style>
 </head>
 <body>
@@ -63,6 +77,64 @@ h3{color:var(--acc)}
 </form></section>
 <section id="app" class="hidden">
 <div class="panel topline"><div><strong id="who"></strong><div class="muted">Las fichas verificadas se guardan en la base de datos y prevalecen sobre los datos automáticos.</div></div><button id="new-record">＋ Nueva ficha</button></div>
+<section class="panel" id="today-panel">
+ <div class="topline"><div><h2 style="margin:.2rem 0">Resumen del día</h2><div class="muted">Lo que pide atención hoy. Pulsa una cifra para ir a su apartado.</div></div></div>
+ <div id="today-summary" class="counter-grid"><span class="muted">Cargando…</span></div>
+</section>
+<section class="panel" id="queue-panel" style="margin-bottom:.6rem">
+ <div class="topline"><div><h2 style="margin:.2rem 0">Cola de verificación</h2><div class="muted">Filtra las fichas, abre una, compruébala y pulsa «Verificada y siguiente» o «Dudosa y siguiente». La siguiente se abre sola.</div></div><div id="queue-progress" class="queue-progress"></div></div>
+</section>
+<datalist id="category-options"></datalist>
+<div class="grid">
+<aside class="panel"><label for="search">Buscar por nombre, categoría o dirección</label><input id="search" type="search" placeholder="Ej. restaurante, calle…">
+<div class="queue-filters">
+ <div><label for="q-estado">Estado</label><select id="q-estado"><option value="pendiente">Sin verificar</option><option value="">Todas</option><option value="verificada">Verificadas</option><option value="insuficiente">Datos dudosos</option></select></div>
+ <div><label for="q-fuente">Fuente</label><select id="q-fuente"><option value="">Todas las fuentes</option></select></div>
+ <div><label for="q-tipo">Tipo</label><select id="q-tipo"><option value="">Ocio y negocio</option><option value="negocio">Negocio</option><option value="ocio">Ocio</option></select></div>
+ <div><label for="q-zona">Zona</label><select id="q-zona"><option value="">Todas las zonas</option></select></div>
+ <div class="wide"><label for="q-cat">Categoría</label><select id="q-cat"><option value="">Todas las categorías</option></select></div>
+ <div class="wide"><label for="q-orden">Orden</label><select id="q-orden"><option value="facil">Más fáciles primero (con teléfono o web)</option><option value="nombre">Por nombre</option></select></div>
+ <label class="queue-check"><input type="checkbox" id="q-contacto"> Solo las que tienen teléfono o web</label>
+</div>
+<div class="topline"><div id="count" class="muted"></div><button id="q-reset" type="button" class="secondary" style="padding:.35rem .7rem">Quitar filtros</button></div>
+<details class="queue-legend muted"><summary>Qué cuenta en los 7 datos útiles</summary><ol><li>Dirección</li><li>Teléfono</li><li>Correo electrónico</li><li>Página web</li><li>Horario</li><li>Descripción</li><li>Redes sociales</li></ol><small>Tipo, categoría, nombre, dato destacado y coordenadas no cuentan.</small></details>
+<div id="list"></div></aside>
+<section class="panel">
+<div class="topline"><div><h2 id="form-title">Selecciona una ficha</h2><div id="record-meta" class="muted"></div></div></div>
+<div id="collab-panel" class="panel wide hidden" style="margin:.8rem 0;background:var(--soft)">
+ <strong>Enlace privado para completar la ficha</strong>
+ <p class="muted">Genera un enlace temporal de 30 días. Solo permite proponer cambios en esta ficha; la publicación siempre requiere aprobación administrativa.</p>
+ <div class="actions">
+  <button id="collab-issue" type="button">Generar enlace</button>
+  <button id="collab-revoke" type="button" class="danger">Revocar enlace</button>
+  <button id="collab-copy" type="button" class="secondary">Copiar enlace</button>
+ </div>
+ <input id="collab-link-url" type="text" readonly aria-label="Enlace privado generado" placeholder="El enlace aparecerá aquí" style="margin-top:.6rem">
+</div>
+<form id="record-form" class="fields hidden">
+<div><label for="n">Nombre *</label><input id="n" name="n" required maxlength="180"></div>
+<div><label for="t">Tipo *</label><select id="t" name="t"><option value="negocio">Negocio</option><option value="ocio">Ocio</option></select></div>
+<div><label for="c">Categoría *</label><input id="c" name="c" list="category-options" required maxlength="100" placeholder="Restaurante, Parking, Camping…"></div>
+<div><label for="a">1. Dirección</label><input id="a" name="a" maxlength="240"></div>
+<div><label for="p">2. Teléfono</label><input id="p" name="p" maxlength="100"></div>
+<div><label for="e">3. Correo electrónico</label><input id="e" name="e" type="email" maxlength="180"></div>
+<div class="wide"><label for="w">4. Página web (URL completa)</label><input id="w" name="w" type="url" placeholder="https://…" maxlength="500"></div>
+<div class="wide"><label for="h">5. Horario</label><input id="h" name="h" maxlength="300"></div>
+<div class="wide"><label for="r">7. Redes sociales (enlaces completos, separados por espacios)</label><input id="r" name="r" maxlength="500" placeholder="https://www.instagram.com/… https://www.facebook.com/…"></div>
+<div class="wide"><label for="s">Dato destacado (no computa)</label><input id="s" name="s" maxlength="500"></div>
+<div class="wide"><label for="d">6. Descripción</label><textarea id="d" name="d" rows="4" maxlength="3000"></textarea></div>
+<div><label for="lat">Latitud (opcional; no computa)</label><input id="lat" name="lat" type="number" step="any"></div>
+<div><label for="lon">Longitud (opcional; no computa)</label><input id="lon" name="lon" type="number" step="any"></div>
+<div class="wide"><label for="estado-verificacion">Estado de verificación</label><select id="estado-verificacion" name="estado_verificacion"><option value="pendiente">Pendiente de verificar</option><option value="verificada">Verificada</option><option value="insuficiente">Datos Dudosos</option></select><small class="muted">Verificada exige comprobar existencia y datos principales con una fuente fiable. Pendiente se aplica a fichas incorporadas sin comprobación humana. Datos Dudosos se reserva para fichas cuya identidad o ubicación no se puede confirmar con suficiente fiabilidad. No se asigna por tener pocos campos cumplimentados.</small></div>
+<div><label for="f">Fuente de verificación / procedencia</label><input id="f" maxlength="500" placeholder="Web oficial, Ayuntamiento, llamada…"></div>
+<div><label for="v">Fecha de comprobación</label><input id="v" type="date"></div>
+<div id="queue-actions" class="wide actions queue-actions hidden"><button id="q-verify-next" type="button">✓ Verificada y siguiente</button><button id="q-doubt-next" type="button" class="secondary">Dudosa y siguiente</button><button id="q-skip" type="button" class="secondary">Saltar →</button><small class="muted" style="flex-basis:100%">«Verificada» pide escribir antes dónde lo has comprobado (llamada, web oficial, visita…). Los cambios que hayas hecho en la ficha se guardan a la vez.</small></div>
+<div class="wide actions"><button id="save-button" type="submit">Guardar ficha</button><button id="delete-button" type="button" class="danger">Eliminar ficha</button><button id="cancel" type="button" class="secondary">Cancelar</button></div>
+</form>
+<div id="alternate-contacts" class="wide muted hidden" style="margin-top:1rem;padding:.8rem;border:1px solid var(--bd);border-radius:10px"><strong>Contactos alternativos y procedencia</strong><div id="alternate-contacts-list"></div><div style="display:grid;grid-template-columns:minmax(130px,.7fr) minmax(180px,1.5fr) minmax(140px,1fr) auto;gap:.5rem;align-items:end;margin-top:.8rem"><div><label for="alt-type">Tipo</label><select id="alt-type"><option value="p">Teléfono</option><option value="e">Correo electrónico</option><option value="w">Web</option></select></div><div><label for="alt-value">Contacto alternativo</label><input id="alt-value" type="text" placeholder="Dato adicional"></div><div><label for="alt-source">Fuente</label><input id="alt-source" type="text" placeholder="Web oficial, OSM…"></div><button id="alt-add" type="button">Añadir</button></div><small>El contacto principal no se sustituye. Los alternativos se conservan con su fuente y se muestran en la ficha pública.</small></div>
+<div id="empty-editor" class="muted">Elige una ficha de la lista o pulsa «Nueva ficha».</div>
+</section>
+</div>
 <section class="panel" id="counter-panel">
  <div class="topline"><div><h2 style="margin:.2rem 0">Contador de datos de las fichas</h2><div class="muted">Mide cuántos de los 7 datos útiles (dirección, teléfono, correo, web, horario, descripción y redes sociales) tienen las fichas activas, comparado con la línea base del <span id="counter-base-date"></span>.</div></div><button id="counter-download" type="button" class="secondary">Descargar CSV de hoy</button></div>
  <div id="counter-summary" class="counter-grid"></div>
@@ -182,44 +254,6 @@ h3{color:var(--acc)}
 </section>
 
 
-<datalist id="category-options"></datalist>
-<div class="grid">
-<aside class="panel"><label for="search">Buscar ficha por nombre, categoría o dirección</label><input id="search" type="search" placeholder="Ej. restaurante, calle…"><div id="count" class="muted"></div><div class="muted" style="margin:.65rem 0;padding:.65rem;border:1px solid var(--border,#ddd);border-radius:10px"><strong style="display:block;font-size:1rem;color:var(--ink)">Completitud de información útil (1–6)</strong><ol style="list-style:none;margin:.4rem 0 0;padding:0"><li><strong>1.</strong> Dirección</li><li><strong>2.</strong> Teléfono</li><li><strong>3.</strong> Correo electrónico</li><li><strong>4.</strong> Página web</li><li><strong>5.</strong> Horario</li><li><strong>6.</strong> Descripción</li></ol><small>Tipo, categoría, dato destacado y coordenadas no cuentan. El nombre tampoco.</small></div><div id="list"></div></aside>
-<section class="panel">
-<div class="topline"><div><h2 id="form-title">Selecciona una ficha</h2><div id="record-meta" class="muted"></div></div></div>
-<div id="collab-panel" class="panel wide hidden" style="margin:.8rem 0;background:var(--soft)">
- <strong>Enlace privado para completar la ficha</strong>
- <p class="muted">Genera un enlace temporal de 30 días. Solo permite proponer cambios en esta ficha; la publicación siempre requiere aprobación administrativa.</p>
- <div class="actions">
-  <button id="collab-issue" type="button">Generar enlace</button>
-  <button id="collab-revoke" type="button" class="danger">Revocar enlace</button>
-  <button id="collab-copy" type="button" class="secondary">Copiar enlace</button>
- </div>
- <input id="collab-link-url" type="text" readonly aria-label="Enlace privado generado" placeholder="El enlace aparecerá aquí" style="margin-top:.6rem">
-</div>
-<form id="record-form" class="fields hidden">
-<div><label for="n">Nombre *</label><input id="n" name="n" required maxlength="180"></div>
-<div><label for="t">Tipo *</label><select id="t" name="t"><option value="negocio">Negocio</option><option value="ocio">Ocio</option></select></div>
-<div><label for="c">Categoría *</label><input id="c" name="c" list="category-options" required maxlength="100" placeholder="Restaurante, Parking, Camping…"></div>
-<div><label for="a">1. Dirección</label><input id="a" name="a" maxlength="240"></div>
-<div><label for="p">2. Teléfono</label><input id="p" name="p" maxlength="100"></div>
-<div><label for="e">3. Correo electrónico</label><input id="e" name="e" type="email" maxlength="180"></div>
-<div class="wide"><label for="w">4. Página web (URL completa)</label><input id="w" name="w" type="url" placeholder="https://…" maxlength="500"></div>
-<div class="wide"><label for="h">5. Horario</label><input id="h" name="h" maxlength="300"></div>
-<div class="wide"><label for="r">7. Redes sociales (enlaces completos, separados por espacios)</label><input id="r" name="r" maxlength="500" placeholder="https://www.instagram.com/… https://www.facebook.com/…"></div>
-<div class="wide"><label for="s">Dato destacado (no computa)</label><input id="s" name="s" maxlength="500"></div>
-<div class="wide"><label for="d">6. Descripción</label><textarea id="d" name="d" rows="4" maxlength="3000"></textarea></div>
-<div><label for="lat">Latitud (opcional; no computa)</label><input id="lat" name="lat" type="number" step="any"></div>
-<div><label for="lon">Longitud (opcional; no computa)</label><input id="lon" name="lon" type="number" step="any"></div>
-<div class="wide"><label for="estado-verificacion">Estado de verificación</label><select id="estado-verificacion" name="estado_verificacion"><option value="pendiente">Pendiente de verificar</option><option value="verificada">Verificada</option><option value="insuficiente">Datos Dudosos</option></select><small class="muted">Verificada exige comprobar existencia y datos principales con una fuente fiable. Pendiente se aplica a fichas incorporadas sin comprobación humana. Datos Dudosos se reserva para fichas cuya identidad o ubicación no se puede confirmar con suficiente fiabilidad. No se asigna por tener pocos campos cumplimentados.</small></div>
-<div><label for="f">Fuente de verificación / procedencia</label><input id="f" maxlength="500" placeholder="Web oficial, Ayuntamiento, llamada…"></div>
-<div><label for="v">Fecha de comprobación</label><input id="v" type="date"></div>
-<div class="wide actions"><button id="save-button" type="submit">Guardar ficha</button><button id="delete-button" type="button" class="danger">Eliminar ficha</button><button id="cancel" type="button" class="secondary">Cancelar</button></div>
-</form>
-<div id="alternate-contacts" class="wide muted hidden" style="margin-top:1rem;padding:.8rem;border:1px solid var(--bd);border-radius:10px"><strong>Contactos alternativos y procedencia</strong><div id="alternate-contacts-list"></div><div style="display:grid;grid-template-columns:minmax(130px,.7fr) minmax(180px,1.5fr) minmax(140px,1fr) auto;gap:.5rem;align-items:end;margin-top:.8rem"><div><label for="alt-type">Tipo</label><select id="alt-type"><option value="p">Teléfono</option><option value="e">Correo electrónico</option><option value="w">Web</option></select></div><div><label for="alt-value">Contacto alternativo</label><input id="alt-value" type="text" placeholder="Dato adicional"></div><div><label for="alt-source">Fuente</label><input id="alt-source" type="text" placeholder="Web oficial, OSM…"></div><button id="alt-add" type="button">Añadir</button></div><small>El contacto principal no se sustituye. Los alternativos se conservan con su fuente y se muestran en la ficha pública.</small></div>
-<div id="empty-editor" class="muted">Elige una ficha de la lista o pulsa «Nueva ficha».</div>
-</section>
-</div>
 </section>
 <p class="muted">Consejo de seguridad: no compartas la contraseña y no introduzcas nunca una clave service_role en esta página ni en el repositorio.</p>
 </main>
@@ -344,20 +378,96 @@ $("#counter-download").onclick=()=>{
  const blob=new Blob(["\ufeff"+head.join(";")+"\n"+row.join(";")+"\n"],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");
  a.href=URL.createObjectURL(blob);a.download="contador-xiclana-"+st.fecha+".csv";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 };
+const QUEUE_PAGE=50;let queueLimit=QUEUE_PAGE,queueNextAfterSave;
+const FUENTES={overture:"Overture Maps",osm:"OpenStreetMap","osm-extra":"OpenStreetMap (extra)",rad:"Rastreo web",detector:"Detector de Google",oficial:"Fuentes oficiales",manual:"Altas manuales",turismo:"Turismo de Chiclana",proposal:"Propuestas aprobadas",legacy:"Fichas antiguas"};
+const QUEUE_FILTERS=["q-estado","q-fuente","q-tipo","q-zona","q-cat","q-orden"];
+function queueNorm(v){return String(v??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("es").trim()}
+function fuenteDe(x){return String(x.id||"").split(":")[0]||"otra"}
+function estadoDe(x){const e=String(x.estado_verificacion||"pendiente").toLowerCase();return e==="verificada"||e==="insuficiente"?e:"pendiente"}
+function hasValue(v){return v!==undefined&&v!==null&&String(v).trim()!==""}
+function hasContact(x){return hasValue(x.p)||hasValue(x.w)}
+// Zona: la del detector si la tiene; si no, aproximada por coordenadas (sin coste, sin servicios externos).
+function zonaDe(x){if(hasValue(x.zona_detector))return String(x.zona_detector);const lat=Number(x.lat),lon=Number(x.lon);if(!hasValue(x.lat)||!hasValue(x.lon)||!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat-36.4)>0.3||Math.abs(lon+6.15)>0.3)return "Sin coordenadas";const km=Math.hypot((lat-36.4195)*111,(lon+6.1495)*89.5);if(km<=1)return "Centro";if(lat<36.395&&km>3)return "Costa";return "Resto del término"}
+function localDay(iso){if(!iso)return "";const d=new Date(iso);if(isNaN(d))return "";return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function queueValue(id){const el=document.getElementById(id);return el?el.value:""}
+function saveQueueFilters(){try{const o={};QUEUE_FILTERS.forEach(id=>o[id]=queueValue(id));o.contacto=$("#q-contacto").checked;localStorage.setItem("admin-cola",JSON.stringify(o))}catch(e){}}
+function restoreQueueFilters(){try{const o=JSON.parse(localStorage.getItem("admin-cola")||"null");if(!o)return;QUEUE_FILTERS.forEach(id=>{const el=document.getElementById(id);if(el&&typeof o[id]==="string"){el.dataset.wanted=o[id];el.value=o[id]}});$("#q-contacto").checked=Boolean(o.contacto)}catch(e){}}
+function fillSelect(id,entries,allLabel){const sel=document.getElementById(id);if(!sel)return;const want=sel.dataset.wanted??sel.value;sel.textContent="";const all=document.createElement("option");all.value="";all.textContent=allLabel;sel.append(all);entries.forEach(([value,label,count])=>{const o=document.createElement("option");o.value=value;o.textContent=label+" ("+count.toLocaleString("es-ES")+")";sel.append(o)});if(want&&!entries.some(([v])=>v===want)){const o=document.createElement("option");o.value=want;o.textContent=(FUENTES[want]||want)+" (0)";sel.append(o)}sel.value=want||"";delete sel.dataset.wanted}
+function countBy(items,fn){const m=new Map();items.forEach(x=>{const k=fn(x);m.set(k,(m.get(k)||0)+1)});return m}
+function fillQueueFilters(items){
+ const fuentes=[...countBy(items,fuenteDe)].sort((a,b)=>b[1]-a[1]).map(([k,n])=>[k,FUENTES[k]||k,n]);fillSelect("q-fuente",fuentes,"Todas las fuentes");
+ const zonas=[...countBy(items,zonaDe)].sort((a,b)=>b[1]-a[1]).map(([k,n])=>[k,k,n]);fillSelect("q-zona",zonas,"Todas las zonas");
+ const cats=[...countBy(items,x=>String(x.c||"Sin categoría"))].sort((a,b)=>a[0].localeCompare(b[0],"es",{sensitivity:"base"})).map(([k,n])=>[k,k,n]);fillSelect("q-cat",cats,"Todas las categorías");
+}
+function queueMatches(items=visibleItems){
+ const q=queueNorm($("#search").value),estado=queueValue("q-estado"),fuente=queueValue("q-fuente"),tipo=queueValue("q-tipo"),zona=queueValue("q-zona"),cat=queueValue("q-cat"),orden=queueValue("q-orden")||"facil",contacto=$("#q-contacto").checked;
+ const out=items.filter(x=>{
+  if(estado&&estadoDe(x)!==estado)return false;
+  if(fuente&&fuenteDe(x)!==fuente)return false;
+  if(tipo&&String(x.t||"")!==tipo)return false;
+  if(cat&&String(x.c||"Sin categoría")!==cat)return false;
+  if(zona&&zonaDe(x)!==zona)return false;
+  if(contacto&&!hasContact(x))return false;
+  if(!q)return true;
+  // Buscar también por identificador, fuente y cualquier campo importado.
+  const searchableStatus=({verificada:"Verificada",pendiente:"Pendiente de verificar",insuficiente:"Datos Dudosos"}[estadoDe(x)]||"");
+  return Object.entries(x).some(([k,v])=>k!=="fields"&&queueNorm(typeof v==="object"?JSON.stringify(v):v).includes(q))||queueNorm(searchableStatus).includes(q);
+ });
+ const byName=(a,b)=>String(a.n||a.nombre||a.name||"").localeCompare(String(b.n||b.nombre||b.name||""),"es");
+ if(orden==="nombre")return out.sort(byName);
+ // Más fáciles primero: con teléfono o web (se pueden comprobar llamando o mirando la web), luego más datos útiles.
+ return out.sort((a,b)=>(Number(hasContact(b))-Number(hasContact(a)))||(visitorCompleteness(b)-visitorCompleteness(a))||byName(a,b));
+}
+function nextQueueId(currentId){const m=queueMatches();const i=m.findIndex(x=>String(x.id)===String(currentId));const next=i>=0?m[i+1]:m.find(x=>String(x.id)!==String(currentId));return next?String(next.id):null}
+function renderQueueProgress(items){
+ const total=items.length,ver=items.filter(x=>estadoDe(x)==="verificada").length,hoy=localDateInput(),today=items.filter(x=>estadoDe(x)==="verificada"&&localDay(x.verified_at)===hoy).length;
+ const pctv=total?100*ver/total:0,root=$("#queue-progress");if(!root)return;root.textContent="";
+ const t=document.createElement("strong");t.textContent=ver.toLocaleString("es-ES")+" de "+total.toLocaleString("es-ES")+" verificadas ("+pctv.toLocaleString("es-ES",{maximumFractionDigits:1})+" %)";
+ const sm=document.createElement("small");sm.className="muted";sm.textContent=today.toLocaleString("es-ES")+" verificadas hoy";
+ const bar=document.createElement("div");bar.className="progress";const fill=document.createElement("span");fill.style.width=Math.min(100,pctv).toFixed(1)+"%";bar.append(fill);
+ root.append(t,bar,sm);
+}
+const summaryCounts={};
+function goToQueue(estado){const sel=$("#q-estado");if(sel&&estado!==undefined){sel.value=estado;queueLimit=QUEUE_PAGE;saveQueueFilters();refreshList()}$("#queue-panel").scrollIntoView({behavior:"smooth",block:"start"})}
+function renderSummary(){
+ const root=$("#today-summary");if(!root||!user)return;const items=visibleItems||[];const hoy=localDateInput(),en30=new Date(Date.now()+30*864e5);const lim=en30.getFullYear()+"-"+String(en30.getMonth()+1).padStart(2,"0")+"-"+String(en30.getDate()).padStart(2,"0");
+ const pend=items.filter(x=>estadoDe(x)==="pendiente").length,dud=items.filter(x=>estadoDe(x)==="insuficiente").length,ver=items.filter(x=>estadoDe(x)==="verificada"&&localDay(x.verified_at)===hoy).length;
+ const prox=(typeof eventos!=="undefined"?eventos:[]).filter(e=>e.publicado&&(e.fecha_fin||e.fecha_inicio)>=hoy&&e.fecha_inicio<=lim).length;
+ const fmt=n=>n===undefined?"…":Number(n).toLocaleString("es-ES");
+ const tiles=[["Fichas por verificar",fmt(pend),"Abrir la cola",()=>goToQueue("pendiente")],
+  ["Verificadas hoy",fmt(ver),"Ver las verificadas",()=>goToQueue("verificada")],
+  ["Datos dudosos",fmt(dud),"Revisarlas",()=>goToQueue("insuficiente")],
+  ["Propuestas de negocios",fmt(summaryCounts.propuestas),"Pendientes de aprobar",()=>$("#proposals-panel").scrollIntoView({behavior:"smooth"})],
+  ["Candidatas OSM",fmt(summaryCounts.candidatas),"Sin resolver",()=>$("#automatic-candidates-panel").scrollIntoView({behavior:"smooth"})],
+  ["Eventos próximos",fmt(prox),"En los próximos 30 días",()=>$("#events-panel").scrollIntoView({behavior:"smooth"})]];
+ root.replaceChildren(...tiles.map(([label,value,note,go])=>{const b=document.createElement("button");b.type="button";b.className="tile";const sm=document.createElement("small"),st=document.createElement("strong"),n=document.createElement("small");sm.textContent=label;st.textContent=value;n.textContent=note;b.append(sm,st,n);b.onclick=go;return b}));
+}
 function refreshList(){
  visibleItems=effectiveItems();
  try{renderCounter()}catch(error){console.warn("Contador de datos no disponible",error)}
- const normalize=v=>String(v??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("es").trim();
- const q=normalize($("#search").value);
- const matches=visibleItems.filter(x=>{
-  if(!q)return true;
-  // Buscar también por identificador, fuente y cualquier campo importado,
-  // no solo por nombre/categoría/dirección/teléfono.
-  const searchableStatus=({verificada:"Verificada",pendiente:"Pendiente de verificar",insuficiente:"Datos Dudosos"}[String(x.estado_verificacion||"pendiente").toLowerCase()]||"");
-  return Object.entries(x).some(([k,v])=>k!=="fields"&&normalize(typeof v==="object"?JSON.stringify(v):v).includes(q))||normalize(searchableStatus).includes(q);
- }).sort((a,b)=>String(a.n||a.nombre||a.name||"").localeCompare(String(b.n||b.nombre||b.name||""),"es"));
- list.textContent="";$("#count").textContent=matches.length+" fichas";
- matches.forEach(x=>{const b=document.createElement("button");b.type="button";b.className="item"+(x.id===selectedId?" active":"");b.append(document.createTextNode(x.n||x.nombre||x.name||"Sin nombre"));const small=document.createElement("small");small.textContent=(x.c||"Sin categoría")+" · "+(x.a||"Sin dirección");b.append(small);const completeness=document.createElement("span");completeness.className="pill";completeness.textContent=visitorCompleteness(x)+"/7";completeness.title="Dirección, teléfono, correo, web, horario, descripción y redes sociales";b.append(completeness);const states={verificada:["Verificada","verified"],pendiente:["Pendiente de verificar","pending"],insuficiente:["Datos Dudosos","insufficient"]};const state=states[x.estado_verificacion||"pendiente"]||states.pendiente;const p=document.createElement("span");p.className="verification "+state[1];p.textContent=state[0];p.style.display="table";p.style.marginTop=".1rem";p.style.marginLeft="auto";p.style.fontWeight="400";b.append(p);b.onclick=()=>selectItem(x.id);list.append(b)});
+ try{fillQueueFilters(visibleItems);renderQueueProgress(visibleItems);renderSummary()}catch(error){console.warn("Cola de verificación",error)}
+ const matches=queueMatches(visibleItems),shown=matches.slice(0,queueLimit);
+ list.textContent="";$("#count").textContent=matches.length.toLocaleString("es-ES")+" fichas"+(matches.length>shown.length?" · se ven "+shown.length:"");
+ shown.forEach(x=>{const b=document.createElement("button");b.type="button";b.className="item"+(x.id===selectedId?" active":"");b.append(document.createTextNode(x.n||x.nombre||x.name||"Sin nombre"));const small=document.createElement("small");small.textContent=(x.c||"Sin categoría")+" · "+(x.a||"Sin dirección");b.append(small);const completeness=document.createElement("span");completeness.className="pill";completeness.textContent=visitorCompleteness(x)+"/7";completeness.title="Dirección, teléfono, correo, web, horario, descripción y redes sociales";b.append(completeness);const states={verificada:["Verificada","verified"],pendiente:["Pendiente de verificar","pending"],insuficiente:["Datos Dudosos","insufficient"]};const state=states[x.estado_verificacion||"pendiente"]||states.pendiente;const p=document.createElement("span");p.className="verification "+state[1];p.textContent=state[0];p.style.display="table";p.style.marginTop=".1rem";p.style.marginLeft="auto";p.style.fontWeight="400";b.append(p);b.onclick=()=>selectItem(x.id);list.append(b)});
+ if(matches.length>shown.length){const more=document.createElement("button");more.type="button";more.className="secondary more";more.textContent="Ver "+Math.min(QUEUE_PAGE,matches.length-shown.length)+" más";more.onclick=()=>{queueLimit+=QUEUE_PAGE;refreshList()};list.append(more)}
+ if(!matches.length){const empty=document.createElement("p");empty.className="muted";empty.textContent="No hay fichas con estos filtros.";list.append(empty)}
+}
+function applyLocalSave(id,fields,isNewFlag){
+ // Tras «… y siguiente» se actualiza la copia local en vez de recargar las 3.000 fichas: así la siguiente se abre al momento.
+ const now=new Date().toISOString();let o=overrides.find(r=>String(r.listing_id)===String(id));
+ const wasVerified=String(o?.fields?.estado_verificacion||"").toLowerCase()==="verificada";
+ const merged={...(o?.fields||{}),...fields};
+ const verifiedAt=String(merged.estado_verificacion)==="verificada"?(wasVerified?(o?.verified_at||now):now):null;
+ if(o){o.fields=merged;o.verified_at=verifiedAt;o.updated_at=now}else{o={listing_id:id,fields:merged,is_new:Boolean(isNewFlag),verified_at:verifiedAt,updated_at:now,is_deleted:false};overrides.push(o)}
+ const item={...merged,id,verified_at:verifiedAt,is_new:o.is_new,_xiclana_deleted:false};
+ const i=baseItems.findIndex(x=>String(x.id)===String(id));if(i>=0)baseItems[i]=item;else baseItems.push(item);
+}
+function saveAndNext(estado){
+ if(!selectedId||String(selectedId).startsWith("new:"))return;
+ if(estado==="verificada"&&!$("#f").value.trim()){message("Para marcar la ficha como Verificada, escribe antes en «Fuente de verificación / procedencia» dónde lo has comprobado (llamada, web oficial, visita…).","error");$("#f").focus();return}
+ $("#estado-verificacion").value=estado;if(estado==="verificada"&&!$("#v").value)$("#v").value=localDateInput();
+ queueNextAfterSave=nextQueueId(selectedId);
+ form.requestSubmit($("#save-button"));
 }
 function renderAlternateContacts(item){
  const panel=$("#alternate-contacts"),root=$("#alternate-contacts-list");root.textContent="";
@@ -463,10 +573,10 @@ async function addAlternateContact(){
 }
 function localDateInput(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function normalizeDateInput(value){const s=String(value||"").trim();if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);const m=s.match(/^(\d{1,2})[\/. -](\d{1,2})[\/. -](\d{4})$/);return m?m[3]+"-"+String(m[2]).padStart(2,"0")+"-"+String(m[1]).padStart(2,"0"):""}
-function selectItem(id){const x=effectiveItems().find(v=>v.id===id);if(!x)return;selectedId=id;isNew=!!x.is_new;$("#collab-panel").classList.remove("hidden");$("#collab-issue").disabled=false;$("#collab-revoke").disabled=false;$("#collab-link-url").value="";$("#form-title").textContent=x.n;$("#record-meta").textContent=visitorCompleteness(x)+"/7 datos útiles · Estado: "+({verificada:"Verificada",pendiente:"Pendiente de verificar",insuficiente:"Datos Dudosos"}[x.estado_verificacion||"pendiente"]||"Pendiente de verificar");$("#delete-button").disabled=false;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");fieldNames.forEach(k=>{const input=form.elements[k];input.value=x[k]??""});$("#estado-verificacion").value=x.estado_verificacion||"pendiente";$("#f").value=x.f||"";$("#v").value=normalizeDateInput(x.v);renderAlternateContacts(x);refreshList()}
+function selectItem(id){const x=effectiveItems().find(v=>v.id===id);if(!x)return;selectedId=id;isNew=!!x.is_new;$("#collab-panel").classList.remove("hidden");$("#queue-actions").classList.remove("hidden");$("#collab-issue").disabled=false;$("#collab-revoke").disabled=false;$("#collab-link-url").value="";$("#form-title").textContent=x.n;$("#record-meta").textContent=visitorCompleteness(x)+"/7 datos útiles · Estado: "+({verificada:"Verificada",pendiente:"Pendiente de verificar",insuficiente:"Datos Dudosos"}[x.estado_verificacion||"pendiente"]||"Pendiente de verificar");$("#delete-button").disabled=false;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");fieldNames.forEach(k=>{const input=form.elements[k];input.value=x[k]??""});$("#estado-verificacion").value=x.estado_verificacion||"pendiente";$("#f").value=x.f||"";$("#v").value=normalizeDateInput(x.v);renderAlternateContacts(x);refreshList()}
 $("#estado-verificacion").addEventListener("change",()=>{if($("#estado-verificacion").value==="verificada"&&!$("#v").value)$("#v").value=localDateInput()});
-function startNew(){selectedId="new:"+crypto.randomUUID();isNew=true;$("#collab-panel").classList.add("hidden");$("#alternate-contacts").classList.add("hidden");$("#form-title").textContent="Nueva ficha";$("#record-meta").textContent="Se añadirá al directorio público";$("#delete-button").disabled=true;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");form.reset();$("#t").value="negocio";$("#estado-verificacion").value="pendiente";$("#v").value=new Date().toISOString().slice(0,10);refreshList()}
-function cancelEdit(){selectedId=null;isNew=false;$("#collab-panel").classList.add("hidden");form.classList.add("hidden");$("#alternate-contacts").classList.add("hidden");$("#empty-editor").classList.remove("hidden");$("#form-title").textContent="Selecciona una ficha";$("#record-meta").textContent="";refreshList()}
+function startNew(){selectedId="new:"+crypto.randomUUID();isNew=true;$("#collab-panel").classList.add("hidden");$("#queue-actions").classList.add("hidden");$("#alternate-contacts").classList.add("hidden");$("#form-title").textContent="Nueva ficha";$("#record-meta").textContent="Se añadirá al directorio público";$("#delete-button").disabled=true;$("#empty-editor").classList.add("hidden");form.classList.remove("hidden");form.reset();$("#t").value="negocio";$("#estado-verificacion").value="pendiente";$("#v").value=new Date().toISOString().slice(0,10);refreshList()}
+function cancelEdit(){selectedId=null;isNew=false;$("#collab-panel").classList.add("hidden");$("#queue-actions").classList.add("hidden");form.classList.add("hidden");$("#alternate-contacts").classList.add("hidden");$("#empty-editor").classList.remove("hidden");$("#form-title").textContent="Selecciona una ficha";$("#record-meta").textContent="";refreshList()}
 function candidateKey(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
 // Misma regla que address_key() en rastreo_web_publico.py: «Av.» y «Avenida»,
 // código postal, municipio o país no convierten una ficha en sucursal distinta.
@@ -670,6 +780,7 @@ function renderAutomaticCandidates(){
   (Array.isArray(x.historial_fusiones)?x.historial_fusiones:[]).forEach(h=>h?.id_ficha_fusionada&&absorbed.add(String(h.id_ficha_fusionada)));
  });
  const pending=reviewCandidates.filter(x=>{const id=String(x?.id||"");if(absorbed.has(id))return false;const recovery=String(x?.estado_revision||"").startsWith("recuperada_de_baja")&&x._xiclana_recovery_review_batch==="2026-11-05";return x&&id&&!approved.has(id)&&(!deletedOverrides.has(id)||recovery)&&!rejected.has(id)&&!baseIds.has(id)&&x.estado_revision!=="descartada"});
+ summaryCounts.candidatas=pending.length;try{renderSummary()}catch(e){}
  if(!pending.length){root.textContent="No hay candidatas automáticas pendientes de revisión.";return}
  const appendField=(container,label,value)=>{
   if(value===undefined||value===null||String(value).trim()==="")return;
@@ -857,7 +968,7 @@ function renderEventos(){const tb=$("#events-list");tb.textContent="";const hoy=
  $("#events-note").textContent=eventos.length?eventos.length+" eventos (se muestran también los de los últimos 30 días).":"Todavía no hay eventos. Pulsa «Nuevo evento» para añadir el primero."}
 async function loadEventos(){const desde=new Date(Date.now()-30*864e5).toISOString().slice(0,10);
  const {data,error}=await client.from("eventos").select("*").or("fecha_fin.gte."+desde+",and(fecha_fin.is.null,fecha_inicio.gte."+desde+")").order("fecha_inicio").order("hora");
- if(error)throw new Error("No se pudo cargar la agenda: "+error.message);eventos=data||[];renderEventos()}
+ if(error)throw new Error("No se pudo cargar la agenda: "+error.message);eventos=data||[];renderEventos();try{renderSummary()}catch(e){}}
 $("#events-new").addEventListener("click",()=>evForm());
 $("#ev-cancelar").addEventListener("click",()=>$("#event-form").classList.add("hidden"));
 $("#event-form").addEventListener("submit",async ev=>{ev.preventDefault();if(!user)return;const btn=$("#ev-guardar");btn.disabled=true;
@@ -896,6 +1007,7 @@ function renderProposals(){
  const activeListings=effectiveItems().filter(x=>x._xiclana_deleted!==true);
  const alreadyPublished=p=>{const f=proposalFields(p);if(f._xiclana_update_target_id)return false;const name=normProposalValue(f.n),address=normProposalValue(f.a);return Boolean(name&&address&&activeListings.some(x=>normProposalValue(x.n||x.nombre||x.name)===name&&normProposalValue(x.a||x.direccion||x.address)===address))};
  const pending=proposals.filter(p=>p.status==="pending"&&!alreadyPublished(p)).sort((a,b)=>String(b.created_at||"").localeCompare(String(a.created_at||"")));
+ summaryCounts.propuestas=pending.length;try{renderSummary()}catch(e){}
  if(!pending.length){root.textContent="No hay propuestas pendientes.";return}
  pending.forEach(p=>{
   const card=document.createElement("div");card.className="item";card.style.marginBottom=".5rem";
@@ -1045,6 +1157,7 @@ $("#category-form").addEventListener("submit",async e=>{
 });
 form.addEventListener("submit",async e=>{
  e.preventDefault();
+ const goNext=e.submitter&&e.submitter.id==="save-button"&&queueNextAfterSave!==undefined?queueNextAfterSave:undefined;queueNextAfterSave=undefined;
  if(!user){message("No hay una sesión administrativa activa. Vuelve a iniciar sesión antes de guardar.","error");return}
  if(!selectedId){message("No hay una ficha abierta. Pulsa «Nueva ficha» antes de guardar.","error");return}
  const btn=$("#save-button");btn.disabled=true;btn.textContent="Guardando…";
@@ -1074,6 +1187,13 @@ form.addEventListener("submit",async e=>{
    const {data:catData,error:catError}=await client.from("listing_categories").upsert({slug:categorySlug,name:fields.c,type:fields.t||"negocio",created_by:user.id},{onConflict:"slug"}).select("slug,name,type,created_at").single();
    if(catError){message("La ficha se ha guardado, pero no se pudo registrar la categoría: "+catError.message,"error");await loadData();selectItem(id);return}
    categories=categories.filter(c=>c.slug!==catData.slug);categories.push(catData);renderCategories();
+  }
+  if(goNext!==undefined){
+   applyLocalSave(id,fields,keepAsNew);
+   const label={verificada:"Verificada",insuficiente:"Datos dudosos",pendiente:"Pendiente"}[fields.estado_verificacion]||fields.estado_verificacion;
+   if(goNext&&goNext!==id){selectItem(goNext);$("#form-title").scrollIntoView({behavior:"smooth",block:"start"})}else cancelEdit();
+   message("«"+fields.n+"» guardada como "+label+". "+(goNext?"Ya tienes abierta la siguiente.":"No quedan más fichas con estos filtros."),"ok");
+   return;
   }
   await loadData();selectItem(id);
   message("Ficha guardada en public.listings. La web pública consulta directamente esta base; puedes actualizarla.","ok");
@@ -1111,7 +1231,13 @@ $("#collab-copy").addEventListener("click",async()=>{
 $("#login-form").addEventListener("submit",async e=>{e.preventDefault();const btn=$("#login-button");btn.disabled=true;try{const {data,error}=await client.auth.signInWithPassword({email:$("#email").value.trim(),password:$("#password").value});if(error)throw error;if(data.user?.id!=="2ebd10a1-fbae-454b-a12b-e1692f1eed17"){await client.auth.signOut();throw new Error("Esta cuenta no está autorizada para administrar Xiclana.")}user=data.user;showApp();wireAdForms();await loadData();message("Sesión iniciada. Solo la cuenta autorizada puede guardar cambios.","ok")}catch(err){message("No se pudo iniciar sesión: "+(err.message||"revisa el correo y la contraseña."),"error")}finally{btn.disabled=false}});
 logout.onclick=async()=>{await client.auth.signOut();user=null;showLogin();message("Sesión cerrada.")};
 $("#alt-add").onclick=addAlternateContact;
-$("#search").addEventListener("input",refreshList);$("#new-record").onclick=startNew;$("#cancel").onclick=cancelEdit;$("#trash-refresh").onclick=async()=>{try{await loadData();message("Papelera actualizada.","ok")}catch(err){message("No se pudo actualizar la papelera: "+err.message,"error")}};
+$("#search").addEventListener("input",()=>{queueLimit=QUEUE_PAGE;refreshList()});
+restoreQueueFilters();
+[...QUEUE_FILTERS,"q-contacto"].forEach(id=>document.getElementById(id).addEventListener("change",()=>{queueLimit=QUEUE_PAGE;saveQueueFilters();refreshList()}));
+$("#q-reset").onclick=()=>{$("#search").value="";QUEUE_FILTERS.forEach(id=>{const el=document.getElementById(id);el.value=id==="q-estado"?"":(id==="q-orden"?"facil":"")});$("#q-contacto").checked=false;queueLimit=QUEUE_PAGE;saveQueueFilters();refreshList()};
+$("#save-button").addEventListener("click",()=>{queueNextAfterSave=undefined});
+$("#q-verify-next").onclick=()=>saveAndNext("verificada");$("#q-doubt-next").onclick=()=>saveAndNext("insuficiente");
+$("#q-skip").onclick=()=>{const next=nextQueueId(selectedId);if(next){selectItem(next);$("#form-title").scrollIntoView({behavior:"smooth",block:"start"})}else message("No hay más fichas con estos filtros.")};$("#new-record").onclick=startNew;$("#cancel").onclick=cancelEdit;$("#trash-refresh").onclick=async()=>{try{await loadData();message("Papelera actualizada.","ok")}catch(err){message("No se pudo actualizar la papelera: "+err.message,"error")}};
  $("#delete-button").onclick=async()=>{
   if(!user||!selectedId||String(selectedId).startsWith("new:"))return;
   const item=effectiveItems().find(x=>x.id===selectedId);if(!item)return;
