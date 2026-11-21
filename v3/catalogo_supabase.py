@@ -134,6 +134,7 @@ def sync_enrichment(before_path, after_path, allowed_ids=None):
     allowed_fields = {
         "a", "h", "d", "t", "c", "rta_registro", "direcciones_alternativas",
         "p", "e", "w", "web_alternativas", "fuentes_datos", "estado_verificacion", "f", "v",
+        "r",  # redes sociales enlazadas desde la web propia
     }
     to_update = []
     detected_count = conflict_count = inactive_count = verification_count = 0
