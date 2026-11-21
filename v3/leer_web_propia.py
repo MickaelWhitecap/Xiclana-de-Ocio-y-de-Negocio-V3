@@ -329,14 +329,16 @@ def leer_web(ficha, dominios_compartidos=()):
         if datos:
             paginas.append((fin, datos))
     texto_total = " ".join(" ".join(p.title_parts + p.headings + p.text) + " " + p.meta.get("description", "") for _u, (p, _j) in paginas)
-    if not identifica_negocio(nombre, texto_total, host):
+    tel_ficha = set(rad.extract_phones(ficha.get("p") or ""))
+    tel_web = {t for _u, (p, j) in paginas for t in telefonos_de(p, j)}
+    # El nombre de la ficha (a menudo el de Google u Overture) puede no coincidir con la marca
+    # de la web; si la web publica el mismo teléfono que la ficha, es la del negocio.
+    if not identifica_negocio(nombre, texto_total, host) and not (tel_ficha & tel_web):
         return {"campos": {}, "motivo": "la_web_no_nombra_el_negocio", "paginas": [u for u, _ in paginas]}
     if not menciona_chiclana(texto_total) and not menciona_chiclana(str(ficha.get("a") or "")):
         return {"campos": {}, "motivo": "la_web_no_menciona_chiclana", "paginas": [u for u, _ in paginas]}
     if not menciona_chiclana(texto_total):
         # La web no nombra Chiclana: solo es aceptable si su teléfono coincide con el de la ficha.
-        tel_ficha = set(rad.extract_phones(ficha.get("p") or ""))
-        tel_web = {t for _u, (p, j) in paginas for t in telefonos_de(p, j)}
         if not (tel_ficha & tel_web):
             return {"campos": {}, "motivo": "la_web_no_menciona_chiclana", "paginas": [u for u, _ in paginas]}
     p0, j0 = portada
