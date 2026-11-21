@@ -40,6 +40,7 @@ h2{color:var(--tit);font-size:1.5rem;font-weight:800;letter-spacing:-.01em;borde
 h3{color:var(--acc)}
 .panel{border:1.5px solid var(--tit)}
 /* Selector de fusión de candidatas: mismo filete dorado/azul que los títulos. */
+.dup-pair{border:1px solid var(--bd);border-radius:10px;padding:.8rem;margin-bottom:.7rem;background:var(--soft)}.dup-cols{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem}.dup-col{border:1px solid var(--bd);border-radius:9px;padding:.6rem;background:var(--card);min-width:0;overflow-wrap:anywhere}.dup-col.keep{border-color:var(--ok);box-shadow:0 0 0 2px #246a4a33}.dup-col dl{margin:.4rem 0 0;display:grid;grid-template-columns:auto 1fr;gap:.15rem .5rem;font-size:.9rem}.dup-col dt{color:var(--mut)}.dup-col dd{margin:0}.dup-col label{display:flex;gap:.45rem;align-items:center;justify-content:flex-start;font-weight:700;margin:0;cursor:pointer}.dup-col label input{width:auto;margin:0;flex:0 0 auto}.dup-class{font-size:.78rem;border-radius:999px;padding:.12rem .5rem;font-weight:700}.dup-class.c1{background:var(--err-bg);color:var(--err)}.dup-class.c2{background:#f2c94c33;color:var(--warn)}.dup-class.c3{background:var(--chip);color:var(--ink)}@media(max-width:700px){.dup-cols{grid-template-columns:1fr}}
 .merge-picker{margin-top:.75rem;padding:.85rem;background:var(--soft);border:1px solid var(--bd);border-left:4px solid var(--tit-bar);border-radius:9px}
 .merge-picker h3{margin:0 0 .35rem}
 .merge-option{display:flex;gap:.7rem;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:.55rem 0;border-bottom:1px solid var(--bd)}
@@ -211,6 +212,14 @@ h3{color:var(--acc)}
  <p class="muted" id="events-note"></p>
 </section>
 
+<section class="panel" id="duplicates-panel">
+ <div class="topline"><div><h2 style="margin:.2rem 0">Fichas duplicadas</h2><div class="muted">Parejas que el vigilante cree que son el mismo negocio. Elige qué ficha se queda y pulsa «Fusionar», o «Son distintas» si no lo son (ya no volverán a salir). Las fusiones se pueden deshacer.</div></div><button id="dup-refresh" type="button" class="secondary">Actualizar</button></div>
+ <div class="queue-filters" style="margin-top:.6rem"><div><label for="dup-clase">Mostrar</label><select id="dup-clase"><option value="casi seguro">Casi seguras</option><option value="probable">Probables</option><option value="dudoso">Dudosas</option><option value="">Todas</option></select></div></div>
+ <div id="dup-summary" class="muted" style="margin:.5rem 0"></div>
+ <div id="dup-undo" class="status ok hidden"></div>
+ <div id="dup-list"><span class="muted">Cargando parejas…</span></div>
+</section>
+
 <section class="panel" id="trash-panel">
 <div class="topline"><div><h2 style="margin:.2rem 0">Papelera de fichas</h2><div class="muted">Las fichas eliminadas se conservan aquí y se pueden restaurar sin reconstruirlas.</div></div><button id="trash-refresh" type="button" class="secondary">Actualizar papelera</button></div>
 <div id="trash-list" style="margin-top:.7rem"><span class="muted">Cargando papelera…</span></div>
@@ -316,6 +325,81 @@ function deletedItems(){
  const deleted=overrides.filter(o=>o.fields&&o.fields._xiclana_deleted===true);
  return deleted.map(o=>{const base=baseItems.find(x=>stableId(x)===o.listing_id);return base?({...base,id:o.listing_id,is_new:false}):({...o.fields,id:o.listing_id,is_new:Boolean(o.is_new)});}).sort((a,b)=>String(a.n||"").localeCompare(String(b.n||""),"es"));
 }
+// ---------- Fichas duplicadas (vigilancia de duplicados, 21-nov-2026) ----------
+let dupPairs=[],dupShown=20,dupError="";
+const DUP_FUENTE_PESO={manual:6,oficial:5,turismo:5,proposal:5,osm:4,rad:3,detector:3,"osm-extra":2,overture:1};
+function dupItem(id){return (baseItems||[]).find(x=>String(x.id)===String(id))}
+function dupValor(x){if(!x)return -99;let v=visitorCompleteness(x)+(DUP_FUENTE_PESO[fuenteDe(x)]||0);if((x.estado_verificacion||"")==="verificada")v+=10;if(x.posible_duplicado_de)v-=5;return v}
+async function loadDuplicates(){
+ const root=$("#dup-list");if(!root)return;
+ const {data,error}=await client.from("duplicados_revision").select("id,ficha_a,ficha_b,puntos,clase,motivos").eq("estado","pendiente").order("puntos",{ascending:false}).order("id",{ascending:true}).limit(2000);
+ if(error){dupError=/duplicados_revision/.test(error.message||"")?"Falta instalar la vigilancia de duplicados en Supabase (instalar-vigilancia-duplicados.sql).":"No se pudo cargar la lista de duplicados: "+error.message;dupPairs=[];summaryCounts.duplicados=undefined}
+ else{dupError="";dupPairs=data||[];summaryCounts.duplicados=dupPairs.length}
+ renderDuplicates();renderSummary();
+}
+function renderDuplicates(){
+ const root=$("#dup-list");if(!root)return;root.textContent="";
+ if(dupError){root.textContent=dupError;$("#dup-summary").textContent="";return}
+ const n=c=>dupPairs.filter(p=>p.clase===c).length;
+ $("#dup-summary").textContent=dupPairs.length?("Pendientes: "+n("casi seguro")+" casi seguras · "+n("probable")+" probables · "+n("dudoso")+" dudosas"):"No hay parejas pendientes. El vigilante repasa el catálogo cada noche.";
+ const clase=$("#dup-clase").value;const list=dupPairs.filter(p=>!clase||p.clase===clase);
+ if(!list.length&&dupPairs.length){root.textContent="No hay parejas pendientes en este grupo.";return}
+ list.slice(0,dupShown).forEach(pair=>root.append(dupCard(pair)));
+ if(list.length>dupShown){const more=document.createElement("button");more.type="button";more.className="secondary";more.textContent="Ver "+Math.min(20,list.length-dupShown)+" más (quedan "+(list.length-dupShown)+")";more.onclick=()=>{dupShown+=20;renderDuplicates()};root.append(more)}
+}
+function dupCard(pair){
+ const a=dupItem(pair.ficha_a),b=dupItem(pair.ficha_b);
+ const card=document.createElement("div");card.className="dup-pair";
+ const head=document.createElement("div");const badge=document.createElement("span");badge.className="dup-class "+({"casi seguro":"c1",probable:"c2",dudoso:"c3"}[pair.clase]||"c3");badge.textContent=({"casi seguro":"Casi seguro",probable:"Probable",dudoso:"Dudoso"}[pair.clase]||pair.clase)+" · "+pair.puntos+" puntos";
+ const why=document.createElement("div");why.className="muted";why.style.marginTop=".3rem";why.textContent="Por qué: "+pair.motivos;head.append(badge,why);card.append(head);
+ let keep=dupValor(b)>dupValor(a)?pair.ficha_b:pair.ficha_a;
+ const cols=document.createElement("div");cols.className="dup-cols";const colEls={};
+ const name="dup-keep-"+pair.id;
+ [[pair.ficha_a,a],[pair.ficha_b,b]].forEach(([id,x])=>{
+  const col=document.createElement("div");col.className="dup-col";colEls[id]=col;
+  const lab=document.createElement("label");const radio=document.createElement("input");radio.type="radio";radio.name=name;radio.value=id;radio.checked=id===keep;radio.onchange=()=>{keep=id;Object.entries(colEls).forEach(([k,el])=>el.classList.toggle("keep",k===keep));mergeBtn.textContent="Fusionar (se queda «"+((dupItem(keep)||{}).n||keep)+"»)"};
+  lab.append(radio,document.createTextNode(" Se queda esta"));col.append(lab);
+  const t=document.createElement("strong");t.style.display="block";t.style.marginTop=".3rem";t.textContent=x?(x.n||"Sin nombre"):"Ficha no encontrada";col.append(t);
+  const dl=document.createElement("dl");
+  const rows=x?[["Fuente",FUENTES[fuenteDe(x)]||fuenteDe(x)],["Estado",({verificada:"Verificada",pendiente:"Pendiente",insuficiente:"Datos dudosos"}[x.estado_verificacion||"pendiente"]||"Pendiente")+(x.posible_duplicado_de?" · oculta por posible duplicado":"")],["Categoría",x.c],["Dirección",x.a],["Teléfono",x.p],["Correo",x.e],["Web",x.w],["Horario",x.h],["Datos útiles",visitorCompleteness(x)+"/7"]]:[["Id",id]];
+  rows.forEach(([k,v])=>{if(v===undefined||v===null||String(v).trim()==="")v="—";const dt=document.createElement("dt"),dd=document.createElement("dd");dt.textContent=k;dd.textContent=String(v);dl.append(dt,dd)});col.append(dl);
+  if(x){const open=document.createElement("button");open.type="button";open.className="secondary";open.style.cssText="margin-top:.5rem;padding:.35rem .7rem";open.textContent="Abrir ficha";open.onclick=()=>{selectItem(id);$("#queue-panel").scrollIntoView({behavior:"smooth"})};col.append(open)}
+  cols.append(col);
+ });
+ Object.entries(colEls).forEach(([k,el])=>el.classList.toggle("keep",k===keep));
+ card.append(cols);
+ const actions=document.createElement("div");actions.className="actions";
+ const mergeBtn=document.createElement("button");mergeBtn.type="button";mergeBtn.textContent="Fusionar (se queda «"+((dupItem(keep)||{}).n||keep)+"»)";
+ mergeBtn.title="La ficha marcada recibe los datos que le faltan; la otra pasa a la papelera. Se puede deshacer.";
+ mergeBtn.disabled=!a||!b;mergeBtn.onclick=()=>dupMerge(pair,keep,keep===pair.ficha_a?pair.ficha_b:pair.ficha_a,[mergeBtn,distinct]);
+ const distinct=document.createElement("button");distinct.type="button";distinct.className="secondary";distinct.textContent="Son distintas";distinct.title="No es el mismo negocio. La pareja no volverá a salir.";distinct.onclick=()=>dupDistinct(pair,[mergeBtn,distinct]);
+ actions.append(mergeBtn,distinct);card.append(actions);
+ return card;
+}
+async function dupMerge(pair,keepId,dropId,buttons){
+ const k=dupItem(keepId),d=dupItem(dropId);
+ if(!window.confirm("Se queda «"+(k?.n||keepId)+"» y recibe los datos que le falten de «"+(d?.n||dropId)+"».\n«"+(d?.n||dropId)+"» pasará a la papelera.\n\nSe puede deshacer. ¿Fusionar?"))return;
+ buttons.forEach(b=>b.disabled=true);
+ const {data,error}=await client.rpc("dup_fusionar",{p_quedar:keepId,p_retirar:dropId,p_par:pair.id});
+ if(error){message("No se pudo fusionar: "+error.message+(/dup_fusionar/.test(error.message)?" (falta instalar instalar-panel-duplicados.sql)":""),"error");buttons.forEach(b=>b.disabled=false);return}
+ dupShowUndo("Fusionadas: se queda «"+(k?.n||keepId)+"».",data?.registro);
+ message("Fichas fusionadas.","ok");
+ await loadData();
+}
+function dupShowUndo(text,registro){
+ const box=$("#dup-undo");box.textContent=text+" ";box.classList.remove("hidden");
+ if(registro){const u=document.createElement("button");u.type="button";u.className="secondary";u.style.cssText="padding:.3rem .7rem";u.textContent="Deshacer";u.onclick=async()=>{u.disabled=true;const {error}=await client.rpc("dup_deshacer_fusion",{p_registro:registro});if(error){message("No se pudo deshacer: "+error.message,"error");u.disabled=false;return}box.textContent="Fusión deshecha: las dos fichas vuelven a estar como antes.";message("Fusión deshecha.","ok");await loadData()};box.append(u)}
+}
+async function dupDistinct(pair,buttons){
+ buttons.forEach(b=>b.disabled=true);
+ const {error}=await client.rpc("dup_decidir",{p_par:pair.id,p_estado:"distintas",p_nota:null});
+ if(error){message("No se pudo guardar: "+error.message,"error");buttons.forEach(b=>b.disabled=false);return}
+ dupPairs=dupPairs.filter(p=>p.id!==pair.id);summaryCounts.duplicados=dupPairs.length;
+ const box=$("#dup-undo");box.textContent="Marcadas como distintas: «"+((dupItem(pair.ficha_a)||{}).n||pair.ficha_a)+"» y «"+((dupItem(pair.ficha_b)||{}).n||pair.ficha_b)+"». ";box.classList.remove("hidden");
+ const u=document.createElement("button");u.type="button";u.className="secondary";u.style.cssText="padding:.3rem .7rem";u.textContent="Deshacer";u.onclick=async()=>{u.disabled=true;const {error:e2}=await client.rpc("dup_decidir",{p_par:pair.id,p_estado:"pendiente",p_nota:null});if(e2){message("No se pudo deshacer: "+e2.message,"error");u.disabled=false;return}box.textContent="Vuelve a estar pendiente.";await loadDuplicates()};box.append(u);
+ renderDuplicates();renderSummary();
+}
+
 function renderTrash(){
  const root=$("#trash-list");root.textContent="";const items=deletedItems();
  if(!items.length){root.textContent="La papelera está vacía.";return}
@@ -439,6 +523,7 @@ function renderSummary(){
   ["Datos dudosos",fmt(dud),"Revisarlas",()=>goToQueue("insuficiente")],
   ["Propuestas de negocios",fmt(summaryCounts.propuestas),"Pendientes de aprobar",()=>$("#proposals-panel").scrollIntoView({behavior:"smooth"})],
   ["Candidatas OSM",fmt(summaryCounts.candidatas),"Sin resolver",()=>$("#automatic-candidates-panel").scrollIntoView({behavior:"smooth"})],
+  ["Posibles duplicados",fmt(summaryCounts.duplicados),"Parejas por revisar",()=>$("#duplicates-panel").scrollIntoView({behavior:"smooth"})],
   ["Eventos próximos",fmt(prox),"En los próximos 30 días",()=>$("#events-panel").scrollIntoView({behavior:"smooth"})]];
  root.replaceChildren(...tiles.map(([label,value,note,go])=>{const b=document.createElement("button");b.type="button";b.className="tile";const sm=document.createElement("small"),st=document.createElement("strong"),n=document.createElement("small");sm.textContent=label;st.textContent=value;n.textContent=note;b.append(sm,st,n);b.onclick=go;return b}));
 }
@@ -940,7 +1025,7 @@ async function loadData(){
  addressProposals=normalizedAddressProposals.filter(x=>x&&typeof x==="object").map(x=>({...x}));
  const categoryRes=await client.from("listing_categories").select("slug,name,type,created_at").order("name");
  if(categoryRes.error)throw new Error("No se pudieron cargar las categorías: "+categoryRes.error.message);
- categories=categoryRes.data||[];renderCategories();refreshList();renderTrash();renderAutomaticCandidates();renderAddressProposals();await loadProposals();await loadAdvertisingSlots();loadWebStats().catch(err=>{$("#stats-note").textContent=err.message+" (si es la primera vez, falta crear la tabla de estadísticas en Supabase)."});loadEventos().catch(err=>{$("#events-note").textContent=err.message+" (si es la primera vez, falta crear la tabla de eventos en Supabase)."});
+ categories=categoryRes.data||[];renderCategories();refreshList();renderTrash();loadDuplicates().catch(err=>{$("#dup-list").textContent="No se pudo cargar la lista de duplicados: "+err.message});renderAutomaticCandidates();renderAddressProposals();await loadProposals();await loadAdvertisingSlots();loadWebStats().catch(err=>{$("#stats-note").textContent=err.message+" (si es la primera vez, falta crear la tabla de estadísticas en Supabase)."});loadEventos().catch(err=>{$("#events-note").textContent=err.message+" (si es la primera vez, falta crear la tabla de eventos en Supabase)."});
 }
 
 
@@ -1237,7 +1322,7 @@ restoreQueueFilters();
 $("#q-reset").onclick=()=>{$("#search").value="";QUEUE_FILTERS.forEach(id=>{const el=document.getElementById(id);el.value=id==="q-estado"?"":(id==="q-orden"?"facil":"")});$("#q-contacto").checked=false;queueLimit=QUEUE_PAGE;saveQueueFilters();refreshList()};
 $("#save-button").addEventListener("click",()=>{queueNextAfterSave=undefined});
 $("#q-verify-next").onclick=()=>saveAndNext("verificada");$("#q-doubt-next").onclick=()=>saveAndNext("insuficiente");
-$("#q-skip").onclick=()=>{const next=nextQueueId(selectedId);if(next){selectItem(next);$("#form-title").scrollIntoView({behavior:"smooth",block:"start"})}else message("No hay más fichas con estos filtros.")};$("#new-record").onclick=startNew;$("#cancel").onclick=cancelEdit;$("#trash-refresh").onclick=async()=>{try{await loadData();message("Papelera actualizada.","ok")}catch(err){message("No se pudo actualizar la papelera: "+err.message,"error")}};
+$("#q-skip").onclick=()=>{const next=nextQueueId(selectedId);if(next){selectItem(next);$("#form-title").scrollIntoView({behavior:"smooth",block:"start"})}else message("No hay más fichas con estos filtros.")};$("#new-record").onclick=startNew;$("#cancel").onclick=cancelEdit;$("#dup-refresh").onclick=async()=>{try{await loadData();message("Lista de duplicados actualizada.","ok")}catch(err){message("No se pudo actualizar: "+err.message,"error")}};$("#dup-clase").onchange=()=>{dupShown=20;renderDuplicates()};$("#trash-refresh").onclick=async()=>{try{await loadData();message("Papelera actualizada.","ok")}catch(err){message("No se pudo actualizar la papelera: "+err.message,"error")}};
  $("#delete-button").onclick=async()=>{
   if(!user||!selectedId||String(selectedId).startsWith("new:"))return;
   const item=effectiveItems().find(x=>x.id===selectedId);if(!item)return;
