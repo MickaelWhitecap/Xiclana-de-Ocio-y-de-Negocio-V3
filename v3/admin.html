@@ -430,7 +430,11 @@ function renderCategories(){
 // Contador de datos: 7 datos útiles por ficha. La línea base se midió en Supabase el 19-nov-2026 (1.518 fichas publicadas),
 // después de vaciar 71 webs erróneas (portadas de todociudad.es y similares): por eso la web de partida es 361 y no 429.
 const COUNTER_FIELDS=[["a","Dirección"],["p","Teléfono"],["e","Correo electrónico"],["w","Página web"],["h","Horario"],["d","Descripción"],["r","Redes sociales"]];
-const COUNTER_BASELINE={fecha:"2026-11-19",fichas:1518,campos:{a:856,p:607,e:460,w:361,h:107,d:449,r:0},completas:0,vacias:560,verificadas:310};
+// Verificadas = estado «verificada», lo mismo que muestra la web pública. Antes se contaba la fecha
+// verified_at, y 148 fichas antiguas (oct-nov 2026) tienen fecha pero estado «pendiente» o «insuficiente»;
+// todas son anteriores al 19-nov, así que la base equivalente es 310 − 148 = 162.
+// Redes sociales: base 0 porque el campo «r» aún no se rellenaba el 19-nov.
+const COUNTER_BASELINE={fecha:"2026-11-19",fichas:1518,campos:{a:856,p:607,e:460,w:361,h:107,d:449,r:0},completas:0,vacias:560,verificadas:162};
 function hasValue(v){return v!==undefined&&v!==null&&String(v).trim()!==""}
 function counterStats(){
  const items=effectiveItems().filter(x=>x._xiclana_deleted!==true),campos={};
@@ -439,7 +443,7 @@ function counterStats(){
  return {fecha:new Date().toISOString().slice(0,10),fichas:items.length,campos,llenos,
   completas:items.filter(x=>COUNTER_FIELDS.every(([k])=>hasValue(x[k]))).length,
   vacias:items.filter(x=>!COUNTER_FIELDS.some(([k])=>hasValue(x[k]))).length,
-  verificadas:items.filter(x=>Boolean(x.verified_at)).length};
+  verificadas:items.filter(x=>estadoDe(x)==="verificada").length};
 }
 function pct(n,total){return total?(100*n/total).toLocaleString("es-ES",{minimumFractionDigits:1,maximumFractionDigits:1})+" %":"0 %"}
 function signed(n){return (n>0?"+":"")+n.toLocaleString("es-ES")}
