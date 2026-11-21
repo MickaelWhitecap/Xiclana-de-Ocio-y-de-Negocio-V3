@@ -1,31 +1,30 @@
 #!/usr/bin/env python3
-"""Lee la web propia de cada ficha que todavía no se ha leído y completa sus datos.
+"""Lee la web propia de cada ficha que todavía no se ha leído y rellena sus huecos.
 
-Por qué existe: el rastreo RAD por lotes recorre el catálogo entero y fija la
-lista de fichas al empezar cada ciclo. Las fichas dadas de alta después (por
-ejemplo, las de Overture Maps del 21-nov-2026) se quedaban sin leer su web
-hasta un ciclo futuro que, además, llevaba días cancelado. Este proceso no
-depende de ese ciclo: cada día busca las fichas publicadas con web que aún no
-tienen datos leídos de su web oficial ni un intento reciente, y las lee.
+Por qué existe: el rastreo RAD por lotes fija la lista de fichas al empezar cada
+ciclo y el último ciclo quedó cancelado, así que las fichas dadas de alta después
+(p. ej. las de Overture del 21-nov-2026, como la Venta Bonilla) nunca se leían.
 
-Reglas:
-- Solo lee la web que ya figura en la ficha (sin buscadores) y como máximo
-  --max-paginas páginas, empezando por contacto, horario y aviso legal.
-- Nunca sobrescribe un dato que ya existe; solo rellena huecos (sync_enrichment).
-- Guarda cada intento en site_settings.catalogo.rastreo_web_fichas para no
-  repetir una web que falla todos los días (se reintenta pasados REINTENTO_DIAS).
+Cómo lee: con leer_web_propia.py (portada + hasta 4 páginas de contacto/horario,
+solo datos con forma clara; ver allí las reglas). Nunca cambia un dato que ya
+existe: solo rellena teléfono (hasta 2), correo, horario, descripción y redes.
+Cada intento queda en site_settings.catalogo.lectura_web_propia para no repetir a
+diario una web que falla (se reintenta a los REINTENTO_DIAS o si cambia la web).
 """
-import argparse, json, pathlib, shutil, subprocess, sys, tempfile, time, urllib.parse
+import argparse, json, pathlib, sys, tempfile, time, urllib.parse
+from collections import Counter
 from datetime import datetime, timedelta, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 import catalogo_supabase as catalog
+import leer_web_propia as lector
 
-CLAVE_ESTADO = "rastreo_web_fichas"
+CLAVE_ESTADO = "lectura_web_propia"
 REINTENTO_DIAS = 30
 SECTORES = ("ocio", "negocio")
+NOMBRES_CAMPO = {"p": "telefono", "e": "correo", "h": "horario", "d": "descripcion", "r": "redes"}
 
 
 def ahora():
@@ -33,31 +32,33 @@ def ahora():
 
 
 def tiene_web(item):
-    web = str(item.get("w") or "").strip()
-    partes = urllib.parse.urlsplit(web)
+    partes = urllib.parse.urlsplit(str(item.get("w") or "").strip())
     return partes.scheme.lower() in ("http", "https") and bool(partes.netloc)
 
 
 def web_ya_leida(item):
     fuentes = item.get("fuentes_datos")
-    if not isinstance(fuentes, list):
-        return False
-    return any(isinstance(x, dict) and x.get("tipo") == "web_oficial" for x in fuentes)
+    return isinstance(fuentes, list) and any(
+        isinstance(x, dict) and x.get("tipo") == "web_oficial" for x in fuentes)
+
+
+def activas(data):
+    return [x for x in data.get("items", []) if isinstance(x, dict) and x.get("id")
+            and x.get("is_published") is True and not x.get("_xiclana_deleted")
+            and str(x.get("t") or "").strip().lower() in SECTORES]
+
+
+def dominios_compartidos(items):
+    """Un mismo dominio en varias fichas suele ser una cadena o un portal."""
+    cuenta = Counter(lector.host_de(x.get("w")) for x in items if tiene_web(x))
+    return {h for h, n in cuenta.items() if h and n >= 3}
 
 
 def pendientes(data, intentos, hoy=None):
-    """Fichas publicadas con web que no se han leído nunca o cuyo intento caducó.
-    Primero las que nunca se intentaron; dentro de ellas, las más recientes."""
     hoy = hoy or ahora()
     limite = hoy - timedelta(days=REINTENTO_DIAS)
     nuevas, reintentos = [], []
-    for item in data.get("items", []):
-        if not isinstance(item, dict) or not item.get("id"):
-            continue
-        if item.get("is_published") is not True or item.get("_xiclana_deleted"):
-            continue
-        if str(item.get("t") or "").strip().lower() not in SECTORES:
-            continue
+    for item in activas(data):
         if not tiene_web(item) or web_ya_leida(item):
             continue
         previo = intentos.get(str(item["id"]))
@@ -68,7 +69,6 @@ def pendientes(data, intentos, hoy=None):
             fecha = datetime.fromisoformat(str(previo.get("fecha_utc")))
         except ValueError:
             fecha = None
-        # Si cambió la web de la ficha, se vuelve a leer aunque el intento sea reciente.
         if fecha is None or fecha < limite or previo.get("web") != item.get("w"):
             reintentos.append(item)
     nuevas.sort(key=lambda x: str(x.get("_xiclana_updated_at") or ""), reverse=True)
@@ -82,9 +82,38 @@ def guardar_intentos(intentos):
         catalog.sync_metadata(path, [CLAVE_ESTADO])
 
 
-def leer_intentos(data):
-    estado = data.get(CLAVE_ESTADO)
-    return estado if isinstance(estado, dict) else {}
+def aplicar(base, key, ident, campos, paginas):
+    """Lee la fila actual, rellena solo huecos y guarda con control de concurrencia."""
+    filas, _ = catalog.request(base + "/listings?" + urllib.parse.urlencode(
+        {"select": "id,data,is_published,is_deleted,updated_at", "id": "eq." + ident}), key)
+    if not filas:
+        return [], "ficha_no_encontrada"
+    fila = filas[0]
+    if fila.get("is_deleted") or fila.get("is_published") is not True:
+        return [], "ficha_inactiva"
+    datos = fila.get("data") or {}
+    nuevo, añadidos = lector.completar(datos, campos)
+    if not añadidos:
+        return [], "sin_datos_nuevos"
+    hoy = ahora().date().isoformat()
+    fuentes = list(nuevo.get("fuentes_datos") or []) if isinstance(nuevo.get("fuentes_datos"), list) else []
+    fuentes.append({"url": paginas[0] if paginas else nuevo.get("w"), "tipo": "web_oficial",
+                    "campos": [NOMBRES_CAMPO[k] for k in añadidos], "fecha": hoy,
+                    "paginas_leidas": paginas[:5]})
+    nuevo["fuentes_datos"] = fuentes
+    cuerpo = {"data": nuevo, "updated_at": ahora().isoformat()}
+    if str(datos.get("estado_verificacion") or "").lower() != "verificada":
+        # La propia web del negocio lo nombra y lo sitúa en Chiclana.
+        nuevo["estado_verificacion"] = "verificada"
+        nuevo["f"] = paginas[0] if paginas else nuevo.get("w")
+        nuevo["v"] = hoy
+        cuerpo["verified_at"] = ahora().isoformat()
+    filtro = {"id": "eq." + ident, "updated_at": "eq." + fila["updated_at"] if fila.get("updated_at") else "is.null"}
+    res, _ = catalog.request(base + "/listings?" + urllib.parse.urlencode(filtro), key, method="PATCH",
+                             payload=cuerpo, headers={"Prefer": "return=representation"})
+    if not res:
+        return [], "cambio_concurrente"
+    return añadidos, "completada"
 
 
 def self_test():
@@ -100,98 +129,81 @@ def self_test():
         {"id": "h", "t": "negocio", "is_published": True, "w": "https://h-nueva.es"},
     ]}
     intentos = {
-        "f": {"fecha_utc": "2026-11-20T00:00:00+00:00", "web": "https://f.es"},  # reciente: no
-        "g": {"fecha_utc": "2026-09-01T00:00:00+00:00", "web": "https://g.es"},  # caducado: sí
-        "h": {"fecha_utc": "2026-11-20T00:00:00+00:00", "web": "https://h-vieja.es"},  # web cambiada: sí
+        "f": {"fecha_utc": "2026-11-20T00:00:00+00:00", "web": "https://f.es"},
+        "g": {"fecha_utc": "2026-09-01T00:00:00+00:00", "web": "https://g.es"},
+        "h": {"fecha_utc": "2026-11-20T00:00:00+00:00", "web": "https://h-vieja.es"},
     }
     assert pendientes(data, intentos, hoy) == ["a", "g", "h"], pendientes(data, intentos, hoy)
+    assert dominios_compartidos([{"w": "https://www.repsol.es/a"}, {"w": "https://repsol.es/b"}, {"w": "https://repsol.es/c"}, {"w": "https://x.es"}]) == {"repsol.es"}
+    lector.self_test()
     print("rastreo_fichas_con_web: pruebas internas OK")
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--self-test", action="store_true")
-    parser.add_argument("--max-fichas", type=int, default=400)
-    parser.add_argument("--max-paginas", type=int, default=12)
-    parser.add_argument("--minutos", type=float, default=300,
-                        help="Tiempo máximo de esta ejecución; lo que falte queda para la siguiente.")
-    parser.add_argument("--ids", default="", help="IDs concretos separados por comas (prueba de un caso).")
+    parser.add_argument("--max-fichas", type=int, default=600)
+    parser.add_argument("--minutos", type=float, default=300)
+    parser.add_argument("--ids", default="", help="IDs concretos separados por comas.")
+    parser.add_argument("--simular", action="store_true", help="Lee las webs pero no guarda nada.")
     args = parser.parse_args()
     if args.self_test:
         self_test()
         return
 
     inicio = time.monotonic()
-    resumen = {"fichas_leidas": 0, "fichas_mejoradas": 0, "datos_anadidos": 0,
-               "web_no_confirmada": 0, "errores": 0, "detalle": []}
+    base, key = catalog.connection()
+    resumen = {"fichas_leidas": 0, "fichas_mejoradas": 0, "datos_anadidos": Counter(), "motivos": Counter(), "detalle": []}
     with tempfile.TemporaryDirectory(prefix="xiclana-web-fichas-") as tmp:
-        tmp = pathlib.Path(tmp)
-        catalogo = tmp / "catalogo.json"
-        antes = tmp / "antes.json"
-        lote = tmp / "ids.txt"
+        catalogo = pathlib.Path(tmp) / "catalogo.json"
         catalog.export_catalog(catalogo)
         data = json.loads(catalogo.read_text(encoding="utf-8"))
-        intentos = leer_intentos(data)
-        if args.ids:
-            cola = [x.strip() for x in args.ids.split(",") if x.strip()]
-        else:
-            cola = pendientes(data, intentos)
-        resumen["pendientes_al_empezar"] = len(cola)
-        cola = cola[:args.max_fichas]
-        print(json.dumps({"evento": "inicio", "pendientes": resumen["pendientes_al_empezar"], "en_esta_ejecucion": len(cola)}, ensure_ascii=False), flush=True)
+    estado = data.get(CLAVE_ESTADO)
+    intentos = estado if isinstance(estado, dict) else {}
+    por_id = {str(x["id"]): x for x in activas(data)}
+    compartidos = dominios_compartidos(list(por_id.values()))
+    cola = [x.strip() for x in args.ids.split(",") if x.strip()] if args.ids else pendientes(data, intentos)
+    resumen["pendientes_al_empezar"] = len(cola)
+    cola = cola[:args.max_fichas]
+    print(json.dumps({"evento": "inicio", "pendientes": len(cola)}, ensure_ascii=False), flush=True)
 
-        for numero, ident in enumerate(cola, 1):
-            if (time.monotonic() - inicio) / 60 > args.minutos:
-                print(json.dumps({"evento": "tiempo_agotado", "leidas": numero - 1}, ensure_ascii=False), flush=True)
-                break
-            item = next((x for x in data["items"] if str(x.get("id")) == ident), None)
-            if item is None:
-                continue
-            shutil.copyfile(catalogo, antes)
-            lote.write_text(ident + "\n", encoding="utf-8")
-            fila = {"id": ident, "nombre": item.get("n"), "web": item.get("w")}
-            try:
-                subprocess.run([
-                    sys.executable, str(ROOT / "rastreo_web_publico.py"),
-                    "--catalog", str(catalogo), "--batch-ids-file", str(lote),
-                    "--max-paginas", str(args.max_paginas), "--solo-web-registrada",
-                    "--local-checkpoints-only",
-                ], check=True, timeout=600)
-                sync = catalog.sync_enrichment(antes, catalogo, allowed_ids={ident})
-                data = json.loads(catalogo.read_text(encoding="utf-8"))
-                rad = data.get("rad_ultima_ejecucion", {})
-                res = next((r for r in rad.get("resultados_por_ficha", []) if str(r.get("id")) == ident), {})
-                fila.update({
-                    "resultado": res.get("resultado", "sin_resultado"),
-                    "paginas": res.get("paginas_visitadas", 0),
-                    "campos_en_web": res.get("campos_detectados", []),
-                    "campos_aplicados": sync.get("campos_actualizados", 0),
-                })
-                if sync.get("fichas_actualizadas"):
+    for numero, ident in enumerate(cola, 1):
+        if (time.monotonic() - inicio) / 60 > args.minutos:
+            break
+        ficha = por_id.get(ident)
+        if not ficha:
+            continue
+        fila = {"id": ident, "nombre": ficha.get("n"), "web": ficha.get("w")}
+        try:
+            leido = lector.leer_web(ficha, compartidos)
+            fila["motivo"] = leido["motivo"]
+            fila["encontrado"] = {k: v for k, v in leido["campos"].items() if v}
+            if leido["campos"] and not args.simular:
+                añadidos, estado_ficha = aplicar(base, key, ident, leido["campos"], leido["paginas"])
+                fila["motivo"] = estado_ficha if leido["motivo"] == "leida" else leido["motivo"]
+                fila["añadidos"] = añadidos
+                if añadidos:
                     resumen["fichas_mejoradas"] += 1
-                    resumen["datos_anadidos"] += int(sync.get("campos_actualizados", 0))
-                if not res.get("web_oficial_confirmada"):
-                    resumen["web_no_confirmada"] += 1
-            except (subprocess.SubprocessError, RuntimeError, OSError, ValueError) as exc:
-                resumen["errores"] += 1
-                fila["resultado"] = "error"
-                fila["error"] = str(exc)[:300]
-                # Restaurar la copia previa para que un fallo no contamine la siguiente ficha.
-                shutil.copyfile(antes, catalogo)
-                data = json.loads(catalogo.read_text(encoding="utf-8"))
-            resumen["fichas_leidas"] += 1
-            resumen["detalle"].append(fila)
-            intentos[ident] = {"fecha_utc": ahora().isoformat(), "web": item.get("w"),
-                               "resultado": fila.get("resultado"), "campos_aplicados": fila.get("campos_aplicados", 0)}
-            print(json.dumps({"evento": "ficha", "n": numero, **fila}, ensure_ascii=False), flush=True)
-            # Guardar el intento cada 10 fichas (y al final) para poder reanudar.
-            if numero % 10 == 0:
-                guardar_intentos(intentos)
+                    resumen["datos_anadidos"].update(NOMBRES_CAMPO[k] for k in añadidos)
+        except Exception as exc:  # una web rota no debe parar la tanda
+            fila["motivo"] = "error"
+            fila["error"] = str(exc)[:200]
+        resumen["motivos"][fila["motivo"]] += 1
+        resumen["fichas_leidas"] += 1
+        resumen["detalle"].append(fila)
+        intentos[ident] = {"fecha_utc": ahora().isoformat(), "web": ficha.get("w"), "motivo": fila["motivo"],
+                           "añadidos": fila.get("añadidos", [])}
+        print(json.dumps({"n": numero, **fila}, ensure_ascii=False), flush=True)
+        if not args.simular and numero % 10 == 0:
+            guardar_intentos(intentos)
+    if not args.simular:
         guardar_intentos(intentos)
 
-    restantes = len(pendientes(json.loads(json.dumps({"items": data["items"]})), intentos))
+    restantes = 0 if args.ids or args.simular else len(pendientes(data, intentos))
     resumen["pendientes_al_terminar"] = restantes
-    resumen["status"] = "more" if restantes and not args.ids and resumen["fichas_leidas"] else "done"
+    resumen["status"] = "more" if restantes and resumen["fichas_leidas"] else "done"
+    resumen["datos_anadidos"] = dict(resumen["datos_anadidos"])
+    resumen["motivos"] = dict(resumen["motivos"])
     pathlib.Path("rastreo-fichas-web-result.json").write_text(json.dumps(resumen, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps({k: v for k, v in resumen.items() if k != "detalle"}, ensure_ascii=False), flush=True)
 
