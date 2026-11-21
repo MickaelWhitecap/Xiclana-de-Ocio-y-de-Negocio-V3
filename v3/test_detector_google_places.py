@@ -14,3 +14,18 @@ def test_nombres_equivalentes_siguen_coincidiendo():
 
 def test_una_palabra_suelta_no_basta():
     assert D.parecido("Cantina Plaza de Abastos", "Farmacia La Plaza") < 0.5
+
+
+def test_palabras_frecuentes_pesan_poco():
+    nombres = ["Inmobiliaria Alameda", "Inmobiliaria Sol", "Inmobiliaria Mar", "Inmobiliaria Luz",
+               "Umami La Barrosa", "Telepizza Barrosa", "Barrosa Playa", "Hotel Barrosa",
+               "Playa Sol", "Playa Mar", "Playa Luz", "Kiosko Playa"]
+    D.preparar_pesos(nombres)
+    try:
+        assert D.peso({"inmobiliaria"}) < D.peso({"gaviota"})
+        # Comparten dos palabras frecuentes, pero el nombre propio es distinto.
+        assert D.parecido("Umami Playa Barrosa", "Telepizza Playa Barrosa") < 0.5
+        # Mismo nombre propio con palabras de relleno distintas: sigue siendo el mismo.
+        assert D.parecido("Umami Barrosa", "Umami") >= 0.5
+    finally:
+        D.PESOS, D.PESO_DESCONOCIDA = {}, 1.0
