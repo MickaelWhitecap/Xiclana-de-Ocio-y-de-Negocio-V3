@@ -50,6 +50,11 @@ PALABRAS_GENERICAS = {
     "bar", "bares", "restaurante", "restaurant", "cafeteria", "cafe", "la", "el", "los",
     "las", "de", "del", "y", "the", "chiclana", "frontera", "tienda", "casa", "cerveceria",
     "taberna", "freiduria", "heladeria", "pizzeria", "peluqueria", "farmacia", "clinica",
+    # Tipos de local que no distinguen un negocio de otro (21-nov-2026: «Venta
+    # Bonilla» se daba por la misma que «Venta Zacarías» solo por «venta»).
+    "venta", "meson", "asador", "bodega", "bodeguita", "kiosco", "chiringuito", "gastrobar",
+    "tasca", "tapas", "pub", "hotel", "hostal", "apartamentos", "panaderia", "pasteleria",
+    "carniceria", "fruteria", "restaurantes", "cafe-bar", "beach", "club",
 }
 MAX_LLAMADAS = 400  # tope por defecto de una ejecución
 # NORMA DE MIGUEL (20-nov-2026): no gastar nada, nunca. El cupo gratuito de
@@ -86,6 +91,10 @@ def parecido(nombre_a, nombre_b):
     if juntos_a == juntos_b:
         return 1.0
     comunes = a & b
+    # Si cada nombre tiene una palabra propia que el otro no tiene y solo
+    # comparten una, son negocios distintos («Venta Bonilla» ≠ «Venta Zacarías»).
+    if len(comunes) == 1 and (a - comunes) and (b - comunes):
+        return 0.0
     if len(comunes) >= 2:
         return len(comunes) / min(len(a), len(b))
     # Una sola palabra en común («Santa», «Plaza») solo cuenta si es casi todo
