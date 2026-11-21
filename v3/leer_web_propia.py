@@ -77,14 +77,29 @@ def tokens_nombre(nombre):
     return [t for t in rad.norm(nombre).split() if len(t) > 1 and t not in vacias]
 
 
+GENERICAS = set("""autoescuela restaurante restaurantes bar bares cafeteria cafe venta meson asador bodega
+inmobiliaria inmobiliarias clinica clinicas dental dentista farmacia taller talleres hotel hostal apartamentos
+peluqueria estetica centro academia escuela colegio ceip ies tienda tiendas muebles cocinas club gimnasio
+abogados abogado asesoria asesores gestoria seguros viajes agencia supermercado panaderia pasteleria carniceria
+fruteria pescaderia kiosco chiringuito beach playa barrosa novo sancti petri cadiz grupo servicios suministros
+reformas construcciones pinturas electricidad fontaneria cerrajeria lavanderia veterinaria veterinario optica
+fisioterapia psicologia moda zapateria joyeria floristeria vivero viveros jardineria taxi""".split())
+
+
 def identifica_negocio(nombre, texto, host):
-    """Al menos la mitad de las palabras propias del nombre aparecen en la web o en el dominio."""
+    """La web debe contener la mitad de las palabras del nombre y, si el nombre tiene
+    alguna palabra propia (no genérica como «autoescuela» o «inmobiliaria»), al menos una."""
     toks = tokens_nombre(nombre)
     if not toks:
         return False
     evidencia = set(rad.norm(texto).split())
     dominio = re.sub(r"[^a-z0-9]", "", host)
-    aciertos = sum(1 for t in toks if t in evidencia or (len(t) >= 4 and t in dominio))
+    def aparece(t):
+        return t in evidencia or (len(t) >= 4 and t in dominio)
+    aciertos = sum(1 for t in toks if aparece(t))
+    propias = [t for t in toks if t not in GENERICAS]
+    if propias and not any(aparece(t) for t in propias):
+        return False
     return aciertos >= max(1, (len(toks) + 1) // 2)
 
 
@@ -155,7 +170,11 @@ def horario_jsonld(jsonld):
                 txt = e
                 for en, es in sorted(DIAS_EN.items(), key=lambda x: -len(x[0])):
                     txt = re.sub(rf"(?i)\b{en}\b", es, txt)
-                partes.append(txt.replace(",", ", "))
+                txt = re.sub(r"\s*,\s*", ", ", txt)
+                txt = txt.replace("lunes, martes, miércoles, jueves, viernes, sábado, domingo", "lunes a domingo")
+                txt = txt.replace("lunes, martes, miércoles, jueves, viernes, sábado", "lunes a sábado")
+                txt = txt.replace("lunes, martes, miércoles, jueves, viernes", "lunes a viernes")
+                partes.append(txt[:1].upper() + txt[1:])
     return "; ".join(dict.fromkeys(partes))[:200]
 
 
@@ -196,25 +215,68 @@ def descripcion_de(pagina, jsonld, nombre):
             continue
         if re.search(r"@|https?://|\b[6789]\d{2}\s?\d{3}\s?\d{3}\b", d):
             continue
+        if re.search(r"(\.\.\.|…|\[…\]|\[\.\.\.\])\s*$", d):  # recortada por la plantilla
+            continue
+        palabras = len(d.split())
+        if d.count(",") >= 5 and palabras / (d.count(",") + 1) < 4:  # lista de palabras clave
+            continue
         return d
     return ""
 
 
 def redes_de(pagina, host):
-    por_red = {}
+    """Todos los perfiles sociales enlazados en la página (sin cuentas de plataformas)."""
+    encontrados = []
     for _c, href, _t in pagina.links:
         canon = rad.social_profile_url(urllib.parse.urljoin("https://" + host + "/", str(href)))
-        if not canon:
+        if not canon or canon in encontrados:
             continue
-        red = host_de(canon).split(".")[0]
-        usuario = urllib.parse.urlsplit(canon).path.strip("/").lower()
+        usuario = urllib.parse.urlsplit(canon).path.strip("/").lower().lstrip("@")
         if usuario in ("wix", "wordpress", "squarespace", "share.php", "sharer", "sharer.php", "godaddy", "webnode", "jimdo"):
             continue
-        actual = por_red.get(red)
-        # Mejor un nombre de página que un número interno de Facebook.
-        if actual is None or (re.fullmatch(r"\d+", urllib.parse.urlsplit(actual).path.strip("/")) and not re.fullmatch(r"\d+", usuario)):
-            por_red[red] = canon
-    return list(por_red.values())
+        encontrados.append(canon)
+    return encontrados
+
+
+def _trozos(texto, n=5):
+    texto = re.sub(r"[^a-z0-9]", "", rad.norm(texto))
+    if len(texto) < n:
+        return {texto} if len(texto) >= 4 else set()
+    return {texto[i:i + n] for i in range(len(texto) - n + 1)}
+
+
+def perfil_relacionado(canon, nombre, host):
+    """Un perfil con nombre propio debe parecerse al nombre del negocio o a su dominio
+    (evita la cuenta del diseñador de la plantilla, del programa inmobiliario, etc.)."""
+    usuario = urllib.parse.urlsplit(canon).path.strip("/").split("/")[-1].lstrip("@")
+    if "profile.php" in canon or not usuario or usuario.isdigit():
+        return None  # número interno: no dice a quién pertenece
+    claves = set()
+    for t in tokens_nombre(nombre):
+        if len(t) >= 4:
+            claves |= _trozos(t)
+    claves |= _trozos(host.split(".")[0])
+    u = re.sub(r"[^a-z0-9]", "", rad.norm(usuario))
+    return any(c in u for c in claves)
+
+
+def elegir_redes(redes, nombre, host):
+    """Una cuenta por red: la que se parece al negocio; si solo hay un enlace
+    numérico (profile.php?id=…) y ninguno ajeno, se acepta ese."""
+    por_red = {}
+    for r in redes:
+        red = host_de(r).split(".")[0]
+        por_red.setdefault(red, []).append(r)
+    elegidas = []
+    for red, lista in por_red.items():
+        buenas = [r for r in lista if perfil_relacionado(r, nombre, host)]
+        if buenas:
+            elegidas.append(buenas[0])
+            continue
+        numericas = [r for r in lista if perfil_relacionado(r, nombre, host) is None]
+        if numericas and len(numericas) == len(lista):
+            elegidas.append(numericas[0])
+    return elegidas
 
 
 def leer_pagina(url):
@@ -289,17 +351,9 @@ def leer_web(ficha, dominios_compartidos=()):
         "e": (list(dict.fromkeys(correos)) or [""])[0],
         "h": horario,
         "d": descripcion_de(p0, j0, nombre),
-        "r": redes_de_unicas(redes),
+        "r": elegir_redes(redes, nombre, host),
     }
     return {"campos": campos, "motivo": "leida", "paginas": [u for u, _ in paginas]}
-
-
-def redes_de_unicas(redes):
-    por_red = {}
-    for r in redes:
-        red = host_de(r).split(".")[0]
-        por_red.setdefault(red, r)
-    return list(por_red.values())
 
 
 def completar(ficha_data, campos):
@@ -345,11 +399,26 @@ def self_test():
     p = rad.Page()
     p.feed("<p>Horario: Lunes a domingo de 7:00 a 23:00</p><p>El próximo lunes, 7 de noviembre, a partir de las 9:15 horas, charla.</p>")
     assert horario_texto(p) == "Lunes a domingo de 7:00 a 23:00", horario_texto(p)
-    assert horario_jsonld([{"openingHours": "Mo-Su 12:00-16:00"}]) == "lunes-domingo 12:00-16:00"
+    assert horario_jsonld([{"openingHours": "Mo-Su 12:00-16:00"}]) == "Lunes-domingo 12:00-16:00"
+    assert horario_jsonld([{"openingHours": ["Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday 12:00-16:00"]}]) == "Lunes a domingo 12:00-16:00"
+    p = rad.Page()
+    p.feed('<meta name="description" content="LM INMOBILIARIA - Chiclana con multitud de propiedades, pisos y casas en toda la provincia de Cád...">')
+    assert descripcion_de(p, [], "x") == ""
+    p = rad.Page()
+    p.feed('<meta name="description" content="clinica veterinaria chiclana, clinica veterinaria, veterinarios chiclana, rocio, clinica en la barrosa, veterinarios en la barrosa">')
+    assert descripcion_de(p, [], "x") == ""
+    p = rad.Page()
+    p.feed('<a href="https://www.tiktok.com/@wix">t</a><a href="https://www.tiktok.com/@minegocio">t</a>')
+    assert redes_de(p, "x.es") == ["https://www.tiktok.com/@minegocio"], redes_de(p, "x.es")
     assert horario_jsonld([{"openingHoursSpecification": [{"dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "09:00", "closes": "21:00"}]}]) == "Lunes a viernes 09:00-21:00"
     p = rad.Page()
     p.feed('<a href="https://facebook.com/203330216480504">f</a><a href="https://facebook.com/AgricentroGarola/">f</a><a href="https://www.instagram.com/wix/">i</a><a href="https://www.facebook.com/sharer.php?u=x">s</a>')
-    assert redes_de(p, "x.es") == ["https://www.facebook.com/AgricentroGarola/"], redes_de(p, "x.es")
+    assert elegir_redes(redes_de(p, "agricentrogarola.com"), "Agricentro Garola", "agricentrogarola.com") == ["https://www.facebook.com/AgricentroGarola/"]
+    assert elegir_redes(["https://www.facebook.com/AxiomThemes/", "https://www.instagram.com/axiom_themes/"], "Bulli 67", "bulli67.com") == []
+    assert elegir_redes(["https://www.facebook.com/crminmovilla/"], "Interhogar", "inmobiliariainterhogar.com") == []
+    assert elegir_redes(["https://www.facebook.com/profile.php?id=615592468078", "https://www.instagram.com/ventabonilla/"], "Venta Bonilla", "ventabonilla.com") == ["https://www.facebook.com/profile.php?id=615592468078", "https://www.instagram.com/ventabonilla/"]
+    assert elegir_redes(["https://www.facebook.com/cvetdelmar-104866931107151/"], "Clínica Veterinaria del Mar", "clinicaveterinariadelmar.com") != []
+    assert not identifica_negocio("Autoescuela JB", "Autoescuela Kike en Chiclana", "autoescuelakike.es")
     p = rad.Page()
     p.feed('<a href="mailto:info@mysite.com">a</a><a href="mailto:legal@viajes.com">b</a><a href="mailto:hola@gmail.com">c</a><a href="mailto:info@viajes.com">d</a>')
     assert correos_de(p, [], "viajes.com") == ["info@viajes.com", "hola@gmail.com"]
