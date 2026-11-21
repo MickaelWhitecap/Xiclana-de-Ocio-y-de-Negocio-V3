@@ -1,0 +1,77 @@
+name: Leer la web propia de las fichas nuevas
+
+# Toda ficha publicada con web que aún no se haya leído pasa por aquí:
+# cada día de madrugada, al pulsar "Run workflow" y encadenando ejecuciones
+# hasta que no quede ninguna pendiente. Solo rellena datos vacíos.
+on:
+  schedule:
+    - cron: "23 4 * * *"
+      timezone: "Europe/Madrid"
+  workflow_dispatch:
+    inputs:
+      ids:
+        description: "IDs concretos separados por comas (vacío = todas las pendientes)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: rastreo-fichas-con-web
+  cancel-in-progress: false
+
+jobs:
+  leer-webs:
+    name: Leer webs pendientes y completar fichas
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Pruebas internas
+        run: |
+          python v3/rastreo_web_publico.py --self-test
+          python v3/rastreo_fichas_con_web.py --self-test
+      - name: Leer webs y completar fichas en Supabase
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          IDS: ${{ inputs.ids }}
+        run: python v3/rastreo_fichas_con_web.py --minutos 300 --ids "$IDS"
+      - name: Resumen
+        if: always()
+        run: |
+          if [ -f rastreo-fichas-web-result.json ]; then
+            python - <<'PY'
+          import json, os
+          r = json.load(open("rastreo-fichas-web-result.json", encoding="utf-8"))
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
+              f.write("## Lectura de webs de fichas\n\n")
+              for k in ("pendientes_al_empezar", "fichas_leidas", "fichas_mejoradas", "datos_anadidos", "web_no_confirmada", "errores", "pendientes_al_terminar"):
+                  f.write(f"- **{k}:** {r.get(k)}\n")
+          PY
+          fi
+      - name: Encadenar la siguiente tanda si quedan pendientes
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          status=$(python -c 'import json; print(json.load(open("rastreo-fichas-web-result.json")).get("status",""))')
+          if [ "$status" = "more" ]; then
+            gh workflow run rastreo-fichas-con-web.yml --ref main
+          fi
+      - name: Guardar informe
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rastreo-fichas-web-${{ github.run_id }}
+          path: rastreo-fichas-web-result.json
+          if-no-files-found: ignore
+          retention-days: 30

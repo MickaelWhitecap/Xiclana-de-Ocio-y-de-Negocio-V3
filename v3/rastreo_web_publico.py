@@ -1226,6 +1226,7 @@ def extract(url, trusted_local=False, target=None, allow_single_email=False, all
         ]
         if schedule_candidates:
             hours=max(schedule_candidates,key=len)[:500]
+            hours=re.sub(r"(?i)^\s*horarios?\s*(?:de\s+apertura)?\s*[:：-]\s*","",hours)
     if isinstance(hours,dict): hours=[hours]
     if isinstance(hours,list):
         parts=[]
@@ -1566,7 +1567,7 @@ def merge_existing_record(existing, record, source_url):
             sources=[]
             existing["fuentes_datos"]=sources
         if not any(isinstance(x,dict) and url_key(x.get("url",""))==url_key(source_url) for x in sources):
-            source_info={"url":source_url,"campos":changed}
+            source_info={"url":source_url,"campos":list(changed)}
             if "datos.juntadeandalucia.es" in source_url:
                 source_info["licencia"]="CC BY 4.0"
             sources.append(source_info)
@@ -2357,8 +2358,21 @@ def store_crawl_checkpoint(store, progress):
     return store
 
 
-def crawl_official_site(target, seed_url, allow_single_email=False, resume_state=None, progress_callback=None):
-    """Recorre todas las páginas internas y sitemaps; permite reanudar desde un checkpoint."""
+CONTACT_PATH_HINTS=("contact","horario","quienes","sobre","about","nosotros","ubicacion","donde","localiza","aviso-legal","legal","info","reserva","carta","menu")
+
+def is_contact_like(url):
+    """Páginas donde suelen estar teléfono, horario, dirección o correo."""
+    path=norm(urllib.parse.unquote(urllib.parse.urlsplit(url).path)).replace(" ","-")
+    return any(h in path for h in CONTACT_PATH_HINTS)
+
+def prioritize_contact_pages(urls):
+    """Contacto, horario, quiénes somos y aviso legal primero; el resto después."""
+    urls=list(urls)
+    return [u for u in urls if is_contact_like(u)]+[u for u in urls if not is_contact_like(u)]
+
+def crawl_official_site(target, seed_url, allow_single_email=False, resume_state=None, progress_callback=None, max_pages=None):
+    """Recorre las páginas internas y sitemaps; permite reanudar desde un checkpoint.
+    Con max_pages se limita el recorrido, visitando antes las páginas de contacto."""
     started=time.monotonic()
     seed_host=urllib.parse.urlsplit(seed_url).netloc.lower()
     target_id=str(target.get("id") or record_value(target,"n","nombre","name"))
@@ -2395,6 +2409,8 @@ def crawl_official_site(target, seed_url, allow_single_email=False, resume_state
             })
 
     while queue:
+        if max_pages and len(visited)>=max_pages:
+            break
         page_url=queue.pop(0)
         page_key=url_key(page_url)
         if page_key in visited:
@@ -2428,11 +2444,14 @@ def crawl_official_site(target, seed_url, allow_single_email=False, resume_state
             sitemap_loaded=True
             try:
                 queue.extend(sitemap_page_urls(record.get("source_url") or page_url,seed_host))
+                queue[:]=prioritize_contact_pages(queue)
             except Exception as exc:
                 print(f"No se pudo leer el sitemap de {seed_host}: {exc}",flush=True)
         for candidate in record.pop("_internal_links",[]):
             if url_key(candidate) not in visited:
                 queue.append(candidate)
+        if max_pages:
+            queue[:]=prioritize_contact_pages(queue)
         if len(visited)%5==0:
             save_progress()
         # No detenerse al encontrar los seis campos: se recorren todas las páginas internas.
@@ -2441,7 +2460,7 @@ def crawl_official_site(target, seed_url, allow_single_email=False, resume_state
     return records,len(visited)
 
 
-def discover_official_website_jobs(records, resume_state=None, progress_callback=None):
+def discover_official_website_jobs(records, resume_state=None, progress_callback=None, max_pages=None):
     """Investiga y registra por ficha el resultado de cada web ya registrada."""
     official_records=[]
     domains=set()
@@ -2469,7 +2488,7 @@ def discover_official_website_jobs(records, resume_state=None, progress_callback
         try:
             ficha_started=time.monotonic()
             log_event("ficha_web_registrada_inicio",ficha_id=ident,nombre=name,web=website)
-            pages,visited=crawl_official_site(target,website,allow_single_email=seed_counts.get(website,0)==1,resume_state=resume_state,progress_callback=progress_callback)
+            pages,visited=crawl_official_site(target,website,allow_single_email=seed_counts.get(website,0)==1,resume_state=resume_state,progress_callback=progress_callback,max_pages=max_pages)
             official_records.extend(pages)
             pages_total+=visited
             audit["paginas_visitadas"]=visited
@@ -2595,6 +2614,10 @@ def main():
                         help="IDs de las fichas activas que debe investigar este lote.")
     parser.add_argument("--global-discovery",action="store_true",
                         help="Ejecuta una sola vez por ciclo las fuentes generales y el descubrimiento de candidatas.")
+    parser.add_argument("--max-paginas",type=int,default=None,
+                        help="Máximo de páginas por web (se visitan antes contacto, horario y aviso legal).")
+    parser.add_argument("--solo-web-registrada",action="store_true",
+                        help="Solo lee la web que ya tiene la ficha; no busca webs nuevas en buscadores.")
     parser.add_argument("--local-checkpoints-only",action="store_true",
                         help="No escribe checkpoints en Supabase; reservado para pruebas aisladas de duración.")
     args=parser.parse_args()
@@ -2718,14 +2741,18 @@ def main():
         log_event("checkpoint_web_guardado",ficha_id=progress.get("target_id"),web=progress.get("seed_url"),paginas=progress.get("paginas_visitadas"),pendientes=len(progress.get("queue") or []),completado=progress.get("completed",False),destino="local" if args.local_checkpoints_only else "supabase")
 
     official_records, official_domains, official_pages, registered_audit=discover_official_website_jobs(
-        target_items,resume_state=resume_state,progress_callback=persist_crawl_progress
+        target_items,resume_state=resume_state,progress_callback=persist_crawl_progress,
+        max_pages=args.max_paginas
     )
     retry_ids={
         str(x.get("id") or record_value(x,"n","nombre","name"))
         for x in target_items
         if not registered_audit.get(str(x.get("id") or record_value(x,"n","nombre","name")),{}).get("web_oficial_confirmada")
     }
-    unlinked_official_records, fichas_sin_web_consultadas, unlinked_pages, unlinked_audit=discover_unlinked_official_website_jobs(target_items,retry_ids,resume_state=resume_state,progress_callback=persist_crawl_progress)
+    if args.solo_web_registrada:
+        unlinked_official_records, fichas_sin_web_consultadas, unlinked_pages, unlinked_audit=[],0,0,{}
+    else:
+        unlinked_official_records, fichas_sin_web_consultadas, unlinked_pages, unlinked_audit=discover_unlinked_official_website_jobs(target_items,retry_ids,resume_state=resume_state,progress_callback=persist_crawl_progress)
     official_pages+=unlinked_pages
     official_records.extend(unlinked_official_records)
     target_audit=dict(registered_audit)
@@ -2816,10 +2843,18 @@ def main():
                         (x for x in sources if isinstance(x, dict) and url_key(x.get("url","")) == url_key(source_url)),
                         None
                     )
+                    has_official_source = any(isinstance(x, dict) and x.get("tipo") == "web_oficial" for x in sources)
                     if existing_source is None:
-                        sources.append({"url":source_url,"tipo":"web_oficial","campos":source_fields,"fecha":verification_date})
-                        changed.append("fuentes_datos")
+                        # Solo se anota la página si aportó algún dato nuevo o si es la
+                        # primera de la web oficial; así no se acumulan decenas de URLs.
+                        if changed or not has_official_source:
+                            sources.append({"url":source_url,"tipo":"web_oficial","campos":source_fields,"fecha":verification_date})
+                            changed.append("fuentes_datos")
                     else:
+                        if existing_source.get("tipo") != "web_oficial":
+                            existing_source["tipo"] = "web_oficial"
+                            existing_source.setdefault("fecha", verification_date)
+                            changed.append("fuentes_datos")
                         merged_fields = list(dict.fromkeys((existing_source.get("campos") or []) + source_fields))
                         if merged_fields != existing_source.get("campos"):
                             existing_source["campos"] = merged_fields
@@ -2828,6 +2863,11 @@ def main():
                     fichas_enriquecidas.add(str(old.get("id") or record_value(old,"n","nombre","name")))
                     campos_actualizados+=len(changed)
                     conflictos_no_sobrescritos+=len(conflicts)
+                if official_site:
+                    # La página es de la propia ficha: ya se ha usado para completarla.
+                    # No debe convertirse además en una candidata nueva duplicada.
+                    seen_urls.add(seen_key)
+                    continue
     
             else:
                 coincidencias.append({
