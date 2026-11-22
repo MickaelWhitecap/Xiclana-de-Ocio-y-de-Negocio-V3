@@ -40,7 +40,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _site
-          cp v3/index.html v3/admin.html v3/exportar-fichas.html v3/completar-ficha.html v3/supabase-config.js _site/
+          cp v3/index.html v3/admin.html v3/exportar-fichas.html v3/completar-ficha.html v3/aviso-legal.html v3/privacidad.html v3/supabase-config.js _site/
           cp v3/espacio-1-flamenca.webp v3/cabecera.webp v3/logo-on.webp _site/
           cp README.md _site/README.md
           python - <<'PY'
@@ -80,6 +80,8 @@ jobs:
           set -euo pipefail
           curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}index.html?build=${BUILD_ID}" -o /tmp/index.html
           curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}admin.html?build=${BUILD_ID}" -o /tmp/admin.html
+          curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}aviso-legal.html?build=${BUILD_ID}" -o /dev/null
+          curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}privacidad.html?build=${BUILD_ID}" -o /dev/null
           grep -Fq "XICLANA_BUILD_ID=${BUILD_ID}" /tmp/index.html
           grep -Fq "XICLANA_BUILD_ID=${BUILD_ID}" /tmp/admin.html
           curl --fail --silent --show-error "${SUPABASE_URL}/rest/v1/listings?select=id&is_published=eq.true&is_deleted=eq.false&limit=1" \
