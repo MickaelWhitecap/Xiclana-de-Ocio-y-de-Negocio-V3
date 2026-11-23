@@ -52,3 +52,11 @@ def test_familias_de_negocio():
 def test_nombres_de_zona_no_cuentan():
     assert D.parecido("Umami La Barrosa", "Taller La Barrosa") == 0.0
     assert D.parecido("Los Quintos Sancti Petri", "Los Quintos") == 1.0
+
+
+def test_supermercados_y_cafeterias_de_overture():
+    # Avisado al revisar Overture (23-nov-2026): no deben salir como «falta».
+    assert D.familias_compatibles("food_and_beverage_store", "Supermercado")
+    assert D.familias_compatibles("coffee_shop", "Cafetería")
+    assert D.familia("fast_food_restaurant") == "comida"
+    assert not D.familias_compatibles("food_and_beverage_store", "Farmacia")

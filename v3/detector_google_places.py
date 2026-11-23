@@ -75,12 +75,15 @@ FAMILIAS = [  # comienzos de palabra; «=» delante obliga a palabra exacta
     ("alojamiento", ("hotel", "hostal", "hostel", "guest", "lodging", "motel",
                      "alojamiento", "apartament", "camping")),
     ("deporte", ("gym", "gimnasio", "fitness", "deport", "sports")),
-    ("comida", ("restaur", "=bar", "=bares", "cafe", "=pub", "pizz", "burger", "hamburg",
+    # Antes que comida: «food_and_beverage_store» (Overture) es un supermercado.
+    ("alimentacion", ("=beverage", "supermerc", "supermarket", "grocery", "aliment", "carnic",
+                      "butcher", "fruter", "greengrocer", "convenience", "charcut")),
+    ("comida", ("coffee", "restaur", "=bar", "=bares", "cafe", "=pub", "pizz", "burger", "hamburg",
                 "kebab", "sushi", "meal", "food", "comida", "helad", "ice", "bakery", "panader",
                 "pasteler", "night", "discoteca", "tea", "brunch", "breakfast", "marisquer",
                 "taperia", "churr", "chiringu", "freidur", "asador", "lounge", "wine")),
     ("tienda", ("store", "shop", "tienda", "ropa", "calzado", "zapat", "joyer", "ferreter",
-                "muebles", "electron", "supermerc", "supermarket", "grocery", "florist",
+                "muebles", "electron", "florist",
                 "floristeria", "libreria", "papeler", "juguet", "bazar")),
 ]
 MAX_LLAMADAS = 400  # tope por defecto de una ejecución
@@ -115,7 +118,11 @@ def familia(tipo):
 
 def familias_compatibles(tipo_a, tipo_b):
     fa, fb = familia(tipo_a), familia(tipo_b)
-    return not fa or not fb or fa == fb
+    if not fa or not fb or fa == fb:
+        return True
+    # Una tienda de alimentación puede estar en el catálogo como comercio o
+    # como panadería/pastelería: no se bloquea.
+    return "alimentacion" in (fa, fb) and {fa, fb} & {"tienda", "comida"} != set()
 
 
 def distancia_m(lat1, lon1, lat2, lon2):
