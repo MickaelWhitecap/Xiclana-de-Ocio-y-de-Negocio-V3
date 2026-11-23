@@ -56,6 +56,36 @@ PALABRAS_GENERICAS = {
     "tasca", "tapas", "pub", "hotel", "hostal", "apartamentos", "panaderia", "pasteleria",
     "carniceria", "fruteria", "restaurantes", "cafe-bar", "beach", "club",
 }
+# Nombres de zona (23-nov-2026, caso Greda): «Greda - Restaurante en La Barrosa»
+# salió parecido a «Farmacia La Barrosa» solo por el nombre del barrio. Un sitio
+# no dice qué negocio es, así que estas palabras no cuentan para comparar.
+PALABRAS_DE_ZONA = {
+    "barrosa", "labarrosa", "sancti", "santi", "petri", "novo", "poblado", "playa",
+    "urbanizacion", "urb", "centro", "poligono", "marquesado", "carretera", "ctra",
+    "pinar", "franceses", "torno", "loma", "puerco", "pago", "humo", "cadiz",
+}
+# Familias de negocio (23-nov-2026): un restaurante no puede ser una farmacia.
+# Si las dos fichas tienen una familia conocida y es distinta, no se emparejan.
+# Las categorías genéricas («Comercio», «Servicios y negocios») no tienen familia
+# y no bloquean nada. Vale para tipos de Google, de Overture y del catálogo.
+FAMILIAS = [  # comienzos de palabra; «=» delante obliga a palabra exacta
+    ("salud", ("farmac", "pharmac", "drugstore", "dentist", "dental", "clinic", "salud",
+               "medic", "doctor", "hospital", "veterin", "physio", "fisio", "optic")),
+    ("belleza", ("peluq", "hair", "barber", "beauty", "estetic", "nail", "belleza")),
+    ("alojamiento", ("hotel", "hostal", "hostel", "guest", "lodging", "motel",
+                     "alojamiento", "apartament", "camping")),
+    ("deporte", ("gym", "gimnasio", "fitness", "deport", "sports")),
+    # Antes que comida: «food_and_beverage_store» (Overture) es un supermercado.
+    ("alimentacion", ("=beverage", "supermerc", "supermarket", "grocery", "aliment", "carnic",
+                      "butcher", "fruter", "greengrocer", "convenience", "charcut")),
+    ("comida", ("coffee", "restaur", "=bar", "=bares", "cafe", "=pub", "pizz", "burger", "hamburg",
+                "kebab", "sushi", "meal", "food", "comida", "helad", "ice", "bakery", "panader",
+                "pasteler", "night", "discoteca", "tea", "brunch", "breakfast", "marisquer",
+                "taperia", "churr", "chiringu", "freidur", "asador", "lounge", "wine")),
+    ("tienda", ("store", "shop", "tienda", "ropa", "calzado", "zapat", "joyer", "ferreter",
+                "muebles", "electron", "florist",
+                "floristeria", "libreria", "papeler", "juguet", "bazar")),
+]
 MAX_LLAMADAS = 400  # tope por defecto de una ejecución
 # NORMA DE MIGUEL (20-nov-2026): no gastar nada, nunca. El cupo gratuito de
 # Nearby Search Pro es de 5.000 consultas al mes; nos quedamos en 4.000 para
@@ -72,7 +102,27 @@ def norm(value):
 
 
 def palabras(value):
-    return {w for w in norm(value).split() if len(w) >= 3 and w not in PALABRAS_GENERICAS}
+    return {w for w in norm(value).split()
+            if len(w) >= 3 and w not in PALABRAS_GENERICAS and w not in PALABRAS_DE_ZONA}
+
+
+def familia(tipo):
+    """Familia de negocio de un tipo de Google/Overture o una categoría del catálogo."""
+    tokens = re.findall(r"[a-z]+", norm(str(tipo or "").replace("_", " ")))
+    for nombre, claves in FAMILIAS:
+        for c in claves:
+            if any(t == c[1:] if c.startswith("=") else t.startswith(c) for t in tokens):
+                return nombre
+    return ""
+
+
+def familias_compatibles(tipo_a, tipo_b):
+    fa, fb = familia(tipo_a), familia(tipo_b)
+    if not fa or not fb or fa == fb:
+        return True
+    # Una tienda de alimentación puede estar en el catálogo como comercio o
+    # como panadería/pastelería: no se bloquea.
+    return "alimentacion" in (fa, fb) and {fa, fb} & {"tienda", "comida"} != set()
 
 
 def distancia_m(lat1, lon1, lat2, lon2):
@@ -145,7 +195,7 @@ def cargar_catalogo(path):
         except (TypeError, ValueError):
             lat = lon = None
         fichas.append({"id": x.get("id"), "nombres": [n for n in nombres if n],
-                       "a": x.get("a") or "", "lat": lat, "lon": lon})
+                       "a": x.get("a") or "", "c": x.get("c") or "", "lat": lat, "lon": lon})
     preparar_pesos(f["nombres"][0] for f in fichas if f["nombres"])
     return fichas
 
@@ -153,8 +203,11 @@ def cargar_catalogo(path):
 def buscar_en_catalogo(lugar, fichas):
     """Devuelve (estado, ficha). estado: 'en_catalogo', 'dudoso' o 'falta'."""
     nombre = lugar["nombre"]
+    tipo = lugar.get("tipo") or ""
     mejor, mejor_puntos = None, 0.0
     for f in fichas:
+        if not familias_compatibles(tipo, f.get("c")):
+            continue
         p = max((parecido(nombre, n) for n in f["nombres"]), default=0.0)
         if p < 0.5:
             continue
