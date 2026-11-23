@@ -29,3 +29,26 @@ def test_palabras_frecuentes_pesan_poco():
         assert D.parecido("Umami Barrosa", "Umami") >= 0.5
     finally:
         D.PESOS, D.PESO_DESCONOCIDA = {}, 1.0
+
+
+def test_restaurante_no_se_confunde_con_farmacia():
+    # Caso Greda (23-nov-2026): solo compartían el nombre del barrio.
+    assert D.parecido("Greda - Restaurante en La Barrosa", "Farmacia La Barrosa") < 0.5
+    assert not D.familias_compatibles("restaurant", "Farmacia")
+    fichas = [{"id": "f1", "nombres": ["Greda"], "a": "", "c": "Farmacia", "lat": None, "lon": None}]
+    lugar = {"nombre": "Greda", "tipo": "restaurant", "lat": 36.39, "lon": -6.17}
+    assert D.buscar_en_catalogo(lugar, fichas) == ("falta", None)
+
+
+def test_familias_de_negocio():
+    assert D.familia("barber_shop") == "belleza"
+    assert D.familia("ice_cream_shop") == "comida"
+    assert D.familia("Servicio público") == ""
+    assert D.familias_compatibles("restaurant", "Bar")
+    assert D.familias_compatibles("restaurant", "Servicios y negocios")
+    assert not D.familias_compatibles("hair_care", "Restaurante")
+
+
+def test_nombres_de_zona_no_cuentan():
+    assert D.parecido("Umami La Barrosa", "Taller La Barrosa") == 0.0
+    assert D.parecido("Los Quintos Sancti Petri", "Los Quintos") == 1.0
