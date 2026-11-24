@@ -1,11 +1,12 @@
 name: Leer la web propia de las fichas nuevas
 
 # Toda ficha publicada con web que aún no se haya leído pasa por aquí:
-# cada día de madrugada, al pulsar "Run workflow" y encadenando ejecuciones
+# lunes y jueves de madrugada (antes cada día, se redujo para ahorrar ancho de
+# banda en Supabase), al pulsar "Run workflow" y encadenando ejecuciones
 # hasta que no quede ninguna pendiente. Solo rellena datos vacíos.
 on:
   schedule:
-    - cron: "23 4 * * *"
+    - cron: "23 4 * * 1,4"
       timezone: "Europe/Madrid"
   workflow_dispatch:
     inputs:

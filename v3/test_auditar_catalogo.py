@@ -149,8 +149,9 @@ class OSMIntegrationTests(unittest.TestCase):
 
     def test_admin_loads_review_metadata_from_the_canonical_supabase_database(self):
         admin = (Path(__file__).with_name("admin.html")).read_text(encoding="utf-8")
-        self.assertIn('client.from("site_settings").select("data")', admin)
-        self.assertIn('const metadata=settingsRes.data?.data||{}', admin)
+        self.assertIn('client.from("site_settings").select("candidatas_revision:data->candidatas_revision,propuestas_direcciones_osm:data->propuestas_direcciones_osm")', admin)
+        self.assertNotIn('client.from("site_settings").select("data")', admin)
+        self.assertIn('const metadata=settingsRes.data||{}', admin)
         self.assertIn('reviewCandidates=Array.isArray(metadata.candidatas_revision)', admin)
         self.assertIn('const rawAddressProposals=metadata.propuestas_direcciones_osm', admin)
         self.assertIn('addressProposals=normalizedAddressProposals.filter', admin)

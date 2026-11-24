@@ -89,8 +89,10 @@ class RadSafeEnrichmentTests(unittest.TestCase):
             after_path = Path(directory) / "after.json"
             before_path.write_text(json.dumps({"items":before_items}),encoding="utf-8")
             after_path.write_text(json.dumps({"items":after_items}),encoding="utf-8")
-            with patch.object(self.catalog,"connection",return_value=("https://example.supabase.co/rest/v1","secret")), patch.object(self.catalog,"fetch_all",return_value=current), patch.object(self.catalog,"request",return_value=([{"id":"listing-1"}],{})) as request:
+            with patch.object(self.catalog,"connection",return_value=("https://example.supabase.co/rest/v1","secret")), patch.object(self.catalog,"fetch_all",side_effect=AssertionError("no debe bajar todo el catálogo")), patch.object(self.catalog,"fetch_by_ids",side_effect=lambda base,key,ids: [r for r in current if r["id"] in ids]) as by_ids, patch.object(self.catalog,"request",return_value=(None,{"Content-Range":"*/1"})) as request:
                 result = self.catalog.sync_enrichment(before_path,after_path,allowed_ids={"listing-1"})
+        self.assertEqual(set(by_ids.call_args.args[2]),{"listing-1"})
+        self.assertEqual(request.call_args.kwargs["headers"]["Prefer"],"return=minimal,count=exact")
         self.assertEqual(result["fichas_detectadas"],1)
         self.assertEqual(result["fichas_actualizadas"],1)
         self.assertEqual(len(request.call_args_list),1)
@@ -241,7 +243,7 @@ class SingleSupabaseMasterTests(unittest.TestCase):
         self.assertIn("resultados_por_ficha", orchestrator)
         self.assertIn("resultados_por_ficha", crawler)
         self.assertIn("allowed_ids=None", helper)
-        self.assertIn('cron: "47 6 * * 1"', workflow)
+        self.assertIn('cron: "47 6 1 * *"', workflow)
         self.assertIn("workflow_dispatch:", workflow)
         self.assertNotIn("\n  push:", workflow)
         self.assertIn("--catalog", orchestrator)
