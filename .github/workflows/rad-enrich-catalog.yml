@@ -1,8 +1,10 @@
 name: RAD - descubrimiento y propuestas desde Supabase
 
 on:
+  # Una vez al mes (día 1); antes cada lunes. Cada ciclo encadena sus lotes
+  # hasta terminar todas las fichas. Menos ciclos = menos ancho de banda en Supabase.
   schedule:
-    - cron: "47 6 * * 1"
+    - cron: "47 6 1 * *"
       timezone: "Europe/Madrid"
   workflow_dispatch:
     inputs:

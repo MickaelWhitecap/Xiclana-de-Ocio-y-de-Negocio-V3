@@ -229,16 +229,21 @@ def main():
 
         # Cada ficha se investiga y confirma individualmente. El cursor solo
         # avanza después de sincronizar el enriquecimiento y guardar metadatos.
+        catalog_path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        previous_ident = None
         for position in range(start, end):
             ident = state["manifest"][sector][position]
             if ident in state.setdefault("resultados_por_ficha", {}):
                 state["cursor"][sector] = max(int(state["cursor"].get(sector, 0)), position + 1)
                 continue
 
-            # Volver a exportar antes de cada ficha: respeta bajas, papelera y
-            # modificaciones administrativas realizadas durante el lote.
-            catalog.export_catalog(catalog_path)
+            # Antes de cada ficha se vuelve a leer de Supabase SOLO esa ficha (y la
+            # anterior, ya enriquecida): respeta bajas, papelera y cambios hechos
+            # desde Administración sin descargar otra vez el catálogo entero (~7 MB).
             data = json.loads(catalog_path.read_text(encoding="utf-8"))
+            catalog.refresh_items(data, [ident] + ([previous_ident] if previous_ident else []))
+            catalog_path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+            previous_ident = ident
             active_now = {str(x["id"]): x for x in active_items(data)}
             if ident not in active_now:
                 state["resultados_por_ficha"][ident] = {
@@ -322,6 +327,9 @@ def main():
             # El crawler hijo actualiza checkpoints directamente en Supabase.
             # No volver a escribir aquí la copia local anterior.
             catalog.clear_rad_crawl_progress(ident)
+            # La copia local pasa a ser la base de la siguiente ficha.
+            catalog.drop_local_checkpoints(updated, ident)
+            catalog_path.write_text(json.dumps(updated, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
             print(json.dumps({
                 "evento": "ficha_confirmada",
                 "id": ident,
@@ -342,10 +350,8 @@ def main():
         # Marcar que el rastreo individual se ha separado del descubrimiento
         # general: este último no debe bloquear ni repetirse dentro de cada ficha.
         state["global_discovery_status"] = "pendiente_de_flujo_independiente"
-        catalog.export_catalog(catalog_path)
-        updated = json.loads(catalog_path.read_text(encoding="utf-8"))
-        updated["rad_lotes"] = state
-        persist_metadata(updated, ["rad_lotes"])
+        # Solo se guarda el estado del lote; no hace falta volver a bajar el catálogo.
+        persist_metadata({"items": [], "rad_lotes": state}, ["rad_lotes"])
 
         more = has_remaining(state)
         result = {

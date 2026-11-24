@@ -1575,7 +1575,7 @@ def merge_existing_record(existing, record, source_url):
 
 
 def self_test():
-    global allowed, get, extract, sitemap_page_urls
+    global allowed, get, extract, sitemap_page_urls, CHECKPOINT_CADA_PAGINAS
     assert social_profile_url("https://instagram.com/santamonicacantina?igsh=x") == "https://www.instagram.com/santamonicacantina/"
     assert social_profile_url("https://www.instagram.com/p/ABC123/") == ""
     assert social_profile_url("https://www.facebook.com/sharer/sharer.php?u=x") == ""
@@ -2115,11 +2115,15 @@ def self_test():
             if progress.get("paginas_visitadas")==5 and not progress.get("completed"):
                 raise RuntimeError("interrupción simulada")
         target={"id":"aurora","n":"Comercio Aurora","w":"https://aurora.example/","t":"negocio"}
+        checkpoint_cada_original=CHECKPOINT_CADA_PAGINAS
+        CHECKPOINT_CADA_PAGINAS=5  # la web de prueba solo tiene 6 páginas
         try:
             crawl_official_site(target,"https://aurora.example/",resume_state=None,progress_callback=interrupt_after_five)
             raise AssertionError("La interrupción simulada no se produjo")
         except RuntimeError as exc:
             assert str(exc)=="interrupción simulada"
+        finally:
+            CHECKPOINT_CADA_PAGINAS=checkpoint_cada_original
         assert checkpoint.get("paginas_visitadas")==5
         resumed_records,resumed_pages=crawl_official_site(target,"https://aurora.example/",resume_state=checkpoint)
         assert resumed_pages==6, f"Reanudación incorrecta: {resumed_pages} páginas"
@@ -2325,6 +2329,12 @@ def sitemap_page_urls(seed_url, site_host):
     return list(dict.fromkeys(pages))
 
 
+# Cada punto de control sube a Supabase el avance de la web (puede pesar varios MB).
+# Guardarlo cada 25 páginas (antes cada 5) reduce mucho el tráfico; si el proceso se
+# corta, solo se repiten como mucho 25 páginas.
+CHECKPOINT_CADA_PAGINAS=25
+
+
 def crawl_checkpoint_key(target_id, seed_url):
     raw=str(target_id)+"\\n"+url_key(seed_url)
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
@@ -2431,7 +2441,7 @@ def crawl_official_site(target, seed_url, allow_single_email=False, resume_state
         if not record:
             if not seed_verified:
                 break
-            if len(visited)%5==0:
+            if len(visited)%CHECKPOINT_CADA_PAGINAS==0:
                 save_progress()
             continue
         if not seed_verified:
@@ -2452,7 +2462,7 @@ def crawl_official_site(target, seed_url, allow_single_email=False, resume_state
                 queue.append(candidate)
         if max_pages:
             queue[:]=prioritize_contact_pages(queue)
-        if len(visited)%5==0:
+        if len(visited)%CHECKPOINT_CADA_PAGINAS==0:
             save_progress()
         # No detenerse al encontrar los seis campos: se recorren todas las páginas internas.
     save_progress(completed=True)

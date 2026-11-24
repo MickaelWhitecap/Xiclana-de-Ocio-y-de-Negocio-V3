@@ -113,9 +113,9 @@ def aplicar(base, key, ident, campos, paginas):
         nuevo["v"] = hoy
         cuerpo["verified_at"] = ahora().isoformat()
     filtro = {"id": "eq." + ident, "updated_at": "eq." + fila["updated_at"] if fila.get("updated_at") else "is.null"}
-    res, _ = catalog.request(base + "/listings?" + urllib.parse.urlencode(filtro), key, method="PATCH",
-                             payload=cuerpo, headers={"Prefer": "return=representation"})
-    if not res:
+    res, cabeceras = catalog.request(base + "/listings?" + urllib.parse.urlencode(filtro), key, method="PATCH",
+                                     payload=cuerpo, headers=catalog.PREFER_MINIMAL)
+    if not catalog.affected_rows(res, cabeceras):
         return [], "cambio_concurrente"
     return añadidos, "completada" if añadidos else "verificada_sin_datos_nuevos"
 
@@ -198,7 +198,7 @@ def main():
         intentos[ident] = {"fecha_utc": ahora().isoformat(), "web": ficha.get("w"), "motivo": fila["motivo"],
                            "añadidos": fila.get("añadidos", [])}
         print(json.dumps({"n": numero, **fila}, ensure_ascii=False), flush=True)
-        if not args.simular and numero % 10 == 0:
+        if not args.simular and numero % 50 == 0:  # menos guardados = menos tráfico
             guardar_intentos(intentos)
     if not args.simular:
         guardar_intentos(intentos)
