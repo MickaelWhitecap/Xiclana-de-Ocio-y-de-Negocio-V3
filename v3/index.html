@@ -691,9 +691,23 @@ body{overflow-x:clip;max-width:100%}
 #agenda .ag-vacio{color:var(--mut);margin:.2rem 0}
 #agenda .ag-mas{margin-top:.6rem;font:inherit;font-size:.9rem;border:1px solid var(--bd);background:var(--card);color:var(--ink);border-radius:6px;padding:.4rem .9rem;cursor:pointer}
 </style>
+<style id="mejoras-usuario">
+#buscador-portada{margin:0 0 1rem}
+#q0{width:100%;box-sizing:border-box;font-size:1.05rem;padding:.85rem 1rem;border:2px solid var(--bd);border-radius:14px;background:var(--card);color:var(--ink)}
+#q0:focus{outline:none;border-color:var(--acc)}
+.trampa{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0!important}
+.card .cerrar-ficha{display:none}
+.card.centered .cerrar-ficha{display:flex;align-items:center;justify-content:center;position:absolute;top:.45rem;right:.45rem;z-index:3;width:2.4rem;height:2.4rem;border-radius:50%;border:1px solid var(--bd);background:var(--card);color:var(--ink);font-size:1.15rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.card.centered{box-shadow:0 0 0 100vmax rgba(10,25,40,.55),0 18px 50px rgba(0,0,0,.28)!important;overscroll-behavior:contain}
+html.ficha-abierta,html.ficha-abierta body{overflow:hidden!important}
+@media(max-width:650px){.card.centered{width:calc(100vw - 1rem)!important;max-width:calc(100vw - 1rem)!important;max-height:calc(100dvh - 1rem)!important}}
+.card .verification{font-size:.7rem!important;padding:.1rem .4rem!important}
+#elige .dos > .op[data-m] small{font-size:.8rem!important;line-height:1.3!important;white-space:normal!important;letter-spacing:0!important}
+@media(max-width:650px){.hero .t p{white-space:normal!important;font-size:.8rem!important;line-height:1.3!important;letter-spacing:0!important}}
+</style>
 </head><body>
 <header class="hero foto"><svg viewBox="0 0 1200 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect class="salt" width="1200" height="340"/><rect class="p" style="--d:0" x="0" y="0" width="300" height="150" fill="#f08fa8"/><rect class="p" style="--d:1" x="308" y="0" width="220" height="100" fill="#f7c1cd"/><rect class="p" style="--d:2" x="536" y="0" width="330" height="170" fill="#e56b8d"/><rect class="p" style="--d:3" x="874" y="0" width="326" height="120" fill="#f3a3b6"/><rect class="p" style="--d:4" x="0" y="158" width="180" height="182" fill="#8cc9cf"/><rect class="p" style="--d:5" x="188" y="158" width="330" height="90" fill="#5fb0ba"/><rect class="p" style="--d:6" x="526" y="178" width="180" height="162" fill="#f7c1cd"/><rect class="p" style="--d:7" x="714" y="178" width="200" height="100" fill="#f08fa8"/><rect class="p" style="--d:8" x="922" y="128" width="278" height="212" fill="#8cc9cf"/><rect class="p" style="--d:9" x="188" y="256" width="330" height="84" fill="#f3a3b6"/><rect class="p" style="--d:10" x="714" y="286" width="200" height="54" fill="#5fb0ba"/><circle cx="1080" cy="62" r="34" fill="#f6b93b"/></svg><div class="t"><h1>Xiclana <span class="de-conector">de</span> <span class="brand-ocio">Ocio</span> <span class="de-conector">y</span> <span class="de-conector">de</span> <span class="brand-negocio">Negocio</span></h1><p>Playas, marismas, bares y comercios de Chiclana de la Frontera (11130, Cádiz) en un solo sitio.</p></div></header>
-<div class="cuerpo"><aside class="lado" id="lado-i" aria-label="Espacio destacado"></aside><div class="centro"><section id="elige"><h2>¿Qué buscas hoy?</h2><div class="dos">
+<div class="cuerpo"><aside class="lado" id="lado-i" aria-label="Espacio destacado"></aside><div class="centro"><section id="elige"><h2>¿Qué buscas hoy?</h2><form id="buscador-portada" role="search" onsubmit="return false"><input id="q0" type="search" placeholder="Busca en toda la web: bar, farmacia, playa, dormir…" aria-label="Buscar en toda la web" autocomplete="off"></form><div class="dos">
 <button class="op" data-m="ocio"><span>🏖️</span><b>Ocio</b><i class="cnt" data-c="ocio">…</i><small>Playas, patrimonio, naturaleza, cultura, deporte, restaurantes, bares</small></button>
 <button class="op" data-m="negocio"><span>🤝</span><b>NegOcio</b><i class="cnt" data-c="negocio">…</i><small>Comercios, servicios, alojamiento, empresas, administración</small></button></div>
 <p id="hint">Elige una de las dos opciones para ver el directorio.</p></section>
@@ -719,9 +733,11 @@ body{overflow-x:clip;max-width:100%}
 <input name="c" placeholder="Categoría (ej. Restaurante) *" required><input name="a" placeholder="Dirección">
 <input name="p" placeholder="Teléfono"><input name="s" placeholder="Lo mejor del sitio (plato estrella, vistas…)"><input name="w" type="url" placeholder="Web (https://…)">
 <textarea class="w" name="d" rows="2" placeholder="Descripción"></textarea>
-<div class="w"><button class="btn" type="submit">Guardar</button> <button class="btn s" type="button" id="exp">Exportar JSON</button> <button class="btn s" type="button" id="imp">Importar JSON</button></div>
+<input name="contacto" placeholder="Tu correo o teléfono (opcional, por si tenemos dudas)" autocomplete="email">
+<input name="web_extra" tabindex="-1" autocomplete="off" aria-hidden="true" class="trampa">
+<div class="w"><button class="btn" type="submit">Enviar</button></div>
 </form>
-<p style="color:var(--mut);font-size:.85rem">Tus altas se guardan en este navegador. Exporta el JSON para conservarlas o pasarlas a otro dispositivo.</p></details></div>
+<p id="f-estado" role="status" style="color:var(--mut);font-size:.9rem">Lo revisaremos antes de publicarlo. Gracias por ayudar a completar la guía.</p></details></div>
 </main></div><aside class="lado" id="lado-d" aria-label="Espacio destacado"></aside></div>
 <footer><div id="fecha"></div>Datos de © colaboradores de <a href="https://www.openstreetmap.org/copyright" style="color:inherit">OpenStreetMap</a> (licencia ODbL) y del Ayuntamiento de Chiclana, <a href="https://datosabiertos.chiclana.es" style="color:inherit">Portal de Datos Abiertos</a> (licencia ODC-By). Datos orientativos: comprueba horarios y teléfonos antes de ir. Sitio independiente, sin vinculación oficial con el Ayuntamiento.<br><a href="aviso-legal.html" style="color:inherit">Aviso legal</a> · <a href="privacidad.html" style="color:inherit">Privacidad</a> · <a href="mailto:xiclanaon@gmail.com" style="color:inherit">xiclanaon@gmail.com</a></footer>
 <script src="./supabase-config.js"></script>
@@ -798,8 +814,11 @@ async function loadAdvertisingSlotsPublic(){
 function normalizarBusqueda(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim()}
 // Redes sociales: el campo "r" guarda uno o varios enlaces completos separados por espacios, comas o saltos de línea.
 function enlacesRedes(valor){const nombres=[["instagram.com","Instagram"],["facebook.com","Facebook"],["fb.com","Facebook"],["tiktok.com","TikTok"],["x.com","X"],["twitter.com","X"],["youtube.com","YouTube"],["youtu.be","YouTube"],["linkedin.com","LinkedIn"],["wa.me","WhatsApp"]];const vistos=new Set();return String(valor||"").split(/[\s,;]+/).map(v=>{try{const u=new URL(v);if(!/^https?:$/.test(u.protocol))return null;const host=u.hostname.replace(/^www\./,"").toLowerCase();const red=nombres.find(([d])=>host===d||host.endsWith("."+d));return [red?red[1]:"Red social",u.href]}catch(e){return null}}).filter(r=>r&&!vistos.has(r[1])&&vistos.add(r[1]))}
-function buscarPrioritario(lista,q){if(!q)return lista;const termino=normalizarBusqueda(q);const compacto=v=>normalizarBusqueda(v).replace(/[^a-z0-9]/g,"");const nombres=lista.filter(x=>compacto(x.n).includes(compacto(q)));if(nombres.length)return nombres;return lista.filter(x=>normalizarBusqueda([x.c,x.a,x.d,x.p,x.e,x.w,x.h,x.s].join(" ")).includes(termino))}
-function pintarVacio(n,all,q){const e=$("#empty");e.hidden=n>0;if(n>0)return;e.textContent="";const ocio=modo==="ocio",otro=ocio?"negocio":"ocio",v=$("#q").value.trim();
+// Palabras habituales que no son nombres de categoría: llevan a las categorías que busca la gente.
+const SINONIMOS={comer:["restaurante","bar","cafeteria","comida rapida"],comida:["restaurante","bar","comida rapida"],cenar:["restaurante","bar"],almorzar:["restaurante","bar"],desayunar:["cafeteria","bar","panaderia"],desayuno:["cafeteria","bar","panaderia"],tapas:["bar","restaurante"],tapear:["bar","restaurante"],cerveza:["bar"],copas:["bar","discoteca","pub"],copa:["bar","discoteca","pub"],dormir:["hotel","hostal","alojamiento","apartamento","camping"],alojamiento:["hotel","hostal","alojamiento","apartamento","camping"],hospedaje:["hotel","hostal","alojamiento","apartamento"],medico:["salud","clinica","centro de salud"],doctor:["salud","clinica"],gasolina:["gasolinera"],cajero:["banco"],aparcar:["parking","aparcamiento"],aparcamiento:["parking","aparcamiento"],pelo:["peluqueria"],ninos:["ocio infantil","parques infantiles","ocio familiar"],bano:["playa"],banarse:["playa"],perro:["veterinario","mascota"],mascota:["veterinario","mascota"],super:["supermercado","alimentacion"],compra:["supermercado","alimentacion"],helado:["heladeria"],helados:["heladeria"],cafe:["cafeteria"]};
+function buscarPrioritario(lista,q){if(!q)return lista;const termino=normalizarBusqueda(q);const sinonimos=SINONIMOS[termino];if(sinonimos){const porCategoria=lista.filter(x=>{const c=normalizarBusqueda(x.c);return sinonimos.some(w=>c.includes(w))});if(porCategoria.length){const ya=new Set(porCategoria);return porCategoria.concat(buscarTexto(lista,q).filter(x=>!ya.has(x)))}}const formas=termino.length>=4?[termino,termino.replace(/s$/,""),termino.replace(/es$/,"")]:[termino];const porCat=lista.filter(x=>formas.includes(normalizarBusqueda(x.c)));let r=buscarTexto(lista,q);for(const f of formas.slice(1)){if(r.length)break;if(f!==termino)r=buscarTexto(lista,f)}if(porCat.length){const ya=new Set(porCat);return porCat.concat(r.filter(x=>!ya.has(x)))}return r}
+function buscarTexto(lista,q){const termino=normalizarBusqueda(q);const compacto=v=>normalizarBusqueda(v).replace(/[^a-z0-9]/g,"");const nombres=lista.filter(x=>compacto(x.n).includes(compacto(q)));if(nombres.length)return nombres;return lista.filter(x=>normalizarBusqueda([x.c,x.a,x.d,x.p,x.e,x.w,x.h,x.s].join(" ")).includes(termino))}
+function pintarVacio(n,all,q){const e=$("#empty");e.hidden=n>0;if(n>0)return;e.textContent="";if(!modo){e.append("Sin resultados en toda la web"+(q?" para «"+$("#q").value.trim()+"»":"")+". Prueba con otra palabra.");return}const ocio=modo==="ocio",otro=ocio?"negocio":"ocio",v=$("#q").value.trim();
 const k=q?buscarPrioritario(all.filter(x=>x.t===otro),q).length:0;
 e.append("Sin resultados en "+(ocio?"Ocio":"NegOcio")+(v?" para «"+v+"»":"")+". ");
 if(k){const b=el("button","btn s","Ver los "+k+" resultados en "+(ocio?"NegOcio":"Ocio"));b.onclick=()=>{const t=$("#q").value;elegir(otro);$("#q").value=t;render()};e.append(b)}else e.append("Prueba con otra palabra o quita el filtro de categoría.")}
@@ -810,6 +829,8 @@ const NIVEL_VERIFICACION={verificada:0,pendiente:1,insuficiente:2};
 function nivelVerificacion(x){const v=NIVEL_VERIFICACION[x.estado_verificacion||"pendiente"];return v===undefined?1:v}
 function datosUtiles(x){return ["a","p","e","w","h","d","r"].filter(k=>x[k]!==undefined&&x[k]!==null&&String(x[k]).trim()!=="").length}
 function ordenFichas(a,b){const na=nivelVerificacion(a),nb=nivelVerificacion(b);if(na!==nb)return na-nb;if(na===1){const d=datosUtiles(b)-datosUtiles(a);if(d)return d}return String(a.n||"").localeCompare(String(b.n||""),"es",{sensitivity:"base",numeric:true})}
+function fechaMasReciente(base,items){let f=String(base||"").slice(0,10);(items||[]).forEach(x=>{const v=String(x.verified_at||"").slice(0,10);if(v>f)f=v});return f}
+function fechaLegible(iso){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||""));if(!m)return String(iso||"");const meses=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];return Number(m[3])+" de "+meses[Number(m[2])-1]+" de "+m[1]}
 function render(){
  const all=[...SEED,...mine].sort(ordenFichas);document.querySelectorAll(".cnt").forEach(e=>{const k=all.filter(x=>x.t===e.dataset.c).length;e.textContent=k.toLocaleString("es-ES")+(k===1?" ficha":" fichas")});const q=$("#q").value,t=modo;
   const groupMap=GROUPS[modo]||{};
@@ -820,7 +841,7 @@ function render(){
   const gr=$("#groups");gr.textContent="";
   [["","Todas"],...groupEntries.map(([nombre])=>[nombre,nombre])].forEach(([value,label])=>{const b=el("button","chip"+(grupo===value?" on":""),(grupo===value?"✓ ":"")+label);b.onclick=()=>{grupo=value;cat="";render()};gr.append(b)});
   const allowed=grupo?new Set(groupMap[grupo]||[]):null;
-  const cs=[...new Set(all.filter(x=>x.t===modo&&(!allowed||allowed.has(x.c))).map(x=>x.c))].sort((a,b)=>a.localeCompare(b,"es"));const ch=$("#chips");ch.textContent="";
+  const cs=[...new Set(all.filter(x=>(!modo||x.t===modo)&&(!allowed||allowed.has(x.c))).map(x=>x.c))].sort((a,b)=>a.localeCompare(b,"es"));const ch=$("#chips");ch.textContent="";
   [["", "Todas las categorías"],...cs.map(c=>[c,c])].forEach(([v,l])=>{const b=el("button","chip"+(cat===v?" on":""),(cat===v?"✓ ":"")+l);b.onclick=()=>{cat=v;render()};ch.append(b)});
  // En móvil las filas de etiquetas se deslizan: al redibujarlas, dejar visible la etiqueta elegida.
  [gr,ch].forEach(fila=>{const on=fila.querySelector(".chip.on");if(on&&fila.scrollWidth>fila.clientWidth)fila.scrollLeft+=on.getBoundingClientRect().left-fila.getBoundingClientRect().left-8});
@@ -838,6 +859,7 @@ function render(){
 $("#q").oninput=()=>{LIM=120;render()};
 const MN=CATS,MO=["Restaurantes","Bares y tapas","Cafeterías","Heladerías","Playas","Chiringuitos","Museos","Parques","Rutas de senderismo","Campos de golf","Cines","Discotecas","Clubes náuticos","Parques infantiles"];
 function mapas(){const m=$("#maps");m.textContent="";$("#mt").textContent=modo==="ocio"?"Más ocio, en el mapa":"Todos los negocios, en el mapa";(modo==="ocio"?MO:MN).forEach(c=>{const a=el("a","chip",c);a.href=map(c);a.target="_blank";a.rel="noopener";a.style.textDecoration="none";m.append(a)})}
+function buscarEnTodo(texto){modo="";document.body.dataset.m="";$("#elige").classList.add("sel");cat="";grupo="";LIM=120;document.querySelectorAll(".op").forEach(b=>b.classList.remove("on"));$("#main").hidden=false;$("#hint").hidden=true;$("#extras").hidden=true;q_.value=texto;render();$("#main").scrollIntoView({behavior:"smooth"})}
 function elegir(m){modo=m;document.body.dataset.m=m;$("#elige").classList.add("sel");cat="";grupo="";q_.value="";if(typeof LIM!=="undefined")LIM=120;document.querySelectorAll(".op").forEach(b=>b.classList.toggle("on",b.dataset.m===m));$("#main").hidden=false;$("#hint").hidden=true;document.querySelector("[name=t]").value=m;mapas();render();$("#main").scrollIntoView({behavior:"smooth"})}
 const q_=$("#q");
 const grid=$("#grid");
@@ -845,11 +867,20 @@ function cardFromEvent(e){const target=e.target instanceof Element?e.target:e.ta
 grid.addEventListener("mouseover",e=>{const card=cardFromEvent(e);if(!card||card.dataset.pinned==="true")return;if(e.relatedTarget&&card.contains(e.relatedTarget))return;card.open=true;card.dataset.previewOpen="true";card.classList.add("preview")});
 grid.addEventListener("mouseout",e=>{const card=cardFromEvent(e);if(!card||card.dataset.pinned==="true"||card.dataset.previewOpen!=="true")return;if(e.relatedTarget&&card.contains(e.relatedTarget))return;card.open=false;delete card.dataset.previewOpen;card.classList.remove("preview")});
 
-grid.addEventListener("click",e=>{const target=e.target instanceof Element?e.target:e.target?.parentElement;const sum=target?.closest("summary.card-summary");if(!sum)return;if(target.closest("a"))return;e.preventDefault();const card=sum.parentElement;if(card.classList.contains("centered")){card.open=false;card.classList.remove("preview","centered");delete card.dataset.pinned;delete card.dataset.previewOpen;const info=card.querySelector(".card-details");if(info)info.style.removeProperty("display");return}document.querySelectorAll(".card.centered").forEach(other=>{other.classList.remove("centered","preview");other.open=false;delete other.dataset.pinned;delete other.dataset.previewOpen});card.open=true;card.dataset.pinned="true";delete card.dataset.previewOpen;card.classList.remove("preview");card.classList.add("centered");const info=card.querySelector(".card-details");if(info)info.style.removeProperty("display")});
+function cerrarFicha(card){if(!card)return;card.open=false;card.classList.remove("preview","centered");delete card.dataset.pinned;delete card.dataset.previewOpen;const info=card.querySelector(".card-details");if(info)info.style.removeProperty("display");if(!document.querySelector(".card.centered"))document.documentElement.classList.remove("ficha-abierta")}
+grid.addEventListener("click",e=>{const target=e.target instanceof Element?e.target:e.target?.parentElement;if(target?.closest(".cerrar-ficha")){e.preventDefault();cerrarFicha(target.closest("details.card"));return}const sum=target?.closest("summary.card-summary");if(!sum)return;if(target.closest("a"))return;e.preventDefault();const card=sum.parentElement;if(card.classList.contains("centered")){cerrarFicha(card);return}document.querySelectorAll(".card.centered").forEach(other=>cerrarFicha(other));card.open=true;card.dataset.pinned="true";delete card.dataset.previewOpen;card.classList.remove("preview");card.classList.add("centered");if(!card.querySelector(".cerrar-ficha")){const x=el("button","cerrar-ficha","✕");x.type="button";x.setAttribute("aria-label","Cerrar ficha");x.title="Cerrar";card.prepend(x)}document.documentElement.classList.add("ficha-abierta");const info=card.querySelector(".card-details");if(info)info.style.removeProperty("display")});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".card.centered").forEach(c=>cerrarFicha(c))});
+document.addEventListener("click",e=>{const abierta=document.querySelector(".card.centered");if(abierta&&e.target instanceof Element&&!abierta.contains(e.target)&&document.documentElement.contains(e.target))cerrarFicha(abierta)});
  document.querySelectorAll(".op").forEach(b=>b.onclick=()=>elegir(b.dataset.m));
-$("#f").onsubmit=e=>{e.preventDefault();const d=new FormData(e.target);mine.push({n:d.get("n"),t:d.get("t"),c:d.get("c"),a:d.get("a"),p:d.get("p"),w:d.get("w"),s:d.get("s"),d:d.get("d")});save();e.target.reset();render()};
-$("#exp").onclick=()=>{const s=JSON.stringify(mine,null,1);navigator.clipboard?.writeText(s).then(()=>alert("JSON copiado al portapapeles"),()=>prompt("Copia el JSON:",s))||prompt("Copia el JSON:",s)};
-$("#imp").onclick=()=>{const s=prompt("Pega aquí el JSON exportado:");if(!s)return;try{const a=JSON.parse(s);if(Array.isArray(a)){mine=mine.concat(a.filter(x=>x&&x.n&&x.c&&(x.t==="ocio"||x.t==="negocio")).map(x=>({n:String(x.n),t:x.t,c:String(x.c),a:x.a?String(x.a):"",p:x.p?String(x.p):"",w:x.w?String(x.w):"",s:x.s?String(x.s):"",d:x.d?String(x.d):""})));save();render()}}catch(e){alert("JSON no válido")}};
+{const q0=$("#q0");let espera;const lanzar=()=>{const v=q0.value.trim();if(v.length>=2)buscarEnTodo(v)};q0.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();clearTimeout(espera);lanzar();q0.blur()}});q0.addEventListener("search",()=>{clearTimeout(espera);lanzar()});q0.addEventListener("input",()=>{clearTimeout(espera);espera=setTimeout(()=>{if(document.activeElement!==q0)return;const v=q0.value.trim();if(v.length>=3){modo="";document.body.dataset.m="";$("#main").hidden=false;$("#hint").hidden=true;$("#extras").hidden=true;cat="";grupo="";LIM=120;document.querySelectorAll(".op").forEach(b=>b.classList.remove("on"));q_.value=v;render()}},500)})}
+$("#f").onsubmit=async e=>{e.preventDefault();const form=e.target,d=new FormData(form),estado=$("#f-estado"),boton=form.querySelector("button[type=submit]");
+ if(String(d.get("web_extra")||"").trim()){form.reset();estado.textContent="¡Gracias! Lo revisaremos antes de publicarlo.";return}
+ const campos={};["n","t","c","a","p","w","s","d"].forEach(k=>{const v=String(d.get(k)||"").trim().slice(0,500);if(v)campos[k]=v});
+ const cfg=window.XICLANA_SUPABASE||{};boton.disabled=true;estado.textContent="Enviando…";
+ try{const r=await fetch(cfg.url.replace(/\/+$/,"")+"/rest/v1/rpc/proponer_sitio_publico",{method:"POST",headers:{apikey:cfg.anonKey,Authorization:"Bearer "+cfg.anonKey,"Content-Type":"application/json"},body:JSON.stringify({p_campos:campos,p_contacto:String(d.get("contacto")||"").trim().slice(0,200)})});
+  if(!r.ok)throw new Error(r.status);form.reset();estado.textContent="¡Gracias! Hemos recibido tu propuesta y la revisaremos antes de publicarla."}
+ catch(err){estado.textContent="No se ha podido enviar ahora. Puedes escribirnos a xiclanaon@gmail.com con los datos del sitio."}
+ finally{boton.disabled=false}};
 function combinarCamposConDatos(base, aportados){
   const resultado={...base};
   Object.entries(aportados||{}).forEach(([clave,valor])=>{
@@ -911,7 +942,7 @@ async function aplicarCambios(j){
   const CAT_UNIFICADA={"Instalación deportiva":"Instalaciones deportivas","Restauración":"Restaurante","Patrimonio y culto":"Patrimonio","Oficina de turismo":"Información turística","Servicios públicos":"Servicio público","Muebles":"Muebles y decoración","Joyería y relojería":"Joyería","Bodega y licores":"Bodega"};
   items=items.map(x=>CAT_UNIFICADA[x.c]?({...x,c:CAT_UNIFICADA[x.c]}):x);
   SEED=items;DEST={...(j.destacados||{}),...(ESPACIOS?{espacios:ESPACIOS}:{})};pintarDest();
-  $("#fecha").textContent="Datos actualizados: "+j.actualizado+" · "+items.length+" fichas"+(j.deCache?" (copia guardada, comprobando novedades…)":"");
+  $("#fecha").textContent="Datos actualizados: "+fechaLegible(fechaMasReciente(j.actualizado,items))+" · "+items.length.toLocaleString("es-ES")+" fichas"+(j.deCache?" (copia guardada, comprobando novedades…)":"");
   render();
  }
  // Solo se piden los campos que muestra la web pública (no todo el JSON interno de cada ficha).
