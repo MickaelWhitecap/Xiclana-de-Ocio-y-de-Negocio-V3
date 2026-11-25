@@ -804,8 +804,14 @@ const k=q?buscarPrioritario(all.filter(x=>x.t===otro),q).length:0;
 e.append("Sin resultados en "+(ocio?"Ocio":"NegOcio")+(v?" para «"+v+"»":"")+". ");
 if(k){const b=el("button","btn s","Ver los "+k+" resultados en "+(ocio?"NegOcio":"Ocio"));b.onclick=()=>{const t=$("#q").value;elegir(otro);$("#q").value=t;render()};e.append(b)}else e.append("Prueba con otra palabra o quita el filtro de categoría.")}
 function horarioES(h){const d={Mo:"L",Tu:"M",We:"X",Th:"J",Fr:"V",Sa:"S",Su:"D",PH:"festivos"};return String(h).replace(/\b(Mo|Tu|We|Th|Fr|Sa|Su|PH)\b/g,m=>d[m]).replace(/\boff\b/gi,"cerrado").replace(/24\/7/,"24 horas")}
+// Orden de las fichas (pedido por Miguel, 25-nov-2026): primero las verificadas, después las pendientes de verificar
+// (las que tienen más datos útiles primero) y al final las de datos dudosos; dentro de cada grupo, por orden alfabético.
+const NIVEL_VERIFICACION={verificada:0,pendiente:1,insuficiente:2};
+function nivelVerificacion(x){const v=NIVEL_VERIFICACION[x.estado_verificacion||"pendiente"];return v===undefined?1:v}
+function datosUtiles(x){return ["a","p","e","w","h","d","r"].filter(k=>x[k]!==undefined&&x[k]!==null&&String(x[k]).trim()!=="").length}
+function ordenFichas(a,b){const na=nivelVerificacion(a),nb=nivelVerificacion(b);if(na!==nb)return na-nb;if(na===1){const d=datosUtiles(b)-datosUtiles(a);if(d)return d}return String(a.n||"").localeCompare(String(b.n||""),"es",{sensitivity:"base",numeric:true})}
 function render(){
- const all=[...SEED,...mine].sort((a,b)=>String(a.n||"").localeCompare(String(b.n||""),"es",{sensitivity:"base",numeric:true}));document.querySelectorAll(".cnt").forEach(e=>{const k=all.filter(x=>x.t===e.dataset.c).length;e.textContent=k.toLocaleString("es-ES")+(k===1?" ficha":" fichas")});const q=$("#q").value,t=modo;
+ const all=[...SEED,...mine].sort(ordenFichas);document.querySelectorAll(".cnt").forEach(e=>{const k=all.filter(x=>x.t===e.dataset.c).length;e.textContent=k.toLocaleString("es-ES")+(k===1?" ficha":" fichas")});const q=$("#q").value,t=modo;
   const groupMap=GROUPS[modo]||{};
   const groupEntries=Object.entries(groupMap).filter(([,categories])=>categories.some(category=>all.some(x=>x.t===modo&&x.c===category)));
   const mappedCategories=new Set(Object.values(groupMap).flat());
