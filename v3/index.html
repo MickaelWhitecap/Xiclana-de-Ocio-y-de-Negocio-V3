@@ -4,6 +4,12 @@
 <title>Xiclana de Ocio y de NegOcio</title>
 <meta name="description" content="Directorio de ocio y negocios de Chiclana de la Frontera: playas, restaurantes, patrimonio, comercios y servicios, con datos abiertos del Ayuntamiento y de OpenStreetMap.">
 <meta name="theme-color" content="#0d2238">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Xiclana ON">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta property="og:type" content="website"><meta property="og:locale" content="es_ES"><meta property="og:title" content="Xiclana de Ocio y de NegOcio"><meta property="og:description" content="Playas, marismas, bares y comercios de Chiclana de la Frontera en un solo sitio.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Ctext%20y%3D%27.9em%27%20font-size%3D%2790%27%3E%F0%9F%8F%96%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <link rel="preload" as="image" href="cabecera.webp" fetchpriority="high">
@@ -723,7 +729,22 @@ body{overflow-x:clip;max-width:100%}
 </form>
 <p style="color:var(--mut);font-size:.85rem">Tus altas se guardan en este navegador. Exporta el JSON para conservarlas o pasarlas a otro dispositivo.</p></details></div>
 </main></div><aside class="lado" id="lado-d" aria-label="Espacio destacado"></aside></div>
-<footer><div id="fecha"></div>Datos de © colaboradores de <a href="https://www.openstreetmap.org/copyright" style="color:inherit">OpenStreetMap</a> (licencia ODbL) y del Ayuntamiento de Chiclana, <a href="https://datosabiertos.chiclana.es" style="color:inherit">Portal de Datos Abiertos</a> (licencia ODC-By). Datos orientativos: comprueba horarios y teléfonos antes de ir. Sitio independiente, sin vinculación oficial con el Ayuntamiento.<br><a href="aviso-legal.html" style="color:inherit">Aviso legal</a> · <a href="privacidad.html" style="color:inherit">Privacidad</a> · <a href="mailto:xiclanaon@gmail.com" style="color:inherit">xiclanaon@gmail.com</a></footer>
+<footer><div id="fecha"></div>Datos de © colaboradores de <a href="https://www.openstreetmap.org/copyright" style="color:inherit">OpenStreetMap</a> (licencia ODbL) y del Ayuntamiento de Chiclana, <a href="https://datosabiertos.chiclana.es" style="color:inherit">Portal de Datos Abiertos</a> (licencia ODC-By). Datos orientativos: comprueba horarios y teléfonos antes de ir. Sitio independiente, sin vinculación oficial con el Ayuntamiento.<br><a href="aviso-legal.html" style="color:inherit">Aviso legal</a> · <a href="privacidad.html" style="color:inherit">Privacidad</a> · <a href="mailto:xiclanaon@gmail.com" style="color:inherit">xiclanaon@gmail.com</a><div id="app-instalar" hidden><button type="button" id="app-boton">📲 Instalar la app en este teléfono</button><p id="app-ios" hidden>📲 Para tenerla como app en el iPhone: pulsa <b>Compartir</b> <span aria-hidden="true">⬆️</span> y luego <b>«Añadir a pantalla de inicio»</b>.</p></div></footer>
+<style id="app-telefono">#app-instalar{margin-top:1rem}#app-boton{font:600 1rem Figtree,system-ui,sans-serif;background:#f6b93b;color:#0d2238;border:0;border-radius:999px;padding:.7rem 1.2rem;cursor:pointer}#app-ios{margin:.4rem auto 0;max-width:36ch;color:#fff}</style>
+<script>
+/* App para el teléfono: registro del service worker y botón «Instalar». */
+(function(){
+ if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
+ var yaApp=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+ if(yaApp)return;
+ var caja=document.getElementById("app-instalar"),boton=document.getElementById("app-boton"),ios=document.getElementById("app-ios"),aviso=null;
+ boton.hidden=true;
+ addEventListener("beforeinstallprompt",function(e){e.preventDefault();aviso=e;caja.hidden=false;boton.hidden=false;ios.hidden=true});
+ boton.addEventListener("click",function(){if(!aviso)return;aviso.prompt();aviso.userChoice.finally(function(){aviso=null;caja.hidden=true})});
+ addEventListener("appinstalled",function(){caja.hidden=true});
+ if(/iPhone|iPad|iPod/.test(navigator.userAgent)){caja.hidden=false;ios.hidden=false}
+})();
+</script>
 <script src="./supabase-config.js"></script>
 <script>
 let SEED=[],LIM=2000;

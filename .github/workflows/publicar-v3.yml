@@ -42,6 +42,7 @@ jobs:
           mkdir -p _site
           cp v3/index.html v3/admin.html v3/exportar-fichas.html v3/completar-ficha.html v3/aviso-legal.html v3/privacidad.html v3/supabase-config.js _site/
           cp v3/espacio-1-flamenca.webp v3/cabecera.webp v3/logo-on.webp _site/
+          cp v3/manifest.webmanifest v3/sw.js v3/icon-192.png v3/icon-512.png v3/icon-maskable-512.png v3/apple-touch-icon.png _site/
           cp README.md _site/README.md
           python - <<'PY'
           import os
@@ -82,6 +83,8 @@ jobs:
           curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}admin.html?build=${BUILD_ID}" -o /tmp/admin.html
           curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}aviso-legal.html?build=${BUILD_ID}" -o /dev/null
           curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}privacidad.html?build=${BUILD_ID}" -o /dev/null
+          curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}manifest.webmanifest?build=${BUILD_ID}" -o /dev/null
+          curl --fail --silent --show-error --retry 10 --retry-delay 5 "${PAGES_URL}sw.js?build=${BUILD_ID}" -o /dev/null
           grep -Fq "XICLANA_BUILD_ID=${BUILD_ID}" /tmp/index.html
           grep -Fq "XICLANA_BUILD_ID=${BUILD_ID}" /tmp/admin.html
           curl --fail --silent --show-error "${SUPABASE_URL}/rest/v1/listings?select=id&is_published=eq.true&is_deleted=eq.false&limit=1" \
