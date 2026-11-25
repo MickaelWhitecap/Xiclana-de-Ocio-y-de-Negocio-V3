@@ -710,6 +710,7 @@ html.ficha-abierta,html.ficha-abierta body{overflow:hidden!important}
 .aviso-cerca{color:var(--mut);margin:.2rem 0 .8rem;font-size:.92rem}
 #mapa{height:min(65vh,560px);border-radius:14px;border:1px solid var(--bd);margin:0 0 1rem;z-index:1}
 .popup-mapa{font-size:.9rem;line-height:1.45}
+.acts .aviso-error{color:var(--mut)!important;font-weight:400}
 .card .distancia{margin:.25rem 0 0;font-weight:700;color:var(--acc);font-size:.9rem}
 </style>
 </head><body>
@@ -758,19 +759,19 @@ const map=s=>"https://www.google.com/maps/search/?api=1&query="+encodeURICompone
 const GROUPS={
  ocio:{
   "Comer y beber":["Bar","Cafetería","Comida rápida","Heladería","Restaurante","Restauración","Bodega"],
-  "Cultura y visitas":["Arte público","Biblioteca","Cultura","Espacios culturales","Información turística","Museo","Ocio y cultura","Oficina de turismo","Patrimonio","Patrimonio y culto","Ruta cultural","Teatro"],
-  "Naturaleza y aire libre":["Atracción","Aventura","Mirador","Naturaleza","Parque","Parques infantiles","Playa","Plaza / paseo"],
+  "Cultura y visitas":["Cultura","Arte público","Biblioteca","Cultura","Espacios culturales","Información turística","Museo","Ocio y cultura","Oficina de turismo","Patrimonio","Patrimonio y culto","Ruta cultural","Teatro"],
+  "Naturaleza y aire libre":["Miradores y paseos","Atracción","Aventura","Mirador","Naturaleza","Parque","Parques infantiles","Playa","Plaza / paseo"],
   "Deporte y bienestar":["Baile","Balneario y spa","Buceo","Deporte","Estadio","Gimnasio","Golf","Instalación deportiva","Instalaciones deportivas","Náutica"],
-  "Ocio familiar y estancias":["Camping","Discoteca","Ocio familiar","Ocio infantil"]
+  "Ocio familiar y estancias":["Ocio infantil y familiar","Camping","Discoteca","Ocio familiar","Ocio infantil"]
  },
  negocio:{
   "Alojamiento":["Alojamiento","Apartamentos","Camping","Hostal","Hotel"],
   "Alimentación":["Alimentación","Bodega","Bodega y licores","Carnicería","Delicatessen","Frutería","Mercado","Panadería","Pescadería","Supermercado","Tienda de barrio"],
-  "Compras":["Bazar","Bicicletas","Calzado","Comercio","Decoración","Deportes","Droguería","Electrónica","Estanco","Floristería","Joyería","Joyería y relojería","Juguetes","Librería","Mascotas","Muebles","Muebles y decoración","Óptica","Papelería","Quiosco","Regalos","Ropa","Telas","Telefonía"],
+  "Compras":["Bazar, regalos y juguetes","Electrónica y telefonía","Prensa, papelería y estanco","Ropa y calzado","Tienda de deportes","Bazar","Bicicletas","Calzado","Comercio","Decoración","Deportes","Droguería","Electrónica","Estanco","Floristería","Joyería","Joyería y relojería","Juguetes","Librería","Mascotas","Muebles","Muebles y decoración","Óptica","Papelería","Quiosco","Regalos","Ropa","Telas","Telefonía"],
   "Servicios profesionales":["Abogado","Administración","Agencia de viajes","Banco","Empresa","Inmobiliaria","Oficina","Oficios y artesanía","Servicios y negocios","Seguros"],
-  "Motor y movilidad":["Alquiler de coches","Automoción","Autoescuela","Concesionario","Gasolinera","Lavado de coches","Neumáticos","Parking","Taller mecánico"],
-  "Salud y cuidado":["Clínica","Consulta médica","Dentista","Estética","Farmacia","Peluquería","Salud","Belleza y deporte","Bienestar","Veterinario"],
-  "Educación, hogar y servicios públicos":["Colegio","Educación","Emergencias","Correos","Ferretería","Guardería","Jardinería","Lavandería","Servicio público","Servicios públicos","Servicios sociales","Transporte"]
+  "Motor y movilidad":["Talleres y automoción","Alquiler de coches","Automoción","Autoescuela","Concesionario","Gasolinera","Lavado de coches","Neumáticos","Parking","Taller mecánico"],
+  "Salud y cuidado":["Veterinario y mascotas","Clínica","Consulta médica","Dentista","Estética","Farmacia","Peluquería","Salud","Belleza y deporte","Bienestar","Veterinario"],
+  "Educación, hogar y servicios públicos":["Colegios y guarderías","Ferretería y jardinería","Colegio","Educación","Emergencias","Correos","Ferretería","Guardería","Jardinería","Lavandería","Servicio público","Servicios públicos","Servicios sociales","Transporte"]
  }
 };
 let cat="",grupo="",modo="";
@@ -823,8 +824,8 @@ function normalizarBusqueda(v){return String(v||"").normalize("NFD").replace(/[\
 function enlacesRedes(valor){const nombres=[["instagram.com","Instagram"],["facebook.com","Facebook"],["fb.com","Facebook"],["tiktok.com","TikTok"],["x.com","X"],["twitter.com","X"],["youtube.com","YouTube"],["youtu.be","YouTube"],["linkedin.com","LinkedIn"],["wa.me","WhatsApp"]];const vistos=new Set();return String(valor||"").split(/[\s,;]+/).map(v=>{try{const u=new URL(v);if(!/^https?:$/.test(u.protocol))return null;const host=u.hostname.replace(/^www\./,"").toLowerCase();const red=nombres.find(([d])=>host===d||host.endsWith("."+d));return [red?red[1]:"Red social",u.href]}catch(e){return null}}).filter(r=>r&&!vistos.has(r[1])&&vistos.add(r[1]))}
 // Palabras habituales que no son nombres de categoría: llevan a las categorías que busca la gente.
 const SINONIMOS={comer:["restaurante","bar","cafeteria","comida rapida"],comida:["restaurante","bar","comida rapida"],cenar:["restaurante","bar"],almorzar:["restaurante","bar"],desayunar:["cafeteria","bar","panaderia"],desayuno:["cafeteria","bar","panaderia"],tapas:["bar","restaurante"],tapear:["bar","restaurante"],cerveza:["bar"],copas:["bar","discoteca","pub"],copa:["bar","discoteca","pub"],dormir:["hotel","hostal","alojamiento","apartamento","camping"],alojamiento:["hotel","hostal","alojamiento","apartamento","camping"],hospedaje:["hotel","hostal","alojamiento","apartamento"],medico:["salud","clinica","centro de salud"],doctor:["salud","clinica"],gasolina:["gasolinera"],cajero:["banco"],aparcar:["parking","aparcamiento"],aparcamiento:["parking","aparcamiento"],pelo:["peluqueria"],ninos:["ocio infantil","parques infantiles","ocio familiar"],bano:["playa"],banarse:["playa"],perro:["veterinario","mascota"],mascota:["veterinario","mascota"],super:["supermercado","alimentacion"],compra:["supermercado","alimentacion"],helado:["heladeria"],helados:["heladeria"],cafe:["cafeteria"]};
-function buscarPrioritario(lista,q){if(!q)return lista;const termino=normalizarBusqueda(q);const sinonimos=SINONIMOS[termino];if(sinonimos){const porCategoria=lista.filter(x=>{const c=normalizarBusqueda(x.c);return sinonimos.some(w=>c.includes(w))});if(porCategoria.length){const ya=new Set(porCategoria);return porCategoria.concat(buscarTexto(lista,q).filter(x=>!ya.has(x)))}}const formas=termino.length>=4?[termino,termino.replace(/s$/,""),termino.replace(/es$/,"")]:[termino];const porCat=lista.filter(x=>formas.includes(normalizarBusqueda(x.c)));let r=buscarTexto(lista,q);for(const f of formas.slice(1)){if(r.length)break;if(f!==termino)r=buscarTexto(lista,f)}if(porCat.length){const ya=new Set(porCat);return porCat.concat(r.filter(x=>!ya.has(x)))}return r}
-function buscarTexto(lista,q){const termino=normalizarBusqueda(q);const compacto=v=>normalizarBusqueda(v).replace(/[^a-z0-9]/g,"");const nombres=lista.filter(x=>compacto(x.n).includes(compacto(q)));if(nombres.length)return nombres;return lista.filter(x=>normalizarBusqueda([x.c,x.a,x.d,x.p,x.e,x.w,x.h,x.s].join(" ")).includes(termino))}
+function buscarPrioritario(lista,q){if(!q)return lista;const termino=normalizarBusqueda(q);const sinonimos=SINONIMOS[termino];if(sinonimos){const porCategoria=lista.filter(x=>{const c=normalizarBusqueda(x.c+" "+(x.c0||""));return sinonimos.some(w=>c.includes(w))});if(porCategoria.length){const ya=new Set(porCategoria);return porCategoria.concat(buscarTexto(lista,q).filter(x=>!ya.has(x)))}}const formas=termino.length>=4?[termino,termino.replace(/s$/,""),termino.replace(/es$/,"")]:[termino];const porCat=lista.filter(x=>formas.includes(normalizarBusqueda(x.c))||formas.includes(normalizarBusqueda(x.c0)));let r=buscarTexto(lista,q);for(const f of formas.slice(1)){if(r.length)break;if(f!==termino)r=buscarTexto(lista,f)}if(porCat.length){const ya=new Set(porCat);return porCat.concat(r.filter(x=>!ya.has(x)))}return r}
+function buscarTexto(lista,q){const termino=normalizarBusqueda(q);const compacto=v=>normalizarBusqueda(v).replace(/[^a-z0-9]/g,"");const nombres=lista.filter(x=>compacto(x.n).includes(compacto(q)));if(nombres.length)return nombres;return lista.filter(x=>normalizarBusqueda([x.c,x.c0,x.a,x.d,x.p,x.e,x.w,x.h,x.s].join(" ")).includes(termino))}
 function pintarVacio(n,all,q){const e=$("#empty");e.hidden=n>0;if(n>0)return;e.textContent="";if(!modo){e.append("Sin resultados en toda la web"+(q?" para «"+$("#q").value.trim()+"»":"")+". Prueba con otra palabra.");return}const ocio=modo==="ocio",otro=ocio?"negocio":"ocio",v=$("#q").value.trim();
 const k=q?buscarPrioritario(all.filter(x=>x.t===otro),q).length:0;
 e.append("Sin resultados en "+(ocio?"Ocio":"NegOcio")+(v?" para «"+v+"»":"")+". ");
@@ -876,7 +877,7 @@ function render(){
   if(x.f)info.append(el("p","f","Fuente: "+x.f));const a=el("div","acts"),m=el("a","","Ver en Google Maps");m.href=x.m&&/^https?:\/\//.test(x.m)?x.m:map(x.n+(x.c&&!x.n.toLowerCase().includes(x.c.toLowerCase())?" "+x.c:""));m.target="_blank";m.rel="noopener";a.append(m);if(x.lat){const dd=el("a","","Cómo llegar");dd.href="https://www.google.com/maps/dir/?api=1&destination="+x.lat+","+x.lon;dd.target="_blank";dd.rel="noopener";a.append(dd)}
   if(x.w&&/^https?:\/\//.test(x.w)){const w=el("a","","Web");w.href=x.w;w.target="_blank";w.rel="noopener";a.append(w)}enlacesRedes(x.r).forEach(([nombre,url])=>{const rs=el("a","",nombre);rs.href=url;rs.target="_blank";rs.rel="noopener";a.append(rs)});altContacts.filter(v=>v&&v.tipo==="w"&&v.valor).forEach(v=>{const url=String(v.valor);if(/^https?:\/\//.test(url)){const w=el("a","","Web alternativa");w.href=url;w.target="_blank";w.rel="noopener";a.append(w)}else a.append(el("span","mut","Web alternativa: "+url))});
   if(!x.seed){const d=el("button","lnk","Eliminar");d.onclick=()=>{const idx=mine.findIndex(y=>y===x||(y.id&&x.id&&y.id===x.id));if(idx>=0)mine.splice(idx,1);save();render()};a.append(d)}
-  info.append(a);c.append(info);if(posicion&&x._dist!=null){const dd=el("p","distancia","🚶 a "+textoDistancia(x._dist));sum.append(dd)}g.append(c)});
+  if(x.seed){const av=el("a","aviso-error","¿Algún dato mal? Avísanos");av.href="mailto:xiclanaon@gmail.com?subject="+encodeURIComponent("Dato a corregir: "+x.n)+"&body="+encodeURIComponent("Ficha: "+x.n+(x.a?" ("+x.a+")":"")+"\nQué dato está mal y cuál es el bueno:\n\n");a.append(av)}info.append(a);c.append(info);if(posicion&&x._dist!=null){const dd=el("p","distancia","🚶 a "+textoDistancia(x._dist));sum.append(dd)}g.append(c)});
  if(n>LIM){const b=el("button","btn s","Mostrar más ("+(n-LIM)+" restantes)");b.style.gridColumn="1/-1";b.onclick=()=>{LIM+=120;render()};g.append(b)}
  pintarVacio(n,all,q)}
 $("#q").oninput=()=>{LIM=120;render()};
@@ -967,8 +968,18 @@ async function aplicarCambios(j){
   const normalizarCategoria=v=>String(v||"").normalize("NFD").replace(/\p{Diacritic}/gu,"").toLowerCase().trim();
   items=items.map(x=>["camping","nautica"].includes(normalizarCategoria(x.c))?({...x,t:"ocio"}):x);
   // Categorías repetidas con distinto nombre: se muestran unidas en una sola etiqueta (los datos de Supabase no se tocan).
-  const CAT_UNIFICADA={"Instalación deportiva":"Instalaciones deportivas","Restauración":"Restaurante","Patrimonio y culto":"Patrimonio","Oficina de turismo":"Información turística","Servicios públicos":"Servicio público","Muebles":"Muebles y decoración","Joyería y relojería":"Joyería","Bodega y licores":"Bodega"};
-  items=items.map(x=>CAT_UNIFICADA[x.c]?({...x,c:CAT_UNIFICADA[x.c]}):x);
+  const CAT_UNIFICADA={"Instalación deportiva":"Instalaciones deportivas","Estadio":"Instalaciones deportivas","Restauración":"Restaurante","Patrimonio y culto":"Patrimonio","Oficina de turismo":"Información turística","Servicios públicos":"Servicio público","Servicios sociales":"Servicio público","Correos":"Servicio público","Emergencias":"Servicio público","Muebles":"Muebles y decoración","Decoración":"Muebles y decoración","Joyería y relojería":"Joyería","Bodega y licores":"Bodega",
+   "Ocio y cultura":"Cultura","Espacios culturales":"Cultura","Ocio infantil":"Ocio infantil y familiar","Ocio familiar":"Ocio infantil y familiar","Parques infantiles":"Ocio infantil y familiar","Plaza / paseo":"Miradores y paseos","Mirador":"Miradores y paseos","Buceo":"Náutica",
+   "Hostal":"Alojamiento","Apartamentos":"Alojamiento","Clínica":"Salud","Consulta médica":"Salud","Bienestar":"Estética","Belleza y deporte":"Estética",
+   "Taller mecánico":"Talleres y automoción","Neumáticos":"Talleres y automoción","Automoción":"Talleres y automoción","Lavado de coches":"Talleres y automoción",
+   "Frutería":"Alimentación","Pescadería":"Alimentación","Delicatessen":"Alimentación","Mercado":"Alimentación","Panadería":"Alimentación","Tienda de barrio":"Alimentación","Droguería":"Supermercado",
+   "Quiosco":"Prensa, papelería y estanco","Estanco":"Prensa, papelería y estanco","Papelería":"Prensa, papelería y estanco","Librería":"Prensa, papelería y estanco",
+   "Regalos":"Bazar, regalos y juguetes","Juguetes":"Bazar, regalos y juguetes","Bazar":"Bazar, regalos y juguetes","Ropa":"Ropa y calzado","Calzado":"Ropa y calzado","Telas":"Ropa y calzado",
+   "Telefonía":"Electrónica y telefonía","Electrónica":"Electrónica y telefonía","Bicicletas":"Tienda de deportes","Deportes":"Tienda de deportes",
+   "Abogado":"Servicios profesionales","Oficina":"Servicios profesionales","Empresa":"Servicios profesionales",
+   "Guardería":"Colegios y guarderías","Colegio":"Colegios y guarderías","Jardinería":"Ferretería y jardinería","Ferretería":"Ferretería y jardinería","Mascotas":"Veterinario y mascotas","Veterinario":"Veterinario y mascotas"};
+  // La categoría original se guarda en c0 para que el buscador la siga encontrando («panadería», «estanco»…).
+  items=items.map(x=>CAT_UNIFICADA[x.c]?({...x,c0:x.c,c:CAT_UNIFICADA[x.c]}):x);
   SEED=items;DEST={...(j.destacados||{}),...(ESPACIOS?{espacios:ESPACIOS}:{})};pintarDest();
   $("#fecha").textContent="Datos actualizados: "+fechaLegible(fechaMasReciente(j.actualizado,items))+" · "+items.length.toLocaleString("es-ES")+" fichas"+(j.deCache?" (copia guardada, comprobando novedades…)":"");
   render();
