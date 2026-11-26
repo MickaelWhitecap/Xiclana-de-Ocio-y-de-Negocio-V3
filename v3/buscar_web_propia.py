@@ -66,6 +66,22 @@ APARCADO = re.compile(r"(?i)domain (?:is )?for sale|buy this domain|dominio (?:e
                       r"en construcci[oó]n|under construction|cuenta suspendida|account suspended|index of /")
 
 
+# Una web que nombra muchas otras ciudades suele ser de una cadena o franquicia
+# (26-nov-2026: «Bubble TAI», cinco tiendas): sus teléfonos y textos no son del local.
+OTRAS_CIUDADES = ("madrid", "barcelona", "sevilla", "malaga", "granada", "cordoba", "valencia", "bilbao",
+                  "zaragoza", "murcia", "alicante", "huelva", "almeria", "jaen", "jerez", "algeciras",
+                  "san fernando", "puerto real", "el puerto de santa maria", "conil", "vejer", "tarifa",
+                  "rota", "sanlucar", "marbella", "palma", "toledo", "salamanca", "valladolid", "lisboa")
+RE_FRANQUICIA = re.compile(r"(?i)franquicia|nuestras tiendas|nuestros locales|tiendas abiertas|encuentra tu tienda|"
+                           r"nuestros restaurantes en")
+
+
+def parece_cadena(texto):
+    t = " " + rad.norm(texto) + " "
+    otras = sum(1 for c in OTRAS_CIUDADES if f" {c} " in t)
+    return otras >= 3 or bool(RE_FRANQUICIA.search(texto))
+
+
 def ahora():
     return datetime.now(timezone.utc)
 
@@ -177,6 +193,8 @@ def comprobar(ficha, url):
         return False, "no_nombra_el_negocio"
     if not lector.menciona_chiclana(texto):
         return False, "no_menciona_chiclana"
+    if parece_cadena(texto):
+        return False, "parece_cadena_o_franquicia"
     tel_ficha = set(rad.extract_phones(ficha.get("p") or ""))
     tel_web = set(lector.telefonos_de(p, jsonld))
     calle = calle_de(ficha.get("a"))
@@ -311,6 +329,9 @@ def self_test():
         assert comprobar(greda, "https://greda.com/")[1] == "no_menciona_chiclana"
     finally:
         lector.leer_pagina = orig
+    assert parece_cadena("Cinco tiendas abiertas en diferentes ciudades desde 2015")
+    assert parece_cadena("Estamos en Madrid, Sevilla, Málaga y Chiclana")
+    assert not parece_cadena("Restaurante en La Barrosa, Chiclana. Cerca de Conil.")
     print("buscar_web_propia: pruebas internas OK")
 
 
