@@ -41,7 +41,7 @@ jobs:
           set -euo pipefail
           mkdir -p _site
           cp v3/index.html v3/admin.html v3/exportar-fichas.html v3/completar-ficha.html v3/aviso-legal.html v3/privacidad.html v3/supabase-config.js _site/
-          cp v3/espacio-1-flamenca.webp v3/cabecera.webp v3/logo-on.webp _site/
+          cp v3/espacio-1-flamenca.webp v3/cabecera.webp v3/logo-on.webp v3/limite-chiclana.json _site/
           cp README.md _site/README.md
           python - <<'PY'
           import os
