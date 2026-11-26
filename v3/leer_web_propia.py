@@ -48,7 +48,8 @@ DESCRIPCION_PROHIBIDA = re.compile(
     r"mi experiencia|recomiendo|estrellas|rese[ñn]a|opini[oó]n|fondo europeo|feder|femp|ayuda de la uni[oó]n|"
     r"destinatarios|responsable del tratamiento|se vende|se alquila|\bref\.|precio|€"
 )
-CORREO_PROHIBIDO = re.compile(r"(?i)@(?:mysite|example|domain|email|tudominio|yourdomain|wix|sentry|wixpress|godaddy)\.|"
+CORREO_PROHIBIDO = re.compile(r"(?i)@(?:mysite|example|domain|email|tudominio|yourdomain|website|tuweb|tuempresa|empresa|"
+                              r"wix|sentry|wixpress|godaddy)\.|"
                               r"^(?:legal|privacidad|privacy|rgpd|lopd|dpo|protecciondatos|noreply|no-reply|webmaster)@")
 
 
@@ -210,6 +211,8 @@ def descripcion_de(pagina, jsonld, nombre):
         if not (40 <= len(d) <= 400):
             continue
         if DESCRIPCION_PROHIBIDA.search(d):
+            continue
+        if "\ufffd" in d:  # texto mal descodificado («C�diz», 26-nov-2026)
             continue
         if re.search(r"[Ѐ-ӿ֐-ۿ぀-ヿ一-鿿]", d):  # otro alfabeto
             continue
@@ -424,6 +427,12 @@ def self_test():
     p = rad.Page()
     p.feed('<a href="mailto:info@mysite.com">a</a><a href="mailto:legal@viajes.com">b</a><a href="mailto:hola@gmail.com">c</a><a href="mailto:info@viajes.com">d</a>')
     assert correos_de(p, [], "viajes.com") == ["info@viajes.com", "hola@gmail.com"]
+    p = rad.Page()
+    p.feed('<a href="mailto:info@website.com">a</a>')
+    assert correos_de(p, [], "bigmatchiclana.com") == []
+    p = rad.Page()
+    p.feed('<meta name="description" content="DON GATTO MERCATO \ufffd Bar Restaurante Italiano en Chiclana de la Frontera C\ufffddiz">')
+    assert descripcion_de(p, [], "x") == ""
     assert identifica_negocio("Venta Bonilla", "Restaurante Venta Bonilla en Chiclana", "ventabonilla.com")
     assert not identifica_negocio("Sushi Toqui", "Empresa de diseño web", "to-focus.com")
     nuevo, añ = completar({"p": "+34 956 53 08 64", "e": "", "h": "x", "d": "", "r": ""},

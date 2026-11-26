@@ -43,7 +43,7 @@ CLAVE_ESTADO = "busqueda_web_propia"
 REINTENTO_DIAS = 60
 MAX_CANDIDATOS = 24
 TLDS = ("com", "es")
-PALABRAS_ZONA = {"barrosa", "labarrosa", "sancti", "santi", "petri", "novo", "poblado", "playa", "urbanizacion",
+PALABRAS_ZONA = {"costa", "luz", "bahia", "barrosa", "labarrosa", "sancti", "santi", "petri", "novo", "poblado", "playa", "urbanizacion",
                  "urb", "centro", "poligono", "carretera", "ctra", "pinar", "cadiz", "andalucia", "spain", "espana"}
 # Palabra de la categoría que suele ir en el dominio (gredarestaurante.com, barpepe.es...).
 PREFIJOS_CATEGORIA = (
@@ -165,7 +165,10 @@ def calle_de(direccion):
     primera = rad.norm(str(direccion or "").split(",")[0])
     vacias = {"calle", "c", "avenida", "av", "avda", "plaza", "pl", "pza", "carretera", "ctra", "camino",
               "paseo", "urbanizacion", "urb", "de", "del", "la", "el", "los", "las", "s", "n", "local", "km"}
-    return [t for t in primera.split() if len(t) >= 4 and t not in vacias and not t.isdigit()]
+    # Las palabras de zona («Barrosa», «Sancti Petri»...) no cuentan: «Ctra. de la Barrosa»
+    # coincidía con cualquier web de la zona (26-nov-2026: un alquiler vacacional «Ohana»).
+    return [t for t in primera.split() if len(t) >= 4 and t not in vacias and not t.isdigit()
+            and t not in PALABRAS_ZONA and t not in lector.GENERICAS]
 
 
 def comprobar(ficha, url):
@@ -199,12 +202,12 @@ def comprobar(ficha, url):
     tel_web = set(lector.telefonos_de(p, jsonld))
     calle = calle_de(ficha.get("a"))
     pref = prefijos_categoria(ficha.get("c"), ficha.get("n"))
-    texto_norm = rad.norm(texto)
     if tel_ficha & tel_web:
         return True, "coincide_telefono"
     if calle and sum(1 for t in calle if t in palabras) >= max(1, (len(calle) + 1) // 2):
         return True, "coincide_calle"
-    if any(pp in texto_norm.replace(" ", "") for pp in pref):
+    # Palabra entera (o comienzo de palabra si es larga): «bar» no vale dentro de «Barrosa».
+    if any(w == pp or (len(pp) >= 6 and w.startswith(pp)) for pp in pref for w in palabras):
         return True, "coincide_categoria"
     return False, "nada_coincide_con_la_ficha"
 
@@ -335,7 +338,9 @@ def self_test():
     assert candidatos({"n": "Greda - Restaurante en La Barrosa", "c": "Restaurante"})[0] == "greda.com"
     assert "benitez.com" in candidatos({"n": "Bar Benitez", "c": "Bar"})
     assert "barbenitez.com" in candidatos({"n": "Bar Benitez", "c": "Bar"})
-    assert calle_de("Ctra. de la Barrosa, 109, 11139 Chiclana") == ["barrosa"]
+    assert calle_de("Ctra. de la Barrosa, 109, 11139 Chiclana") == []
+    assert calle_de("C. Ayala, 1, 11130 Chiclana") == ["ayala"]
+    assert candidatos({"n": "Costa De La Luz", "c": "Hotel"}) == []
     items = [{"id": str(i), "n": "Mercadona", "w": ""} for i in range(3)] + [
         {"id": "g", "n": "Greda", "w": "", "_xiclana_updated_at": "2026-11-23"},
         {"id": "v", "n": "Venta Bonilla", "w": "http://ventabonilla.com/"},
@@ -349,9 +354,15 @@ def self_test():
     orig = lector.leer_pagina
     try:
         lector.leer_pagina = lambda url: ((p, []), url)
-        assert comprobar(greda, "https://gredarestaurante.com/") == (True, "coincide_calle")
+        assert comprobar(greda, "https://gredarestaurante.com/") == (True, "coincide_categoria")
         assert comprobar({"n": "Greda", "c": "Restaurante", "a": "C. Real, 3"}, "https://x.com/") == (True, "coincide_categoria")
         assert comprobar({"n": "Picasso", "c": "Tienda", "a": "C. Real, 3"}, "https://x.com/")[1] == "no_nombra_el_negocio"
+        o = rad.Page()
+        o.feed("<h1>Ohana Chiclana</h1><p>Alquiler vacacional en Chiclana de la Frontera. Casa con piscina "
+               "a 1,7 km de la Playa La Barrosa.</p>")
+        lector.leer_pagina = lambda url: ((o, []), url)
+        assert comprobar({"n": "Chiringuito Ohana La Barrosa", "c": "Restaurante",
+                          "a": "Ctra. de la Barrosa, 11139 Chiclana"}, "https://ohanachiclana.com/")[0] is False
         q = rad.Page()
         q.feed("<h1>Greda</h1><p>Restaurante Greda en Madrid, cocina de producto y vinos de la tierra.</p>")
         lector.leer_pagina = lambda url: ((q, []), url)
