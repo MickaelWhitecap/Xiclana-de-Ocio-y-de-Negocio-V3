@@ -196,7 +196,11 @@ def comprobar(ficha, url):
         return False, "no_nombra_el_negocio"
     if not lector.menciona_chiclana(texto):
         return False, "no_menciona_chiclana"
-    if parece_cadena(texto):
+    # Una web que se presenta (título o descripción) como un local de Chiclana no es la de
+    # una franquicia aunque su grupo tenga otros locales (26-nov-2026: Greda, Grupo Feduchy).
+    portada_chiclana = lector.menciona_chiclana(" ".join(p.title_parts) + " " + p.meta.get("description", "")
+                                                + " " + p.meta.get("og:description", ""))
+    if parece_cadena(texto) and not portada_chiclana:
         return False, "parece_cadena_o_franquicia"
     tel_ficha = set(rad.extract_phones(ficha.get("p") or ""))
     tel_web = set(lector.telefonos_de(p, jsonld))
@@ -207,7 +211,9 @@ def comprobar(ficha, url):
     if calle and sum(1 for t in calle if t in palabras) >= max(1, (len(calle) + 1) // 2):
         return True, "coincide_calle"
     # Palabra entera (o comienzo de palabra si es larga): «bar» no vale dentro de «Barrosa».
-    if any(w == pp or (len(pp) >= 6 and w.startswith(pp)) for pp in pref for w in palabras):
+    # También vale la palabra de tipo que lleva el propio nombre («Erizo Gastrobar»).
+    del_nombre = [t for t in tokens(ficha.get("n")) if len(t) >= 5 and t not in propias(ficha.get("n"))]
+    if any(w == pp or (len(pp) >= 6 and w.startswith(pp)) for pp in pref + del_nombre for w in palabras):
         return True, "coincide_categoria"
     return False, "nada_coincide_con_la_ficha"
 
@@ -243,7 +249,6 @@ def cadenas(items):
 
 def pendientes(items, intentos, hoy=None):
     hoy = hoy or ahora()
-    limite = hoy - timedelta(days=REINTENTO_DIAS)
     de_cadena = cadenas(items)
     cola = []
     for item in items:
@@ -252,7 +257,9 @@ def pendientes(items, intentos, hoy=None):
         previo = intentos.get(str(item["id"]))
         if isinstance(previo, dict):
             try:
-                if datetime.fromisoformat(str(previo.get("fecha_utc"))) >= limite:
+                # Si alguna web probable no abrió (caída o lenta), se reintenta a la semana.
+                dias = 7 if previo.get("alguna_no_abrio") else REINTENTO_DIAS
+                if datetime.fromisoformat(str(previo.get("fecha_utc"))) >= hoy - timedelta(days=dias):
                     continue
             except ValueError:
                 pass
@@ -347,6 +354,7 @@ def self_test():
         {"id": "x", "n": "Ya probada", "w": ""}]
     hoy = datetime(2026, 11, 26, tzinfo=timezone.utc)
     assert pendientes(items, {"x": {"fecha_utc": "2026-11-20T00:00:00+00:00"}}, hoy) == ["g"]
+    assert pendientes(items, {"x": {"fecha_utc": "2026-11-18T00:00:00+00:00", "alguna_no_abrio": True}}, hoy) == ["g", "x"]
     assert contador([{"a": "x", "p": "1"}, {}])["llenos"] == 2
     p = rad.Page()
     p.feed("<title>Greda</title><h1>Greda</h1><p>Cocina de producto en La Barrosa, Chiclana de la Frontera. "
@@ -367,6 +375,15 @@ def self_test():
         q.feed("<h1>Greda</h1><p>Restaurante Greda en Madrid, cocina de producto y vinos de la tierra.</p>")
         lector.leer_pagina = lambda url: ((q, []), url)
         assert comprobar(greda, "https://greda.com/")[1] == "no_menciona_chiclana"
+        e = rad.Page()
+        e.feed("<title>Erizo</title><h1>Erizo Gastrobar</h1><p>Tapas creativas en Chiclana.</p>")
+        lector.leer_pagina = lambda url: ((e, []), url)
+        assert comprobar({"n": "Erizo Gastrobar", "c": "Bar", "a": "Av. Real, 3"}, "https://x.com/") == (True, "coincide_categoria")
+        g = rad.Page()
+        g.feed('<title>Greda</title><meta name="description" content="Greda es un restaurante en La Barrosa, Chiclana.">'
+               "<p>Greda. Nuestros restaurantes en Conil, Vejer y Chiclana.</p>")
+        lector.leer_pagina = lambda url: ((g, []), url)
+        assert comprobar(greda, "https://gredarestaurante.com/")[0] is True
     finally:
         lector.leer_pagina = orig
     assert parece_cadena("Cinco tiendas abiertas en diferentes ciudades desde 2015")
@@ -465,7 +482,8 @@ def main():
         resumen["motivos"][motivo.split(":")[0]] += 1
         resumen["fichas_probadas"] += 1
         resumen["detalle"].append(fila)
-        intentos[ident] = {"fecha_utc": ahora().isoformat(), "motivo": motivo, "web": fila.get("web", "")}
+        intentos[ident] = {"fecha_utc": ahora().isoformat(), "motivo": motivo, "web": fila.get("web", ""),
+                           "alguna_no_abrio": not fila.get("web") and any(":no_abre" in r for r in fila.get("rechazos", []))}
         print(json.dumps({"n": numero, **fila}, ensure_ascii=False), flush=True)
         if not args.simular and numero % 100 == 0:  # menos guardados = menos tráfico
             guardar_intentos(catalog, intentos)
