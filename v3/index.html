@@ -1017,9 +1017,24 @@ async function aplicarCambios(j){
   const total=Number(String(response.headers.get("content-range")||"").split("/")[1]);
   return {page,total:Number.isFinite(total)?total:null};
  };
- // Primera página, metadatos y espacios publicitarios a la vez.
+ // Metadatos del catálogo (menos de 1 KB): se piden siempre.
  const ajustes=fetch(base+"site_settings?select=id,public_data&id=eq.catalogo",{headers,cache:"no-store"}).then(r=>{if(!r.ok)throw new Error("No se pudieron cargar los datos generales del catálogo.");return r.json()});
  ajustes.catch(()=>{});
+ // Ahorro de tráfico: Supabase calcula una «huella» de las fichas publicadas (unos 40 bytes).
+ // Si coincide con la de la copia guardada en este navegador, no se vuelven a descargar las ~3.000 fichas (~1,2 MB).
+ // Si la función no existe o falla, se descarga todo como antes.
+ const huellaP=fetch(base+"rpc/xiclana_huella_catalogo",{method:"POST",headers:{...headers,"Content-Type":"application/json"},body:"{}",cache:"no-store"})
+  .then(r=>r.ok?r.json():null).then(h=>typeof h==="string"&&h?h:null).catch(()=>null);
+ const guardado=leerCatalogoGuardado();
+ // Sin copia guardada no se espera a la huella: la descarga empieza ya.
+ let huella=guardado?.huella?await huellaP:null;
+ if(huella&&guardado.huella===huella){
+  const publico=((await ajustes)?.[0]?.public_data)||{};
+  const catalogo={...guardado,actualizado:publico.actualizado,destacados:publico.destacados||{},huella};
+  await aplicarCambios(catalogo);
+  guardarCatalogo(catalogo);
+  return;
+ }
  const primera=await pagina(0,true);
  const rows=[...primera.page];
  if(primera.page.length===pageSize){
@@ -1032,9 +1047,10 @@ async function aplicarCambios(j){
   }
  }
  const settings=await ajustes;
+ if(!huella)huella=await huellaP;
  const items=rows.map(row=>{const x={id:row.id,verified_at:row.verified_at,seed:1};CAMPOS_PUBLICOS.forEach(k=>{if(row[k]!==null&&row[k]!==undefined)x[k]=row[k]});return x});
  const publico=(settings?.[0]?.public_data)||{};
- const catalogo={actualizado:publico.actualizado,destacados:publico.destacados||{},items};
+ const catalogo={actualizado:publico.actualizado,destacados:publico.destacados||{},items,huella};
  await aplicarCambios(catalogo);
  guardarCatalogo(catalogo);
  }
