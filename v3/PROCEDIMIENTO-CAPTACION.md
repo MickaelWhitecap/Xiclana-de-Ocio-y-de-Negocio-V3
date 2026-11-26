@@ -58,6 +58,8 @@ misma pasada, y la fase 4 relee lo que haya quedado.
 | 23-nov | Greda (alta) | Marcado «dudoso» por parecerse a «Farmacia La Barrosa»; nadie revisó los dudosos | Palabras de zona no cuentan; familias de negocio; **los dudosos se revisan siempre** |
 | 26-nov | Greda (datos) | Dado de alta sin web; la fase 4 solo trabaja con fichas que ya tienen web | Fase 3 (`buscar_web_propia.py`): toda ficha sin web se busca y se reintenta a los 60 días |
 | 26-nov | Bubble TAI | Web de una franquicia aceptada como propia | `parece_cadena`: webs que nombran muchas ciudades o franquicias se rechazan |
+| 26-nov | Ohana, «Costa de la Luz» | Un alquiler vacacional y una villa aceptados como restaurante y hotel: la «calle» coincidía solo por «Barrosa» y «bar» casaba dentro de «Barrosa» | Las palabras de zona no cuentan como calle; la categoría debe ser palabra entera; nombres solo de zona no se buscan |
+| 26-nov | BigMat, Don Gatto | Correo de plantilla (`info@website.com`) y descripción mal descodificada | Correos de plantilla y textos con «�» se descartan |
 
 ## Comprobación de un sitio notorio
 
