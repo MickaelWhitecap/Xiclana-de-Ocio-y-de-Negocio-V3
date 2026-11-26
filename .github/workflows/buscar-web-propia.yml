@@ -1,0 +1,103 @@
+name: Buscar la web propia de las fichas sin web
+
+# Caso Greda (26-nov-2026): la lectura de webs solo trabaja con fichas que ya
+# tienen web; las altas del detector y de otras listas entran sin web y nadie
+# se la buscaba. Este flujo prueba dominios probables (gratis: DNS + portada),
+# acepta solo webs que nombran el negocio, Chiclana y algo concreto de la ficha,
+# y en la misma pasada lee la web para rellenar sus huecos. Solo rellena vacíos.
+on:
+  schedule:
+    - cron: "53 3 * * 1,4"
+      timezone: "Europe/Madrid"
+  push:
+    branches: ["claude/project-thread-3ge78r"]
+    paths: ["v3/buscar_web_propia.py", "v3/leer_web_propia.py", "v3/ids_prueba_buscar_web.txt", ".github/workflows/buscar-web-propia.yml"]
+  workflow_dispatch:
+    inputs:
+      ids:
+        description: "IDs concretos separados por comas (vacío = todas las fichas sin web pendientes)"
+        required: false
+        default: ""
+        type: string
+      simular:
+        description: "Solo buscar y mostrar lo que se añadiría, sin guardar nada"
+        required: false
+        default: false
+        type: boolean
+      solo_contador:
+        description: "Solo medir el contador de completitud"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  # Las simulaciones de la rama de trabajo no esperan a la tanda real ni al revés.
+  group: buscar-web-propia-${{ github.event_name == 'push' && 'simulacion' || 'real' }}
+  cancel-in-progress: false
+
+jobs:
+  buscar:
+    name: Buscar webs y completar fichas
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Pruebas internas
+        run: python v3/buscar_web_propia.py --self-test
+      - name: Buscar webs y completar fichas en Supabase
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          IDS: ${{ inputs.ids }}
+          EVENTO: ${{ github.event_name }}
+          # Una subida a la rama de trabajo solo simula: nunca guarda nada.
+          SIMULAR: ${{ (github.event_name == 'push' || inputs.simular) && '--simular' || '' }}
+          CONTADOR: ${{ inputs.solo_contador && '--solo-contador' || '' }}
+        run: |
+          # En la rama de trabajo se simula solo con las webs encontradas en la revisión
+          # del 26-nov-2026 (comprobar que los filtros nuevos quitan las equivocadas).
+          if [ "$EVENTO" = "push" ]; then IDS=$(cat v3/ids_prueba_buscar_web.txt); fi
+          python v3/buscar_web_propia.py --minutos 300 --ids "$IDS" $SIMULAR $CONTADOR
+      - name: Resumen
+        if: always()
+        run: |
+          if [ -f buscar-web-propia-result.json ]; then
+            python - <<'PY'
+          import json, os
+          r = json.load(open("buscar-web-propia-result.json", encoding="utf-8"))
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
+              f.write("## Búsqueda de webs propias\n\n")
+              for k in ("contador_antes", "activas_sin_web", "pendientes_al_empezar", "fichas_probadas", "webs_encontradas",
+                        "fichas_mejoradas", "datos_anadidos", "motivos", "contador_despues", "pendientes_al_terminar"):
+                  f.write(f"- **{k}:** {r.get(k)}\n")
+              f.write("\n### Webs encontradas\n\n")
+              for d in r.get("detalle", []):
+                  if d.get("web"):
+                      f.write(f"- {d.get('nombre')} → {d.get('web')} ({d.get('motivo')}) {d.get('encontrado', {})}\n")
+          PY
+          fi
+      - name: Encadenar la siguiente tanda si quedan pendientes
+        if: success() && github.event_name != 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          status=$(python -c 'import json; print(json.load(open("buscar-web-propia-result.json")).get("status",""))')
+          if [ "$status" = "more" ]; then
+            gh workflow run buscar-web-propia.yml --ref main
+          fi
+      - name: Guardar informe
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: buscar-web-propia-${{ github.run_id }}
+          path: buscar-web-propia-result.json
+          if-no-files-found: ignore
+          retention-days: 30
