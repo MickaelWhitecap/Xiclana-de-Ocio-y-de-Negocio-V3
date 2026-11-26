@@ -708,6 +708,7 @@ html.ficha-abierta,html.ficha-abierta body{overflow:hidden!important}
 .bar #q{flex:1 1 220px;min-width:0}
 .chip.herramienta{flex:0 0 auto;cursor:pointer}
 .chips.radio{margin:.2rem 0 .4rem}
+#radio[hidden],#mapa[hidden],#cerca-aviso[hidden]{display:none!important}
 .aviso-cerca{color:var(--mut);margin:.2rem 0 .8rem;font-size:.92rem}
 #mapa{height:min(65vh,560px);border-radius:14px;border:1px solid var(--bd);margin:0 0 1rem;z-index:1}
 .popup-mapa{font-size:.9rem;line-height:1.45}
@@ -889,11 +890,14 @@ function render(){
  pintarVacio(n,all,q)}
 $("#q").oninput=()=>{LIM=120;render()};
 $("#cerca").onclick=()=>{const b=$("#cerca"),aviso=$("#cerca-aviso");if(posicion){posicion=null;radioKm=0;$("#radio").hidden=true;marcarRadio();b.classList.remove("on");b.setAttribute("aria-pressed","false");aviso.hidden=true;render();return}
+ activarCerca()};
+// Pide la ubicación y, si se consigue, ordena por cercanía. «despues» se ejecuta solo si hay posición.
+function activarCerca(despues){const b=$("#cerca"),aviso=$("#cerca-aviso");
  if(!navigator.geolocation){aviso.hidden=false;aviso.textContent="Tu navegador no permite saber dónde estás.";return}
  aviso.hidden=false;aviso.textContent="Buscando tu posición…";
- navigator.geolocation.getCurrentPosition(p=>{posicion={lat:p.coords.latitude,lon:p.coords.longitude};b.classList.add("on");b.setAttribute("aria-pressed","true");const lejos=distanciaKm(posicion,{lat:36.4167,lon:-6.15})>40;$("#radio").hidden=false;aviso.textContent=lejos?"Parece que no estás en Chiclana: las distancias serán grandes.":"Ordenado por cercanía. Las fichas sin ubicación van al final.";LIM=120;render()},()=>{aviso.textContent="No hemos podido saber dónde estás. Revisa que el navegador tenga permiso de ubicación."},{enableHighAccuracy:false,timeout:10000,maximumAge:300000})};
+ navigator.geolocation.getCurrentPosition(p=>{posicion={lat:p.coords.latitude,lon:p.coords.longitude};b.classList.add("on");b.setAttribute("aria-pressed","true");const lejos=distanciaKm(posicion,{lat:36.4167,lon:-6.15})>40;$("#radio").hidden=false;aviso.textContent=lejos?"Parece que no estás en Chiclana: las distancias serán grandes.":"Ordenado por cercanía. Las fichas sin ubicación van al final.";LIM=120;if(despues)despues();render()},()=>{posicion=null;radioKm=0;marcarRadio();$("#radio").hidden=true;aviso.textContent="No hemos podido saber dónde estás. Revisa que el navegador tenga permiso de ubicación.";render()},{enableHighAccuracy:false,timeout:10000,maximumAge:300000})}
 function marcarRadio(){document.querySelectorAll("#radio .chip").forEach(c=>{const on=Number(c.dataset.r)===radioKm;c.classList.toggle("on",on);c.textContent=(on?"✓ ":"")+(c.dataset.r==="0"?"Sin límite":c.dataset.r==="0.5"?"500 m":c.dataset.r+" km")})}
-document.querySelectorAll("#radio .chip").forEach(c=>c.onclick=()=>{radioKm=Number(c.dataset.r);marcarRadio();LIM=120;render()});
+document.querySelectorAll("#radio .chip").forEach(c=>c.onclick=()=>{const r=Number(c.dataset.r);if(!posicion){activarCerca(()=>{radioKm=r;marcarRadio()});return}radioKm=r;marcarRadio();LIM=120;render()});
 $("#ver-mapa").onclick=()=>{const b=$("#ver-mapa"),m=$("#mapa"),abrir=m.hidden;m.hidden=!abrir;b.classList.toggle("on",abrir);b.setAttribute("aria-pressed",String(abrir));b.textContent=abrir?"☰ Lista":"🗺️ Mapa";if(abrir){render();m.scrollIntoView({behavior:"smooth",block:"start"})}};
 const MN=CATS,MO=["Restaurantes","Bares y tapas","Cafeterías","Heladerías","Playas","Chiringuitos","Museos","Parques","Rutas de senderismo","Campos de golf","Cines","Discotecas","Clubes náuticos","Parques infantiles"];
 function mapas(){const m=$("#maps");m.textContent="";$("#mt").textContent=modo==="ocio"?"Más ocio, en el mapa":"Todos los negocios, en el mapa";(modo==="ocio"?MO:MN).forEach(c=>{const a=el("a","chip",c);a.href=map(c);a.target="_blank";a.rel="noopener";a.style.textDecoration="none";m.append(a)})}
