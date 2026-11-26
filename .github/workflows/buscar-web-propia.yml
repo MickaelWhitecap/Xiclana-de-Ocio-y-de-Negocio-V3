@@ -11,7 +11,7 @@ on:
       timezone: "Europe/Madrid"
   push:
     branches: ["claude/project-thread-3ge78r"]
-    paths: ["v3/buscar_web_propia.py", "v3/ids_prueba_buscar_web.txt", ".github/workflows/buscar-web-propia.yml"]
+    paths: ["v3/buscar_web_propia.py", ".github/workflows/buscar-web-propia.yml"]
   workflow_dispatch:
     inputs:
       ids:
@@ -62,8 +62,11 @@ jobs:
           SIMULAR: ${{ (github.event_name == 'push' || inputs.simular) && '--simular' || '' }}
           CONTADOR: ${{ inputs.solo_contador && '--solo-contador' || '' }}
         run: |
-          # En la rama de trabajo se simula con las 31 altas del caso Greda (23-nov-2026).
-          if [ "$EVENTO" = "push" ]; then IDS=$(cat v3/ids_prueba_buscar_web.txt); fi
+          # En la rama de trabajo: diagnóstico de webs que no se pudieron leer y
+          # simulación sobre todas las fichas sin web (sin guardar nada).
+          if [ "$EVENTO" = "push" ]; then
+            python v3/buscar_web_propia.py --diagnosticar 60 | grep -v '^DIAGNOSTICO' || true
+          fi
           python v3/buscar_web_propia.py --minutos 300 --ids "$IDS" $SIMULAR $CONTADOR
       - name: Resumen
         if: always()

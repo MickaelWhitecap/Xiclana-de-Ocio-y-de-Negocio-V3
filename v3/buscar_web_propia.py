@@ -297,6 +297,35 @@ def guardar_web(catalog, base, key, ident, web, motivo):
     return bool(catalog.affected_rows(res, cab))
 
 
+def diagnosticar(fichas, limite):
+    """Para webs que la lectura no pudo abrir: ¿robots.txt, cortafuegos, caída? Solo lee."""
+    import urllib.error, urllib.request
+    filas = []
+    for f in fichas[:limite]:
+        url = str(f.get("w") or "")
+        partes = urllib.parse.urlsplit(url)
+        origen = f"{partes.scheme}://{partes.netloc}"
+        fila = {"id": f.get("id"), "web": url}
+        # Siempre con nuestro nombre de robot: si una web nos bloquea, se respeta.
+        for nombre, destino, agente in (("robots", origen + "/robots.txt", rad.UA), ("pagina", url, rad.UA)):
+            try:
+                req = urllib.request.Request(destino, headers={"User-Agent": agente, "Accept": "text/html,*/*"})
+                with urllib.request.urlopen(req, timeout=15) as r:
+                    fila[nombre] = r.status
+            except urllib.error.HTTPError as exc:
+                fila[nombre] = exc.code
+            except Exception as exc:
+                fila[nombre] = type(exc).__name__ + ":" + str(exc)[:60]
+        try:
+            rad.CACHE_ROBOTS.clear()
+            fila["permitido"] = rad.allowed(url)
+        except Exception as exc:
+            fila["permitido"] = "error:" + type(exc).__name__
+        filas.append(fila)
+        print("DIAGNOSTICO " + json.dumps(fila, ensure_ascii=False), flush=True)
+    return filas
+
+
 def self_test():
     greda = {"n": "Greda", "c": "Restaurante", "a": "Ctra. de la Barrosa, 109, 11139 Chiclana de la Frontera, Cádiz"}
     c = candidatos(greda)
@@ -343,6 +372,8 @@ def main():
     parser.add_argument("--ids", default="", help="IDs concretos separados por comas.")
     parser.add_argument("--simular", action="store_true", help="Busca y comprueba, pero no guarda nada.")
     parser.add_argument("--solo-contador", action="store_true", help="Solo mide el contador de completitud.")
+    parser.add_argument("--diagnosticar", type=int, default=0,
+                        help="Diagnostica N webs que la lectura normal no pudo abrir (solo lee) y termina.")
     args = parser.parse_args()
     if args.self_test:
         self_test()
@@ -360,6 +391,19 @@ def main():
     resumen = {"contador_antes": contador(todas)}
     activas = rastreo.activas(data)
     resumen["activas_sin_web"] = sum(1 for x in activas if sin_web(x))
+    if args.diagnosticar:
+        lecturas = data.get("lectura_web_propia") if isinstance(data.get("lectura_web_propia"), dict) else {}
+        fallidas = [x for x in activas if (lecturas.get(str(x["id"])) or {}).get("motivo") in
+                    ("web_no_accesible_o_robots", "error")]
+        resumen["webs_no_accesibles"] = len(fallidas)
+        filas = diagnosticar(fallidas, args.diagnosticar)
+        resumen["diagnostico"] = {
+            "robots": dict(Counter(str(f["robots"]) for f in filas)),
+            "pagina": dict(Counter(str(f["pagina"])[:30] for f in filas)),
+            "permitido_ahora": dict(Counter(str(f["permitido"]) for f in filas))}
+        pathlib.Path("buscar-web-propia-result.json").write_text(json.dumps(resumen, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(json.dumps(resumen, ensure_ascii=False), flush=True)
+        return
     if args.solo_contador:
         pathlib.Path("buscar-web-propia-result.json").write_text(json.dumps(resumen, ensure_ascii=False, indent=2), encoding="utf-8")
         print(json.dumps(resumen, ensure_ascii=False), flush=True)
@@ -427,6 +471,10 @@ def main():
     resumen["datos_anadidos"] = dict(resumen["datos_anadidos"])
     resumen["motivos"] = dict(resumen["motivos"])
     pathlib.Path("buscar-web-propia-result.json").write_text(json.dumps(resumen, ensure_ascii=False, indent=2), encoding="utf-8")
+    for d in resumen["detalle"]:  # lista corta para revisar a mano
+        if d.get("web"):
+            print("ENCONTRADA | " + " | ".join(str(x) for x in (d["id"], d.get("nombre"), d.get("categoria"), d["web"],
+                  d.get("motivo"), json.dumps(d.get("encontrado", {}), ensure_ascii=False)[:300])), flush=True)
     print(json.dumps({k: v for k, v in resumen.items() if k != "detalle"}, ensure_ascii=False), flush=True)
 
 
