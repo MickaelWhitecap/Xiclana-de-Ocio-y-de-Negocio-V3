@@ -11,7 +11,7 @@ on:
       timezone: "Europe/Madrid"
   push:
     branches: ["claude/project-thread-3ge78r"]
-    paths: ["v3/buscar_web_propia.py", ".github/workflows/buscar-web-propia.yml"]
+    paths: ["v3/buscar_web_propia.py", "v3/ids_prueba_buscar_web.txt", ".github/workflows/buscar-web-propia.yml"]
   workflow_dispatch:
     inputs:
       ids:
@@ -35,7 +35,8 @@ permissions:
   actions: write
 
 concurrency:
-  group: buscar-web-propia
+  # Las simulaciones de la rama de trabajo no esperan a la tanda real ni al revés.
+  group: buscar-web-propia-${{ github.event_name == 'push' && 'simulacion' || 'real' }}
   cancel-in-progress: false
 
 jobs:
@@ -56,10 +57,14 @@ jobs:
         env:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
           IDS: ${{ inputs.ids }}
+          EVENTO: ${{ github.event_name }}
           # Una subida a la rama de trabajo solo simula: nunca guarda nada.
           SIMULAR: ${{ (github.event_name == 'push' || inputs.simular) && '--simular' || '' }}
           CONTADOR: ${{ inputs.solo_contador && '--solo-contador' || '' }}
-        run: python v3/buscar_web_propia.py --minutos 300 --ids "$IDS" $SIMULAR $CONTADOR
+        run: |
+          # En la rama de trabajo se simula con las 31 altas del caso Greda (23-nov-2026).
+          if [ "$EVENTO" = "push" ]; then IDS=$(cat v3/ids_prueba_buscar_web.txt); fi
+          python v3/buscar_web_propia.py --minutos 300 --ids "$IDS" $SIMULAR $CONTADOR
       - name: Resumen
         if: always()
         run: |
