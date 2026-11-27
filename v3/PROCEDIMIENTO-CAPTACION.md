@@ -43,6 +43,10 @@ misma pasada, y la fase 4 relee lo que haya quedado.
    `Xiclana-RAD`. Si una web lo bloquea, no se esquiva.
 8. **Solo la V3** (repo V3 y Supabase `pewfqucupmbkgamwvaic`).
 9. **Medir antes y después** con el contador de completitud en cada tanda.
+10. **Lo que no está claro va a «Datos dudosos»**, no se verifica. Si la web del
+    negocio se presenta en otro municipio (título o descripción) y no en Chiclana,
+    se guardan sus datos pero la ficha queda en «Datos dudosos» (Administración >
+    Revisarlas) hasta que una persona confirme dónde está.
 
 ## Lecciones (fallos reales y su control)
 
@@ -60,6 +64,7 @@ misma pasada, y la fase 4 relee lo que haya quedado.
 | 26-nov | Bubble TAI | Web de una franquicia aceptada como propia | `parece_cadena`: webs que nombran muchas ciudades o franquicias se rechazan |
 | 26-nov | Ohana, «Costa de la Luz» | Un alquiler vacacional y una villa aceptados como restaurante y hotel: la «calle» coincidía solo por «Barrosa» y «bar» casaba dentro de «Barrosa» | Las palabras de zona no cuentan como calle; la categoría debe ser palabra entera; nombres solo de zona no se buscan |
 | 26-nov | BigMat, Don Gatto | Correo de plantilla (`info@website.com`) y descripción mal descodificada | Correos de plantilla y textos con «�» se descartan |
+| 27-nov | Centollo Dive | La web coincidía por teléfono y nombraba Chiclana, pero se presenta «en Tarifa»; la ficha quedó verificada | Regla 10: `otro_municipio` en `leer_web_propia.py`; la ficha pasa a «Datos dudosos» (fases 3 y 4) |
 
 ## Comprobación de un sitio notorio
 

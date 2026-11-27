@@ -82,8 +82,10 @@ def guardar_intentos(intentos):
         catalog.sync_metadata(path, [CLAVE_ESTADO])
 
 
-def aplicar(base, key, ident, campos, paginas):
-    """Lee la fila actual, rellena solo huecos y guarda con control de concurrencia."""
+def aplicar(base, key, ident, campos, paginas, otro_municipio=""):
+    """Lee la fila actual, rellena solo huecos y guarda con control de concurrencia.
+
+    Si la web se presenta en otro municipio, la ficha pasa a «Datos dudosos» en vez de verificarse."""
     filas, _ = catalog.request(base + "/listings?" + urllib.parse.urlencode(
         {"select": "id,data,is_published,is_deleted,updated_at", "id": "eq." + ident}), key)
     if not filas:
@@ -94,7 +96,8 @@ def aplicar(base, key, ident, campos, paginas):
     datos = fila.get("data") or {}
     nuevo, añadidos = lector.completar(datos, campos)
     verificada = str(datos.get("estado_verificacion") or "").lower() == "verificada"
-    if not añadidos and verificada:
+    dudosa = str(datos.get("estado_verificacion") or "").lower() == "insuficiente"
+    if not añadidos and (verificada and not otro_municipio or dudosa):
         return [], "sin_datos_nuevos"
     hoy = ahora().date().isoformat()
     fuentes = list(nuevo.get("fuentes_datos") or []) if isinstance(nuevo.get("fuentes_datos"), list) else []
@@ -106,7 +109,13 @@ def aplicar(base, key, ident, campos, paginas):
         fuentes[-1]["nota"] = "La web propia confirma la ficha aunque no aporta datos nuevos"
     nuevo["fuentes_datos"] = fuentes
     cuerpo = {"data": nuevo, "updated_at": ahora().isoformat()}
-    if not verificada:
+    if otro_municipio and not dudosa:
+        # 27-nov-2026 (Centollo Dive): la web dice «en Tarifa». Se guarda lo leído, pero la
+        # ficha queda en «Datos dudosos» hasta que una persona confirme dónde está.
+        fuentes[-1]["aviso"] = f"La web se presenta en {otro_municipio.title()}, no en Chiclana: revisar"
+        nuevo["estado_verificacion"] = "insuficiente"
+        nuevo["estado_anterior"] = datos.get("estado_verificacion") or "pendiente"
+    elif not verificada and not dudosa:
         # La propia web del negocio lo nombra y lo sitúa en Chiclana.
         nuevo["estado_verificacion"] = "verificada"
         nuevo["f"] = paginas[0] if paginas else nuevo.get("w")
@@ -117,6 +126,8 @@ def aplicar(base, key, ident, campos, paginas):
                                      payload=cuerpo, headers=catalog.PREFER_MINIMAL)
     if not catalog.affected_rows(res, cabeceras):
         return [], "cambio_concurrente"
+    if otro_municipio and not dudosa:
+        return añadidos, "a_datos_dudosos_otro_municipio"
     return añadidos, "completada" if añadidos else "verificada_sin_datos_nuevos"
 
 
@@ -139,6 +150,26 @@ def self_test():
     }
     assert pendientes(data, intentos, hoy) == ["a", "g", "h"], pendientes(data, intentos, hoy)
     assert dominios_compartidos([{"w": "https://www.repsol.es/a"}, {"w": "https://repsol.es/b"}, {"w": "https://repsol.es/c"}, {"w": "https://x.es"}]) == {"repsol.es"}
+    # Centollo Dive (27-nov-2026): web «en Tarifa» -> la ficha va a «Datos dudosos», no se verifica.
+    enviado = {}
+    def falso(url, key, method="GET", payload=None, headers=None):
+        if method == "GET":
+            return [{"id": "cd", "is_published": True, "is_deleted": False, "updated_at": "2026-11-26",
+                     "data": {"n": "Centollo Dive", "estado_verificacion": "verificada"}}], {}
+        enviado.update(payload)
+        return None, {"content-range": "*/1"}
+    original, original_af = catalog.request, catalog.affected_rows
+    catalog.request, catalog.affected_rows = falso, (lambda r, c: 1)
+    try:
+        añadidos, estado = aplicar("u", "k", "cd", {"e": "a@b.es"}, ["https://centollodive.es/"], "tarifa")
+        assert estado == "a_datos_dudosos_otro_municipio" and añadidos == ["e"], (añadidos, estado)
+        assert enviado["data"]["estado_verificacion"] == "insuficiente"
+        assert enviado["data"]["estado_anterior"] == "verificada" and "verified_at" not in enviado
+        enviado.clear()
+        añadidos, estado = aplicar("u", "k", "cd", {"e": "a@b.es"}, ["https://centollodive.es/"])
+        assert enviado["data"]["estado_verificacion"] == "verificada", enviado
+    finally:
+        catalog.request, catalog.affected_rows = original, original_af
     lector.self_test()
     print("rastreo_fichas_con_web: pruebas internas OK")
 
@@ -182,8 +213,11 @@ def main():
             leido = lector.leer_web(ficha, compartidos)
             fila["motivo"] = leido["motivo"]
             fila["encontrado"] = {k: v for k, v in leido["campos"].items() if v}
+            if leido.get("otro_municipio"):
+                fila["otro_municipio"] = leido["otro_municipio"]
             if leido["campos"] and not args.simular:
-                añadidos, estado_ficha = aplicar(base, key, ident, leido["campos"], leido["paginas"])
+                añadidos, estado_ficha = aplicar(base, key, ident, leido["campos"], leido["paginas"],
+                                                 leido.get("otro_municipio", ""))
                 fila["motivo"] = estado_ficha if leido["motivo"] == "leida" else leido["motivo"]
                 fila["añadidos"] = añadidos
                 if añadidos:

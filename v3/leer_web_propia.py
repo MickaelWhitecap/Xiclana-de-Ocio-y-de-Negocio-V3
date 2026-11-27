@@ -109,6 +109,21 @@ def menciona_chiclana(texto):
     return bool(re.search(r"\b(chiclana|11130|11138|11139|sancti petri|novo sancti)\b", t))
 
 
+# Municipios cercanos o grandes que, si la web se presenta con ellos y no con Chiclana,
+# hacen dudar de que el local esté aquí (27-nov-2026: Centollo Dive, «en Tarifa»).
+OTROS_MUNICIPIOS = ("tarifa", "conil", "vejer", "barbate", "zahara", "jerez", "cadiz capital", "san fernando",
+                    "puerto real", "el puerto de santa maria", "rota", "sanlucar", "algeciras", "la linea",
+                    "medina sidonia", "arcos", "sevilla", "malaga", "huelva", "marbella", "madrid")
+
+
+def otro_municipio(texto):
+    """Devuelve el otro municipio con el que se presenta la web, si no nombra también Chiclana."""
+    if menciona_chiclana(texto):
+        return ""
+    t = " " + rad.norm(texto) + " "
+    return next((m for m in OTROS_MUNICIPIOS if f" {m} " in t), "")
+
+
 def telefono_valido(numero):
     n = rad.normalize_phone(numero)
     if not n or n[:3] in ("900", "901", "902", "905", "803", "806", "807"):
@@ -358,7 +373,11 @@ def leer_web(ficha, dominios_compartidos=()):
         "d": descripcion_de(p0, j0, nombre),
         "r": elegir_redes(redes, nombre, host),
     }
-    return {"campos": campos, "motivo": "leida", "paginas": [u for u, _ in paginas]}
+    # La portada (título y descripción) dice dónde está el local; si dice otro municipio y no
+    # Chiclana, la ficha va a «Datos dudosos» para que una persona la revise.
+    presentacion = " ".join(p0.title_parts) + " " + " ".join(p0.meta.get(k, "") for k in ("description", "og:description", "og:title"))
+    return {"campos": campos, "motivo": "leida", "paginas": [u for u, _ in paginas],
+            "otro_municipio": otro_municipio(presentacion)}
 
 
 def completar(ficha_data, campos):
@@ -384,6 +403,11 @@ def completar(ficha_data, campos):
 
 
 def self_test():
+    # Centollo Dive (27-nov-2026): «… con Centollo Dive en Tarifa, Cádiz» -> a «Datos dudosos».
+    assert otro_municipio("Descubre el fondo marino con Centollo Dive en Tarifa, Cádiz.") == "tarifa"
+    assert otro_municipio("Greda es un restaurante en Carretera de La Barrosa, Chiclana") == ""
+    assert otro_municipio("Bar de vinos con tapas caseras") == ""
+    assert otro_municipio("Talleres en Chiclana y Jerez") == ""
     assert es_web_propia("https://www.repsol.es/buscador-eess/cadiz/x/")[0] is False
     assert es_web_propia("https://www.hipotels.com/hoteles/barrosapalace/")[0] is False
     assert es_web_propia("http://www.ventabonilla.com/")[0] is True
