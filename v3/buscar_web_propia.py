@@ -466,10 +466,13 @@ def main():
                 leido = lector.leer_web({**ficha, "w": r["web"]}, ())
                 fila["encontrado"] = {k: v for k, v in leido["campos"].items() if v}
                 fila["lectura"] = leido["motivo"]
+                if leido.get("otro_municipio"):
+                    fila["otro_municipio"] = leido["otro_municipio"]
                 if not args.simular and guardar_web(catalog, base, key, ident, r["web"], motivo):
                     añadidos = ["w"]
-                    if leido["campos"]:
-                        extra, estado_ficha = rastreo.aplicar(base, key, ident, leido["campos"], leido["paginas"])
+                    if leido["campos"] or leido.get("otro_municipio"):
+                        extra, estado_ficha = rastreo.aplicar(base, key, ident, leido["campos"], leido["paginas"],
+                                                              leido.get("otro_municipio", ""))
                         añadidos += extra
                         fila["estado"] = estado_ficha
                     fila["añadidos"] = añadidos
@@ -503,7 +506,7 @@ def main():
     for d in resumen["detalle"]:  # lista corta para revisar a mano
         if d.get("web"):
             print("ENCONTRADA | " + " | ".join(str(x) for x in (d["id"], d.get("nombre"), d.get("categoria"), d["web"],
-                  d.get("motivo"), json.dumps(d.get("encontrado", {}), ensure_ascii=False)[:300])), flush=True)
+                  d.get("motivo") + (" | DUDOSA: se presenta en " + d["otro_municipio"] if d.get("otro_municipio") else ""), json.dumps(d.get("encontrado", {}), ensure_ascii=False)[:300])), flush=True)
     print(json.dumps({k: v for k, v in resumen.items() if k != "detalle"}, ensure_ascii=False), flush=True)
 
 
